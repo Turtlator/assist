@@ -65,6 +65,18 @@ export function dismissSessionAction(
 	};
 }
 
+export function discardSessionAction(
+	send: SendFn,
+	buffers: Map<string, string>,
+	handlers: Map<string, OutputHandler>,
+) {
+	return (id: string) => {
+		send({ type: "discard", sessionId: id });
+		buffers.delete(id);
+		handlers.delete(id);
+	};
+}
+
 export function stopSessionAction(send: SendFn) {
 	return (id: string) => send({ type: "stop", sessionId: id });
 }

@@ -3,7 +3,12 @@ import type { SessionType } from "../../shared/deriveHistoryFields";
 import type { SessionOrigin } from "../../shared/parseSessionFile";
 import type { SessionInfoBase } from "../../shared/SessionInfoBase";
 
-export type SessionStatus = "running" | "waiting" | "done" | "error";
+export type SessionStatus =
+	| "running"
+	| "waiting"
+	| "done"
+	| "error"
+	| "stopped";
 
 export type SessionInfo = SessionInfoBase & {
 	status: SessionStatus;

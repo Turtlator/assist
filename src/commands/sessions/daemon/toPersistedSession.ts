@@ -19,6 +19,7 @@ export function toPersistedSession(session: Session): PersistedSession {
 		assistArgs: session.assistArgs,
 		activity: session.activity,
 		starred: session.starred,
+		undurable: session.undurable,
 	};
 }
 

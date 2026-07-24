@@ -23,6 +23,8 @@ export function resizeSession(
 ): void {
 	const s = sessions.get(id);
 	if (!s || s.status === "done" || !s.pty) return;
+	s.cols = cols;
+	s.rows = rows;
 	try {
 		s.pty.resize(cols, rows);
 	} catch (error) {

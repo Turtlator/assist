@@ -4,18 +4,15 @@ import { ActiveSelection } from "./ActiveSelection";
 import type { SessionClient } from "./broadcast";
 import { broadcastSessions } from "./broadcastSessions";
 import { ClientHub, persistUsagePeak } from "./ClientHub";
-import {
-	type AssistSessionMeta,
-	createAssistSession,
-} from "./createAssistSession";
+import type { AssistSessionMeta } from "./createAssistSession";
 import {
 	createRunSession,
-	createSession,
 	type Session,
 	type SessionInfo,
 	type SessionStatus,
 } from "./createSession";
-import { dismissSession, drainSessions } from "./dismissSession";
+import { drainSessions } from "./dismissSession";
+import { dismissSessionGated } from "./dismissSessionGated";
 import { flushPhaseActiveMs } from "./flushPhaseActiveMs";
 import { greetClient } from "./greetClient";
 import { logSpawnedSession } from "./logSpawnedSession";
@@ -28,7 +25,6 @@ import {
 	type RestartResult,
 } from "./restartManagedSession";
 import { restoreAll } from "./restoreAll";
-import { resumeSession } from "./resumeSession";
 import type { ServerConflictInfo } from "./serverConflictInfo";
 import type { ServerRunMeta } from "./serverRunMeta";
 import { runRetry } from "./runRetry";
@@ -40,6 +36,14 @@ import { toSessionInfo } from "./toSessionInfo";
 import { wireSessionWatchers } from "./wireSessionWatchers";
 import { WindowsProxy } from "./WindowsProxy";
 import { wirePtyEvents } from "./wirePtyEvents";
+import { reconcileWorktreesOnRestore } from "./worktree/reconcileWorktreesOnRestore";
+import { rearmStoppedSessions } from "./worktree/rearmStoppedSessions";
+import {
+	resumeInTree,
+	spawnAssistInTree,
+	spawnInTree,
+	type TreeSpawnContext,
+} from "./worktree/spawnInTree";
 import * as sessionIo from "./writeToSession";
 
 export class SessionManager {
@@ -86,7 +90,10 @@ export class SessionManager {
 	}
 
 	restore(): string[] {
-		return restoreAll(this.spawnWith, this.sessions);
+		const names = restoreAll(this.spawnWith, this.sessions);
+		reconcileWorktreesOnRestore(this.sessions);
+		rearmStoppedSessions(this.sessions, this.notify);
+		return names;
 	}
 
 	drain = (): number => drainSessions(this.sessions, this.notify);
@@ -101,15 +108,21 @@ export class SessionManager {
 	private readonly spawnWith = (create: (id: string) => Session): string =>
 		this.add(create(sessionLimits.nextId(this.sessions.size, this.idCounter)));
 
+	private treeCtx(): TreeSpawnContext {
+		return {
+			sessions: this.sessions,
+			spawnWith: this.spawnWith,
+			notify: this.notify,
+		};
+	}
+
 	spawn(
 		prompt?: string,
 		cwd?: string,
 		design?: boolean,
 		harness?: HarnessKind,
 	): string {
-		return this.spawnWith((id) =>
-			createSession(id, prompt, cwd, design, harness),
-		);
+		return spawnInTree(this.treeCtx(), prompt, cwd, design, harness);
 	}
 
 	spawnRun(
@@ -132,13 +145,11 @@ export class SessionManager {
 		cwd?: string,
 		meta?: AssistSessionMeta,
 	): string {
-		return this.spawnWith((id) =>
-			createAssistSession(id, assistArgs, cwd, meta),
-		);
+		return spawnAssistInTree(this.treeCtx(), assistArgs, cwd, meta);
 	}
 
 	resume(sessionId: string, cwd: string, name?: string): string {
-		return this.spawnWith((id) => resumeSession(id, sessionId, cwd, name));
+		return resumeInTree(this.treeCtx(), sessionId, cwd, name);
 	}
 
 	private readonly onStatusChange = makeStatusChangeHandler(
@@ -183,7 +194,11 @@ export class SessionManager {
 	}
 
 	dismissSession = (id: string): void => {
-		if (dismissSession(this.sessions, id)) this.notify();
+		dismissSessionGated(this.sessions, id, this.notify);
+	};
+
+	discardSession = (id: string): void => {
+		dismissSessionGated(this.sessions, id, this.notify, true);
 	};
 
 	stopSession(id: string): void {

@@ -20,6 +20,16 @@ export function waitingSession(
 	return restoredSession(base, persisted, pty, "waiting");
 }
 
+export function stoppedSession(
+	base: RestoreBase,
+	persisted: PersistedSession,
+): Session {
+	return {
+		...restoredSession(base, persisted, null, "stopped"),
+		undurable: persisted.undurable,
+	};
+}
+
 function restoredSession(
 	base: RestoreBase,
 	persisted: PersistedSession,

@@ -90,6 +90,20 @@ export const assistConfigSchema = z.strictObject({
 		})
 		.optional(),
 	repos: z.record(z.string(), z.record(z.string(), z.unknown())).optional(),
+	worktree: z
+		.strictObject({
+			enabled: z.boolean().default(false),
+			root: z.string().optional(),
+			install: z.union([z.boolean(), z.string()]).default(true),
+			copy: z
+				.array(z.string())
+				.default([
+					".env",
+					"settings.local.json",
+					".claude/settings.local.json",
+				]),
+		})
+		.optional(),
 	run: z.array(z.union([runConfigSchema, runLinkSchema])).optional(),
 	subtasks: z
 		.array(

@@ -20,6 +20,15 @@ export function handlePtyExit(
 		return;
 	}
 	session.pty = null;
+	if (session.pendingDismiss) {
+		const dismiss = session.pendingDismiss;
+		session.pendingDismiss = undefined;
+		daemonLog(
+			`session ${session.id} ("${session.name}") pty exited (code ${exitCode}) for dismiss; resolving durability now the process is gone`,
+		);
+		dismiss();
+		return;
+	}
 	if (handleStoppedExit(session, exitCode, onStatusChange)) return;
 	refreshActivity(session);
 	if (handleFailedResume(session, exitCode, onStatusChange)) return;

@@ -22,7 +22,12 @@ export async function reconcileTranscriptStatus(
 	session: Session,
 	onStatusChange: OnStatusChange,
 ): Promise<void> {
-	if (session.status === "done" || session.status === "error") return;
+	if (
+		session.status === "done" ||
+		session.status === "error" ||
+		session.status === "stopped"
+	)
+		return;
 	const filePath = await resolveTranscriptPath(session);
 	if (!filePath) return;
 

@@ -4,7 +4,11 @@ import { deriveRestoreStatus } from "./deriveRestoreStatus";
 import type { PersistedSession } from "./loadPersistedSessions";
 import { restoreBase } from "./restoreBase";
 import { restoreInteractiveSession } from "./restoreInteractiveSession";
-import { runningSession, waitingSession } from "./runningSession";
+import {
+	runningSession,
+	stoppedSession,
+	waitingSession,
+} from "./runningSession";
 import { spawnPty } from "./spawnPty";
 import { isUpdate, updatedSession } from "./updatedSession";
 
@@ -13,6 +17,8 @@ export function restoreSession(
 	persisted: PersistedSession,
 ): Session {
 	const base = restoreBase(id, persisted);
+
+	if (persisted.status === "stopped") return stoppedSession(base, persisted);
 
 	if (isUpdate(persisted)) return updatedSession(id, persisted);
 

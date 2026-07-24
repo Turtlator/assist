@@ -2,6 +2,7 @@ import { removeActivity } from "../../../shared/emitActivity";
 import { releaseLock } from "../../backlog/acquireLock";
 import type { Session } from "./createSession";
 import { daemonLog } from "./daemonLog";
+import { reapWorktree } from "./worktree/reapWorktree";
 
 export function dismissSession(
 	sessions: Map<string, Session>,
@@ -12,10 +13,12 @@ export function dismissSession(
 	if (s.status !== "done") s.pty?.kill();
 	s.activityWatcher?.close();
 	s.transcriptWatcher?.close();
+	s.gitWatcher?.close();
 	removeActivity(s.id);
 	if (s.activity?.itemId != null) releaseLock(s.activity.itemId);
 	sessions.delete(id);
 	daemonLog(`session ${id} dismissed (${s.name})`);
+	if (s.worktree) void reapWorktree(s.worktree.path);
 	return true;
 }
 

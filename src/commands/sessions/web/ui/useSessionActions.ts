@@ -1,19 +1,17 @@
-import { type RefObject, useCallback, useMemo } from "react";
+import { type RefObject, useMemo } from "react";
 import {
 	createRunAction,
-	dismissSessionAction,
 	inputAction,
 	outputAction,
 	resizeAction,
-	restartSessionAction,
-	retrySessionAction,
 	setAutoAdvanceAction,
 	setAutoRunAction,
 	setStarredAction,
 	stopSessionAction,
 } from "./createSessionAction";
-import { useLaunchActions } from "./useLaunchActions";
 import { prDecisionAction } from "./prDecisionAction";
+import { useLaunchActions } from "./useLaunchActions";
+import { useLifecycleActions } from "./useLifecycleActions";
 
 type SendFn = (msg: object) => void;
 type OutputHandler = (data: string) => void;
@@ -40,26 +38,9 @@ export function useSessionActions(
 		[buffers, handlers],
 	);
 
-	const retrySession = useCallback(
-		(id: string, replace?: boolean) => {
-			retrySessionAction(send, buffers.current)(id, replace);
-		},
-		[send, buffers],
-	);
-
-	const restartSession = useCallback(
-		(id: string) => {
-			restartSessionAction(send, buffers.current)(id);
-		},
-		[send, buffers],
-	);
-
-	const dismissSession = useCallback(
-		(id: string) => {
-			dismissSessionAction(send, buffers.current, handlers.current)(id);
-		},
-		[send, buffers, handlers],
-	);
-
-	return { ...actions, onOutput, retrySession, restartSession, dismissSession };
+	return {
+		...actions,
+		...useLifecycleActions(send, buffers, handlers),
+		onOutput,
+	};
 }

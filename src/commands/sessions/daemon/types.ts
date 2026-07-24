@@ -8,7 +8,12 @@ import type {
 } from "../shared/SessionInfoBase";
 import type { spawnClaude } from "./spawnClaude";
 
-export type SessionStatus = "running" | "waiting" | "done" | "error";
+export type SessionStatus =
+	| "running"
+	| "waiting"
+	| "done"
+	| "error"
+	| "stopped";
 
 export type OnStatusChange = (
 	session: Session,
@@ -44,7 +49,10 @@ export type Session = {
 	activity?: Activity;
 	activityWatcher?: FSWatcher;
 	transcriptWatcher?: FSWatcher;
+	gitWatcher?: FSWatcher;
 	watchedTranscriptId?: string;
+	worktree?: { path: string; clone: string };
+	undurable?: { reason: string };
 	transcriptPath?: string;
 	permissionActive?: boolean;
 	autoRun?: boolean;
@@ -55,6 +63,9 @@ export type Session = {
 	usageSeeded?: boolean;
 	pendingPrPreview?: PrPreview;
 	pendingRestart?: () => void;
+	pendingDismiss?: () => void;
+	cols?: number;
+	rows?: number;
 	usedPct?: number;
 	activeMsFlushedForStretch?: { since: number; ms: number };
 	activeMsFlushChain?: Promise<void>;

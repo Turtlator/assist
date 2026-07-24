@@ -16,6 +16,12 @@ export function applySetStatus(
 		);
 		return;
 	}
+	if (session.status === "stopped") {
+		daemonLog(
+			`set-status for stopped session id=${id} status=${status} (held pending durable close; ignoring)`,
+		);
+		return;
+	}
 	if (source === "permission") session.permissionActive = true;
 	if (status === "running") session.permissionActive = false;
 	onStatusChange(session, status);

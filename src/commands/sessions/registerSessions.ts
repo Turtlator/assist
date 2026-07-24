@@ -1,6 +1,7 @@
 import type { Command } from "commander";
 import { configHelp } from "../../shared/configHelp";
 import { registerSetStatusCommand } from "./registerSetStatusCommand";
+import { sessionsConfigHelp } from "./sessionsConfigHelp";
 import { summarise } from "./summarise";
 import { web as sessionsWeb } from "./web";
 
@@ -31,27 +32,5 @@ export function registerSessions(program: Command): void {
 
 	registerSetStatusCommand(cmd);
 
-	configHelp(cmd, [
-		{
-			key: "sessions.windowsProjectsRoot",
-			setter:
-				"assist config set sessions.windowsProjectsRoot /mnt/c/Users/you/.claude/projects",
-			note: "WSL path to the Windows .claude/projects root to discover",
-		},
-		{
-			key: "sessions.windowsDaemonHost",
-			setter: "assist config set sessions.windowsDaemonHost 127.0.0.1",
-			note: "host the WSL daemon dials to reach the Windows daemon (default: 127.0.0.1)",
-		},
-		{
-			key: "sessions.windowsDaemonPort",
-			setter: "assist config set sessions.windowsDaemonPort 51764",
-			note: "TCP port the Windows daemon listens on (default: 51764)",
-		},
-		{
-			key: "sessions.windowsVersionCheck",
-			setter: "assist config set sessions.windowsVersionCheck block",
-			note: "Windows daemon version mismatch handling: block | warn | off",
-		},
-	]);
+	configHelp(cmd, sessionsConfigHelp);
 }

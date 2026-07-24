@@ -4,6 +4,7 @@ import { daemonLog } from "./daemonLog";
 import { respawnSession } from "./respawnSession";
 import { respawnPlan } from "./respawnPlan";
 import type { OnStatusChange } from "./types";
+import { killPtyTree } from "./killPtyTree";
 
 export function restartSession(
 	session: Session,
@@ -32,18 +33,4 @@ export function restartSession(
 		respawn();
 	}
 	return true;
-}
-
-function killPtyTree(pty: NonNullable<Session["pty"]>): void {
-	if (process.platform === "win32") {
-		pty.kill();
-		return;
-	}
-	try {
-		process.kill(-pty.pid, "SIGHUP");
-	} catch {
-		try {
-			pty.kill();
-		} catch {}
-	}
 }

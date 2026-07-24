@@ -26,7 +26,7 @@ export function savePersistedSessions(sessions: PersistedSession[]): void {
 
 export function persistLiveSessions(sessions: Map<string, Session>): void {
 	const live = [...sessions.values()].filter(
-		(s) => s.pty && s.status !== "done",
+		(s) => (s.pty || s.status === "stopped") && s.status !== "done",
 	);
 	savePersistedSessions(live.map(toPersistedSession));
 	logPersist(live);

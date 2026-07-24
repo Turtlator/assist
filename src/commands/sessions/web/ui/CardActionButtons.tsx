@@ -1,6 +1,6 @@
 import { backlogTarget } from "./backlogTarget";
+import { CardCloseActions } from "./CardCloseActions";
 import { CompleteButton } from "./CompleteButton";
-import { DismissButton } from "./DismissButton";
 import { OpenInCodeButton } from "./OpenInCodeButton";
 import { OpenPrButton } from "./OpenPrButton";
 import { RestartButton } from "./RestartButton";
@@ -20,6 +20,7 @@ export function CardActionButtons({
 	onDismiss,
 }: CardHeaderProps) {
 	const { status } = session;
+	const stopped = status === "stopped";
 	const target = backlogTarget(session);
 	const pr = usePrStatus(session.cwd, reviewTargetPr(session), status);
 	return (
@@ -28,7 +29,7 @@ export function CardActionButtons({
 			{session.cwd && <OpenInCodeButton cwd={session.cwd} variant="card" />}
 			{pr && session.cwd && <OpenPrButton pr={pr} />}
 			{pr && session.cwd && <ReviewButton cwd={session.cwd} pr={pr} />}
-			{onRestart && (
+			{onRestart && !stopped && (
 				<RestartButton onRestart={onRestart} harness={session.harness} />
 			)}
 			{onRetry && <RetryButton onRetry={onRetry} />}
@@ -40,7 +41,11 @@ export function CardActionButtons({
 					onDismiss={onDismiss}
 				/>
 			)}
-			<DismissButton id={session.id} status={status} onDismiss={onDismiss} />
+			<CardCloseActions
+				session={session}
+				onRestart={onRestart}
+				onDismiss={onDismiss}
+			/>
 		</StopCardActivation>
 	);
 }

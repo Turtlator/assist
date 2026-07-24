@@ -7,7 +7,7 @@ export const persistedSessionSchema = z.object({
 	subtitle: z.string().optional(),
 	commandType: z.enum(["claude", "run", "assist"]),
 	harness: z.enum(["claude", "codex", "pi"]).optional(),
-	status: z.enum(["running", "waiting", "done", "error"]).optional(),
+	status: z.enum(["running", "waiting", "done", "error", "stopped"]).optional(),
 	cwd: z.string(),
 	startedAt: z.number(),
 	runningMs: z.number().optional(),
@@ -18,6 +18,7 @@ export const persistedSessionSchema = z.object({
 	assistArgs: z.array(z.string()).optional(),
 	activity: activitySchema.optional(),
 	starred: z.boolean().optional(),
+	undurable: z.object({ reason: z.string() }).optional(),
 });
 
 export type PersistedSession = z.infer<typeof persistedSessionSchema>;

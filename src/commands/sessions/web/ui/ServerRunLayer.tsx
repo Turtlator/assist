@@ -16,10 +16,15 @@ export function ServerRunLayer({
 		retrySession,
 		stopSession,
 		startRun,
+		discardSession,
 	} = socket;
 	const value = useMemo(
-		() => ({ onStop: stopSession, onStart: startRun }),
-		[stopSession, startRun],
+		() => ({
+			onStop: stopSession,
+			onStart: startRun,
+			onDiscard: discardSession,
+		}),
+		[stopSession, startRun, discardSession],
 	);
 	const replace = () => {
 		if (!serverConflict) return;

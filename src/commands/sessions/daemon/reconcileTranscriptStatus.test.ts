@@ -118,4 +118,17 @@ describe("reconcileTranscriptStatus", () => {
 		expect(readMock).not.toHaveBeenCalled();
 		expect(onStatusChange).not.toHaveBeenCalled();
 	});
+
+	it("never resurrects a stopped card held for durable close", async () => {
+		readMock.mockResolvedValue(pendingBash());
+		const onStatusChange = vi.fn();
+
+		await reconcileTranscriptStatus(
+			session({ status: "stopped" }),
+			onStatusChange,
+		);
+
+		expect(readMock).not.toHaveBeenCalled();
+		expect(onStatusChange).not.toHaveBeenCalled();
+	});
 });

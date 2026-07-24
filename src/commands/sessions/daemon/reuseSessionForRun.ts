@@ -18,6 +18,9 @@ export function reuseSessionForRun(
 ): void {
 	const assistArgs = ["backlog", "run", String(itemId)];
 	session.pty?.kill();
+	session.gitWatcher?.close();
+	session.gitWatcher = undefined;
+	session.undurable = undefined;
 	session.assistArgs = assistArgs;
 	session.name = `assist ${assistArgs.join(" ")}`;
 	session.commandType = "assist";
