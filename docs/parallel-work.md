@@ -22,7 +22,10 @@ where you are or where any in-progress changes live. The tool tracks that; you d
   safely landed.
 - **Closing a session that has unpushed changes only stops it** — it is killed but
   stays on the board in a `stopped` state, card still visible. While it holds unpushed
-  changes the only actions are **resume** or **restart**.
+  changes the only actions are **resume**, **restart**, or an explicit **discard**.
+- Discard is the one sanctioned way to lose work: it is never automatic, never a
+  side effect of closing or completing, and always takes a confirmation that names
+  what is about to be destroyed.
 
 ## 4. Cleanup happens only at end of life
 
