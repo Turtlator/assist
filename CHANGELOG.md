@@ -1,3 +1,10 @@
+# [0.432.0](https://github.com/staff0rd/assist/compare/v0.431.0...v0.432.0) (2026-07-24)
+
+
+### Features
+
+* worktree isolation for sessions ([8baee60](https://github.com/staff0rd/assist/commit/8baee601bb32ce1ce3da1a6902ae9ef27a366d3d))
+
 # [0.431.0](https://github.com/staff0rd/assist/compare/v0.430.0...v0.431.0) (2026-07-24)
 
 
