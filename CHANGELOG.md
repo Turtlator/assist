@@ -1,3 +1,10 @@
+# [0.433.0](https://github.com/staff0rd/assist/compare/v0.432.0...v0.433.0) (2026-07-24)
+
+
+### Features
+
+* require -g with config set --repo ([e8175a1](https://github.com/staff0rd/assist/commit/e8175a100cd35c049cd6d3b71066bc828024c0ca))
+
 # [0.432.0](https://github.com/staff0rd/assist/compare/v0.431.0...v0.432.0) (2026-07-24)
 
 
