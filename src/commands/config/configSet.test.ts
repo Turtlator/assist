@@ -95,9 +95,9 @@ describe("configSet", () => {
 		});
 	});
 
-	describe("with --repo", () => {
+	describe("with -g --repo", () => {
 		it("should write under the current repo's shortest label", () => {
-			configSet("commit.push", "true", { repo: true });
+			configSet("commit.push", "true", { repo: true, global: true });
 
 			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({
 				repos: { assist: { commit: { push: true } } },
@@ -110,7 +110,7 @@ describe("configSet", () => {
 				repos: { assist: { commit: { pull: true } } },
 			});
 
-			configSet("commit.push", "true", { repo: true });
+			configSet("commit.push", "true", { repo: true, global: true });
 
 			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({
 				repos: { assist: { commit: { pull: true, push: true } } },
@@ -122,7 +122,7 @@ describe("configSet", () => {
 				repos: { "org/assist": { commit: { pull: true } } },
 			});
 
-			configSet("commit.push", "true", { repo: true });
+			configSet("commit.push", "true", { repo: true, global: true });
 
 			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({
 				repos: {
@@ -138,7 +138,7 @@ describe("configSet", () => {
 				commit: { push: false },
 			});
 
-			configSet("commit.push", "true", { repo: true });
+			configSet("commit.push", "true", { repo: true, global: true });
 
 			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({
 				commit: { push: false },
@@ -151,31 +151,59 @@ describe("configSet", () => {
 				.spyOn(process, "exit")
 				.mockImplementation(() => undefined as never);
 
-			configSet("bogus.key", "true", { repo: true });
+			configSet("bogus.key", "true", { repo: true, global: true });
 
 			expect(mockExit).toHaveBeenCalledWith(1);
 			mockExit.mockRestore();
 		});
 
-		it("should reject combining --repo with --global", () => {
+		it("should allow combining --repo with --global", () => {
 			const mockExit = vi
 				.spyOn(process, "exit")
 				.mockImplementation(() => undefined as never);
 
 			configSet("worktree.enabled", "true", { repo: true, global: true });
 
+			expect(mockExit).not.toHaveBeenCalled();
+			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({
+				repos: { assist: { worktree: { enabled: true } } },
+			});
+			mockExit.mockRestore();
+		});
+
+		it("should reject --repo without --global", () => {
+			const mockExit = vi
+				.spyOn(process, "exit")
+				.mockImplementation(() => undefined as never);
+
+			configSet("worktree.enabled", "true", { repo: true });
+
+			expect(mockExit).toHaveBeenCalledWith(1);
+			mockExit.mockRestore();
+		});
+
+		it("should reject --repo <name> without --global", () => {
+			mockLoadGlobalConfigRaw.mockReturnValue({
+				repos: { "org/planner": {} },
+			});
+			const mockExit = vi
+				.spyOn(process, "exit")
+				.mockImplementation(() => undefined as never);
+
+			configSet("worktree.enabled", "true", { repo: "org/planner" });
+
 			expect(mockExit).toHaveBeenCalledWith(1);
 			mockExit.mockRestore();
 		});
 	});
 
-	describe("with --repo <name>", () => {
+	describe("with -g --repo <name>", () => {
 		it("should write under a named repo's matching block", () => {
 			mockLoadGlobalConfigRaw.mockReturnValue({
 				repos: { "org/planner": { commit: { push: true } } },
 			});
 
-			configSet("commit.push", "true", { repo: "org/planner" });
+			configSet("commit.push", "true", { repo: "org/planner", global: true });
 
 			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({
 				repos: { "org/planner": { commit: { push: true } } },
@@ -187,7 +215,7 @@ describe("configSet", () => {
 				repos: { "org/planner": {} },
 			});
 
-			configSet("commit.push", "true", { repo: "org/planner" });
+			configSet("commit.push", "true", { repo: "org/planner", global: true });
 
 			expect(mockGetCurrentOrigin).not.toHaveBeenCalled();
 			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({
@@ -201,7 +229,7 @@ describe("configSet", () => {
 			});
 
 			expect(() =>
-				configSet("commit.push", "true", { repo: "planner" }),
+				configSet("commit.push", "true", { repo: "planner", global: true }),
 			).toThrow(UnknownRepoConfigError);
 			expect(mockSaveGlobalConfig).not.toHaveBeenCalled();
 		});
@@ -215,14 +243,17 @@ describe("configSet", () => {
 			});
 
 			expect(() =>
-				configSet("commit.push", "true", { repo: "github.com/org/planner" }),
+				configSet("commit.push", "true", {
+					repo: "github.com/org/planner",
+					global: true,
+				}),
 			).toThrow(AmbiguousRepoConfigError);
 		});
 	});
 
-	describe("--repo optional-value greediness", () => {
-		it("should treat a captured key as bare --repo targeting the cwd origin", () => {
-			configSet("true", undefined, { repo: "commit.push" });
+	describe("-g --repo optional-value greediness", () => {
+		it("should treat a captured key as bare -g --repo targeting the cwd origin", () => {
+			configSet("true", undefined, { repo: "commit.push", global: true });
 
 			expect(mockGetCurrentOrigin).toHaveBeenCalled();
 			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({

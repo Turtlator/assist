@@ -13,8 +13,10 @@ export function configSet(
 	value: string | undefined,
 	options: ConfigSetOptions = {},
 ): void {
-	if (options.repo !== undefined && options.global) {
-		console.error(chalk.red("Use either --repo or --global, not both"));
+	if (options.repo !== undefined && !options.global) {
+		console.error(
+			chalk.red("--repo writes to the global config; add -g (e.g. -g --repo)"),
+		);
 		process.exit(1);
 	}
 

@@ -14,7 +14,7 @@ export function registerConfig(program: Command): void {
 		.option("-g, --global", "Write to global ~/.assist.yml")
 		.option(
 			"-r, --repo [name]",
-			"Write to ~/.assist.yml under a repo's identity (defaults to the current repo)",
+			"Requires -g: scope the global write to a repo's identity (defaults to the current repo)",
 		)
 		.action((key, value, options) => configSet(key, value, options));
 

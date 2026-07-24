@@ -24,23 +24,23 @@ export const sessionsConfigHelp: ConfigHelpEntry[] = [
 	},
 	{
 		key: "worktree.enabled",
-		setter: "assist config set worktree.enabled true --repo",
+		setter: "assist config set worktree.enabled true -g --repo",
 		note: "opt in per repo: spill concurrent sessions into adjacent <clone>-N worktrees (default off)",
 	},
 	{
 		key: "worktree.root",
-		setter: "assist config set worktree.root ~/git --repo",
+		setter: "assist config set worktree.root ~/git -g --repo",
 		note: "optional; parent dir for <clone>-N worktrees (default: the clone's parent)",
 	},
 	{
 		key: "worktree.install",
-		setter: "assist config set worktree.install true --repo",
+		setter: "assist config set worktree.install true -g --repo",
 		note: "per-worktree dep install: true auto-detects the package manager, or give an explicit command; false to skip",
 	},
 	{
 		key: "worktree.copy",
 		setter:
-			"assist config set worktree.copy .env,.claude/settings.local.json --repo",
+			"assist config set worktree.copy .env,.claude/settings.local.json -g --repo",
 		note: "gitignored files copied into a new worktree so it can build/run",
 	},
 ];
