@@ -36,7 +36,9 @@ export function FileDiff({
 				collapsed={collapsed}
 				onToggle={() => setCollapsed((c) => !c)}
 				onPreview={
-					isMarkdownPath(path) ? () => setPreviewOpen(true) : undefined
+					isMarkdownPath(path) && file.type !== "delete"
+						? () => setPreviewOpen(true)
+						: undefined
 				}
 			/>
 			{previewOpen && (

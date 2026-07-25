@@ -42,7 +42,7 @@ export function MarkdownPreviewDialog({
 					<Alert severity="error">Couldn't load this file.</Alert>
 				)}
 				{state.status === "ready" && (
-					<MarkdownBlock content={state.content} renderMermaid />
+					<MarkdownBlock content={state.content} renderMermaid wide />
 				)}
 			</DialogContent>
 			<DialogActions>

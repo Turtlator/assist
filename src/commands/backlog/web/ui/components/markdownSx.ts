@@ -67,7 +67,7 @@ const staticSx = {
 	"& img": { maxWidth: "100%" },
 } as const;
 
-export const markdownSx: SxProps<Theme> = (theme) => {
+const themedSx = (theme: Theme) => {
 	const codeBg =
 		theme.palette.mode === "dark"
 			? "rgba(255,255,255,0.08)"
@@ -79,3 +79,10 @@ export const markdownSx: SxProps<Theme> = (theme) => {
 		"& th": { ...staticSx["& th"], bgcolor: codeBg },
 	};
 };
+
+export const markdownSx: SxProps<Theme> = themedSx;
+
+export const wideMarkdownSx: SxProps<Theme> = (theme) => ({
+	...themedSx(theme),
+	maxWidth: "none",
+});
