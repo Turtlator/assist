@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { ConfigEntry } from "../../../config/readConfigEntries";
+import { effectiveConfigValue } from "./effectiveConfigValue";
 import { type ConfigScope, saveConfigValue } from "./saveConfigValue";
 
 type Options = {
@@ -10,9 +11,10 @@ type Options = {
 };
 
 function initialValue(entry: ConfigEntry): string | boolean {
-	if (entry.type === "boolean") return entry.value === true;
-	if (entry.value === undefined || entry.value === null) return "";
-	return String(entry.value);
+	const value = effectiveConfigValue(entry);
+	if (entry.type === "boolean") return value === true;
+	if (value === undefined || value === null) return "";
+	return String(value);
 }
 
 export function useConfigRowEditor({ entry, cwd, onSaved, onError }: Options) {

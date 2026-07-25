@@ -3,7 +3,7 @@ import type { ConfigEntry } from "../../../config/readConfigEntries";
 import { groupConfigEntries } from "./groupConfigEntries";
 
 function entry(key: string): ConfigEntry {
-	return { key, type: "string", value: undefined };
+	return { key, type: "string", value: undefined, source: "default" };
 }
 
 describe("groupConfigEntries", () => {

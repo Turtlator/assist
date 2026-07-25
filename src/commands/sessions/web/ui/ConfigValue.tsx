@@ -1,9 +1,13 @@
 import Typography from "@mui/material/Typography";
 import type { ConfigEntry } from "../../../config/readConfigEntries";
+import { effectiveConfigValue } from "./effectiveConfigValue";
 import { formatConfigValue } from "./formatConfigValue";
 
 export function ConfigValue({ entry }: { entry: ConfigEntry }) {
-	if (entry.value === undefined) {
+	const value = effectiveConfigValue(entry);
+	const isDefault = entry.source === "default";
+
+	if (value === undefined) {
 		return (
 			<Typography variant="body2" color="text.secondary">
 				not set
@@ -14,6 +18,7 @@ export function ConfigValue({ entry }: { entry: ConfigEntry }) {
 		<Typography
 			component="pre"
 			variant="body2"
+			color={isDefault ? "text.secondary" : "text.primary"}
 			sx={{
 				m: 0,
 				fontFamily: "monospace",
@@ -21,7 +26,7 @@ export function ConfigValue({ entry }: { entry: ConfigEntry }) {
 				overflowWrap: "anywhere",
 			}}
 		>
-			{formatConfigValue(entry.value)}
+			{formatConfigValue(value)}
 		</Typography>
 	);
 }

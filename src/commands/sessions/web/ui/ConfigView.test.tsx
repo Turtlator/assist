@@ -69,8 +69,13 @@ function renderView(selectedCwd = "/repo") {
 describe("ConfigView", () => {
 	it("requests the config for the selected cwd and lists grouped keys", async () => {
 		const fetchMock = stubEntries([
-			{ key: "commit.pull", type: "boolean", value: true },
-			{ key: "backup.dir", type: "string", value: "~/.assist/backups" },
+			{ key: "commit.pull", type: "boolean", value: true, source: "project" },
+			{
+				key: "backup.dir",
+				type: "string",
+				value: "~/.assist/backups",
+				source: "global",
+			},
 		]);
 		renderView("/repo/one");
 
@@ -84,8 +89,18 @@ describe("ConfigView", () => {
 
 	it("renders complex leaves as read-only formatted values", async () => {
 		stubEntries([
-			{ key: "sql.connections", type: "array", value: [{ name: "local" }] },
-			{ key: "branch.prefix", type: "string", value: undefined },
+			{
+				key: "sql.connections",
+				type: "array",
+				value: [{ name: "local" }],
+				source: "project",
+			},
+			{
+				key: "branch.prefix",
+				type: "string",
+				value: undefined,
+				source: "default",
+			},
 		]);
 		renderView();
 
@@ -97,6 +112,26 @@ describe("ConfigView", () => {
 		expect(screen.getByText("not set")).toBeTruthy();
 	});
 
+	it("shows the schema default and its source instead of 'not set'", async () => {
+		stubEntries([
+			{
+				key: "worktree.enabled",
+				type: "boolean",
+				value: undefined,
+				defaultValue: false,
+				source: "default",
+			},
+		]);
+		renderView();
+
+		await waitFor(() =>
+			expect(screen.getByText("worktree.enabled")).toBeTruthy(),
+		);
+		expect(screen.getByText("false")).toBeTruthy();
+		expect(screen.getByText("default")).toBeTruthy();
+		expect(screen.queryByText("not set")).toBeNull();
+	});
+
 	it("shows the server error instead of rows when the fetch fails", async () => {
 		stubEntries([], false);
 		renderView();
@@ -106,7 +141,7 @@ describe("ConfigView", () => {
 
 	it("saves a boolean edit to the project config and refetches", async () => {
 		const fetchMock = stubApi([
-			{ key: "commit.push", type: "boolean", value: false },
+			{ key: "commit.push", type: "boolean", value: false, source: "project" },
 		]);
 		renderView("/repo/one");
 
@@ -134,7 +169,12 @@ describe("ConfigView", () => {
 
 	it("writes to the global config when the global scope is picked", async () => {
 		const fetchMock = stubApi([
-			{ key: "backup.dir", type: "string", value: "~/.assist/backups" },
+			{
+				key: "backup.dir",
+				type: "string",
+				value: "~/.assist/backups",
+				source: "global",
+			},
 		]);
 		renderView();
 
@@ -157,11 +197,21 @@ describe("ConfigView", () => {
 	});
 
 	it("shows a rejected value in the snackbar and keeps the editor open", async () => {
-		stubApi([{ key: "commit.push", type: "boolean", value: false }], {
-			ok: false,
-			status: 400,
-			body: { error: "commit.push: expected boolean" },
-		});
+		stubApi(
+			[
+				{
+					key: "commit.push",
+					type: "boolean",
+					value: false,
+					source: "project",
+				},
+			],
+			{
+				ok: false,
+				status: 400,
+				body: { error: "commit.push: expected boolean" },
+			},
+		);
 		renderView();
 
 		await waitFor(() => expect(screen.getByText("commit.push")).toBeTruthy());
@@ -181,6 +231,7 @@ describe("ConfigView", () => {
 				type: "enum",
 				enumValues: ["block", "warn", "off"],
 				value: "block",
+				source: "default",
 			},
 		]);
 		renderView();
@@ -197,7 +248,9 @@ describe("ConfigView", () => {
 	});
 
 	it("does not offer editing for complex leaves", async () => {
-		stubApi([{ key: "sql.connections", type: "array", value: [] }]);
+		stubApi([
+			{ key: "sql.connections", type: "array", value: [], source: "default" },
+		]);
 		renderView();
 
 		await waitFor(() =>

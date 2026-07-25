@@ -5,6 +5,7 @@ import Stack from "@mui/material/Stack";
 import TableCell from "@mui/material/TableCell";
 import Tooltip from "@mui/material/Tooltip";
 import type { ConfigEntry } from "../../../config/readConfigEntries";
+import { ConfigSourceChip } from "./ConfigSourceChip";
 
 type Props = {
 	entry: ConfigEntry;
@@ -21,6 +22,7 @@ export function ConfigRowTypeCell({ entry, readOnly, canEdit, onEdit }: Props) {
 				spacing={0.5}
 				sx={{ justifyContent: "flex-end", alignItems: "center" }}
 			>
+				<ConfigSourceChip source={entry.source} />
 				<Chip
 					size="small"
 					variant="outlined"
