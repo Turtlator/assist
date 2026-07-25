@@ -1,3 +1,10 @@
+# [0.450.0](https://github.com/staff0rd/assist/compare/v0.449.0...v0.450.0) (2026-07-25)
+
+
+### Features
+
+* anchor session diff base to first commit ([a53c271](https://github.com/staff0rd/assist/commit/a53c2715a4b4ee3b8ef9d24663746399691f8523))
+
 # [0.449.0](https://github.com/staff0rd/assist/compare/v0.448.0...v0.449.0) (2026-07-25)
 
 
