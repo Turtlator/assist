@@ -1,5 +1,6 @@
 import { Box, List, ListItem, Typography } from "@mui/material";
 import { marked } from "marked";
+import { itemSectionAnchor } from "./itemSectionAnchor";
 
 type AcceptanceCriteriaListProps = {
 	criteria: string[];
@@ -10,7 +11,7 @@ export function AcceptanceCriteriaList({
 }: AcceptanceCriteriaListProps) {
 	if (criteria.length === 0) return null;
 	return (
-		<Box sx={{ mb: 2 }}>
+		<Box {...itemSectionAnchor("acceptanceCriteria")}>
 			<Typography
 				variant="overline"
 				sx={{

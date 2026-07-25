@@ -1,6 +1,7 @@
 import { Box, Link, Stack, Typography } from "@mui/material";
 import { groupActivityRefs } from "../../../groupActivityRefs";
 import type { GitRef } from "../types";
+import { itemSectionAnchor } from "./itemSectionAnchor";
 import { refLabel } from "./refLabel";
 import { CommitTimestamp } from "./CommitTimestamp";
 
@@ -50,7 +51,7 @@ export function ActivitySection({ gitRefs }: { gitRefs: GitRef[] }) {
 	const ordered = [...branches, ...commits, ...prs, ...slacks];
 	if (ordered.length === 0) return null;
 	return (
-		<Box sx={{ mb: 2 }}>
+		<Box {...itemSectionAnchor("activity")}>
 			<Typography variant="overline" sx={headingSx}>
 				Activity
 			</Typography>

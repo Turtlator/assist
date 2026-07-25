@@ -1,20 +1,8 @@
 import type { PhaseStatus } from "../types";
-
-const statusStyles: Record<
-	PhaseStatus,
-	{ borderColor: string; bgcolor: string; ring?: string }
-> = {
-	done: { borderColor: "success.light", bgcolor: "success.light" },
-	current: {
-		borderColor: "info.main",
-		bgcolor: "info.light",
-		ring: "info.light",
-	},
-	upcoming: { borderColor: "divider", bgcolor: "background.paper" },
-};
+import { phaseStatusStyles } from "./phaseStatusStyles";
 
 export function phaseCardSx(status: PhaseStatus) {
-	const styles = statusStyles[status];
+	const styles = phaseStatusStyles[status];
 	return {
 		p: 2,
 		borderColor: styles.ring ? "info.main" : styles.borderColor,

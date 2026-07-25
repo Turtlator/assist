@@ -4,6 +4,7 @@ import { updateItemStatus, updateSubtaskStatus } from "../api";
 import type { BacklogItem, SubtaskStatus } from "../types";
 import { useRepoCwd } from "../useRepoCwd";
 import { ItemBody } from "./ItemBody";
+import { ItemNavigator } from "./ItemNavigator";
 import { PinnedHeader } from "./PinnedHeader";
 
 type ItemDetailProps = {
@@ -42,6 +43,7 @@ export function ItemDetail({ item, onReload }: ItemDetailProps) {
 				onCommentDeleted={onReload}
 				onSubtaskStatusChange={handleSubtaskStatusChange}
 			/>
+			<ItemNavigator item={item} />
 		</Box>
 	);
 }

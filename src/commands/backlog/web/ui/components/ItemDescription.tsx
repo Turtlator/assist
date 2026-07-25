@@ -1,4 +1,5 @@
 import { Box, Typography } from "@mui/material";
+import { itemSectionAnchor } from "./itemSectionAnchor";
 import { MarkdownBlock } from "./MarkdownBlock";
 
 const sectionHeadingSx = {
@@ -11,7 +12,7 @@ const sectionHeadingSx = {
 export function ItemDescription({ description }: { description?: string }) {
 	if (!description) return null;
 	return (
-		<Box sx={{ mb: 2 }}>
+		<Box {...itemSectionAnchor("description")}>
 			<Typography variant="overline" sx={sectionHeadingSx}>
 				Description
 			</Typography>

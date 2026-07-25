@@ -1,5 +1,6 @@
 import { Alert, Box, Stack, Typography } from "@mui/material";
 import type { Subtask, SubtaskStatus } from "../types";
+import { itemSectionAnchor } from "./itemSectionAnchor";
 import { SubtaskRow } from "./SubtaskRow";
 
 const headingSx = {
@@ -19,7 +20,7 @@ export function SubtasksSection({
 	if (subtasks.length === 0) return null;
 	const incomplete = subtasks.filter((s) => s.status !== "done").length;
 	return (
-		<Box sx={{ mb: 2 }}>
+		<Box {...itemSectionAnchor("subtasks")}>
 			<Typography variant="overline" sx={headingSx}>
 				Sub-tasks
 			</Typography>

@@ -1,6 +1,7 @@
 import { Box, Stack, Typography } from "@mui/material";
 import type { PhaseSession, PhaseUsage, PlanPhase } from "../types";
 import { ItemUsageTotal } from "./ItemUsageTotal";
+import { itemSectionAnchor } from "./itemSectionAnchor";
 import { PhaseCardList } from "./PhaseCardList";
 
 type PlanSectionProps = {
@@ -34,7 +35,7 @@ export function PlanSection({
 }: PlanSectionProps) {
 	if (phases.length === 0) return null;
 	return (
-		<Box sx={{ mb: 2 }}>
+		<Box {...itemSectionAnchor("plan")}>
 			<Stack direction="row" sx={headerRowSx}>
 				<Typography variant="overline" sx={overlineSx}>
 					Plan

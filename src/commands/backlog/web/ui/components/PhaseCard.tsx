@@ -5,6 +5,7 @@ import type {
 	PhaseUsage,
 	PlanPhase,
 } from "../types";
+import { phaseAnchor } from "./itemSectionAnchor";
 import { ManualChecks } from "./ManualChecks";
 import { markers, phaseCardSx } from "./phaseCardSx";
 import { PhaseHeader } from "./PhaseHeader";
@@ -32,8 +33,13 @@ export function PhaseCard({
 	onRewind,
 }: PhaseCardProps) {
 	const checks = phase.manualChecks ?? [];
+	const anchor = phaseAnchor(index);
 	return (
-		<Paper variant="outlined" sx={phaseCardSx(status)}>
+		<Paper
+			variant="outlined"
+			id={anchor.id}
+			sx={{ ...phaseCardSx(status), ...anchor.sx }}
+		>
 			<PhaseHeader
 				phase={phase}
 				index={index}

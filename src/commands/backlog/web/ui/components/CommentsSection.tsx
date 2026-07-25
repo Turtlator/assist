@@ -1,6 +1,7 @@
 import { Box, Stack, Typography } from "@mui/material";
 import type { BacklogComment } from "../types";
 import { CommentCard } from "./CommentCard";
+import { itemSectionAnchor } from "./itemSectionAnchor";
 
 const headingSx = {
 	color: "text.secondary",
@@ -20,7 +21,7 @@ export function CommentsSection({
 }) {
 	if (comments.length === 0) return null;
 	return (
-		<Box sx={{ mb: 2 }}>
+		<Box {...itemSectionAnchor("comments")}>
 			<Typography variant="overline" sx={headingSx}>
 				Comments
 			</Typography>
