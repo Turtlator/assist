@@ -7,11 +7,17 @@ type SessionLaunch = {
 		cwd?: string,
 		meta?: AssistLaunchMeta,
 	) => void;
+	launchAgentInStream: (
+		joinSessionId: string,
+		prompt: string,
+		cwd?: string,
+	) => void;
 	armUpdateReload: () => void;
 };
 
 export const SessionLaunchContext = createContext<SessionLaunch>({
 	launchAssist: () => {},
+	launchAgentInStream: () => {},
 	armUpdateReload: () => {},
 });
 

@@ -15,8 +15,8 @@ import { dismissSessionGated } from "./dismissSessionGated";
 import { drainSessions } from "./drainSessions";
 import { flushPhaseActiveMs } from "./flushPhaseActiveMs";
 import { greetClient } from "./greetClient";
-import { logSpawnedSession } from "./logSpawnedSession";
 import { PrPreviewCoordinator } from "./PrPreviewCoordinator";
+import { registerSpawnedSession } from "./registerSpawnedSession";
 import { applySetStatus } from "./applySetStatus";
 import { applyUsageRecord } from "./applyUsageRecord";
 import { makeStatusChangeHandler } from "./makeStatusChangeHandler";
@@ -34,9 +34,8 @@ import { sessionLimits } from "./sessionLimits";
 import { shutdownSessions } from "./shutdownSessions";
 import { toSessionInfo } from "./toSessionInfo";
 import { treeSpawnContext } from "./treeSpawnContext";
-import { wireSessionWatchers } from "./wireSessionWatchers";
 import { WindowsProxy } from "./WindowsProxy";
-import { wirePtyEvents } from "./wirePtyEvents";
+import { addAgentToStream } from "./worktree/addAgentToStream";
 import {
 	resumeInTree,
 	spawnAssistInTree,
@@ -94,15 +93,14 @@ export class SessionManager {
 
 	drain = (): number => drainSessions(this.sessions, this.notify);
 
-	private add(session: Session): string {
-		this.wire(session);
-		wireSessionWatchers(session, this.notify, this.onStatusChange);
-		logSpawnedSession(session);
-		return session.id;
-	}
-
 	private readonly spawnWith = (create: (id: string) => Session): string =>
-		this.add(create(sessionLimits.nextId(this.sessions.size, this.idCounter)));
+		registerSpawnedSession(
+			create(sessionLimits.nextId(this.sessions.size, this.idCounter)),
+			this.sessions,
+			this.clients,
+			this.onStatusChange,
+			this.notify,
+		);
 
 	private treeCtx(): TreeSpawnContext {
 		return treeSpawnContext(
@@ -121,6 +119,10 @@ export class SessionManager {
 		harness?: HarnessKind,
 	): string {
 		return spawnInTree(this.treeCtx(), prompt, cwd, design, harness);
+	}
+
+	addAgent(targetId: string, prompt?: string, harness?: HarnessKind) {
+		return addAgentToStream(this.treeCtx(), targetId, prompt, harness);
 	}
 
 	spawnRun(
@@ -151,17 +153,12 @@ export class SessionManager {
 	}
 
 	private readonly onStatusChange = makeStatusChangeHandler(
+		this.sessions,
 		(id) => this.dismissSession(id),
 		() => this.notify(),
 		(session, itemId) =>
 			reuseSessionForRun(session, itemId, this.clients, this.onStatusChange),
 	);
-
-	private wire(session: Session): void {
-		this.sessions.set(session.id, session);
-		wirePtyEvents(session, this.clients, this.onStatusChange);
-		this.notify();
-	}
 
 	writeToSession(id: string, data: string): void {
 		sessionIo.writeToSession(this.sessions, id, data, this.onStatusChange);

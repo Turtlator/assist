@@ -34,7 +34,11 @@ function renderChips(
 			value={{ repos: [], selectedCwd: "", setSelectedCwd }}
 		>
 			<SessionLaunchContext.Provider
-				value={{ launchAssist, armUpdateReload: () => {} }}
+				value={{
+					launchAssist,
+					launchAgentInStream: () => {},
+					armUpdateReload: () => {},
+				}}
 			>
 				<RepoSummaryChips sessions={sessions} />
 			</SessionLaunchContext.Provider>
@@ -132,7 +136,11 @@ describe("RepoSummaryChips clone-on-select", () => {
 				value={{ repos: [], selectedCwd: "", setSelectedCwd }}
 			>
 				<SessionLaunchContext.Provider
-					value={{ launchAssist, armUpdateReload: () => {} }}
+					value={{
+						launchAssist,
+						launchAgentInStream: () => {},
+						armUpdateReload: () => {},
+					}}
 				>
 					<RepoSummaryChips sessions={sessions} />
 				</SessionLaunchContext.Provider>
@@ -166,7 +174,11 @@ describe("RepoSummaryChips clone-on-select", () => {
 				value={{ repos: [], selectedCwd: "", setSelectedCwd }}
 			>
 				<SessionLaunchContext.Provider
-					value={{ launchAssist, armUpdateReload: () => {} }}
+					value={{
+						launchAssist,
+						launchAgentInStream: () => {},
+						armUpdateReload: () => {},
+					}}
 				>
 					<RepoSummaryChips sessions={sessions} />
 				</SessionLaunchContext.Provider>

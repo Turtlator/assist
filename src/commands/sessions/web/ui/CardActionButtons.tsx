@@ -1,17 +1,15 @@
+import { AddAgentButton } from "./AddAgentButton";
 import { backlogTarget } from "./backlogTarget";
 import { CardCloseActions } from "./CardCloseActions";
+import { CardPrActions } from "./CardPrActions";
 import { CompleteButton } from "./CompleteButton";
 import { OpenInCodeButton } from "./OpenInCodeButton";
-import { OpenPrButton } from "./OpenPrButton";
 import { RestartButton } from "./RestartButton";
-import { ReviewButton } from "./ReviewButton";
 import { RetryButton } from "./RetryButton";
-import { reviewTargetPr } from "./reviewTargetPr";
 import { ServerRunControls } from "./ServerRunControls";
 import { SessionStarButton } from "./SessionStarButton";
 import { StopCardActivation } from "./StopCardActivation";
 import type { CardHeaderProps } from "./types";
-import { usePrStatus } from "./usePrStatus";
 
 export function CardActionButtons({
 	session,
@@ -19,16 +17,14 @@ export function CardActionButtons({
 	onRestart,
 	onDismiss,
 }: CardHeaderProps) {
-	const { status } = session;
-	const stopped = status === "stopped" || session.closing === true;
+	const stopped = session.status === "stopped" || session.closing === true;
 	const target = backlogTarget(session);
-	const pr = usePrStatus(session.cwd, reviewTargetPr(session), status);
 	return (
 		<StopCardActivation>
 			<ServerRunControls session={session} />
+			<AddAgentButton session={session} />
 			{session.cwd && <OpenInCodeButton cwd={session.cwd} variant="card" />}
-			{pr && session.cwd && <OpenPrButton pr={pr} />}
-			{pr && session.cwd && <ReviewButton cwd={session.cwd} pr={pr} />}
+			<CardPrActions session={session} />
 			{onRestart && !stopped && (
 				<RestartButton
 					id={session.id}

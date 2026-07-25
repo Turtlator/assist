@@ -11,8 +11,12 @@ export function useSessionLaunch(socket: ReturnType<typeof useSessionSocket>) {
 		socket.setError,
 	);
 	const launch = useMemo(
-		() => ({ launchAssist: socket.createAssistSession, armUpdateReload }),
-		[socket.createAssistSession, armUpdateReload],
+		() => ({
+			launchAssist: socket.createAssistSession,
+			launchAgentInStream: socket.createSessionInStream,
+			armUpdateReload,
+		}),
+		[socket.createAssistSession, socket.createSessionInStream, armUpdateReload],
 	);
 	const navigate = useNavigate();
 	/* oxlint-disable react-hooks/exhaustive-deps -- socket methods keep a stable identity; depending on the whole socket object (recreated each render) would needlessly recreate the callback */

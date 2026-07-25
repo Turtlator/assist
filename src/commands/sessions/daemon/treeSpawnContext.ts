@@ -1,5 +1,5 @@
 import type { SessionClient } from "./broadcast";
-import { startHeldSession } from "./startHeldSession";
+import { startHeldInTree } from "./startHeldInTree";
 import type { OnStatusChange, Session } from "./types";
 import type { TreeSpawnContext } from "./worktree/spawnInTree";
 
@@ -15,6 +15,6 @@ export function treeSpawnContext(
 		spawnWith,
 		notify,
 		startHeld: (session) =>
-			startHeldSession(session, sessions, clients, onStatusChange, notify),
+			startHeldInTree(session, sessions, clients, onStatusChange, notify),
 	};
 }

@@ -51,6 +51,9 @@ export async function forwardWindowsCreate(
  * session) and the daemon then re-reports an id we namespace again into w-w-3,
  * w-w-w-3, ... — so strip the prefix before forwarding, as the I/O path does. */
 function stripOutboundSessionId(data: Msg): Msg {
-	if (typeof data.sessionId !== "string") return data;
-	return { ...data, sessionId: stripWindowsSessionId(data.sessionId) };
+	const stripped = { ...data };
+	for (const key of ["sessionId", "joinSessionId"])
+		if (typeof stripped[key] === "string")
+			stripped[key] = stripWindowsSessionId(stripped[key] as string);
+	return stripped;
 }

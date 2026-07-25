@@ -12,7 +12,11 @@ function renderPlay(launchAssist: () => void, sessions: SessionInfo[] = []) {
 		<MemoryRouter initialEntries={["/backlog"]}>
 			<LiveSessionsContext.Provider value={sessions}>
 				<SessionLaunchContext.Provider
-					value={{ launchAssist, armUpdateReload: () => {} }}
+					value={{
+						launchAssist,
+						launchAgentInStream: () => {},
+						armUpdateReload: () => {},
+					}}
 				>
 					<PlayAction itemId={775} />
 				</SessionLaunchContext.Provider>

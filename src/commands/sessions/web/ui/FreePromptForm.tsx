@@ -3,23 +3,25 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import type { FormEvent, KeyboardEvent, ReactNode } from "react";
-import { dropdownStyle } from "./DropdownWrapper";
 import { PLACEHOLDER } from "./dispatchMode";
 import { handleEnterSubmit } from "./handleEnterSubmit";
+import { promptFormSx } from "./promptFormSx";
 
 export function FreePromptForm({
 	value,
 	onChange,
 	onSubmit,
 	header,
+	anchored = false,
 }: {
 	value: string;
 	onChange: (value: string) => void;
 	onSubmit: () => void;
 	header?: ReactNode;
+	anchored?: boolean;
 }) {
 	return (
-		<Paper elevation={4} sx={{ ...dropdownStyle, left: "auto", width: 320 }}>
+		<Paper elevation={anchored ? 0 : 4} sx={promptFormSx(anchored)}>
 			<Stack
 				component="form"
 				spacing={1}

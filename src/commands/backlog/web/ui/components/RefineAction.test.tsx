@@ -14,7 +14,11 @@ function renderRefine(launchAssist: () => void) {
 	return render(
 		<MemoryRouter initialEntries={["/backlog/items/279"]}>
 			<SessionLaunchContext.Provider
-				value={{ launchAssist, armUpdateReload: () => {} }}
+				value={{
+					launchAssist,
+					launchAgentInStream: () => {},
+					armUpdateReload: () => {},
+				}}
 			>
 				<RefineAction itemId={279} />
 				<LocationProbe />

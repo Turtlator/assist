@@ -6,12 +6,17 @@ import {
 	createSessionAction,
 	resumeSessionAction,
 } from "./createSessionAction";
+import { createSessionInStreamAction } from "./createSessionInStreamAction";
 
 type SendFn = (msg: object) => void;
 
 export function useLaunchActions(send: SendFn) {
 	return {
 		createSession: useMemo(() => createSessionAction(send), [send]),
+		createSessionInStream: useMemo(
+			() => createSessionInStreamAction(send),
+			[send],
+		),
 		createDesignSession: useMemo(() => createDesignSessionAction(send), [send]),
 		createPiSession: useMemo(() => createPiSessionAction(send), [send]),
 		createAssistSession: useMemo(() => createAssistSessionAction(send), [send]),

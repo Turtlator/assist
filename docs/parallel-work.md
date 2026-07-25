@@ -31,6 +31,11 @@ where you are or where any in-progress changes live. The tool tracks that; you d
 - New sessions get their own stream (see 1), but you can spawn a plain prompt into an
   **existing** one to add another agent to work already there.
 - This is opt-in — the default is always a fresh isolated stream.
+- An added agent works in **that stream's workspace**; none is placed or created for
+  it, so it picks up exactly the work in progress there.
+- A stream can only take another agent while it is still working. One that has
+  finished, stopped, or is being torn down is not joined; asking anyway gets the
+  default — a fresh isolated stream.
 
 ## 3. Work is never lost — or lost track of
 

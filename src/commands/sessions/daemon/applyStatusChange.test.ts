@@ -92,6 +92,45 @@ describe("applyStatusChange worktree reap gating", () => {
 		});
 	});
 
+	it("keeps the workspace when another agent in that stream is still working", () => {
+		const session = backlogRun({ status: "running" });
+		const dismiss = vi.fn();
+
+		applyStatusChange(
+			session,
+			"done",
+			0,
+			dismiss,
+			vi.fn(),
+			vi.fn(),
+			() => true,
+		);
+
+		expect(resolveMock).not.toHaveBeenCalled();
+		expect(session.status).toBe("done");
+		expect(session.closing).toBeUndefined();
+		expect(session.worktree).toEqual({
+			path: "/git/repo-2",
+			clone: "/git/repo",
+		});
+	});
+
+	it("runs the gate on done once no other agent shares the workspace", () => {
+		const session = backlogRun({ status: "running" });
+
+		applyStatusChange(
+			session,
+			"done",
+			0,
+			vi.fn(),
+			vi.fn(),
+			vi.fn(),
+			() => false,
+		);
+
+		expect(resolveMock).toHaveBeenCalledTimes(1);
+	});
+
 	it("skips the gate for a done transition on a non-worktree session", () => {
 		const session = backlogRun({ status: "waiting", worktree: undefined });
 

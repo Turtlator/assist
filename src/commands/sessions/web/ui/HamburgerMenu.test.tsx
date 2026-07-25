@@ -8,7 +8,9 @@ import { SessionLaunchContext } from "./useSessionLaunchContext";
 function renderMenu(launchAssist: () => void, armUpdateReload = () => {}) {
 	return render(
 		<MemoryRouter initialEntries={["/sessions"]}>
-			<SessionLaunchContext.Provider value={{ launchAssist, armUpdateReload }}>
+			<SessionLaunchContext.Provider
+				value={{ launchAssist, launchAgentInStream: () => {}, armUpdateReload }}
+			>
 				<HamburgerMenu mode="light" toggle={() => {}} />
 				<Routes>
 					<Route path="/config" element={<div>config page</div>} />

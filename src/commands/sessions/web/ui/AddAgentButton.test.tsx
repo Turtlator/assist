@@ -1,0 +1,66 @@
+// @vitest-environment jsdom
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { AddAgentButton } from "./AddAgentButton";
+import type { SessionInfo } from "./types";
+import { SessionLaunchContext } from "./useSessionLaunchContext";
+
+afterEach(cleanup);
+
+const session: SessionInfo = {
+	id: "3",
+	name: "assist backlog run 5",
+	commandType: "claude",
+	status: "running",
+	startedAt: 0,
+	runningMs: 0,
+	runningSince: null,
+	cwd: "/git/repo-2",
+};
+
+function renderButton(launchAgentInStream: (...args: never[]) => void) {
+	render(
+		<SessionLaunchContext.Provider
+			value={{
+				launchAssist: () => {},
+				launchAgentInStream: launchAgentInStream as unknown as (
+					joinSessionId: string,
+					prompt: string,
+					cwd?: string,
+				) => void,
+				armUpdateReload: () => {},
+			}}
+		>
+			<AddAgentButton session={session} />
+		</SessionLaunchContext.Provider>,
+	);
+}
+
+describe("AddAgentButton", () => {
+	it("spawns the prompt into the target stream and its workspace", () => {
+		const launch = vi.fn();
+		renderButton(launch);
+
+		fireEvent.click(screen.getByLabelText("add agent"));
+		fireEvent.change(screen.getByRole("textbox"), {
+			target: { value: "also update the docs" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Start" }));
+
+		expect(launch).toHaveBeenCalledWith(
+			"3",
+			"also update the docs",
+			"/git/repo-2",
+		);
+	});
+
+	it("does nothing without a prompt to give the added agent", () => {
+		const launch = vi.fn();
+		renderButton(launch);
+
+		fireEvent.click(screen.getByLabelText("add agent"));
+		fireEvent.click(screen.getByRole("button", { name: "Start" }));
+
+		expect(launch).not.toHaveBeenCalled();
+	});
+});
