@@ -1,3 +1,10 @@
+# [0.445.0](https://github.com/staff0rd/assist/compare/v0.444.1...v0.445.0) (2026-07-25)
+
+
+### Features
+
+* config-gated worktree branch mode ([f59a2aa](https://github.com/staff0rd/assist/commit/f59a2aa0eb2e2153b4d44a27890f5fa0547e4ecf))
+
 ## [0.444.1](https://github.com/staff0rd/assist/compare/v0.444.0...v0.444.1) (2026-07-25)
 
 
