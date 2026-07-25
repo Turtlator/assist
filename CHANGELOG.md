@@ -1,3 +1,10 @@
+# [0.453.0](https://github.com/staff0rd/assist/compare/v0.452.0...v0.453.0) (2026-07-25)
+
+
+### Features
+
+* gate agent backlog writes ([22943fd](https://github.com/staff0rd/assist/commit/22943fd3625bc5d7524847fc142ed51ccc4f0563))
+
 # [0.452.0](https://github.com/staff0rd/assist/compare/v0.451.0...v0.452.0) (2026-07-25)
 
 
