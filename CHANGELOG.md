@@ -1,3 +1,10 @@
+# [0.449.0](https://github.com/staff0rd/assist/compare/v0.448.0...v0.449.0) (2026-07-25)
+
+
+### Features
+
+* multiple agents per stream ([731a44f](https://github.com/staff0rd/assist/commit/731a44fa9bc5cd19b97fb854999f74406e997cc6))
+
 # [0.448.0](https://github.com/staff0rd/assist/compare/v0.447.0...v0.448.0) (2026-07-25)
 
 
