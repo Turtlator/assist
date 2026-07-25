@@ -2,6 +2,7 @@ import { loadGlobalConfigRaw, saveGlobalConfig } from "../../shared/loadConfig";
 import { resolveNamedRepoWriteLabel } from "../../shared/resolveNamedRepoWriteLabel";
 import { resolveRepoWriteLabel } from "../../shared/resolveRepoOverride";
 import { getCurrentOrigin } from "../backlog/getCurrentOrigin";
+import { exitWithConfigErrors } from "./exitWithConfigErrors";
 import { setNestedValue } from "./setNestedValue";
 import { validateConfig } from "./validateConfig";
 
@@ -18,7 +19,8 @@ export function applyRepoConfigSet(
 	const repos = isPlainObject(globalRaw.repos) ? { ...globalRaw.repos } : {};
 	const existingBlock = isPlainObject(repos[label]) ? repos[label] : {};
 	const updatedBlock = setNestedValue(existingBlock, key, coerced);
-	validateConfig(updatedBlock, key);
+	const validation = validateConfig(updatedBlock, key);
+	if (!validation.ok) exitWithConfigErrors(validation.errors);
 	repos[label] = updatedBlock;
 	saveGlobalConfig({ ...globalRaw, repos });
 	return label;

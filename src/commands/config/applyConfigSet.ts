@@ -1,4 +1,3 @@
-import chalk from "chalk";
 import {
 	loadGlobalConfigRaw,
 	loadProjectConfig,
@@ -10,30 +9,38 @@ import { validateConfig } from "./validateConfig";
 
 const GLOBAL_ONLY_KEYS = ["sync.autoConfirm"];
 
+export type ConfigScalar = string | number | boolean;
+
+type ConfigSetResult =
+	| { ok: true; target: "global" | "project" }
+	| { ok: false; errors: string[] };
+
 export function applyConfigSet(
 	key: string,
-	coerced: string | boolean,
+	coerced: ConfigScalar,
 	global: boolean,
-): string {
-	assertNotGlobalOnly(key, global);
-	const raw = global ? loadGlobalConfigRaw() : loadProjectConfig();
+	cwd: string = process.cwd(),
+): ConfigSetResult {
+	if (!global && isGlobalOnly(key)) {
+		return {
+			ok: false,
+			errors: [
+				`"${key}" is a global-only key. Use --global to set it in ~/.assist.yml`,
+			],
+		};
+	}
+	const raw = global ? loadGlobalConfigRaw() : loadProjectConfig(cwd);
 	const updated = setNestedValue(raw, key, coerced);
-	validateConfig(updated, key);
+	const validation = validateConfig(updated, key);
+	if (!validation.ok) return validation;
 	if (global) {
 		saveGlobalConfig(updated);
-		return "global";
+		return { ok: true, target: "global" };
 	}
-	saveConfig(updated);
-	return "project";
+	saveConfig(updated, cwd);
+	return { ok: true, target: "project" };
 }
 
-function assertNotGlobalOnly(key: string, global: boolean): void {
-	if (!global && GLOBAL_ONLY_KEYS.some((k) => key.startsWith(k))) {
-		console.error(
-			chalk.red(
-				`"${key}" is a global-only key. Use --global to set it in ~/.assist.yml`,
-			),
-		);
-		process.exit(1);
-	}
+function isGlobalOnly(key: string): boolean {
+	return GLOBAL_ONLY_KEYS.some((k) => key.startsWith(k));
 }

@@ -7,6 +7,7 @@ import { listItems } from "../../backlog/web/shared";
 import { diff } from "./diff";
 import { fileContent } from "./fileContent";
 import { getBackups } from "./getBackups";
+import { getConfig } from "./getConfig";
 import { getHtml } from "./getHtml";
 import { handleServerRuns } from "./handleServerRuns";
 import { getReviewSynthesis } from "./getReviewSynthesis";
@@ -21,6 +22,7 @@ import { openInCode } from "./openInCode";
 import { prList } from "./prList";
 import { prStatus } from "./prStatus";
 import { restartWeb } from "./restartWeb";
+import { setConfig } from "./setConfig";
 import { uploadPrImage } from "./uploadPrImage";
 import { createCssHandler } from "./createCssHandler";
 
@@ -56,6 +58,8 @@ const routes: Record<string, Handler> = {
 	"GET /api/news/items": listNewsItems,
 	"GET /api/usage/history": listUsageHistory,
 	"GET /api/backups/list": getBackups,
+	"GET /api/config": getConfig,
+	"POST /api/config/set": setConfig,
 	"GET /api/review/synthesis": getReviewSynthesis,
 };
 

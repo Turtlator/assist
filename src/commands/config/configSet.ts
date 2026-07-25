@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import { applyConfigSet } from "./applyConfigSet";
 import { applyRepoConfigSet } from "./applyRepoConfigSet";
+import { exitWithConfigErrors } from "./exitWithConfigErrors";
 import { resolveRepoTarget } from "./resolveRepoTarget";
 
 type ConfigSetOptions = {
@@ -29,10 +30,20 @@ export function configSet(
 	const coerced = coerceValue(resolved.value);
 	const target = resolved.useRepo
 		? `repo: ${applyRepoConfigSet(resolved.key, coerced, resolved.repoName)}`
-		: applyConfigSet(resolved.key, coerced, options.global ?? false);
+		: applyOrExit(resolved.key, coerced, options.global ?? false);
 	console.log(
 		chalk.green(`Set ${resolved.key} = ${JSON.stringify(coerced)} (${target})`),
 	);
+}
+
+function applyOrExit(
+	key: string,
+	coerced: string | boolean,
+	global: boolean,
+): string {
+	const result = applyConfigSet(key, coerced, global);
+	if (!result.ok) exitWithConfigErrors(result.errors);
+	return result.target;
 }
 
 function coerceValue(value: string): string | boolean {

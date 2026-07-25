@@ -11,10 +11,6 @@ import {
 import { loadRawYaml } from "./loadRawYaml";
 import type { AssistConfig, TranscriptConfig } from "./types";
 
-function getConfigPath(): string {
-	return getConfigPathFrom(process.cwd());
-}
-
 export function getConfigDir(): string {
 	return getConfigDirFrom(process.cwd());
 }
@@ -28,8 +24,10 @@ export function loadConfig(): AssistConfig {
 	return loadConfigFrom(process.cwd());
 }
 
-export function loadProjectConfig(): Record<string, unknown> {
-	return loadRawYaml(getConfigPath());
+export function loadProjectConfig(
+	cwd: string = process.cwd(),
+): Record<string, unknown> {
+	return loadRawYaml(getConfigPathFrom(cwd));
 }
 
 export function loadGlobalConfigRaw(): Record<string, unknown> {
@@ -40,8 +38,11 @@ export function saveGlobalConfig(config: Record<string, unknown>): void {
 	writeFileSync(getGlobalConfigPath(), stringifyYaml(config, { lineWidth: 0 }));
 }
 
-export function saveConfig(config: Record<string, unknown>): void {
-	const configPath = getConfigPath();
+export function saveConfig(
+	config: Record<string, unknown>,
+	cwd: string = process.cwd(),
+): void {
+	const configPath = getConfigPathFrom(cwd);
 	writeFileSync(configPath, stringifyYaml(config, { lineWidth: 0 }));
 }
 

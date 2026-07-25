@@ -1,11 +1,10 @@
 import Menu from "@mui/material/Menu";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { hamburgerMenuItems } from "./hamburgerMenuItems";
+import { HamburgerMenuDialogs } from "./HamburgerMenuDialogs";
 import { MenuTriggerButton } from "./MenuTriggerButton";
 import type { RestartTarget } from "./postRestart";
-import { RestartConfirmDialog } from "./RestartConfirmDialog";
-import { UpdateAssistConfirmDialog } from "./UpdateAssistConfirmDialog";
-import { useSessionLaunchContext } from "./useSessionLaunchContext";
 
 export function HamburgerMenu({
 	mode,
@@ -17,8 +16,9 @@ export function HamburgerMenu({
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const [pending, setPending] = useState<RestartTarget | null>(null);
 	const [updatePending, setUpdatePending] = useState(false);
-	const { launchAssist, armUpdateReload } = useSessionLaunchContext();
+	const navigate = useNavigate();
 	const open = Boolean(anchorEl);
+	const close = () => setAnchorEl(null);
 
 	return (
 		<>
@@ -26,7 +26,7 @@ export function HamburgerMenu({
 			<Menu
 				anchorEl={anchorEl}
 				open={open}
-				onClose={() => setAnchorEl(null)}
+				onClose={close}
 				anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
 				transformOrigin={{ vertical: "top", horizontal: "right" }}
 			>
@@ -34,33 +34,28 @@ export function HamburgerMenu({
 					mode,
 					onToggleColorMode: () => {
 						toggle();
-						setAnchorEl(null);
+						close();
+					},
+					onConfig: () => {
+						close();
+						navigate("/config");
 					},
 					onRestart: (target) => {
-						setAnchorEl(null);
+						close();
 						setPending(target);
 					},
 					onUpdate: () => {
-						setAnchorEl(null);
+						close();
 						setUpdatePending(true);
 					},
 				})}
 			</Menu>
-			{pending && (
-				<RestartConfirmDialog
-					target={pending}
-					onClose={() => setPending(null)}
-				/>
-			)}
-			{updatePending && (
-				<UpdateAssistConfirmDialog
-					onConfirm={() => {
-						armUpdateReload();
-						launchAssist(["update"]);
-					}}
-					onClose={() => setUpdatePending(false)}
-				/>
-			)}
+			<HamburgerMenuDialogs
+				restartTarget={pending}
+				onCloseRestart={() => setPending(null)}
+				updating={updatePending}
+				onCloseUpdate={() => setUpdatePending(false)}
+			/>
 		</>
 	);
 }

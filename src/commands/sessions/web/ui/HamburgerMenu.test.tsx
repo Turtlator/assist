@@ -1,14 +1,21 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { MemoryRouter, Route, Routes } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { HamburgerMenu } from "./HamburgerMenu";
 import { SessionLaunchContext } from "./useSessionLaunchContext";
 
 function renderMenu(launchAssist: () => void, armUpdateReload = () => {}) {
 	return render(
-		<SessionLaunchContext.Provider value={{ launchAssist, armUpdateReload }}>
-			<HamburgerMenu mode="light" toggle={() => {}} />
-		</SessionLaunchContext.Provider>,
+		<MemoryRouter initialEntries={["/sessions"]}>
+			<SessionLaunchContext.Provider value={{ launchAssist, armUpdateReload }}>
+				<HamburgerMenu mode="light" toggle={() => {}} />
+				<Routes>
+					<Route path="/config" element={<div>config page</div>} />
+					<Route path="/sessions" element={<div>sessions page</div>} />
+				</Routes>
+			</SessionLaunchContext.Provider>
+		</MemoryRouter>,
 	);
 }
 
@@ -36,6 +43,15 @@ describe("HamburgerMenu", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Update" }));
 
 		expect(armUpdateReload).toHaveBeenCalledTimes(1);
+	});
+
+	it("navigates to the config page", () => {
+		renderMenu(vi.fn());
+
+		fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
+		fireEvent.click(screen.getByText("Config"));
+
+		expect(screen.getByText("config page")).toBeTruthy();
 	});
 
 	it("does not launch when the update is cancelled", () => {
