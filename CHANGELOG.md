@@ -1,3 +1,16 @@
+# [0.441.0](https://github.com/staff0rd/assist/compare/v0.440.0...v0.441.0) (2026-07-25)
+
+
+### Bug Fixes
+
+* use brand logos for file icons ([3568fb9](https://github.com/staff0rd/assist/commit/3568fb9c8b82d5f9f8a02827b4f17f45eb24e4c6))
+
+
+### Features
+
+* config page in web view ([ac2c74c](https://github.com/staff0rd/assist/commit/ac2c74c18fad804694531e5ab8ad8b01063f3c22))
+* one repo entry per origin remote ([1d421a9](https://github.com/staff0rd/assist/commit/1d421a92df3c30bd66c93fafed83e95d0c68bd8a))
+
 # [0.440.0](https://github.com/staff0rd/assist/compare/v0.439.2...v0.440.0) (2026-07-25)
 
 
