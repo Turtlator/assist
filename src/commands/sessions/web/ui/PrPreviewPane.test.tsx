@@ -212,6 +212,86 @@ describe("PrPreviewPane inline comments", () => {
 		expect(url).toContain("cwd=%2Frepo");
 	});
 
+	type UploadResponse = { ok: boolean; json: () => Promise<unknown> };
+
+	function deferredUpload() {
+		let settle: (res: UploadResponse) => void = () => {};
+		const promise = new Promise<UploadResponse>((resolve) => {
+			settle = resolve;
+		});
+		return {
+			promise,
+			succeed: async (markdown: string) => {
+				await act(async () => {
+					settle({ ok: true, json: async () => ({ markdown }) });
+				});
+			},
+			fail: async (error: string) => {
+				await act(async () => {
+					settle({ ok: false, json: async () => ({ error }) });
+				});
+			},
+		};
+	}
+
+	function stubDeferredUploads() {
+		const first = deferredUpload();
+		const second = deferredUpload();
+		vi.stubGlobal(
+			"fetch",
+			vi
+				.fn()
+				.mockReturnValueOnce(first.promise)
+				.mockReturnValueOnce(second.promise),
+		);
+		return { first, second };
+	}
+
+	const uploadingIndicators = () =>
+		screen.queryAllByText("Uploading screenshot…");
+
+	it("shows an indicator per in-flight upload and keeps them independent", async () => {
+		const { first, second } = stubDeferredUploads();
+		render(
+			<PrPreviewPane preview={preview} cwd="/repo" onDecision={vi.fn()} />,
+		);
+
+		pasteImage("one.png");
+		pasteImage("two.png");
+		expect(uploadingIndicators()).toHaveLength(2);
+
+		await first.succeed("![one](https://x/one.png)");
+		expect(uploadingIndicators()).toHaveLength(1);
+		expect(screen.getAllByAltText("screenshot")).toHaveLength(1);
+
+		await second.succeed("![two](https://x/two.png)");
+		expect(uploadingIndicators()).toHaveLength(0);
+		const images = screen.getAllByAltText("screenshot") as HTMLImageElement[];
+		expect(images).toHaveLength(2);
+		expect(images.map((img) => img.getAttribute("src"))).toEqual([
+			expect.stringMatching(/^blob:/),
+			expect.stringMatching(/^blob:/),
+		]);
+	});
+
+	it("reports one upload's failure without disturbing a concurrent upload", async () => {
+		const { first, second } = stubDeferredUploads();
+		render(
+			<PrPreviewPane preview={preview} cwd="/repo" onDecision={vi.fn()} />,
+		);
+
+		pasteImage("one.png");
+		pasteImage("two.png");
+
+		await first.fail("gh image blew up");
+		expect(screen.getByText("gh image blew up")).toBeTruthy();
+		expect(uploadingIndicators()).toHaveLength(1);
+
+		await second.succeed("![two](https://x/two.png)");
+		expect(screen.getByText("gh image blew up")).toBeTruthy();
+		expect(screen.getAllByAltText("screenshot")).toHaveLength(1);
+	});
+
 	it("appends uploaded screenshots to the decision on approve, but not reject", async () => {
 		vi.stubGlobal(
 			"fetch",

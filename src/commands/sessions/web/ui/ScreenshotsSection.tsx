@@ -2,17 +2,15 @@ import { Box, Stack } from "@mui/material";
 import { ScreenshotThumbnail } from "./ScreenshotThumbnail";
 import { ScreenshotUploadStatus } from "./ScreenshotUploadStatus";
 import type { LocalScreenshot } from "./useScreenshots";
-import type { UploadError } from "./useScreenshotUpload";
+import type { ScreenshotUpload } from "./useScreenshotUpload";
 
 export function ScreenshotsSection({
 	screenshots,
-	uploading,
-	error,
+	uploads,
 	onRemove,
 }: {
 	screenshots: LocalScreenshot[];
-	uploading: boolean;
-	error: UploadError | null;
+	uploads: ScreenshotUpload[];
 	onRemove: (id: number) => void;
 }) {
 	return (
@@ -23,8 +21,7 @@ export function ScreenshotsSection({
 					<ScreenshotThumbnail key={s.id} screenshot={s} onRemove={onRemove} />
 				))}
 				<ScreenshotUploadStatus
-					uploading={uploading}
-					error={error}
+					uploads={uploads}
 					empty={screenshots.length === 0}
 				/>
 			</Stack>

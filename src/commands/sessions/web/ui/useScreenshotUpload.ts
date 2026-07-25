@@ -1,33 +1,39 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { UploadImageError, uploadPreviewImage } from "./uploadPreviewImage";
 import { useImageDropPaste } from "./useImageDropPaste";
 
 export type UploadError = { message: string; command?: string };
 
+export type ScreenshotUpload = { id: number; error?: UploadError };
+
+function toUploadError(error: unknown): UploadError {
+	if (error instanceof UploadImageError)
+		return { message: error.message, command: error.command };
+	return {
+		message: error instanceof Error ? error.message : "Failed to upload image",
+	};
+}
+
 export function useScreenshotUpload(
 	cwd: string | undefined,
 	onUploaded: (screenshot: { markdown: string; url: string }) => void,
 ) {
-	const [uploading, setUploading] = useState(false);
-	const [error, setError] = useState<UploadError | null>(null);
+	const [uploads, setUploads] = useState<ScreenshotUpload[]>([]);
+	const nextId = useRef(0);
 
 	const upload = useCallback(
 		async (file: File) => {
-			setUploading(true);
-			setError(null);
+			const id = nextId.current++;
+			setUploads((us) => [...us.filter((u) => !u.error), { id }]);
 			try {
 				const markdown = await uploadPreviewImage(file, cwd);
 				onUploaded({ markdown, url: URL.createObjectURL(file) });
+				setUploads((us) => us.filter((u) => u.id !== id));
 			} catch (error) {
-				if (error instanceof UploadImageError)
-					setError({ message: error.message, command: error.command });
-				else
-					setError({
-						message:
-							error instanceof Error ? error.message : "Failed to upload image",
-					});
-			} finally {
-				setUploading(false);
+				const failure = toUploadError(error);
+				setUploads((us) =>
+					us.map((u) => (u.id === id ? { id, error: failure } : u)),
+				);
 			}
 		},
 		[cwd, onUploaded],
@@ -35,5 +41,5 @@ export function useScreenshotUpload(
 
 	const { onDrop, onDragOver } = useImageDropPaste(upload);
 
-	return { uploading, error, onDrop, onDragOver };
+	return { uploads, onDrop, onDragOver };
 }

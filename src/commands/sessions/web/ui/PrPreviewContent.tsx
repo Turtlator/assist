@@ -21,8 +21,7 @@ export function PrPreviewContent({
 			footer={
 				<ScreenshotsSection
 					screenshots={pane.screenshots}
-					uploading={pane.uploading}
-					error={pane.uploadError}
+					uploads={pane.uploads}
 					onRemove={pane.removeScreenshot}
 				/>
 			}
