@@ -1,3 +1,10 @@
+## [0.453.1](https://github.com/staff0rd/assist/compare/v0.453.0...v0.453.1) (2026-07-25)
+
+
+### Bug Fixes
+
+* update session card chips ([64dcba8](https://github.com/staff0rd/assist/commit/64dcba84a8fb9621d3f4f5f8f492b2eb98d9691e))
+
 # [0.453.0](https://github.com/staff0rd/assist/compare/v0.452.0...v0.453.0) (2026-07-25)
 
 
