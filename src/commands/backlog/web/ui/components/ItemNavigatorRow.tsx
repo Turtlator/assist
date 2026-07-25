@@ -2,7 +2,7 @@ import { ButtonBase } from "@mui/material";
 import type { ItemNavSection } from "./itemNavSections";
 import { phaseStatusStyles } from "./phaseStatusStyles";
 
-const FONT_SIZE = "1.75rem";
+const FONT_SIZE = "1.3125rem";
 
 const translucentHoverOverlaySx = {
 	position: "relative",
@@ -67,7 +67,7 @@ export function ItemNavigatorRow({ section, onSelect }: ItemNavigatorRowProps) {
 							ml: 1.5,
 							bgcolor: tint.bgcolor,
 							borderColor: tint.borderColor,
-							...(tint.ring ? { boxShadow: "0 0 0 2px" } : {}),
+							borderWidth: tint.ring ? 3 : 1,
 						}
 					: labelButtonSx
 			}
