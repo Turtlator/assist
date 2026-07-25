@@ -1,3 +1,10 @@
+# [0.452.0](https://github.com/staff0rd/assist/compare/v0.451.0...v0.452.0) (2026-07-25)
+
+
+### Features
+
+* drafts stay in the clone ([cce4c0d](https://github.com/staff0rd/assist/commit/cce4c0d6ff6eee6b45105d669405c9298dab5984))
+
 # [0.451.0](https://github.com/staff0rd/assist/compare/v0.450.0...v0.451.0) (2026-07-25)
 
 
