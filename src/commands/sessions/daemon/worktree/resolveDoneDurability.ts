@@ -23,6 +23,7 @@ export async function resolveDoneDurability(
 	await reapWorktree(worktree.path);
 	session.worktree = undefined;
 	session.undurable = undefined;
+	session.closing = undefined;
 	session.gitWatcher?.close();
 	session.gitWatcher = undefined;
 	finalize();
@@ -37,6 +38,7 @@ function holdStopped(
 	if (session.undurable?.reason !== reason)
 		daemonLog(`session ${session.id} stopped; reap blocked: ${reason}`);
 	session.undurable = { reason };
+	session.closing = undefined;
 	setStatus(session, "stopped");
 	if (!session.gitWatcher && session.worktree)
 		session.gitWatcher = watchGitState(session.worktree.path, () => {

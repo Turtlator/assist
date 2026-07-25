@@ -13,6 +13,7 @@ export function CardCloseActions({
 	onDismiss: () => void;
 }) {
 	const { status, id, harness } = session;
+	if (session.closing) return null;
 	if (status !== "stopped")
 		return <DismissButton id={id} status={status} onDismiss={onDismiss} />;
 	return (

@@ -9,18 +9,20 @@ export function StatusRow({
 	restored,
 	usedPct,
 	undurable,
+	closing,
 }: {
 	status: SessionStatus;
 	elapsed: string;
 	restored?: boolean;
 	usedPct?: number;
 	undurable?: { reason: string };
+	closing?: boolean;
 }) {
 	return (
 		<Box sx={{ display: "flex", justifyContent: "space-between", mt: 0.5 }}>
 			<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
 				<Typography variant="caption" sx={{ color: statusColors[status] }}>
-					● {status}
+					● {closing ? "closing…" : status}
 				</Typography>
 				{undurable && (
 					<Typography variant="caption" sx={{ color: "warning.main" }}>

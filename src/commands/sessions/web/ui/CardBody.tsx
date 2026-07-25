@@ -39,6 +39,7 @@ export function CardBody({
 				restored={session.restored}
 				usedPct={session.usedPct}
 				undurable={session.undurable}
+				closing={session.closing}
 			/>
 			<CardToggles
 				session={session}

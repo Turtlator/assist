@@ -26,7 +26,7 @@ export function SessionListCard({
 		<SessionCard
 			session={session}
 			active={session.id === activeId}
-			loading={isSessionStarting(session, initialized)}
+			loading={session.closing || isSessionStarting(session, initialized)}
 			onClick={() => onSelect(session.id)}
 			onRetry={retryable ? () => onRetry(session.id) : undefined}
 			onRestart={restartable ? () => onRestart(session.id) : undefined}

@@ -15,6 +15,7 @@ export function respawnSession(
 	session.gitWatcher = undefined;
 	session.undurable = undefined;
 	session.pendingDismiss = undefined;
+	session.closing = undefined;
 	session.scrollback = "";
 	session.startedAt = Date.now();
 	session.runningMs = 0;

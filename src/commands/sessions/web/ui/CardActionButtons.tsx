@@ -20,7 +20,7 @@ export function CardActionButtons({
 	onDismiss,
 }: CardHeaderProps) {
 	const { status } = session;
-	const stopped = status === "stopped";
+	const stopped = status === "stopped" || session.closing === true;
 	const target = backlogTarget(session);
 	const pr = usePrStatus(session.cwd, reviewTargetPr(session), status);
 	return (

@@ -39,4 +39,5 @@ export type SessionInfoBase = {
 	design?: boolean;
 	pendingPrPreview?: PrPreview;
 	undurable?: { reason: string };
+	closing?: boolean;
 };

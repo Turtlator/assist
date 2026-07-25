@@ -26,6 +26,7 @@ export function dismissSessionGated(
 		}
 		removeCard();
 	};
+	s.closing = true;
 	if (s.pty) {
 		s.pendingDismiss = discard
 			? () => void discardTree()
@@ -34,8 +35,10 @@ export function dismissSessionGated(
 			`session ${id} ${discard ? "discard" : "dismiss"} requested: killing process tree first`,
 		);
 		killPtyTree(s.pty);
+		notify();
 		return;
 	}
+	notify();
 	if (discard) void discardTree();
 	else void resolveDoneDurability(s, removeCard, notify);
 }

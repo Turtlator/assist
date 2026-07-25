@@ -41,6 +41,7 @@ export type Session = {
 	serverPort?: number;
 	serverOrigin?: string;
 	stopping?: boolean;
+	closing?: boolean;
 	cwd?: string;
 	claudeSessionId?: string;
 	initialPrompt?: string;

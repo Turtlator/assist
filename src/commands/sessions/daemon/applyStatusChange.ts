@@ -27,6 +27,8 @@ export function applyStatusChange(
 	const deps = { dismiss, notify, reuseForRun };
 	const chainsToNextRun = shouldAutoRun(session, status).run;
 	if (status === "done" && session.worktree && !chainsToNextRun) {
+		session.closing = true;
+		notify();
 		void resolveDoneDurability(
 			session,
 			() => finishStatusChange(session, "done", exitCode, deps),

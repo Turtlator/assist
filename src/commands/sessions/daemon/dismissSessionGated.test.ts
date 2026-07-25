@@ -83,6 +83,21 @@ describe("dismissSessionGated", () => {
 		expect(resolveMock).toHaveBeenCalledOnce();
 	});
 
+	it("marks the card closing and broadcasts it so the teardown is visible", () => {
+		const pty = { pid: 42 } as unknown as Session["pty"];
+		const s = session({
+			pty,
+			worktree: { path: "/git/repo-2", clone: "/git/repo" },
+		});
+		const sessions = new Map([[s.id, s]]);
+		const notify = vi.fn();
+
+		dismissSessionGated(sessions, s.id, notify);
+
+		expect(s.closing).toBe(true);
+		expect(notify).toHaveBeenCalled();
+	});
+
 	it("force-reaps and removes the card on an explicit discard, bypassing the gate", async () => {
 		const s = session({
 			pty: null,

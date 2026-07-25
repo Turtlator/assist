@@ -29,6 +29,7 @@ export function toSessionInfo({
 	design,
 	pendingPrPreview,
 	undurable,
+	closing,
 }: Session): SessionInfo {
 	return {
 		id,
@@ -58,5 +59,6 @@ export function toSessionInfo({
 		design,
 		pendingPrPreview,
 		undurable,
+		closing,
 	};
 }
