@@ -1,3 +1,10 @@
+## [0.442.2](https://github.com/staff0rd/assist/compare/v0.442.1...v0.442.2) (2026-07-25)
+
+
+### Bug Fixes
+
+* re-run sessions with no transcript ([39e50f6](https://github.com/staff0rd/assist/commit/39e50f63c426bd483f08228c83ab589229f099d2))
+
 ## [0.442.1](https://github.com/staff0rd/assist/compare/v0.442.0...v0.442.1) (2026-07-25)
 
 
