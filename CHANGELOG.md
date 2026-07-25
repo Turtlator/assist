@@ -1,3 +1,10 @@
+## [0.454.1](https://github.com/staff0rd/assist/compare/v0.454.0...v0.454.1) (2026-07-25)
+
+
+### Bug Fixes
+
+* remove NUL byte from test sentinel ([4ba7263](https://github.com/staff0rd/assist/commit/4ba726388a51423d47ca442466808a6bb5b04261))
+
 # [0.454.0](https://github.com/staff0rd/assist/compare/v0.453.1...v0.454.0) (2026-07-25)
 
 
