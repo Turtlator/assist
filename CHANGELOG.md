@@ -1,3 +1,10 @@
+# [0.447.0](https://github.com/staff0rd/assist/compare/v0.446.0...v0.447.0) (2026-07-25)
+
+
+### Features
+
+* review plan phases in item preview ([ad7a3ea](https://github.com/staff0rd/assist/commit/ad7a3ea047cda5c3fd908651549d4cf10c3371bd))
+
 # [0.446.0](https://github.com/staff0rd/assist/compare/v0.445.0...v0.446.0) (2026-07-25)
 
 
