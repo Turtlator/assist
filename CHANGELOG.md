@@ -1,3 +1,10 @@
+## [0.444.1](https://github.com/staff0rd/assist/compare/v0.444.0...v0.444.1) (2026-07-25)
+
+
+### Bug Fixes
+
+* autoConfirm help needs --global ([1b88d83](https://github.com/staff0rd/assist/commit/1b88d83e5f006fc112e2a77955a3e2b8ce90172b))
+
 # [0.444.0](https://github.com/staff0rd/assist/compare/v0.443.0...v0.444.0) (2026-07-25)
 
 
