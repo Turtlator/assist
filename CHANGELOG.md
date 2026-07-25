@@ -1,3 +1,10 @@
+# [0.448.0](https://github.com/staff0rd/assist/compare/v0.447.0...v0.448.0) (2026-07-25)
+
+
+### Features
+
+* config value source on config page ([d4c888c](https://github.com/staff0rd/assist/commit/d4c888cce69619e09cb11df73daec69035381bbb))
+
 # [0.447.0](https://github.com/staff0rd/assist/compare/v0.446.0...v0.447.0) (2026-07-25)
 
 
