@@ -1,3 +1,10 @@
+# [0.443.0](https://github.com/staff0rd/assist/compare/v0.442.2...v0.443.0) (2026-07-25)
+
+
+### Features
+
+* git status counts on session cards ([0ae0ce3](https://github.com/staff0rd/assist/commit/0ae0ce3a9194a0eabdaacfe81b7466237788abe4))
+
 ## [0.442.2](https://github.com/staff0rd/assist/compare/v0.442.1...v0.442.2) (2026-07-25)
 
 
