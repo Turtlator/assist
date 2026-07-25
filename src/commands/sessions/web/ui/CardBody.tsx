@@ -26,7 +26,7 @@ export function CardBody({
 			<Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
 				<CircularProgress size={12} />
 				<Typography variant="caption" color="text.disabled">
-					Starting…
+					{session.closing ? "Closing…" : "Starting…"}
 				</Typography>
 			</Box>
 		);
@@ -39,7 +39,6 @@ export function CardBody({
 				restored={session.restored}
 				usedPct={session.usedPct}
 				undurable={session.undurable}
-				closing={session.closing}
 			/>
 			<CardToggles
 				session={session}

@@ -28,6 +28,9 @@ export function applyStatusChange(
 	const chainsToNextRun = shouldAutoRun(session, status).run;
 	if (status === "done" && session.worktree && !chainsToNextRun) {
 		session.closing = true;
+		daemonLog(
+			`session ${session.id} closing: checking durability of ${session.worktree.path} before reap`,
+		);
 		notify();
 		void resolveDoneDurability(
 			session,

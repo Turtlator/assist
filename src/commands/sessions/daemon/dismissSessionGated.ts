@@ -27,6 +27,9 @@ export function dismissSessionGated(
 		removeCard();
 	};
 	s.closing = true;
+	daemonLog(
+		`session ${id} closing: ${discard ? "discarding" : "checking durability of"} ${s.worktree.path}`,
+	);
 	if (s.pty) {
 		s.pendingDismiss = discard
 			? () => void discardTree()
