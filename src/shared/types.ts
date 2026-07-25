@@ -94,6 +94,7 @@ export const assistConfigSchema = z.strictObject({
 		.strictObject({
 			enabled: z.boolean().default(false),
 			trunk: z.boolean().default(false),
+			includeDrafts: z.boolean().default(false),
 			root: z.string().optional(),
 			install: z.union([z.boolean(), z.string()]).default(true),
 			commitBeforeManualChecks: z.boolean().default(false),

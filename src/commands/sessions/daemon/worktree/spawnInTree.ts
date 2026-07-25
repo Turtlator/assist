@@ -4,6 +4,7 @@ import {
 	createAssistSession,
 } from "../createAssistSession";
 import { createSession, type Session } from "../createSession";
+import { isDraftCommand } from "../isDraftCommand";
 import { resumeSession } from "../resumeSession";
 import { type AllocateOptions, allocateTree } from "./allocateTree";
 import { bindNewWorktree, bindResumedWorktree } from "./bindNewWorktree";
@@ -57,7 +58,10 @@ export function spawnAssistInTree(
 		cwd,
 		(sid, resolvedCwd, holdUntilSeeded) =>
 			createAssistSession(sid, assistArgs, resolvedCwd, meta, holdUntilSeeded),
-		{ forCheckout: isPrCheckoutArgs(assistArgs) },
+		{
+			forCheckout: isPrCheckoutArgs(assistArgs),
+			draftLike: isDraftCommand(assistArgs[0]),
+		},
 	);
 }
 

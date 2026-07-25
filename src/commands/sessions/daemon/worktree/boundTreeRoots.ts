@@ -4,9 +4,13 @@ import { daemonLog } from "../daemonLog";
 import { checkDurabilitySync } from "./treeDurability";
 import { worktreeConfigFor } from "./worktreeConfigFor";
 
-export function boundTreeRoots(sessions: Map<string, Session>): Set<string> {
+export function boundTreeRoots(
+	sessions: Map<string, Session>,
+	exclude?: Session,
+): Set<string> {
 	const roots = new Set<string>();
 	for (const session of sessions.values()) {
+		if (session === exclude) continue;
 		const root = treeRootOf(session);
 		if (root && !roots.has(root) && holdsTree(session, root)) roots.add(root);
 	}

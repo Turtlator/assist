@@ -1,10 +1,13 @@
-import { removeActivity } from "../../../shared/emitActivity";
 import { broadcast, type SessionClient } from "./broadcast";
 import type { Session } from "./createSession";
 import { daemonLog } from "./daemonLog";
-import { setStatus } from "./setStatus";
+import { resetCardForRun } from "./resetCardForRun";
 import { spawnPty } from "./spawnPty";
+import { startOrHoldPty } from "./startOrHoldPty";
 import { wirePtyEvents } from "./wirePtyEvents";
+import { bindNewWorktree } from "./worktree/bindNewWorktree";
+import { planReuseTree } from "./worktree/planReuseTree";
+import type { TreeSpawnContext } from "./worktree/spawnInTree";
 
 export function reuseSessionForRun(
 	session: Session,
@@ -15,29 +18,28 @@ export function reuseSessionForRun(
 		status: Session["status"],
 		exitCode?: number,
 	) => void,
+	tree?: TreeSpawnContext,
 ): void {
 	const assistArgs = ["backlog", "run", String(itemId)];
-	session.pty?.kill();
-	session.gitWatcher?.close();
-	session.gitWatcher = undefined;
-	session.undurable = undefined;
-	session.assistArgs = assistArgs;
-	session.name = `assist ${assistArgs.join(" ")}`;
-	session.commandType = "assist";
-	session.activity = undefined;
-	removeActivity(session.id);
-	session.scrollback = "";
-	/* why: a reused card is a fresh run, so reset the accumulator alongside
-	 * startedAt; setStatus then stamps a new runningSince. */
-	session.startedAt = Date.now();
-	session.runningMs = 0;
-	session.runningSince = null;
-	session.usageSeeded = false;
-	setStatus(session, "running");
-	session.restored = undefined;
-	session.pty = spawnPty(["assist", ...assistArgs], session.cwd, session.id);
+	resetCardForRun(session, assistArgs);
+	const alloc = planReuseTree(session, tree);
+	if (alloc) session.cwd = alloc.cwd;
+	Object.assign(
+		session,
+		startOrHoldPty(
+			() => spawnPty(["assist", ...assistArgs], session.cwd, session.id),
+			alloc !== undefined,
+		),
+	);
 	broadcast(clients, { type: "clear", sessionId: session.id });
-	wirePtyEvents(session, clients, onStatusChange);
+	if (alloc)
+		bindNewWorktree(
+			session,
+			alloc,
+			tree?.notify ?? (() => {}),
+			tree?.startHeld,
+		);
+	else wirePtyEvents(session, clients, onStatusChange);
 	daemonLog(
 		`session ${session.id} reused for backlog run ${itemId}: ${session.name}`,
 	);

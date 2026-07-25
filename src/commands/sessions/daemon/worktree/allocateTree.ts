@@ -15,6 +15,7 @@ export type Allocation = {
 
 export type AllocateOptions = {
 	forCheckout?: boolean;
+	draftLike?: boolean;
 };
 
 export function allocateTree(
@@ -30,6 +31,12 @@ export function allocateTree(
 		return { cwd: requestedCwd, kind: "primary", created: false };
 
 	const clone = mainWorktree(repoRoot) ?? repoRoot;
+	if (options.draftLike === true && cfg.includeDrafts !== true) {
+		daemonLog(
+			`draft-type session kept in the clone ${clone}: worktree.includeDrafts is off`,
+		);
+		return { cwd: clone, kind: "primary", created: false, clone };
+	}
 	if (
 		planAllocation(clone, boundTreeRoots) === "primary" &&
 		!wouldDisturbWorkInProgress(clone, options.forCheckout === true)

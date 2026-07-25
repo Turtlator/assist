@@ -5,6 +5,9 @@ import type { Session } from "./createSession";
 import { reuseSessionForRun } from "./reuseSessionForRun";
 import { spawnPty } from "./spawnPty";
 import { wirePtyEvents } from "./wirePtyEvents";
+import { bindNewWorktree } from "./worktree/bindNewWorktree";
+import { planReuseTree } from "./worktree/planReuseTree";
+import type { TreeSpawnContext } from "./worktree/spawnInTree";
 
 vi.mock("./spawnPty", () => ({
 	spawnPty: vi.fn(() => ({
@@ -16,6 +19,10 @@ vi.mock("./spawnPty", () => ({
 vi.mock("./wirePtyEvents", () => ({ wirePtyEvents: vi.fn() }));
 vi.mock("./daemonLog", () => ({ daemonLog: vi.fn() }));
 vi.mock("../../../shared/emitActivity", () => ({ removeActivity: vi.fn() }));
+vi.mock("./worktree/planReuseTree", () => ({
+	planReuseTree: vi.fn(() => undefined),
+}));
+vi.mock("./worktree/bindNewWorktree", () => ({ bindNewWorktree: vi.fn() }));
 
 const spawnPtyMock = spawnPty as unknown as ReturnType<typeof vi.fn>;
 const wirePtyMock = wirePtyEvents as unknown as ReturnType<typeof vi.fn>;
@@ -134,5 +141,71 @@ describe("reuseSessionForRun", () => {
 		reuseSessionForRun(session, 42, new Set(), vi.fn());
 
 		expect(kill).toHaveBeenCalledOnce();
+	});
+
+	describe("when the chained run needs its own workspace", () => {
+		const alloc = {
+			cwd: "/home/user/repo-2",
+			kind: "worktree" as const,
+			created: true,
+			clone: "/home/user/repo",
+		};
+
+		function treeCtx(): TreeSpawnContext {
+			return {
+				sessions: new Map(),
+				spawnWith: vi.fn(),
+				notify: vi.fn(),
+				startHeld: vi.fn(),
+			};
+		}
+
+		beforeEach(() => {
+			vi.mocked(planReuseTree).mockReturnValue(alloc);
+		});
+
+		it("moves the reused card into the allocated workspace", () => {
+			const session = makeSession();
+
+			reuseSessionForRun(session, 42, new Set(), vi.fn(), treeCtx());
+
+			expect(session.cwd).toBe("/home/user/repo-2");
+			expect(vi.mocked(bindNewWorktree).mock.calls[0]?.[1]).toEqual(alloc);
+		});
+
+		it("holds the run until the workspace has been seeded", () => {
+			const session = makeSession();
+
+			reuseSessionForRun(session, 42, new Set(), vi.fn(), treeCtx());
+
+			expect(spawnPtyMock).not.toHaveBeenCalled();
+			expect(session.pty).toBeNull();
+			expect(session.pendingStart).toBeTypeOf("function");
+			expect(wirePtyMock).not.toHaveBeenCalled();
+		});
+
+		it("starts the held run in the new workspace once seeding releases it", () => {
+			const session = makeSession();
+
+			reuseSessionForRun(session, 42, new Set(), vi.fn(), treeCtx());
+			session.pendingStart?.();
+
+			expect(spawnPtyMock).toHaveBeenCalledWith(
+				["assist", "backlog", "run", "42"],
+				"/home/user/repo-2",
+				"7",
+			);
+		});
+
+		it("starts immediately when the allocator leaves it where it is", () => {
+			vi.mocked(planReuseTree).mockReturnValue(undefined);
+			const session = makeSession();
+
+			reuseSessionForRun(session, 42, new Set(), vi.fn(), treeCtx());
+
+			expect(session.pendingStart).toBeUndefined();
+			expect(spawnPtyMock).toHaveBeenCalledOnce();
+			expect(bindNewWorktree).not.toHaveBeenCalled();
+		});
 	});
 });

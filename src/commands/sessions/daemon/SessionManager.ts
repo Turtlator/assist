@@ -157,7 +157,13 @@ export class SessionManager {
 		(id) => this.dismissSession(id),
 		() => this.notify(),
 		(session, itemId) =>
-			reuseSessionForRun(session, itemId, this.clients, this.onStatusChange),
+			reuseSessionForRun(
+				session,
+				itemId,
+				this.clients,
+				this.onStatusChange,
+				this.treeCtx(),
+			),
 	);
 
 	writeToSession(id: string, data: string): void {

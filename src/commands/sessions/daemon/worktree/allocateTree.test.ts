@@ -13,6 +13,7 @@ vi.mock("./worktreeConfigFor", () => ({
 	worktreeConfigFor: vi.fn(() => ({
 		enabled: true,
 		trunk: false,
+		includeDrafts: false,
 		install: true,
 		commitBeforeManualChecks: false,
 		copy: [],
@@ -35,6 +36,7 @@ describe("allocateTree", () => {
 		configMock.mockReturnValue({
 			enabled: true,
 			trunk: false,
+			includeDrafts: false,
 			install: true,
 			commitBeforeManualChecks: false,
 			copy: [],
@@ -63,6 +65,7 @@ describe("allocateTree", () => {
 			configMock.mockReturnValue({
 				enabled: true,
 				trunk: true,
+				includeDrafts: false,
 				root: "~/git",
 				install: true,
 				commitBeforeManualChecks: false,
@@ -76,6 +79,64 @@ describe("allocateTree", () => {
 				{ root: "~/git", trunk: true },
 				new Set(["/git/repo"]),
 			);
+		});
+	});
+
+	describe("for a draft-type session", () => {
+		it("stays in the clone even when another session already holds it", () => {
+			expect(
+				allocateTree("/git/repo", new Set(["/git/repo"]), { draftLike: true }),
+			).toEqual({
+				cwd: "/git/repo",
+				kind: "primary",
+				created: false,
+				clone: "/git/repo",
+			});
+			expect(createMock).not.toHaveBeenCalled();
+		});
+
+		it("normalises a worktree cwd back to the clone", () => {
+			expect(
+				allocateTree("/git/repo-2", new Set(["/git/repo"]), { draftLike: true })
+					.cwd,
+			).toBe("/git/repo");
+		});
+
+		it("spills like any other session once includeDrafts is on", () => {
+			configMock.mockReturnValue({
+				enabled: true,
+				trunk: false,
+				includeDrafts: true,
+				install: true,
+				commitBeforeManualChecks: false,
+				copy: [],
+			});
+
+			expect(
+				allocateTree("/git/repo", new Set(["/git/repo"]), { draftLike: true }),
+			).toEqual({
+				cwd: "/git/repo-2",
+				kind: "worktree",
+				created: true,
+				clone: "/git/repo",
+			});
+		});
+
+		it("is inert when parallel work is off", () => {
+			configMock.mockReturnValue({
+				enabled: false,
+				trunk: false,
+				includeDrafts: false,
+				install: true,
+				commitBeforeManualChecks: false,
+				copy: [],
+			});
+
+			expect(
+				allocateTree("/git/repo/src", new Set(["/git/repo"]), {
+					draftLike: true,
+				}),
+			).toEqual({ cwd: "/git/repo/src", kind: "primary", created: false });
 		});
 	});
 
@@ -123,6 +184,7 @@ describe("allocateTree", () => {
 			configMock.mockReturnValue({
 				enabled: false,
 				trunk: false,
+				includeDrafts: false,
 				install: true,
 				commitBeforeManualChecks: false,
 				copy: [],

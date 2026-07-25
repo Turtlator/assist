@@ -63,6 +63,24 @@ describe("closeGateApplies", () => {
 		expect(closeGateApplies(map(s), s)).toBe(false);
 	});
 
+	it("does not gate a draft kept in the clone", () => {
+		const s = session({
+			commandType: "assist",
+			assistArgs: ["draft", "--once"],
+		});
+
+		expect(closeGateApplies(map(s), s)).toBe(false);
+	});
+
+	it("gates the run a clone-bound draft chained into", () => {
+		const s = session({
+			commandType: "assist",
+			assistArgs: ["backlog", "run", "7"],
+		});
+
+		expect(closeGateApplies(map(s), s)).toBe(true);
+	});
+
 	it("does not gate a session whose tree another card still holds", () => {
 		const agent = session({
 			id: "1",

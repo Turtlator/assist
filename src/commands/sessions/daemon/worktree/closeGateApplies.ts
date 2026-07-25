@@ -1,4 +1,5 @@
 import type { Session } from "../createSession";
+import { isCloneBoundDraft } from "./isCloneBoundDraft";
 import { otherTreeHolders } from "./otherTreeHolders";
 import { worktreeConfigFor } from "./worktreeConfigFor";
 
@@ -8,6 +9,7 @@ export function closeGateApplies(
 ): boolean {
 	if (otherTreeHolders(sessions, session).length > 0) return false;
 	if (session.worktree) return true;
+	if (isCloneBoundDraft(session)) return false;
 	if (!session.cwd) return false;
 	if (session.status !== "running" && session.status !== "waiting")
 		return false;

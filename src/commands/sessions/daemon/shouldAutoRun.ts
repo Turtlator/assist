@@ -1,4 +1,5 @@
 import type { Session } from "./createSession";
+import { isDraftCommand } from "./isDraftCommand";
 
 type AutoRunDecision =
 	| { run: true; itemId: number }
@@ -20,7 +21,7 @@ export function shouldAutoRun(
 			reason: `command type is "${session.commandType}", not "assist"`,
 		};
 	const cmd = session.assistArgs?.[0];
-	if (cmd !== "draft" && cmd !== "bug" && cmd !== "refine")
+	if (!isDraftCommand(cmd))
 		return {
 			run: false,
 			reason: `command "${cmd ?? "(none)"}" is not draft/bug/refine`,
