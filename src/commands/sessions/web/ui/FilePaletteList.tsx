@@ -1,12 +1,22 @@
+import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
 import MenuList from "@mui/material/MenuList";
 import Typography from "@mui/material/Typography";
+import { FileTypeIcon } from "./FileTypeIcon";
 
 const rowSx = {
 	display: "flex",
 	gap: 1,
+	alignItems: "center",
+	minWidth: 0,
+} as const;
+
+const labelsSx = {
+	display: "flex",
+	gap: 1,
 	alignItems: "baseline",
 	minWidth: 0,
+	overflow: "hidden",
 } as const;
 
 const basenameSx = {
@@ -53,12 +63,15 @@ export function FilePaletteList({
 						onClick={() => onSelect(path)}
 						sx={rowSx}
 					>
-						<Typography component="span" sx={basenameSx}>
-							{basename}
-						</Typography>
-						<Typography component="span" color="text.secondary" sx={dirSx}>
-							{dir}
-						</Typography>
+						<FileTypeIcon path={path} />
+						<Box sx={labelsSx}>
+							<Typography component="span" sx={basenameSx}>
+								{basename}
+							</Typography>
+							<Typography component="span" color="text.secondary" sx={dirSx}>
+								{dir}
+							</Typography>
+						</Box>
 					</MenuItem>
 				);
 			})}

@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
+import { FileTypeIcon } from "./FileTypeIcon";
 
 export type FileViewMode = "raw" | "rendered";
 
@@ -15,6 +16,13 @@ const headerSx = {
 
 const pathSx = { fontFamily: "monospace", fontSize: 13 } as const;
 
+const titleSx = {
+	display: "flex",
+	alignItems: "center",
+	gap: 1,
+	minWidth: 0,
+} as const;
+
 export function FileViewHeader({
 	path,
 	mode,
@@ -26,9 +34,12 @@ export function FileViewHeader({
 }) {
 	return (
 		<Box sx={headerSx}>
-			<Typography color="text.secondary" sx={pathSx}>
-				{path}
-			</Typography>
+			<Box sx={titleSx}>
+				<FileTypeIcon path={path} />
+				<Typography color="text.secondary" sx={pathSx}>
+					{path}
+				</Typography>
+			</Box>
 			{mode && (
 				<ToggleButtonGroup
 					exclusive
