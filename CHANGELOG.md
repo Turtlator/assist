@@ -1,3 +1,10 @@
+# [0.446.0](https://github.com/staff0rd/assist/compare/v0.445.0...v0.446.0) (2026-07-25)
+
+
+### Features
+
+* branch-wide session change counts ([e1c09af](https://github.com/staff0rd/assist/commit/e1c09afaf5ce74102e6758b35b99e4664fbe7f79))
+
 # [0.445.0](https://github.com/staff0rd/assist/compare/v0.444.1...v0.445.0) (2026-07-25)
 
 
