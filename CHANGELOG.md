@@ -1,3 +1,11 @@
+# [0.444.0](https://github.com/staff0rd/assist/compare/v0.443.0...v0.444.0) (2026-07-25)
+
+
+### Features
+
+* config cog beside hamburger ([4c313d8](https://github.com/staff0rd/assist/commit/4c313d8b498500eb4caa4c2d939cecfb511706ba))
+* highlight active navigator section ([dd04c4c](https://github.com/staff0rd/assist/commit/dd04c4c0d091fbe75276326e204be1108c29c78f))
+
 # [0.443.0](https://github.com/staff0rd/assist/compare/v0.442.2...v0.443.0) (2026-07-25)
 
 
