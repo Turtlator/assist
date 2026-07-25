@@ -19,7 +19,7 @@ export function SessionListCard({
 	initialized: Set<string>;
 	onSelect: (id: string) => void;
 } & SessionListHandlers) {
-	const retryable = session.commandType === "run";
+	const retryable = session.commandType === "run" || needsRelaunch(session);
 	const restartable = session.commandType !== "run";
 
 	return (
@@ -34,5 +34,13 @@ export function SessionListCard({
 			onSetAutoRun={(enabled) => onSetAutoRun(session.id, enabled)}
 			onSetAutoAdvance={(enabled) => onSetAutoAdvance(session.id, enabled)}
 		/>
+	);
+}
+
+function needsRelaunch(session: SessionInfo): boolean {
+	return (
+		session.commandType === "assist" &&
+		session.restored === false &&
+		!!session.assistArgs
 	);
 }

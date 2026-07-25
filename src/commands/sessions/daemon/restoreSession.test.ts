@@ -295,21 +295,75 @@ describe("restoreSession", () => {
 		expect(session.runningSince).toBeNull();
 	});
 
-	it("resumes a --once session via bare claude when no sessionId was discovered", () => {
+	it("re-runs a --once launch killed before its transcript existed, from its stored args", () => {
+		findTranscriptPathSyncMock.mockReturnValue(null);
 		const persisted: PersistedSession = {
 			name: "repo/assist draft",
 			commandType: "assist",
 			cwd: "/home/user/repo",
 			startedAt: 123,
-			assistArgs: ["draft", "--once"],
+			assistArgs: ["draft", "--once", "fix the thing"],
 		};
 
 		const session = restoreSession("1", persisted);
 
-		expect(spawnPtyMock).not.toHaveBeenCalled();
 		expect(spawnClaudeMock).not.toHaveBeenCalled();
-		expect(session.status).toBe("done");
-		expect(session.restored).toBe(false);
+		expect(spawnPtyMock).toHaveBeenCalledWith(
+			["assist", "draft", "--once", "fix the thing"],
+			"/home/user/repo",
+			"1",
+			undefined,
+		);
+		expect(session.status).toBe("running");
+		expect(session.restored).toBe(true);
+		expect(session.name).toBe("repo/assist draft");
+		expect(session.assistArgs).toEqual(["draft", "--once", "fix the thing"]);
+	});
+
+	it("re-runs a --once launch whose recorded conversation was never written", () => {
+		findTranscriptPathSyncMock.mockReturnValue(null);
+		const persisted: PersistedSession = {
+			name: "repo/assist draft",
+			commandType: "assist",
+			cwd: "/home/user/repo",
+			startedAt: 123,
+			claudeSessionId: "draft-456",
+			assistArgs: ["draft", "--once", "fix the thing"],
+		};
+
+		const session = restoreSession("1", persisted);
+
+		expect(spawnPtyMock).toHaveBeenCalledWith(
+			["assist", "draft", "--once", "fix the thing"],
+			"/home/user/repo",
+			"1",
+			undefined,
+		);
+		expect(session.status).toBe("running");
+		expect(session.restored).toBe(true);
+	});
+
+	it("re-runs a backlog run whose recorded phase conversation was never written", () => {
+		findTranscriptPathSyncMock.mockReturnValue(null);
+		const persisted: PersistedSession = {
+			name: "repo/Run backlog 295",
+			commandType: "assist",
+			status: "waiting",
+			cwd: "/home/user/repo",
+			startedAt: 123,
+			claudeSessionId: "abc-123",
+			assistArgs: ["backlog", "run", "295"],
+		};
+
+		const session = restoreSession("1", persisted);
+
+		expect(spawnPtyMock).toHaveBeenCalledWith(
+			["assist", "backlog", "run", "295"],
+			"/home/user/repo",
+			"1",
+			undefined,
+		);
+		expect(session.status).toBe("running");
 	});
 
 	it("returns an error session for a claude session without a sessionId", () => {
