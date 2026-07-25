@@ -1,3 +1,15 @@
+# [0.451.0](https://github.com/staff0rd/assist/compare/v0.450.0...v0.451.0) (2026-07-25)
+
+
+### Bug Fixes
+
+* worktree session start and seeding ([f1cef2d](https://github.com/staff0rd/assist/commit/f1cef2dfb8b52c977d8e007fbd7b91383ffb7acb))
+
+
+### Features
+
+* watch command pulls and builds ([4c0f206](https://github.com/staff0rd/assist/commit/4c0f206f9d5a8e9af63fe5d714ae63c685710896))
+
 # [0.450.0](https://github.com/staff0rd/assist/compare/v0.449.0...v0.450.0) (2026-07-25)
 
 
