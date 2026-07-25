@@ -1,3 +1,21 @@
+# [0.438.0](https://github.com/staff0rd/assist/compare/v0.437.0...v0.438.0) (2026-07-25)
+
+
+### Bug Fixes
+
+* focus file palette search field ([43fc2d2](https://github.com/staff0rd/assist/commit/43fc2d26cf85e4d014e708f43a0986bf623336e5))
+* name recovered worktree cards clearly ([76ab3f5](https://github.com/staff0rd/assist/commit/76ab3f56f47c3f645cf9f7966fec46bfc5cb8f3f))
+* navigator rows as borderless buttons ([c7d401b](https://github.com/staff0rd/assist/commit/c7d401bd5011beb1c55099a1f7f51e7b6ae11b28))
+* phase numbers as tinted circles ([fd07855](https://github.com/staff0rd/assist/commit/fd07855592ba95f40cae561862ba4101c21f19c3))
+* tighten item navigator phase rows ([2a332d2](https://github.com/staff0rd/assist/commit/2a332d2e8380b9f2fa1279986d6d5868a543311d))
+
+
+### Features
+
+* ctrl+p file palette in web view ([fe3961d](https://github.com/staff0rd/assist/commit/fe3961de0e4cb008f95c6d94b52873eb26a44be7))
+* filetype icons in file palette ([a51ea0b](https://github.com/staff0rd/assist/commit/a51ea0b148a56b8c4518e7ff6987746d3a98268e))
+* recover orphaned worktrees automatically ([a264706](https://github.com/staff0rd/assist/commit/a264706acf56ee548e62ac4b7fc491d84f06cef1))
+
 # [0.437.0](https://github.com/staff0rd/assist/compare/v0.436.0...v0.437.0) (2026-07-25)
 
 
