@@ -1,3 +1,10 @@
+## [0.442.1](https://github.com/staff0rd/assist/compare/v0.442.0...v0.442.1) (2026-07-25)
+
+
+### Bug Fixes
+
+* shrink nav font, unclip phase ring ([c9f3a8a](https://github.com/staff0rd/assist/commit/c9f3a8a088af6b0b8c804b31143155bc41b5dea2))
+
 # [0.442.0](https://github.com/staff0rd/assist/compare/v0.441.0...v0.442.0) (2026-07-25)
 
 
