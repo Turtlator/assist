@@ -1,65 +1,57 @@
+import type { SvgIconComponent } from "@mui/icons-material";
+import FolderZipOutlined from "@mui/icons-material/FolderZipOutlined";
+import ImageOutlined from "@mui/icons-material/ImageOutlined";
+import InsertDriveFileOutlined from "@mui/icons-material/InsertDriveFileOutlined";
+import PictureAsPdfOutlined from "@mui/icons-material/PictureAsPdfOutlined";
+import StorageOutlined from "@mui/icons-material/StorageOutlined";
 import Box from "@mui/material/Box";
-import { useTheme } from "@mui/material/styles";
-import {
-	type DefaultExtensionType,
-	type FileIconProps,
-	defaultStyles,
-	FileIcon,
-} from "react-file-icon";
+import { deviconForExtension } from "./deviconForExtension";
 
-const aliases: Record<string, DefaultExtensionType> = {
-	bash: "sys",
-	cjs: "js",
-	cts: "ts",
-	fish: "sys",
-	go: "c",
-	kt: "java",
-	less: "css",
-	markdown: "md",
-	mdx: "md",
-	mjs: "js",
-	mts: "ts",
-	rs: "c",
-	sh: "sys",
-	sql: "c",
-	swift: "c",
-	toml: "ini",
-	tsx: "ts",
-	vue: "html",
-	xml: "html",
-	yaml: "yml",
-	zsh: "sys",
+const size = 16;
+
+const muiIcons: Record<string, SvgIconComponent> = {
+	gif: ImageOutlined,
+	gz: FolderZipOutlined,
+	ico: ImageOutlined,
+	jpeg: ImageOutlined,
+	jpg: ImageOutlined,
+	pdf: PictureAsPdfOutlined,
+	png: ImageOutlined,
+	sql: StorageOutlined,
+	svg: ImageOutlined,
+	tar: FolderZipOutlined,
+	webp: ImageOutlined,
+	zip: FolderZipOutlined,
 };
 
-const genericStyle: Partial<FileIconProps> = { type: "document" };
+const wrapperSx = {
+	width: size,
+	height: size,
+	flexShrink: 0,
+	display: "flex",
+	alignItems: "center",
+} as const;
 
-const wrapperSx = { width: 16, flexShrink: 0, display: "flex" } as const;
+const muiSx = { fontSize: size, color: "text.secondary" } as const;
 
-function extensionOf(path: string): string {
-	const basename = path.slice(path.lastIndexOf("/") + 1);
+function keyFor(path: string): string {
+	const basename = path.slice(path.lastIndexOf("/") + 1).toLowerCase();
 	const cut = basename.lastIndexOf(".");
-	return cut <= 0 ? "" : basename.slice(cut + 1).toLowerCase();
-}
-
-function styleFor(extension: string): Partial<FileIconProps> {
-	const key = aliases[extension] ?? (extension as DefaultExtensionType);
-	return defaultStyles[key] ?? genericStyle;
+	return cut <= 0 ? basename : basename.slice(cut + 1);
 }
 
 export function FileTypeIcon({ path }: { path: string }) {
-	const theme = useTheme();
-	const dark = theme.palette.mode === "dark";
-	const extension = extensionOf(path);
+	const key = keyFor(path);
+	const devicon = deviconForExtension(key);
+	const MuiIcon = muiIcons[key] ?? InsertDriveFileOutlined;
 
 	return (
 		<Box sx={wrapperSx}>
-			<FileIcon
-				color={dark ? "#4c5057" : "#e2e5ea"}
-				glyphColor={dark ? "#b9bfc8" : "#7c828c"}
-				labelTextColor="#fff"
-				extension={extension.length <= 4 ? extension : undefined}
-				{...styleFor(extension)}
-			/>
+			{devicon ? (
+				<devicon.Icon size={size} fill={devicon.unpaintedFill} />
+			) : (
+				<MuiIcon sx={muiSx} />
+			)}
 		</Box>
 	);
 }

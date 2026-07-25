@@ -5,41 +5,44 @@ import { FileTypeIcon } from "./FileTypeIcon";
 
 afterEach(cleanup);
 
-function label(): string | undefined {
-	return document.querySelector("text")?.textContent ?? undefined;
-}
-
 function fills(): string[] {
-	return [...document.querySelectorAll("rect")].map(
+	return [...document.querySelectorAll("svg [fill]")].map(
 		(node) => node.getAttribute("fill") ?? "",
 	);
 }
 
+function svgAttribute(name: string): string | null {
+	return document.querySelector("svg")?.getAttribute(name) ?? null;
+}
+
 describe("FileTypeIcon", () => {
-	it("labels the icon with the file extension", () => {
+	it("uses the brand mark for a known extension", () => {
 		render(<FileTypeIcon path="src/useDaemonState.ts" />);
 
-		expect(label()).toBe("ts");
-		expect(fills()).toContain("#3478C7");
+		expect(fills()).toContain("#007acc");
 	});
 
-	it("styles aliased extensions like their base type", () => {
+	it("shares one mark across aliased extensions", () => {
 		render(<FileTypeIcon path="src/App.tsx" />);
 
-		expect(label()).toBe("tsx");
-		expect(fills()).toContain("#3478C7");
+		expect(fills()).toContain("#61dafb");
 	});
 
-	it("falls back to a generic icon for unknown extensions", () => {
+	it("colours marks that ship without fills", () => {
+		render(<FileTypeIcon path="README.md" />);
+
+		expect(svgAttribute("fill")).toBe("#519aba");
+	});
+
+	it("matches extensionless names like Dockerfile", () => {
+		render(<FileTypeIcon path="build/Dockerfile" />);
+
+		expect(fills()).toContain("#00aada");
+	});
+
+	it("falls back to a generic file icon for unknown extensions", () => {
 		render(<FileTypeIcon path="src/data.abc" />);
 
-		expect(label()).toBe("abc");
-		expect(fills()).not.toContain("#3478C7");
-	});
-
-	it("omits the label when there is no short extension", () => {
-		render(<FileTypeIcon path=".gitignore" />);
-
-		expect(label()).toBeUndefined();
+		expect(svgAttribute("data-testid")).toBe("InsertDriveFileOutlinedIcon");
 	});
 });
