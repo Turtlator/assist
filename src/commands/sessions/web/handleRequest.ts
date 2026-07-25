@@ -14,6 +14,7 @@ import { githubUrl } from "./githubUrl";
 import { gitStatus } from "./gitStatus";
 import { harnessCapabilities } from "./harnessCapabilities";
 import { jiraSite } from "./jiraSite";
+import { listFiles } from "./listFiles";
 import { listNewsItems } from "./listNewsItems";
 import { listUsageHistory } from "./listUsageHistory";
 import { openInCode } from "./openInCode";
@@ -46,6 +47,7 @@ const routes: Record<string, Handler> = {
 	"GET /api/git-status": gitStatus,
 	"GET /api/diff": diff,
 	"GET /api/file": fileContent,
+	"GET /api/files": listFiles,
 	"GET /api/jira-site": jiraSite,
 	"GET /api/harness": harnessCapabilities,
 	"GET /api/pr-status": prStatus,

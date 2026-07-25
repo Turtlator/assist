@@ -1,5 +1,5 @@
 declare module "refractor/core" {
-	type RefractorNode = {
+	export type RefractorNode = {
 		type: string;
 		value?: string;
 		tagName?: string;

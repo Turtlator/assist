@@ -1,16 +1,18 @@
 import TextField from "@mui/material/TextField";
 import type { KeyboardEvent, Ref } from "react";
 
-export function RepoFilterInput({
+export function FilterInput({
 	inputRef,
 	value,
 	onChange,
 	onKeyDown,
+	placeholder,
 }: {
 	inputRef: Ref<HTMLInputElement>;
 	value: string;
 	onChange: (value: string) => void;
 	onKeyDown: (e: KeyboardEvent) => void;
+	placeholder: string;
 }) {
 	return (
 		<TextField
@@ -18,7 +20,7 @@ export function RepoFilterInput({
 			value={value}
 			onChange={(e) => onChange(e.target.value)}
 			onKeyDown={onKeyDown}
-			placeholder="Filter repos..."
+			placeholder={placeholder}
 			size="small"
 			fullWidth
 			slotProps={{ input: { sx: { fontSize: 12 } } }}

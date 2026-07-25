@@ -38,6 +38,11 @@ export function MarkdownPreviewDialog({
 						This file is no longer in the working tree.
 					</Alert>
 				)}
+				{state.status === "too-large" && (
+					<Alert severity="info">
+						This file is too large to display (over 2 MB).
+					</Alert>
+				)}
 				{state.status === "error" && (
 					<Alert severity="error">Couldn't load this file.</Alert>
 				)}

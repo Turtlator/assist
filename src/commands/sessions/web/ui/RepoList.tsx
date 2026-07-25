@@ -2,7 +2,7 @@ import type { SxProps, Theme } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import { useEffect, useRef, useState } from "react";
 import { dropdownStyle } from "./DropdownWrapper";
-import { RepoFilterInput } from "./RepoFilterInput";
+import { FilterInput } from "./FilterInput";
 import { RepoMenuList } from "./RepoMenuList";
 import { useRepoKeyboardNav } from "./useRepoKeyboardNav";
 
@@ -52,11 +52,12 @@ export function RepoList({
 
 	return (
 		<Paper elevation={4} sx={menuSx}>
-			<RepoFilterInput
+			<FilterInput
 				inputRef={inputRef}
 				value={filter}
 				onChange={setFilter}
 				onKeyDown={onKeyDown}
+				placeholder="Filter repos..."
 			/>
 			<RepoMenuList
 				repos={filtered}

@@ -37,6 +37,22 @@ describe("MarkdownPreviewDialog", () => {
 		).toBeTruthy();
 	});
 
+	it("reports a file that is too large", async () => {
+		stubFetch({ ok: false, status: 413 });
+
+		render(
+			<MarkdownPreviewDialog
+				cwd="/repo"
+				path="docs/big.md"
+				onClose={vi.fn()}
+			/>,
+		);
+
+		expect(
+			await screen.findByText("This file is too large to display (over 2 MB)."),
+		).toBeTruthy();
+	});
+
 	it("reports a server error", async () => {
 		stubFetch({ ok: false, status: 500 });
 

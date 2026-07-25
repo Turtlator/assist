@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 
-type FileContentState =
+export type FileContentState =
 	| { status: "loading" }
 	| { status: "absent" }
+	| { status: "too-large" }
 	| { status: "error" }
 	| { status: "ready"; content: string };
 
@@ -27,6 +28,10 @@ export function useFileContent(
 				if (cancelled) return;
 				if (res.status === 404) {
 					setState({ status: "absent" });
+					return;
+				}
+				if (res.status === 413) {
+					setState({ status: "too-large" });
 					return;
 				}
 				if (!res.ok) {

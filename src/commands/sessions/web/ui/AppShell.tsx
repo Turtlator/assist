@@ -1,11 +1,9 @@
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import { AppRoutes } from "./AppRoutes";
+import { AppOverlays } from "./AppOverlays";
 import { AppToolbar } from "./AppToolbar";
-import { ErrorSnackbar } from "./ErrorSnackbar";
 import { HamburgerMenu } from "./HamburgerMenu";
-import { LaunchSnackbar } from "./LaunchSnackbar";
-import { ReconnectingIndicator } from "./ReconnectingIndicator";
 import { ServerRunLayer } from "./ServerRunLayer";
 import { DaemonVersionContext } from "./useDaemonVersionContext";
 import { useRepoSelection } from "./useRepoSelection";
@@ -50,12 +48,9 @@ export function AppShell({
 				<ServerRunLayer socket={socket}>
 					<AppRoutes socket={socket} />
 				</ServerRunLayer>
-				<ReconnectingIndicator reconnecting={socket.reconnecting} />
-				<ErrorSnackbar error={socket.error} onClose={socket.clearError} />
-				<LaunchSnackbar
-					notice={socket.success}
-					onClose={socket.clearSuccess}
-					onView={viewLaunchedSession}
+				<AppOverlays
+					socket={socket}
+					onViewLaunchedSession={viewLaunchedSession}
 				/>
 			</SessionLaunchContext.Provider>
 		</RepoSelectionContext.Provider>
