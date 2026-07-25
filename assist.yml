@@ -198,6 +198,16 @@ run:
     args:
       - db
       - migrate
+  - name: build
+    command: npm
+    args:
+      - run
+      - build
+  - name: auto-build
+    command: bash
+    args:
+      - -c
+      - npm i && npm run build
 forbiddenStrings:
   - file: claude/settings.json
     paths:
