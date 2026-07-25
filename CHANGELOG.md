@@ -1,3 +1,10 @@
+## [0.439.2](https://github.com/staff0rd/assist/compare/v0.439.1...v0.439.2) (2026-07-25)
+
+
+### Bug Fixes
+
+* per-upload screenshot indicators ([a4d0ff9](https://github.com/staff0rd/assist/commit/a4d0ff9b7816a243fff2bb54f9144bac6700ab12))
+
 ## [0.439.1](https://github.com/staff0rd/assist/compare/v0.439.0...v0.439.1) (2026-07-25)
 
 
