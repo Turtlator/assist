@@ -1,3 +1,10 @@
+# [0.439.0](https://github.com/staff0rd/assist/compare/v0.438.0...v0.439.0) (2026-07-25)
+
+
+### Features
+
+* filter diff files by name and type ([fc7955f](https://github.com/staff0rd/assist/commit/fc7955fa789327bebc8a722f534edf21c36758c0))
+
 # [0.438.0](https://github.com/staff0rd/assist/compare/v0.437.0...v0.438.0) (2026-07-25)
 
 
