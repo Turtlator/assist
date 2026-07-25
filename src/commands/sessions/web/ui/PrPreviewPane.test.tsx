@@ -318,6 +318,70 @@ describe("PrPreviewPane inline comments", () => {
 		);
 	});
 
+	describe("backlog item previews", () => {
+		const item: PrPreview = {
+			requestId: "b1",
+			title: "Preview never opens",
+			body: "**Type:** bug\n\n## Description\n\nThe pane stays shut",
+			prNumber: null,
+			kind: "backlog-item",
+			itemType: "bug",
+		};
+
+		it("shows a type chip instead of a PR chip", () => {
+			render(<PrPreviewPane preview={item} onDecision={vi.fn()} />);
+
+			expect(screen.getByText("Bug")).toBeTruthy();
+			expect(screen.queryByText("New PR")).toBeNull();
+		});
+
+		it("shows a Story chip for a story", () => {
+			render(
+				<PrPreviewPane
+					preview={{ ...item, itemType: "story" }}
+					onDecision={vi.fn()}
+				/>,
+			);
+
+			expect(screen.getByText("Story")).toBeTruthy();
+		});
+
+		it("offers no screenshot UI and ignores a pasted image", async () => {
+			const fetchMock = vi.fn();
+			vi.stubGlobal("fetch", fetchMock);
+
+			render(<PrPreviewPane preview={item} cwd="/repo" onDecision={vi.fn()} />);
+			expect(screen.queryByText(/attach a screenshot/)).toBeNull();
+
+			pasteImage("shot.png");
+			await Promise.resolve();
+
+			expect(fetchMock).not.toHaveBeenCalled();
+			expect(screen.queryByAltText("screenshot")).toBeNull();
+		});
+
+		it("supports drag-select inline commenting", () => {
+			const onDecision = vi.fn();
+			const { container } = render(
+				<PrPreviewPane preview={item} onDecision={onDecision} />,
+			);
+
+			addComment(container, "stays shut", "which pane?");
+
+			expect(container.querySelector("mark.pr-comment")?.textContent).toBe(
+				"stays shut",
+			);
+			fireEvent.click(
+				screen.getByRole("button", { name: /Request changes \(1\)/ }),
+			);
+			expect(onDecision).toHaveBeenCalledWith(
+				"reject",
+				[{ quote: "stays shut", note: "which pane?" }],
+				[],
+			);
+		});
+	});
+
 	it("clears persisted comments once a decision is made", () => {
 		const { container, unmount } = render(
 			<PrPreviewPane preview={preview} onDecision={vi.fn()} />,

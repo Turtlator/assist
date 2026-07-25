@@ -1,9 +1,8 @@
 import { randomUUID } from "node:crypto";
+import { awaitPreviewApproval } from "../sessions/shared/awaitPreviewApproval";
 import { appendScreenshots } from "./appendScreenshots";
 import type { CreateOptions } from "./buildCreateArgs";
 import { placePr } from "./placePr";
-import { reportPrRejection } from "./reportPrRejection";
-import { requestPrDecision } from "./requestPrDecision";
 
 export async function previewAndPlace(args: {
 	sessionId: string;
@@ -12,25 +11,13 @@ export async function previewAndPlace(args: {
 	prNumber: number | null;
 	options: CreateOptions;
 }): Promise<void> {
-	console.log("Awaiting your approval in the assist web UI preview pane…");
-
-	let decision: Awaited<ReturnType<typeof requestPrDecision>>;
-	try {
-		decision = await requestPrDecision({
-			sessionId: args.sessionId,
-			requestId: randomUUID(),
-			title: args.title,
-			body: args.body,
-			prNumber: args.prNumber,
-		});
-	} catch (error) {
-		console.error(
-			`Error: ${error instanceof Error ? error.message : String(error)}`,
-		);
-		process.exit(1);
-	}
-
-	if (decision.decision === "reject") reportPrRejection(decision);
+	const decision = await awaitPreviewApproval("PR preview", {
+		sessionId: args.sessionId,
+		requestId: randomUUID(),
+		title: args.title,
+		body: args.body,
+		prNumber: args.prNumber,
+	});
 
 	const body = appendScreenshots(args.body, decision.screenshots ?? []);
 

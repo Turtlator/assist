@@ -2,8 +2,12 @@ import type { DragEvent } from "react";
 import { useEffect } from "react";
 import { imageFromClipboard, imageFromDrop } from "./imageFromClipboard";
 
-export function useImageDropPaste(onFile: (file: File) => void) {
+export function useImageDropPaste(
+	onFile: (file: File) => void,
+	enabled: boolean,
+) {
 	useEffect(() => {
+		if (!enabled) return;
 		const onPaste = (e: ClipboardEvent) => {
 			const file = imageFromClipboard(e.clipboardData);
 			if (!file) return;
@@ -12,7 +16,7 @@ export function useImageDropPaste(onFile: (file: File) => void) {
 		};
 		globalThis.addEventListener("paste", onPaste);
 		return () => globalThis.removeEventListener("paste", onPaste);
-	}, [onFile]);
+	}, [onFile, enabled]);
 
 	const onDrop = (e: DragEvent) => {
 		const file = imageFromDrop(e.dataTransfer);
@@ -26,5 +30,7 @@ export function useImageDropPaste(onFile: (file: File) => void) {
 			e.preventDefault();
 	};
 
-	return { onDrop, onDragOver };
+	return enabled
+		? { onDrop, onDragOver }
+		: { onDrop: undefined, onDragOver: undefined };
 }

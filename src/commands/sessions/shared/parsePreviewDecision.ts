@@ -1,6 +1,6 @@
-import type { PrPreviewComment } from "../sessions/shared/SessionInfoBase";
+import type { PrPreviewComment } from "./SessionInfoBase";
 
-export type PrDecision = {
+export type PreviewDecision = {
 	decision: "approve" | "reject";
 	reason?: string;
 	comments?: PrPreviewComment[];
@@ -8,20 +8,20 @@ export type PrDecision = {
 };
 
 type Incoming =
-	| { kind: "decision"; decision: PrDecision }
+	| { kind: "decision"; decision: PreviewDecision }
 	| { kind: "error"; message: string };
 
 type IncomingMessage = {
 	type?: string;
 	requestId?: string;
-	decision?: PrDecision["decision"];
+	decision?: PreviewDecision["decision"];
 	reason?: string;
 	comments?: PrPreviewComment[];
 	screenshots?: string[];
 	message?: string;
 };
 
-export function parseIncoming(
+export function parsePreviewDecision(
 	line: string,
 	requestId: string,
 ): Incoming | null {

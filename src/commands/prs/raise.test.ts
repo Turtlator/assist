@@ -17,8 +17,9 @@ vi.mock("../../shared/loadJson", () => ({
 vi.mock("./recordPrActivity", () => ({ recordPrActivity: vi.fn() }));
 
 const mockRequestPrDecision = vi.fn();
-vi.mock("./requestPrDecision", () => ({
-	requestPrDecision: (...args: unknown[]) => mockRequestPrDecision(...args),
+vi.mock("../sessions/shared/requestPreviewDecision", () => ({
+	requestPreviewDecision: (...args: unknown[]) =>
+		mockRequestPrDecision(...args),
 }));
 
 const mockExit = vi.spyOn(process, "exit").mockImplementation(() => {

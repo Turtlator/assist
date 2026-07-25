@@ -1,12 +1,7 @@
 import chalk from "chalk";
-import { getDb } from "../../../shared/db/getDb";
-import { loadConfig } from "../../../shared/loadConfig";
-import { formatItemId } from "../formatItemId";
-import { insertItem } from "../insertItem";
-import { insertPhaseAt } from "../insertPhaseAt";
-import { insertSubtask } from "../insertSubtask";
+import { createItemWithDefaults } from "../createItemWithDefaults";
 import { ensureRemoteOrigin } from "../ensureRemoteOrigin";
-import { getOrigin } from "../shared";
+import { formatItemId } from "../formatItemId";
 import type { BacklogType } from "../types";
 import {
 	promptAcceptanceCriteria,
@@ -32,27 +27,12 @@ export async function add(options: AddOptions): Promise<void> {
 		(await promptDescription());
 	const acceptanceCriteria = options.ac ?? (await promptAcceptanceCriteria());
 
-	const orm = await getDb();
-	const id = await insertItem(
-		orm,
-		{
-			type,
-			name,
-			description: description || undefined,
-			acceptanceCriteria,
-			status: "todo",
-			starred: false,
-		},
-		getOrigin(),
-	);
-
-	if (type === "bug") {
-		await insertPhaseAt(orm, id, 0, "Fix", ["Fix the bug"], null, undefined);
-	}
-
-	for (const subtask of loadConfig().subtasks ?? []) {
-		await insertSubtask(orm, id, subtask.title, subtask.description);
-	}
+	const id = await createItemWithDefaults({
+		type,
+		name,
+		description,
+		acceptanceCriteria,
+	});
 
 	console.log(chalk.green(`Added item ${formatItemId(id)}: ${name}`));
 }

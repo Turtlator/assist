@@ -29,13 +29,18 @@ export function PrPreviewPane({
 		screenshots: string[],
 	) => void;
 }) {
-	const pane = usePrPane(preview.requestId, cwd, onDecision);
+	const screenshots = preview.kind !== "backlog-item";
+	const pane = usePrPane(preview.requestId, cwd, onDecision, screenshots);
 
 	return (
 		<Box sx={paneSx} onDrop={pane.onDrop} onDragOver={pane.onDragOver}>
-			<PrPreviewHeader title={preview.title} prNumber={preview.prNumber} />
+			<PrPreviewHeader preview={preview} />
 			<Divider />
-			<PrPreviewContent body={preview.body} pane={pane} />
+			<PrPreviewContent
+				body={preview.body}
+				pane={pane}
+				screenshots={screenshots}
+			/>
 			<PrPreviewFooter
 				comments={pane.comments}
 				commentColors={pane.commentColors}

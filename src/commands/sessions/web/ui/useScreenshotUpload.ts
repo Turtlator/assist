@@ -17,6 +17,7 @@ function toUploadError(error: unknown): UploadError {
 export function useScreenshotUpload(
 	cwd: string | undefined,
 	onUploaded: (screenshot: { markdown: string; url: string }) => void,
+	enabled: boolean,
 ) {
 	const [uploads, setUploads] = useState<ScreenshotUpload[]>([]);
 	const nextId = useRef(0);
@@ -39,7 +40,7 @@ export function useScreenshotUpload(
 		[cwd, onUploaded],
 	);
 
-	const { onDrop, onDragOver } = useImageDropPaste(upload);
+	const { onDrop, onDragOver } = useImageDropPaste(upload, enabled);
 
 	return { uploads, onDrop, onDragOver };
 }

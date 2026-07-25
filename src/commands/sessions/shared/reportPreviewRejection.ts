@@ -1,8 +1,11 @@
-import type { PrDecision } from "./parseIncoming";
+import type { PreviewDecision } from "./parsePreviewDecision";
 
-export function reportPrRejection(decision: PrDecision): never {
+export function reportPreviewRejection(
+	subject: string,
+	decision: PreviewDecision,
+): never {
 	console.error(
-		`PR preview rejected${decision.reason ? `: ${decision.reason}` : "."}`,
+		`${subject} rejected${decision.reason ? `: ${decision.reason}` : "."}`,
 	);
 	const comments = decision.comments ?? [];
 	if (comments.length > 0) {

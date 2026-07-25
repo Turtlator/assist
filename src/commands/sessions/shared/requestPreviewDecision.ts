@@ -1,30 +1,36 @@
-import { connectToDaemon } from "../sessions/daemon/connectToDaemon";
-import { readSocketLines } from "../sessions/daemon/readSocketLines";
-import { type PrDecision, parseIncoming } from "./parseIncoming";
+import { connectToDaemon } from "../daemon/connectToDaemon";
+import { readSocketLines } from "../daemon/readSocketLines";
+import {
+	type PreviewDecision,
+	parsePreviewDecision,
+} from "./parsePreviewDecision";
+import type { PreviewItemType, PreviewKind } from "./SessionInfoBase";
 
-type PrPreviewRequest = {
+export type PreviewRequest = {
 	sessionId: string;
 	requestId: string;
 	title: string;
 	body: string;
 	prNumber: number | null;
+	kind?: PreviewKind;
+	itemType?: PreviewItemType;
 };
 
-export function requestPrDecision(
-	request: PrPreviewRequest,
-): Promise<PrDecision> {
+export function requestPreviewDecision(
+	request: PreviewRequest,
+): Promise<PreviewDecision> {
 	return new Promise((resolve, reject) => {
 		connectToDaemon().then((socket) => {
 			let settled = false;
-			const finish = (error?: Error, decision?: PrDecision) => {
+			const finish = (error?: Error, decision?: PreviewDecision) => {
 				if (settled) return;
 				settled = true;
 				socket.destroy();
 				if (error) reject(error);
-				else resolve(decision as PrDecision);
+				else resolve(decision as PreviewDecision);
 			};
 			readSocketLines(socket, (line) => {
-				const incoming = parseIncoming(line, request.requestId);
+				const incoming = parsePreviewDecision(line, request.requestId);
 				if (!incoming) return;
 				if (incoming.kind === "error") finish(new Error(incoming.message));
 				else finish(undefined, incoming.decision);

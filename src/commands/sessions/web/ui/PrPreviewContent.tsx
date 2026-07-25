@@ -5,9 +5,11 @@ import type { usePrPane } from "./usePrPane";
 export function PrPreviewContent({
 	body,
 	pane,
+	screenshots,
 }: {
 	body: string;
 	pane: ReturnType<typeof usePrPane>;
+	screenshots: boolean;
 }) {
 	return (
 		<PreviewBody
@@ -19,11 +21,13 @@ export function PrPreviewContent({
 			dragColor={pane.dragColor}
 			onMouseDown={pane.onMouseDown}
 			footer={
-				<ScreenshotsSection
-					screenshots={pane.screenshots}
-					uploads={pane.uploads}
-					onRemove={pane.removeScreenshot}
-				/>
+				screenshots ? (
+					<ScreenshotsSection
+						screenshots={pane.screenshots}
+						uploads={pane.uploads}
+						onRemove={pane.removeScreenshot}
+					/>
+				) : undefined
 			}
 		/>
 	);

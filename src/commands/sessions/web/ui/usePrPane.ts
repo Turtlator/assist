@@ -16,11 +16,12 @@ export function usePrPane(
 	requestId: string,
 	cwd: string | undefined,
 	onDecision: OnDecision,
+	screenshotsEnabled: boolean,
 ) {
 	const { wrapperRef, contentRef, pending, dragRects, onMouseDown, clear } =
 		usePreviewSelection();
 	const { comments, add, remove } = usePrComments(requestId);
-	const shots = usePaneScreenshots(cwd);
+	const shots = usePaneScreenshots(cwd, screenshotsEnabled);
 
 	const { commentColors, dragColor, ranges } = useMemo(
 		() => previewHighlights(comments, pending),

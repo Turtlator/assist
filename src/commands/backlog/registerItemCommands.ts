@@ -2,6 +2,7 @@ import type { Command } from "commander";
 import { add as backlogAdd } from "./add";
 import { addPhase as backlogAddPhase } from "./addPhase";
 import { list as backlogList } from "./list";
+import { propose as backlogPropose } from "./propose";
 
 export function registerItemCommands(cmd: Command): void {
 	cmd
@@ -28,6 +29,17 @@ export function registerItemCommands(cmd: Command): void {
 		)
 		.option("--ac <criterion...>", "Acceptance criteria (repeatable)")
 		.action(backlogAdd);
+
+	cmd
+		.command("propose")
+		.description(
+			"Preview a complete backlog item for approval, then create it on approval",
+		)
+		.requiredOption(
+			"--json <file|->",
+			"Path to a JSON payload describing the item, or - to read it from stdin",
+		)
+		.action(backlogPropose);
 
 	cmd
 		.command("add-phase <id> <name>")

@@ -8,11 +8,17 @@ export type PrPreviewComment = {
 	note: string;
 };
 
+export type PreviewKind = "pr" | "backlog-item";
+
+export type PreviewItemType = "story" | "bug";
+
 export type PrPreview = {
 	requestId: string;
 	title: string;
 	body: string;
 	prNumber: number | null;
+	kind?: PreviewKind;
+	itemType?: PreviewItemType;
 };
 
 export type SessionInfoBase = {

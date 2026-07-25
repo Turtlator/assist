@@ -23,7 +23,16 @@ Skip questions the user has already answered. Stop asking as soon as you have en
 
 ## Step 3: Propose the item
 
-Show the user the bug report:
+Where the review happens depends on whether this is a web session — check it once:
+
+```
+echo "${ASSIST_SESSION:-0}"
+```
+
+- **`1` (web session):** do NOT print the bug report in the terminal. Skip straight to Step 5 — `assist backlog propose` slides the item into the web UI preview pane, where the user approves it, rejects it, or leaves inline comments on specific lines. That pane is the review gate.
+- **anything else:** show the user the bug report in chat as below, iterate (Step 4), then save.
+
+Either way you compose the same content, so draft it before you call `propose`:
 
 **Name:** (concise title)
 **Type:** bug
@@ -55,17 +64,33 @@ The description renders as markdown in both the terminal (`assist backlog show`)
 
 ## Step 4: Iterate
 
-Ask the user if they want to change anything. Iterate until they confirm.
+In a web session, skip this step — the preview pane handles it.
+
+Otherwise, ask the user if they want to change anything and iterate until they confirm.
 
 ## Step 5: Save
 
-Once confirmed, add the item via CLI and capture the id it prints:
+Propose the item and capture the id it prints. Use `propose`, not `assist backlog add` — `propose` is the reviewed path for an agent-authored item:
 
 ```
-assist backlog add --name "Bug title" --type bug --desc "$(printf '**Repro:**\n\n1. ...\n2. ...\n\n**Expected:** ...\n\n**Actual:** ...')" --ac "criterion 1" --ac "criterion 2" 2>&1
+cat <<'JSON' | assist backlog propose --json - 2>&1
+{
+  "name": "Bug title",
+  "type": "bug",
+  "description": "**Repro:**\n\n1. ...\n2. ...\n\n**Expected:** ...\n\n**Actual:** ...",
+  "acceptanceCriteria": ["criterion 1", "criterion 2"]
+}
+JSON
 ```
 
-Pass the description as real markdown with line breaks preserved (use `printf` or a quoted heredoc so the `\n` sequences become actual newlines, not literal `\n` characters).
+The payload is strict JSON — an unknown key is an error. `\n` inside the `description` string is a JSON escape and becomes a real newline, which is what the markdown rendering needs.
+
+In a web session this blocks until the user decides in the preview pane:
+
+- **Approved** — the item is created and its id is printed.
+- **Rejected** — the command exits non-zero and prints the reason plus every inline comment with the excerpt it was left on. Do not retry verbatim: address each comment, then call `propose` again with the revised payload. Repeat until it is approved.
+
+Outside a web session the rendered item is printed and created straight away.
 
 Note the created item id from the output — you'll pass it to the done signal below.
 

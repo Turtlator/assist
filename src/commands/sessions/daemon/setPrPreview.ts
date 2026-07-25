@@ -22,15 +22,25 @@ export function setPrPreview(
 		return;
 	}
 	const prNumber = typeof d.prNumber === "number" ? d.prNumber : null;
+	const kind = d.kind === "backlog-item" ? "backlog-item" : "pr";
+	const itemType = d.itemType === "bug" ? "bug" : "story";
 	session.pendingPrPreview = {
 		requestId: d.requestId as string,
 		title: d.title as string,
 		body: d.body as string,
 		prNumber,
+		kind,
+		itemType: kind === "backlog-item" ? itemType : undefined,
 	};
 	waiters.set(id, client);
+	const target =
+		kind === "backlog-item"
+			? `backlog ${itemType}`
+			: prNumber === null
+				? "create"
+				: `edit #${prNumber}`;
 	daemonLog(
-		`pr-preview set: id=${id} requestId=${d.requestId} target=${prNumber === null ? "create" : `edit #${prNumber}`}`,
+		`pr-preview set: id=${id} requestId=${d.requestId} kind=${kind} target=${target}`,
 	);
 	notify();
 }

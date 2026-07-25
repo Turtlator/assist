@@ -5,8 +5,9 @@ const requestPrDecisionMock = vi.fn();
 vi.mock("./placePr", () => ({
 	placePr: (...args: unknown[]) => placePrMock(...args),
 }));
-vi.mock("./requestPrDecision", () => ({
-	requestPrDecision: (...args: unknown[]) => requestPrDecisionMock(...args),
+vi.mock("../sessions/shared/requestPreviewDecision", () => ({
+	requestPreviewDecision: (...args: unknown[]) =>
+		requestPrDecisionMock(...args),
 }));
 
 import { previewAndPlace } from "./previewAndPlace";
