@@ -1,3 +1,10 @@
+## [0.433.4](https://github.com/staff0rd/assist/compare/v0.433.3...v0.433.4) (2026-07-25)
+
+
+### Bug Fixes
+
+* surface worktree teardown state ([edfa6d1](https://github.com/staff0rd/assist/commit/edfa6d1baf1ad5f119330643a0badc2f8c3143a3))
+
 ## [0.433.3](https://github.com/staff0rd/assist/compare/v0.433.2...v0.433.3) (2026-07-25)
 
 
