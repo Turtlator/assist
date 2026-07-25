@@ -25,7 +25,12 @@ export function DiffView() {
 			<DiffToolbar viewType={viewType} onChange={setViewType} />
 			<Box sx={diffSx}>
 				{files.map((file) => (
-					<FileDiff key={fileKey(file)} file={file} viewType={viewType} />
+					<FileDiff
+						key={fileKey(file)}
+						file={file}
+						viewType={viewType}
+						cwd={selectedCwd}
+					/>
 				))}
 			</Box>
 		</PageShell>

@@ -5,6 +5,7 @@ import { getBacklogSummary } from "../../backlog/web/getBacklogSummary";
 import { handleItemRoute } from "../../backlog/web/handleItemRoute";
 import { listItems } from "../../backlog/web/shared";
 import { diff } from "./diff";
+import { fileContent } from "./fileContent";
 import { getBackups } from "./getBackups";
 import { getHtml } from "./getHtml";
 import { handleServerRuns } from "./handleServerRuns";
@@ -44,6 +45,7 @@ const routes: Record<string, Handler> = {
 	"GET /api/github-url": githubUrl,
 	"GET /api/git-status": gitStatus,
 	"GET /api/diff": diff,
+	"GET /api/file": fileContent,
 	"GET /api/jira-site": jiraSite,
 	"GET /api/harness": harnessCapabilities,
 	"GET /api/pr-status": prStatus,
