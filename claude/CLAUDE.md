@@ -28,6 +28,10 @@ When drafting a message to send on the user's behalf (Slack, PR, email, comment)
 
 Do not include comments for standard logic or syntax. Only comment if the specific line involves unintuitive complexity or a hack.
 
+## Backlog item IDs
+
+A bare `a` followed by hex (e.g. `a791`, `a3f0`) is an assist backlog item ID, not a git SHA. Read it with `assist backlog view <id>`.
+
 ## Backlog items, PRs, and commits
 
 Do not mention assist backlog items in PR descriptions or PR comments. The reference goes the other way: mention the relevant commits or PRs in the assist backlog item.
