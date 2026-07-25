@@ -1,3 +1,10 @@
+## [0.433.1](https://github.com/staff0rd/assist/compare/v0.433.0...v0.433.1) (2026-07-25)
+
+
+### Bug Fixes
+
+* worktree session lifecycle races ([89e973b](https://github.com/staff0rd/assist/commit/89e973b1b234fca6661c22569473d99a037863d2))
+
 # [0.433.0](https://github.com/staff0rd/assist/compare/v0.432.0...v0.433.0) (2026-07-24)
 
 
