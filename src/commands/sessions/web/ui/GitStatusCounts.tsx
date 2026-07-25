@@ -1,14 +1,8 @@
 import { GitStatusLink, GROUPS } from "./GitStatusLink";
 import { useGitStatusCounts } from "./useGitStatusCounts";
 
-export function GitStatusCounts({
-	cwd,
-	paused,
-}: {
-	cwd: string;
-	paused?: boolean;
-}) {
-	const counts = useGitStatusCounts(cwd, paused);
+export function GitStatusCounts({ cwd }: { cwd: string }) {
+	const counts = useGitStatusCounts(cwd);
 
 	const groups = counts
 		? GROUPS.map((g) => ({ ...g, count: counts[g.key].length })).filter(

@@ -3,14 +3,11 @@ import type { GitStatusCounts } from "../parseGitStatus";
 
 const POLL_INTERVAL_MS = 5000;
 
-export function useGitStatusCounts(
-	cwd: string,
-	paused = false,
-): GitStatusCounts | null {
+export function useGitStatusCounts(cwd: string): GitStatusCounts | null {
 	const [counts, setCounts] = useState<GitStatusCounts | null>(null);
 
 	useEffect(() => {
-		if (!cwd || paused) {
+		if (!cwd) {
 			setCounts(null);
 			return;
 		}
@@ -32,7 +29,7 @@ export function useGitStatusCounts(
 			cancelled = true;
 			clearInterval(id);
 		};
-	}, [cwd, paused]);
+	}, [cwd]);
 
 	return counts;
 }

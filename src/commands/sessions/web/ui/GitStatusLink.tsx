@@ -12,16 +12,15 @@ const containerSx = {
 
 type StatusGroup = {
 	key: string;
-	label: string;
 	prefix: string;
 	color: string;
 	count: number;
 };
 
 export const GROUPS = [
-	{ key: "new", label: "New", prefix: "+", color: "success.main" },
-	{ key: "modified", label: "Modified", prefix: "~", color: "warning.main" },
-	{ key: "deleted", label: "Deleted", prefix: "-", color: "error.main" },
+	{ key: "new", prefix: "+", color: "success.main" },
+	{ key: "modified", prefix: "~", color: "warning.main" },
+	{ key: "deleted", prefix: "-", color: "error.main" },
 ] as const;
 
 function GitStatusChips({ groups }: { groups: StatusGroup[] }) {
