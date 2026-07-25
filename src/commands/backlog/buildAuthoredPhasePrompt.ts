@@ -1,11 +1,15 @@
 import { buildCommentLines } from "./buildCommentLines";
 import { formatItemId } from "./formatItemId";
 import type { BacklogItem, PlanPhase } from "./types";
+import { buildManualCheckLines } from "./buildManualCheckLines";
 
 export function buildAuthoredPhasePrompt(
 	item: BacklogItem,
 	phaseNumber: number,
 	phase: PlanPhase,
+	options: { commitBeforeManualChecks: boolean } = {
+		commitBeforeManualChecks: false,
+	},
 ): string {
 	const manualChecks = phase.manualChecks ?? [];
 	const needsConfirmation = manualChecks.length > 0;
@@ -18,7 +22,7 @@ export function buildAuthoredPhasePrompt(
 		"Focus ONLY on this phase. Do not work on other phases.",
 		"If you need to modify backlog items, run `assist backlog --help` to discover available commands.",
 		"When you have completed all tasks for this phase, run /verify to check your work.",
-		...buildManualCheckLines(manualChecks),
+		...buildManualCheckLines(manualChecks, options.commitBeforeManualChecks),
 		"",
 		`Post concise comments for any notable findings or changes using \`assist backlog comment ${formatItemId(item.id)} "<text>"\`.`,
 		"",
@@ -61,19 +65,6 @@ function buildJiraStartedLines(
 		"",
 		`As your first step, before any implementation, run \`/jira started ${item.jiraKey}\` to assign the issue to yourself and transition it to In Progress.`,
 	];
-}
-
-function buildManualCheckLines(manualChecks: string[]): string[] {
-	if (manualChecks.length > 0) {
-		return [
-			"",
-			"Before marking this phase as done, ask the user to perform these manual checks:",
-			...manualChecks.map((c) => `- ${c}`),
-			"",
-			"Wait for the user to confirm all manual checks pass before proceeding.",
-		];
-	}
-	return [];
 }
 
 function formatTasks(phase: PlanPhase): string {

@@ -38,6 +38,12 @@ export const sessionsConfigHelp: ConfigHelpEntry[] = [
 		note: "per-worktree dep install: true auto-detects the package manager, or give an explicit command; false to skip",
 	},
 	{
+		key: "worktree.commitBeforeManualChecks",
+		setter:
+			"assist config set worktree.commitBeforeManualChecks true -g --repo",
+		note: "phase prompts run /commit before asking the user to perform manual checks, so work is not left uncommitted in a reapable worktree (default off)",
+	},
+	{
 		key: "worktree.copy",
 		setter:
 			"assist config set worktree.copy .env,.claude/settings.local.json -g --repo",

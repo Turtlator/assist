@@ -95,6 +95,7 @@ export const assistConfigSchema = z.strictObject({
 			enabled: z.boolean().default(false),
 			root: z.string().optional(),
 			install: z.union([z.boolean(), z.string()]).default(true),
+			commitBeforeManualChecks: z.boolean().default(false),
 			copy: z
 				.array(z.string())
 				.default([

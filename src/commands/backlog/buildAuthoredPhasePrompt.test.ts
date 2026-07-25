@@ -45,4 +45,46 @@ describe("buildAuthoredPhasePrompt", () => {
 
 		expect(prompt).not.toContain("/jira started");
 	});
+
+	describe("commitBeforeManualChecks", () => {
+		const phaseWithChecks: PlanPhase = {
+			name: "Phase 1",
+			tasks: [{ task: "do it" }],
+			manualChecks: ["click the button"],
+		};
+
+		it("leaves the prompt unchanged when the flag is off", () => {
+			const prompt = buildAuthoredPhasePrompt(makeItem(), 1, phaseWithChecks, {
+				commitBeforeManualChecks: false,
+			});
+
+			expect(prompt).not.toContain("/commit");
+			expect(prompt).toBe(
+				buildAuthoredPhasePrompt(makeItem(), 1, phaseWithChecks),
+			);
+		});
+
+		it("instructs the agent to commit before the manual checks when the flag is on", () => {
+			const prompt = buildAuthoredPhasePrompt(makeItem(), 1, phaseWithChecks, {
+				commitBeforeManualChecks: true,
+			});
+
+			expect(prompt).toContain(
+				"Once verify passes, run /commit to commit the work before asking the user to perform the manual checks below.",
+			);
+			expect(prompt.indexOf("/commit")).toBeLessThan(
+				prompt.indexOf(
+					"Before marking this phase as done, ask the user to perform these manual checks:",
+				),
+			);
+		});
+
+		it("adds no commit instruction when the phase has no manual checks", () => {
+			const prompt = buildAuthoredPhasePrompt(makeItem(), 1, phase, {
+				commitBeforeManualChecks: true,
+			});
+
+			expect(prompt).not.toContain("/commit");
+		});
+	});
 });

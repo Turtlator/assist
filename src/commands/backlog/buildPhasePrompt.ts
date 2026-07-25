@@ -1,3 +1,4 @@
+import { loadConfig } from "../../shared/loadConfig";
 import { buildAuthoredPhasePrompt } from "./buildAuthoredPhasePrompt";
 import { buildReviewPrompt } from "./buildReviewPrompt";
 import type { BacklogItem, PlanPhase } from "./types";
@@ -9,8 +10,13 @@ export function buildPhasePrompt(
 	phaseNumber: number,
 	phase: PlanPhase,
 ): string {
+	const commitBeforeManualChecks =
+		loadConfig().worktree?.commitBeforeManualChecks ?? false;
+
 	if (phase.name === REVIEW_PHASE_NAME) {
-		return buildReviewPrompt(item, phaseNumber);
+		return buildReviewPrompt(item, phaseNumber, { commitBeforeManualChecks });
 	}
-	return buildAuthoredPhasePrompt(item, phaseNumber, phase);
+	return buildAuthoredPhasePrompt(item, phaseNumber, phase, {
+		commitBeforeManualChecks,
+	});
 }
