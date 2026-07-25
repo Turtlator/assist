@@ -1,3 +1,10 @@
+## [0.435.2](https://github.com/staff0rd/assist/compare/v0.435.1...v0.435.2) (2026-07-25)
+
+
+### Bug Fixes
+
+* refuse a duplicate backlog run ([5ec4f7e](https://github.com/staff0rd/assist/commit/5ec4f7ecdee5b7a3b9db1657765a3ff7f6078011))
+
 ## [0.435.1](https://github.com/staff0rd/assist/compare/v0.435.0...v0.435.1) (2026-07-25)
 
 
