@@ -1,3 +1,10 @@
+# [0.436.0](https://github.com/staff0rd/assist/compare/v0.435.2...v0.436.0) (2026-07-25)
+
+
+### Features
+
+* floating item section navigator ([7039103](https://github.com/staff0rd/assist/commit/70391032a6b19464fc8c6ee155768b41f5d92723))
+
 ## [0.435.2](https://github.com/staff0rd/assist/compare/v0.435.1...v0.435.2) (2026-07-25)
 
 
