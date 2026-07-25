@@ -3,18 +3,36 @@ import {
 	type SpawnClaudeOptions,
 	withoutResumeSession,
 } from "../../shared/spawnClaude";
-import { appendDaemonLog } from "../sessions/daemon/appendDaemonLog";
-import { acquireLock, releaseLock } from "./acquireLock";
-import { clearPause, isPausePending } from "./consumePause";
+import { acquireLock, foreignLockHolder, releaseLock } from "./acquireLock";
 import { ensureStoryBranch } from "./ensureStoryBranch";
-import { formatItemId } from "./formatItemId";
+import { formatItemId, parseItemId } from "./formatItemId";
 import { handleReviewResult } from "./handleReviewResult";
 import { type PreparedRun, prepareRun } from "./prepareRun";
+import { reportDuplicateRun } from "./reportDuplicateRun";
 import { runOnce } from "./runOnce";
 import { setStatus } from "./shared";
 import { clearSignalOwner } from "./recordSignalOwner";
+import { discardStalePause } from "./discardStalePause";
 
 export async function run(
+	id: string,
+	spawnOptions?: SpawnClaudeOptions,
+): Promise<boolean> {
+	const itemId = parseItemId(id);
+	const holder = foreignLockHolder(itemId);
+	if (holder) {
+		reportDuplicateRun(itemId, holder);
+		return false;
+	}
+	acquireLock(itemId);
+	try {
+		return await runLocked(id, spawnOptions);
+	} finally {
+		releaseLock(itemId);
+	}
+}
+
+async function runLocked(
 	id: string,
 	spawnOptions?: SpawnClaudeOptions,
 ): Promise<boolean> {
@@ -28,15 +46,6 @@ export async function run(
 	return runPrepared(id, prepared, spawnOptions);
 }
 
-function discardStalePause(itemId: number): void {
-	if (!isPausePending(itemId)) return;
-	clearPause(itemId);
-	appendDaemonLog(
-		`backlog run ${itemId}: discarded stale pause file at run start; ` +
-			`this run starts auto-advancing (Continue on) regardless of a prior run's pause`,
-	);
-}
-
 async function runPrepared(
 	id: string,
 	prepared: PreparedRun,
@@ -44,7 +53,6 @@ async function runPrepared(
 ): Promise<boolean> {
 	const { item } = prepared;
 	let { plan, startPhase } = prepared;
-	acquireLock(item.id);
 	try {
 		while (true) {
 			const review = await runOnce(item, startPhase, plan, spawnOptions);
@@ -57,7 +65,6 @@ async function runPrepared(
 			plan = outcome.plan;
 		}
 	} finally {
-		releaseLock(item.id);
 		clearSignalOwner(item.id);
 	}
 }

@@ -40,11 +40,12 @@ vi.mock("../sessions/daemon/appendDaemonLog", () => ({
 
 vi.mock("./acquireLock", () => ({
 	acquireLock: vi.fn(),
+	foreignLockHolder: vi.fn(),
 	releaseLock: vi.fn(),
 }));
 
 import { appendDaemonLog } from "../sessions/daemon/appendDaemonLog";
-import { acquireLock, releaseLock } from "./acquireLock";
+import { acquireLock, foreignLockHolder, releaseLock } from "./acquireLock";
 import { clearPause, consumePause, isPausePending } from "./consumePause";
 import { executePhase } from "./executePhase";
 import { prepareRun } from "./prepareRun";
@@ -57,6 +58,7 @@ const mockPrepareRun = prepareRun as unknown as MockInstance;
 const mockReloadPlan = reloadPlan as unknown as MockInstance;
 const mockSetStatus = setStatus as unknown as MockInstance;
 const mockAcquireLock = acquireLock as unknown as MockInstance;
+const mockLockHolder = foreignLockHolder as unknown as MockInstance;
 const mockReleaseLock = releaseLock as unknown as MockInstance;
 const mockConsumePause = consumePause as unknown as MockInstance;
 const mockIsPausePending = isPausePending as unknown as MockInstance;
@@ -95,6 +97,7 @@ describe("run", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockReloadPlan.mockReset();
+		mockLockHolder.mockReturnValue(null);
 	});
 
 	describe("when prepare returns undefined", () => {
@@ -854,13 +857,33 @@ describe("run", () => {
 			expect(mockReleaseLock).toHaveBeenCalledWith(1);
 		});
 
-		it("should not acquire lock when prepare returns undefined", async () => {
+		it("should claim the lock before preparing, and release it when prepare bails", async () => {
 			mockPrepareRun.mockReturnValue(undefined);
 
 			await run("99");
 
+			expect(mockAcquireLock).toHaveBeenCalledWith(99);
+			expect(mockReleaseLock).toHaveBeenCalledWith(99);
+			expect(mockAcquireLock.mock.invocationCallOrder[0]).toBeLessThan(
+				mockPrepareRun.mock.invocationCallOrder[0],
+			);
+		});
+
+		it("should refuse a second run while another live process holds the item", async () => {
+			mockLockHolder.mockReturnValue({
+				pid: 4242,
+				timestamp: "2026-07-25T02:51:21.996Z",
+			});
+
+			expect(await run("1")).toBe(false);
+
+			expect(mockPrepareRun).not.toHaveBeenCalled();
 			expect(mockAcquireLock).not.toHaveBeenCalled();
 			expect(mockReleaseLock).not.toHaveBeenCalled();
+			expect(mockSetStatus).not.toHaveBeenCalled();
+			expect(mockAppendDaemonLog).toHaveBeenCalledWith(
+				expect.stringContaining("refused"),
+			);
 		});
 	});
 });

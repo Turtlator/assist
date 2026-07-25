@@ -1,10 +1,11 @@
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import { Button, IconButton, Tooltip } from "@mui/material";
 import { type MouseEvent, useState } from "react";
 import { useNavigate } from "react-router";
+import { useLiveSessionsContext } from "../../../../sessions/web/ui/useLiveSessionsContext";
 import { useSessionLaunchContext } from "../../../../sessions/web/ui/useSessionLaunchContext";
 import { formatItemId } from "../../../formatItemId";
 import { useRepoCwd } from "../useRepoCwd";
+import { PlayButton } from "./PlayButton";
+import { runInFlightSession } from "./runInFlightSession";
 
 export function PlayAction({
 	itemId,
@@ -16,45 +17,28 @@ export function PlayAction({
 	const { launchAssist } = useSessionLaunchContext();
 	const navigate = useNavigate();
 	const cwd = useRepoCwd();
+	const inFlight = runInFlightSession(useLiveSessionsContext(), itemId);
 	// Latch on first click so a double-click can't spawn two sessions before
 	// the list refresh flips the item out of the playable state.
 	const [launched, setLaunched] = useState(false);
+	const disabled = launched || inFlight !== undefined;
 	const handleClick = (event: MouseEvent) => {
 		event.stopPropagation();
-		if (launched) return;
+		if (disabled) return;
 		setLaunched(true);
 		launchAssist(["backlog", "run", formatItemId(itemId)], cwd);
 		navigate("/sessions");
 	};
-	if (compact) {
-		return (
-			<Tooltip title="Build">
-				<span>
-					<IconButton
-						component="span"
-						role="button"
-						aria-label="Build"
-						color="success"
-						size="small"
-						disabled={launched}
-						onClick={handleClick}
-					>
-						<PlayArrowIcon />
-					</IconButton>
-				</span>
-			</Tooltip>
-		);
-	}
 	return (
-		<Button
-			variant="contained"
-			color="success"
-			size="small"
-			startIcon={<PlayArrowIcon />}
-			disabled={launched}
+		<PlayButton
+			tooltip={
+				inFlight
+					? "Already running — close that session to run it again"
+					: "Build"
+			}
+			disabled={disabled}
+			compact={compact}
 			onClick={handleClick}
-		>
-			Build
-		</Button>
+		/>
 	);
 }

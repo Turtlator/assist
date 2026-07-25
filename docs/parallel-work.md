@@ -9,6 +9,10 @@ where you are or where any in-progress changes live. The tool tracks that; you d
 - Each is a fully independent working copy — one session's edits never touch another's.
 - You never choose, name, or manage these. You start a session on the repo; the tool
   places it.
+- Isolation is per session, not per task. The same piece of work is never started
+  twice: ask to run a backlog item that already has a live run and the tool
+  **refuses and points at the run that holds it**, rather than isolating a duplicate
+  into another workspace where two agents land the same phase.
 
 ## 2. A stream can hold more than one agent
 

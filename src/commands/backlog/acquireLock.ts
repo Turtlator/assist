@@ -25,17 +25,24 @@ function isProcessAlive(pid: number): boolean {
 	}
 }
 
-export function isLockedByOther(itemId: number): boolean {
+export type LockHolder = { pid: number; timestamp?: string };
+
+export function foreignLockHolder(itemId: number): LockHolder | null {
 	const lockPath = getLockPath(itemId);
-	if (!existsSync(lockPath)) return false;
+	if (!existsSync(lockPath)) return null;
 
 	try {
 		const lock = JSON.parse(readFileSync(lockPath, "utf8"));
-		if (lock.pid === process.pid) return false;
-		return isProcessAlive(lock.pid);
+		if (typeof lock.pid !== "number" || lock.pid === process.pid) return null;
+		if (!isProcessAlive(lock.pid)) return null;
+		return { pid: lock.pid, timestamp: lock.timestamp };
 	} catch {
-		return false;
+		return null;
 	}
+}
+
+export function isLockedByOther(itemId: number): boolean {
+	return foreignLockHolder(itemId) !== null;
 }
 
 export function acquireLock(itemId: number): void {

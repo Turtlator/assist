@@ -17,7 +17,12 @@ vi.mock("node:fs", () => ({
 	unlinkSync: vi.fn(),
 }));
 
-import { acquireLock, isLockedByOther, releaseLock } from "./acquireLock";
+import {
+	acquireLock,
+	foreignLockHolder,
+	isLockedByOther,
+	releaseLock,
+} from "./acquireLock";
 
 const mockExistsSync = existsSync as unknown as ReturnType<typeof vi.fn>;
 const mockMkdirSync = mkdirSync as unknown as ReturnType<typeof vi.fn>;
@@ -72,6 +77,34 @@ describe("lockFile", () => {
 			mockReadFileSync.mockReturnValue("not json");
 
 			expect(isLockedByOther(1)).toBe(false);
+		});
+	});
+
+	describe("foreignLockHolder", () => {
+		it("names the live holder so a refusal can point at it", () => {
+			mockExistsSync.mockReturnValue(true);
+			mockReadFileSync.mockReturnValue(
+				JSON.stringify({ pid: process.ppid, timestamp: "2026-01-01" }),
+			);
+
+			expect(foreignLockHolder(1)).toEqual({
+				pid: process.ppid,
+				timestamp: "2026-01-01",
+			});
+		});
+
+		it("returns null for a dead holder", () => {
+			mockExistsSync.mockReturnValue(true);
+			mockReadFileSync.mockReturnValue(JSON.stringify({ pid: 999999999 }));
+
+			expect(foreignLockHolder(1)).toBeNull();
+		});
+
+		it("returns null when the lock records no pid", () => {
+			mockExistsSync.mockReturnValue(true);
+			mockReadFileSync.mockReturnValue(JSON.stringify({ timestamp: "x" }));
+
+			expect(foreignLockHolder(1)).toBeNull();
 		});
 	});
 
