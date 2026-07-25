@@ -1,3 +1,10 @@
+# [0.454.0](https://github.com/staff0rd/assist/compare/v0.453.1...v0.454.0) (2026-07-25)
+
+
+### Features
+
+* global-only keys force global scope ([c941d3c](https://github.com/staff0rd/assist/commit/c941d3ce9e5a8e30e82f1d7f3c6a6ccea4552651))
+
 ## [0.453.1](https://github.com/staff0rd/assist/compare/v0.453.0...v0.453.1) (2026-07-25)
 
 
