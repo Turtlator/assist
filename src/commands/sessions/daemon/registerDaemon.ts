@@ -41,7 +41,8 @@ export function registerDaemon(program: Command): void {
 	cmd
 		.command("drain")
 		.description(
-			"Remove all sessions from the local daemon for a clean slate (does not affect the Windows daemon)",
+			"Remove all sessions from the local daemon for a clean slate (does not affect the Windows daemon); prompts before closing live sessions, and a session holding unpushed work is stopped, not removed",
 		)
-		.action(drainDaemon);
+		.option("--yes", "Close live sessions without confirming")
+		.action((options: { yes?: boolean }) => drainDaemon(options));
 }

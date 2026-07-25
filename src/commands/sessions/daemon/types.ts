@@ -53,7 +53,7 @@ export type Session = {
 	gitWatcher?: FSWatcher;
 	watchedTranscriptId?: string;
 	worktree?: { path: string; clone: string };
-	undurable?: { reason: string };
+	undurable?: { reason: string; removesTree?: boolean };
 	transcriptPath?: string;
 	permissionActive?: boolean;
 	autoRun?: boolean;

@@ -11,8 +11,8 @@ import {
 	type SessionInfo,
 	type SessionStatus,
 } from "./createSession";
-import { drainSessions } from "./dismissSession";
 import { dismissSessionGated } from "./dismissSessionGated";
+import { drainSessions } from "./drainSessions";
 import { flushPhaseActiveMs } from "./flushPhaseActiveMs";
 import { greetClient } from "./greetClient";
 import { logSpawnedSession } from "./logSpawnedSession";

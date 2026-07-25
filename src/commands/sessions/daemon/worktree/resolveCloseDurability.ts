@@ -3,24 +3,25 @@ import { daemonLog } from "../daemonLog";
 import { setStatus } from "../setStatus";
 import { reapWorktree } from "./reapWorktree";
 import { checkDurability } from "./treeDurability";
+import { type ClosingTree, treeUnderClose } from "./treeUnderClose";
 import { watchGitState } from "./watchGitState";
 
-export async function resolveDoneDurability(
+export async function resolveCloseDurability(
 	session: Session,
 	finalize: () => void,
 	notify: () => void,
 ): Promise<void> {
-	const worktree = session.worktree;
-	if (!worktree) {
+	const tree = treeUnderClose(session);
+	if (!tree) {
 		finalize();
 		return;
 	}
-	const durability = await checkDurability(worktree.path);
+	const durability = await checkDurability(tree.path);
 	if (!durability.durable) {
-		holdStopped(session, durability.reason, finalize, notify);
+		holdStopped(session, tree, durability.reason, finalize, notify);
 		return;
 	}
-	await reapWorktree(worktree.path);
+	if (tree.removable) await reapWorktree(tree.path);
 	session.worktree = undefined;
 	session.undurable = undefined;
 	session.closing = undefined;
@@ -31,19 +32,22 @@ export async function resolveDoneDurability(
 
 function holdStopped(
 	session: Session,
+	tree: ClosingTree,
 	reason: string,
 	finalize: () => void,
 	notify: () => void,
 ): void {
 	if (session.undurable?.reason !== reason)
-		daemonLog(`session ${session.id} stopped; reap blocked: ${reason}`);
-	session.undurable = { reason };
+		daemonLog(
+			`session ${session.id} stopped; ${tree.removable ? "reap" : "close"} blocked in ${tree.path}: ${reason}`,
+		);
+	session.undurable = { reason, removesTree: tree.removable };
 	session.closing = undefined;
 	setStatus(session, "stopped");
-	if (!session.gitWatcher && session.worktree)
-		session.gitWatcher = watchGitState(session.worktree.path, () => {
+	if (!session.gitWatcher)
+		session.gitWatcher = watchGitState(tree.path, () => {
 			if (session.status !== "stopped") return;
-			void resolveDoneDurability(session, finalize, notify);
+			void resolveCloseDurability(session, finalize, notify);
 		});
 	notify();
 }

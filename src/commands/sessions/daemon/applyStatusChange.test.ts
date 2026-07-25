@@ -1,17 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { applyStatusChange } from "./applyStatusChange";
 import type { Session } from "./createSession";
-import { resolveDoneDurability } from "./worktree/resolveDoneDurability";
+import { resolveCloseDurability } from "./worktree/resolveCloseDurability";
 
 vi.mock("./daemonLog", () => ({ daemonLog: vi.fn() }));
 vi.mock("./flushPhaseActiveMs", () => ({
 	flushPhaseActiveMs: vi.fn(() => Promise.resolve()),
 }));
-vi.mock("./worktree/resolveDoneDurability", () => ({
-	resolveDoneDurability: vi.fn(() => Promise.resolve()),
+vi.mock("./worktree/resolveCloseDurability", () => ({
+	resolveCloseDurability: vi.fn(() => Promise.resolve()),
 }));
 
-const resolveMock = resolveDoneDurability as unknown as ReturnType<
+const resolveMock = resolveCloseDurability as unknown as ReturnType<
 	typeof vi.fn
 >;
 
@@ -99,5 +99,44 @@ describe("applyStatusChange worktree reap gating", () => {
 
 		expect(resolveMock).not.toHaveBeenCalled();
 		expect(session.status).toBe("done");
+	});
+});
+
+describe("applyStatusChange undurable hold reason", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("keeps the hold reason when the card is held as stopped", () => {
+		const session = backlogRun({
+			status: "waiting",
+			undurable: { reason: "unpushed commits" },
+		});
+
+		applyStatusChange(session, "stopped", undefined, vi.fn(), vi.fn(), vi.fn());
+
+		expect(session.undurable).toEqual({ reason: "unpushed commits" });
+	});
+
+	it("clears a stale hold reason once the card leaves stopped", () => {
+		const session = backlogRun({
+			status: "stopped",
+			undurable: { reason: "unpushed commits" },
+		});
+
+		applyStatusChange(session, "running", undefined, vi.fn(), vi.fn(), vi.fn());
+
+		expect(session.undurable).toBeUndefined();
+	});
+
+	it("clears a stale hold reason on a waiting phase transition", () => {
+		const session = backlogRun({
+			status: "running",
+			undurable: { reason: "unpushed commits" },
+		});
+
+		applyStatusChange(session, "waiting", undefined, vi.fn(), vi.fn(), vi.fn());
+
+		expect(session.undurable).toBeUndefined();
 	});
 });

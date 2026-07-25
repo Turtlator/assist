@@ -23,14 +23,24 @@ where you are or where any in-progress changes live. The tool tracks that; you d
 - **Closing a session that has unpushed changes only stops it** — it is killed but
   stays on the board in a `stopped` state, card still visible. While it holds unpushed
   changes the only actions are **resume**, **restart**, or an explicit **discard**.
+- This applies to **whichever workspace the session is in**, the repo's own working
+  copy included. A session there is stopped rather than closed away too; its workspace
+  is of course never removed, only the card is at stake.
+- Only the **last** session holding a workspace is stopped this way. Close one of
+  several agents sharing a workspace and its card simply goes — the work is still
+  held by the others.
+- Closing many at once (a bulk drain) is still an explicit close: it says what is
+  live before it acts, and holds whatever isn't landed.
 - Discard is the one sanctioned way to lose work: it is never automatic, never a
   side effect of closing or completing, and always takes a confirmation that names
-  what is about to be destroyed.
+  what is about to be destroyed — the workspace and its work where that is what goes,
+  or just the card where nothing on disk is touched.
 
 ## 4. Cleanup happens only at end of life
 
-- A workspace is only ever removed when the card reaches **done** or the user closes
-  it — **never** while a backlog run moves between phases, regardless of push state.
+- A workspace is only ever removed when the last card holding it reaches **done** or
+  the user closes it — **never** while a backlog run moves between phases, regardless
+  of push state, and never while another session is still working there.
 - End of life means the **stream** is over, not that a command in it finished. A card
   that carries straight on into more work keeps its workspace, so the work that
   follows continues where the last one left off — a drafted item picked up by
@@ -41,6 +51,9 @@ where you are or where any in-progress changes live. The tool tracks that; you d
 
 - If the system breaks down or leaves stray state behind, **the tool cleans up after
   itself** — recovering never means removing or pruning workspaces by hand.
+- What can't be determined is never guessed. A workspace already gone from disk holds
+  nothing and pins no card; one whose state can't be read says so, rather than being
+  reported as work you don't have.
 
 ## 6. Configuration
 

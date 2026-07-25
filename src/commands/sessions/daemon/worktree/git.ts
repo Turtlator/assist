@@ -34,6 +34,20 @@ export async function gitOrNull(
 	}
 }
 
+export async function gitResult(
+	cwd: string,
+	args: string[],
+): Promise<{ ok: true; out: string } | { ok: false; error: string }> {
+	try {
+		return { ok: true, out: (await git(cwd, args)).trim() };
+	} catch (error) {
+		return {
+			ok: false,
+			error: error instanceof Error ? error.message : String(error),
+		};
+	}
+}
+
 export function gitSync(cwd: string, args: string[]): string {
 	const { file, argv, options } = gitInvocation(cwd, args);
 	return execFileSync(file, argv, {

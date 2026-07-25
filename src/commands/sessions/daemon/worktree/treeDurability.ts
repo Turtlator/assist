@@ -1,5 +1,6 @@
+import { existsSync } from "node:fs";
 import { loadConfigFrom } from "../../../../shared/loadConfigFrom";
-import { gitOrNull } from "./git";
+import { gitResult } from "./git";
 
 type TreeState = {
 	dirty: boolean;
@@ -17,39 +18,27 @@ export function treeDurability(state: TreeState): Durability {
 }
 
 async function hasLocalOnlyCommits(cwd: string): Promise<boolean> {
-	const upstream = await gitOrNull(cwd, [
+	const upstream = await gitResult(cwd, [
 		"rev-parse",
 		"--abbrev-ref",
 		"--symbolic-full-name",
 		"@{upstream}",
 	]);
-	if (upstream) {
-		const ahead = await gitOrNull(cwd, [
+	if (upstream.ok && upstream.out) {
+		const ahead = await gitResult(cwd, [
 			"rev-list",
 			"--count",
 			"@{upstream}..HEAD",
 		]);
-		return Number(ahead ?? "0") > 0;
+		return !ahead.ok || Number(ahead.out) > 0;
 	}
-	const remoteBranches = await gitOrNull(cwd, [
+	const remoteBranches = await gitResult(cwd, [
 		"branch",
 		"-r",
 		"--contains",
 		"HEAD",
 	]);
-	return !remoteBranches;
-}
-
-async function collectTreeState(
-	cwd: string,
-	push: boolean,
-): Promise<TreeState> {
-	const status = await gitOrNull(cwd, ["status", "--porcelain"]);
-	return {
-		dirty: status !== null,
-		push,
-		localOnlyCommits: await hasLocalOnlyCommits(cwd),
-	};
+	return !remoteBranches.ok || remoteBranches.out === "";
 }
 
 function pushOnCommit(cwd: string): boolean {
@@ -61,5 +50,13 @@ function pushOnCommit(cwd: string): boolean {
 }
 
 export async function checkDurability(cwd: string): Promise<Durability> {
-	return treeDurability(await collectTreeState(cwd, pushOnCommit(cwd)));
+	if (!existsSync(cwd)) return { durable: true };
+	const status = await gitResult(cwd, ["status", "--porcelain"]);
+	if (!status.ok)
+		return { durable: false, reason: `tree state unreadable: ${status.error}` };
+	return treeDurability({
+		dirty: status.out !== "",
+		push: pushOnCommit(cwd),
+		localOnlyCommits: await hasLocalOnlyCommits(cwd),
+	});
 }

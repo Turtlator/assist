@@ -4,7 +4,7 @@ import { flushPhaseActiveMs } from "./flushPhaseActiveMs";
 import { setStatus } from "./setStatus";
 import { shouldAutoDismiss } from "./shouldAutoDismiss";
 import { shouldAutoRun } from "./shouldAutoRun";
-import { resolveDoneDurability } from "./worktree/resolveDoneDurability";
+import { resolveCloseDurability } from "./worktree/resolveCloseDurability";
 
 type StatusChangeDeps = {
 	dismiss: (id: string) => void;
@@ -32,7 +32,7 @@ export function applyStatusChange(
 			`session ${session.id} closing: checking durability of ${session.worktree.path} before reap`,
 		);
 		notify();
-		void resolveDoneDurability(
+		void resolveCloseDurability(
 			session,
 			() => finishStatusChange(session, "done", exitCode, deps),
 			notify,
@@ -51,7 +51,7 @@ function finishStatusChange(
 	daemonLog(`session ${session.id} status: ${session.status} -> ${status}`);
 	void flushPhaseActiveMs(session);
 	setStatus(session, status);
-	if (status !== "waiting") session.undurable = undefined;
+	if (status !== "stopped") session.undurable = undefined;
 	const autoRun = shouldAutoRun(session);
 	if (autoRun.run) {
 		deps.reuseForRun(session, autoRun.itemId);

@@ -38,6 +38,6 @@ export type SessionInfoBase = {
 	usedPct?: number;
 	design?: boolean;
 	pendingPrPreview?: PrPreview;
-	undurable?: { reason: string };
+	undurable?: { reason: string; removesTree?: boolean };
 	closing?: boolean;
 };

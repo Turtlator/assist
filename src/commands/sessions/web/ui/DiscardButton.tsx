@@ -5,9 +5,21 @@ import { ConfirmDialog } from "../../../backlog/web/ui/components/ConfirmDialog"
 import { StopCardActivation } from "./StopCardActivation";
 import { useServerActionsContext } from "./useServerActionsContext";
 
-export function DiscardButton({ id, reason }: { id: string; reason?: string }) {
+export function DiscardButton({
+	id,
+	reason,
+	path,
+	removesTree,
+}: {
+	id: string;
+	reason?: string;
+	path?: string;
+	removesTree?: boolean;
+}) {
 	const { onDiscard } = useServerActionsContext();
 	const [confirming, setConfirming] = useState(false);
+	const held = reason ? ` (${reason})` : "";
+	const where = path ?? "its working tree";
 
 	return (
 		<>
@@ -17,7 +29,11 @@ export function DiscardButton({ id, reason }: { id: string; reason?: string }) {
 					e.stopPropagation();
 					setConfirming(true);
 				}}
-				title="Discard changes and remove worktree"
+				title={
+					removesTree
+						? "Discard changes and remove worktree"
+						: "Drop this card and stop tracking its unlanded work"
+				}
 				sx={{ color: "text.disabled", "&:hover": { color: "error.main" } }}
 			>
 				<DeleteForeverIcon sx={{ fontSize: 16 }} />
@@ -25,9 +41,15 @@ export function DiscardButton({ id, reason }: { id: string; reason?: string }) {
 			{confirming && (
 				<StopCardActivation>
 					<ConfirmDialog
-						title="Discard all changes"
-						message={`This permanently deletes the worktree and its uncommitted work${reason ? ` (${reason})` : ""}. This cannot be undone.`}
-						confirmLabel="Discard changes"
+						title={
+							removesTree ? "Discard all changes" : "Stop tracking this work"
+						}
+						message={
+							removesTree
+								? `This permanently deletes the worktree ${where} and the work it holds${held}. This cannot be undone.`
+								: `This drops the card and stops tracking the unlanded work in ${where}${held}. Nothing on disk is deleted.`
+						}
+						confirmLabel={removesTree ? "Discard changes" : "Drop card"}
 						onConfirm={() => {
 							setConfirming(false);
 							onDiscard(id);

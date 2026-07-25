@@ -4,7 +4,7 @@ import { dismissSessionGated } from "./dismissSessionGated";
 import { dismissSession } from "./dismissSession";
 import { killPtyTree } from "./killPtyTree";
 import { reapWorktree } from "./worktree/reapWorktree";
-import { resolveDoneDurability } from "./worktree/resolveDoneDurability";
+import { resolveCloseDurability } from "./worktree/resolveCloseDurability";
 
 vi.mock("./daemonLog", () => ({ daemonLog: vi.fn() }));
 vi.mock("./dismissSession", () => ({ dismissSession: vi.fn(() => true) }));
@@ -12,13 +12,16 @@ vi.mock("./killPtyTree", () => ({ killPtyTree: vi.fn() }));
 vi.mock("./worktree/reapWorktree", () => ({
 	reapWorktree: vi.fn(() => Promise.resolve(true)),
 }));
-vi.mock("./worktree/resolveDoneDurability", () => ({
-	resolveDoneDurability: vi.fn(() => Promise.resolve()),
+vi.mock("./worktree/resolveCloseDurability", () => ({
+	resolveCloseDurability: vi.fn(() => Promise.resolve()),
+}));
+vi.mock("./worktree/worktreeConfigFor", () => ({
+	worktreeConfigFor: vi.fn(() => ({ enabled: true, install: true, copy: [] })),
 }));
 
 const killMock = killPtyTree as unknown as ReturnType<typeof vi.fn>;
 const reapMock = reapWorktree as unknown as ReturnType<typeof vi.fn>;
-const resolveMock = resolveDoneDurability as unknown as ReturnType<
+const resolveMock = resolveCloseDurability as unknown as ReturnType<
 	typeof vi.fn
 >;
 const dismissMock = dismissSession as unknown as ReturnType<typeof vi.fn>;
@@ -113,5 +116,40 @@ describe("dismissSessionGated", () => {
 		expect(resolveMock).not.toHaveBeenCalled();
 		expect(reapMock).toHaveBeenCalledWith("/git/repo-2", true);
 		expect(dismissMock).toHaveBeenCalledWith(sessions, "3");
+	});
+
+	it("holds a live session in the clone's own tree instead of deleting its card", () => {
+		const pty = { pid: 42, kill: vi.fn() } as unknown as Session["pty"];
+		const s = session({ pty, status: "running", cwd: "/git/repo" });
+		const sessions = new Map([[s.id, s]]);
+
+		dismissSessionGated(sessions, s.id, vi.fn());
+
+		expect(dismissMock).not.toHaveBeenCalled();
+		expect(killMock).toHaveBeenCalledWith(pty);
+		expect(s.pendingDismiss).toBeTypeOf("function");
+	});
+
+	it("closes an added agent outright while another card still holds the tree", () => {
+		const agent = session({
+			id: "3",
+			cwd: "/git/repo-2",
+			worktree: { path: "/git/repo-2", clone: "/git/repo" },
+		});
+		const sibling = session({
+			id: "4",
+			cwd: "/git/repo-2",
+			worktree: { path: "/git/repo-2", clone: "/git/repo" },
+		});
+		const sessions = new Map([
+			[agent.id, agent],
+			[sibling.id, sibling],
+		]);
+
+		dismissSessionGated(sessions, agent.id, vi.fn());
+
+		expect(dismissMock).toHaveBeenCalledWith(sessions, "3");
+		expect(resolveMock).not.toHaveBeenCalled();
+		expect(agent.closing).toBeUndefined();
 	});
 });

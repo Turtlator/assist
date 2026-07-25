@@ -19,7 +19,12 @@ export function CardCloseActions({
 	return (
 		<>
 			{session.undurable && (
-				<DiscardButton id={id} reason={session.undurable.reason} />
+				<DiscardButton
+					id={id}
+					reason={session.undurable.reason}
+					path={session.cwd}
+					removesTree={session.undurable.removesTree}
+				/>
 			)}
 			{onRestart && <RestartButton onRestart={onRestart} harness={harness} />}
 		</>

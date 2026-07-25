@@ -18,7 +18,9 @@ export const persistedSessionSchema = z.object({
 	assistArgs: z.array(z.string()).optional(),
 	activity: activitySchema.optional(),
 	starred: z.boolean().optional(),
-	undurable: z.object({ reason: z.string() }).optional(),
+	undurable: z
+		.object({ reason: z.string(), removesTree: z.boolean().optional() })
+		.optional(),
 });
 
 export type PersistedSession = z.infer<typeof persistedSessionSchema>;
