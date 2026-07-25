@@ -1,7 +1,13 @@
 import ReplayIcon from "@mui/icons-material/Replay";
 import IconButton from "@mui/material/IconButton";
 
-export function RetryButton({ onRetry }: { onRetry: () => void }) {
+export function RetryButton({
+	id,
+	onRetry,
+}: {
+	id: string;
+	onRetry: () => void;
+}) {
 	return (
 		<IconButton
 			size="small"
@@ -9,7 +15,7 @@ export function RetryButton({ onRetry }: { onRetry: () => void }) {
 				e.stopPropagation();
 				onRetry();
 			}}
-			title="Retry"
+			title={`Retry session ${id}`}
 			sx={{ color: "text.disabled", "&:hover": { color: "text.primary" } }}
 		>
 			<ReplayIcon sx={{ fontSize: 14 }} />

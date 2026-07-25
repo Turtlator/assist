@@ -53,7 +53,7 @@ describe("CardActionButtons dismiss visibility", () => {
 		);
 
 		expect(screen.queryByTitle("Dismiss session 3")).toBeNull();
-		expect(screen.queryByTitle("Restart")).not.toBeNull();
+		expect(screen.queryByTitle("Restart session 3")).not.toBeNull();
 	});
 
 	it("offers discard only when a stopped card holds undurable work", () => {

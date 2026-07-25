@@ -26,7 +26,9 @@ export function CardCloseActions({
 					removesTree={session.undurable.removesTree}
 				/>
 			)}
-			{onRestart && <RestartButton onRestart={onRestart} harness={harness} />}
+			{onRestart && (
+				<RestartButton id={id} onRestart={onRestart} harness={harness} />
+			)}
 		</>
 	);
 }

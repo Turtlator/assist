@@ -6,9 +6,11 @@ import { harnessLabel } from "../../../../shared/harnessLabel";
 import { ConfirmDialog } from "../../../backlog/web/ui/components/ConfirmDialog";
 
 export function RestartButton({
+	id,
 	onRestart,
 	harness,
 }: {
+	id: string;
 	onRestart: () => void;
 	harness?: HarnessKind;
 }) {
@@ -21,14 +23,14 @@ export function RestartButton({
 					e.stopPropagation();
 					setConfirming(true);
 				}}
-				title="Restart"
+				title={`Restart session ${id}`}
 				sx={{ color: "text.disabled", "&:hover": { color: "text.primary" } }}
 			>
 				<RestartAltIcon sx={{ fontSize: 14 }} />
 			</IconButton>
 			{confirming && (
 				<ConfirmDialog
-					title="Restart session"
+					title={`Restart session ${id}`}
 					message={`Restart this ${harnessLabel(harness)} session? It resumes the conversation, stopping the running process first.`}
 					confirmLabel="Restart"
 					onConfirm={() => {
