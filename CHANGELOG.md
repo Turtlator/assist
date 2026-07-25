@@ -1,3 +1,10 @@
+# [0.435.0](https://github.com/staff0rd/assist/compare/v0.434.1...v0.435.0) (2026-07-25)
+
+
+### Features
+
+* name session in card tooltips ([81935cf](https://github.com/staff0rd/assist/commit/81935cff2b09991b4ef4b118aa719e418b2a5353))
+
 ## [0.434.1](https://github.com/staff0rd/assist/compare/v0.434.0...v0.434.1) (2026-07-25)
 
 
