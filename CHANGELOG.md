@@ -1,3 +1,11 @@
+## [0.433.2](https://github.com/staff0rd/assist/compare/v0.433.1...v0.433.2) (2026-07-25)
+
+
+### Bug Fixes
+
+* add missing update-reload files ([40b9ed4](https://github.com/staff0rd/assist/commit/40b9ed497efa074ed9d46ab612ca94ffbb0582ee))
+* restart web server on update ([3e57195](https://github.com/staff0rd/assist/commit/3e5719554b82116845bf630f1339a91508a443c4))
+
 ## [0.433.1](https://github.com/staff0rd/assist/compare/v0.433.0...v0.433.1) (2026-07-25)
 
 
