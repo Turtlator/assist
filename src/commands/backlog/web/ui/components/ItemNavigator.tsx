@@ -4,6 +4,7 @@ import type { BacklogItem } from "../types";
 import { itemNavSections } from "./itemNavSections";
 import { ItemNavigatorRow } from "./ItemNavigatorRow";
 import { STICKY_PINNED_HEADER_HEIGHT } from "./itemSectionAnchor";
+import { useActiveSection } from "./useActiveSection";
 
 const SIDEBAR_PERCENT = 25;
 const ITEM_BODY_MAX_WIDTH = 900;
@@ -21,6 +22,8 @@ const panelSx = {
 	minWidth: 0,
 	alignItems: "flex-start",
 	overflowY: "auto",
+	overflowX: "hidden",
+	pb: 1,
 } as const;
 
 function scrollToSection(id: string) {
@@ -34,6 +37,7 @@ export function ItemNavigator({ item }: { item: BacklogItem }) {
 		theme.breakpoints.up("lg"),
 	);
 	const sections = itemNavSections(item);
+	const activeId = useActiveSection(sections.map((section) => section.id));
 	if (!wideEnough || sections.length === 0) return null;
 	return (
 		<Stack component="nav" spacing={1} sx={panelSx}>
@@ -41,6 +45,7 @@ export function ItemNavigator({ item }: { item: BacklogItem }) {
 				<ItemNavigatorRow
 					key={section.id}
 					section={section}
+					active={section.id === activeId}
 					onSelect={scrollToSection}
 				/>
 			))}

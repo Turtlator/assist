@@ -16,6 +16,23 @@ describe("itemNavSections", () => {
 		expect(itemNavSections(item())).toEqual([]);
 	});
 
+	it("omits rows for sections the item does not have", () => {
+		const sections = itemNavSections(
+			item({
+				description: "d",
+				acceptanceCriteria: ["a"],
+				subtasks: [],
+				gitRefs: [],
+				comments: [],
+			}),
+		);
+
+		expect(sections.map((s) => s.label)).toEqual([
+			"Description",
+			"Acceptance Criteria",
+		]);
+	});
+
 	it("renders a nested numbered row per phase, status-tinted, named only in the title", () => {
 		const sections = itemNavSections(
 			item({
