@@ -30,9 +30,11 @@ describe("FileDiffHeader", () => {
 				onPreview={onPreview}
 			/>,
 		);
-		fireEvent.click(
-			screen.getByRole("button", { name: "Preview rendered markdown" }),
-		);
+		const preview = screen.getByRole("button", {
+			name: "Preview rendered markdown",
+		});
+		expect(preview.textContent).toContain("Preview");
+		fireEvent.click(preview);
 		expect(onPreview).toHaveBeenCalledOnce();
 		expect(onToggle).not.toHaveBeenCalled();
 	});

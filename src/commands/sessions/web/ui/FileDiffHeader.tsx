@@ -2,8 +2,7 @@ import ChevronRight from "@mui/icons-material/ChevronRight";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
 import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
+import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { DIFF_TOOLBAR_HEIGHT } from "./DiffToolbar";
 
@@ -47,18 +46,17 @@ export function FileDiffHeader({
 				{path}
 			</Typography>
 			{onPreview && (
-				<Tooltip title="Preview rendered markdown">
-					<IconButton
-						size="small"
-						aria-label="Preview rendered markdown"
-						onClick={(event) => {
-							event.stopPropagation();
-							onPreview();
-						}}
-					>
-						<VisibilityOutlined fontSize="small" />
-					</IconButton>
-				</Tooltip>
+				<Button
+					size="small"
+					startIcon={<VisibilityOutlined fontSize="small" />}
+					aria-label="Preview rendered markdown"
+					onClick={(event) => {
+						event.stopPropagation();
+						onPreview();
+					}}
+				>
+					Preview
+				</Button>
 			)}
 		</Box>
 	);
