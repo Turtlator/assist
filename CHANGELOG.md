@@ -1,3 +1,10 @@
+## [0.435.1](https://github.com/staff0rd/assist/compare/v0.435.0...v0.435.1) (2026-07-25)
+
+
+### Bug Fixes
+
+* label markdown preview button ([ec137fd](https://github.com/staff0rd/assist/commit/ec137fd53336097df6115c8a2543769bcf0140d4))
+
 # [0.435.0](https://github.com/staff0rd/assist/compare/v0.434.1...v0.435.0) (2026-07-25)
 
 
