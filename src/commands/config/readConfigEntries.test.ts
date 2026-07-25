@@ -66,6 +66,11 @@ describe("readConfigEntries", () => {
 		expect(entry.value).toBe(false);
 	});
 
+	it("flags global-only keys and leaves the rest unflagged", () => {
+		expect(entryFor("sync.autoConfirm").globalOnly).toBe(true);
+		expect(entryFor("commit.push").globalOnly).toBe(false);
+	});
+
 	it("reports the schema default for a leaf under an unset optional parent", () => {
 		const entry = entryFor("worktree.enabled");
 

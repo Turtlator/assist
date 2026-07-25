@@ -178,6 +178,23 @@ describe("setConfig", () => {
 		);
 	});
 
+	it("accepts a global write of a global-only key", async () => {
+		const [status, payload] = await post({
+			key: "sync.autoConfirm",
+			value: true,
+			cwd: paths.repo,
+			scope: "global",
+		});
+
+		expect(status).toBe(200);
+		expect(payload.target).toBe("global");
+		expect(readYaml(paths.globalConfig)).toEqual({
+			commit: { pull: false },
+			sync: { autoConfirm: true },
+		});
+		expect(readYaml(paths.repoConfig)).toEqual({ commit: { push: false } });
+	});
+
 	it("rejects a missing cwd or scope", async () => {
 		const [noCwd] = await post({ key: "commit.push", value: true });
 		expect(noCwd).toBe(400);

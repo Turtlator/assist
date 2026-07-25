@@ -18,8 +18,11 @@ function initialValue(entry: ConfigEntry): string | boolean {
 }
 
 export function useConfigRowEditor({ entry, cwd, onSaved, onError }: Options) {
+	const scopeLocked = entry.globalOnly === true;
 	const [value, setValue] = useState<string | boolean>(initialValue(entry));
-	const [scope, setScope] = useState<ConfigScope>("project");
+	const [scope, setScope] = useState<ConfigScope>(
+		scopeLocked ? "global" : "project",
+	);
 	const [saving, setSaving] = useState(false);
 
 	async function save(): Promise<void> {
@@ -35,5 +38,5 @@ export function useConfigRowEditor({ entry, cwd, onSaved, onError }: Options) {
 		else onSaved();
 	}
 
-	return { value, setValue, scope, setScope, saving, save };
+	return { value, setValue, scope, setScope, scopeLocked, saving, save };
 }

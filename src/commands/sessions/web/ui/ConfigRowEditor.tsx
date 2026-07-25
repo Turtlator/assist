@@ -20,9 +20,8 @@ export function ConfigRowEditor({
 	onError,
 	onCancel,
 }: Props) {
-	const { value, setValue, scope, setScope, saving, save } = useConfigRowEditor(
-		{ entry, cwd, onSaved, onError },
-	);
+	const { value, setValue, scope, setScope, scopeLocked, saving, save } =
+		useConfigRowEditor({ entry, cwd, onSaved, onError });
 
 	return (
 		<Stack
@@ -36,7 +35,12 @@ export function ConfigRowEditor({
 				disabled={saving}
 				onChange={setValue}
 			/>
-			<ConfigScopeToggle scope={scope} disabled={saving} onChange={setScope} />
+			<ConfigScopeToggle
+				scope={scope}
+				disabled={saving}
+				lockedToGlobal={scopeLocked}
+				onChange={setScope}
+			/>
 			<Button
 				size="small"
 				variant="contained"

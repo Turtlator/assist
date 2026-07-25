@@ -5,10 +5,16 @@ import type { ConfigScope } from "./saveConfigValue";
 type Props = {
 	scope: ConfigScope;
 	disabled: boolean;
+	lockedToGlobal: boolean;
 	onChange: (scope: ConfigScope) => void;
 };
 
-export function ConfigScopeToggle({ scope, disabled, onChange }: Props) {
+export function ConfigScopeToggle({
+	scope,
+	disabled,
+	lockedToGlobal,
+	onChange,
+}: Props) {
 	return (
 		<ToggleButtonGroup
 			size="small"
@@ -19,7 +25,13 @@ export function ConfigScopeToggle({ scope, disabled, onChange }: Props) {
 				if (next) onChange(next);
 			}}
 		>
-			<ToggleButton value="project">Project</ToggleButton>
+			<ToggleButton
+				value="project"
+				disabled={lockedToGlobal}
+				title={lockedToGlobal ? "Global-only key" : undefined}
+			>
+				Project
+			</ToggleButton>
 			<ToggleButton value="global">Global</ToggleButton>
 		</ToggleButtonGroup>
 	);

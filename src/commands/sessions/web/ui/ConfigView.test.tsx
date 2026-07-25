@@ -196,6 +196,48 @@ describe("ConfigView", () => {
 		);
 	});
 
+	it("forces a global write for a global-only key", async () => {
+		const fetchMock = stubApi(
+			[
+				{
+					key: "sync.autoConfirm",
+					type: "boolean",
+					value: false,
+					source: "global",
+					globalOnly: true,
+				},
+			],
+			{ ok: true, status: 200, body: { target: "global" } },
+		);
+		renderView("/repo/one");
+
+		await waitFor(() =>
+			expect(screen.getByText("sync.autoConfirm")).toBeTruthy(),
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Edit sync.autoConfirm" }),
+		);
+		const project = screen.getByRole("button", { name: "Project" });
+		expect(project.hasAttribute("disabled")).toBe(true);
+		expect(
+			screen
+				.getByRole("button", { name: "Global" })
+				.getAttribute("aria-pressed"),
+		).toBe("true");
+
+		fireEvent.click(screen.getByLabelText("sync.autoConfirm value"));
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() =>
+			expect(lastSetBody(fetchMock)).toEqual({
+				key: "sync.autoConfirm",
+				value: true,
+				cwd: "/repo/one",
+				scope: "global",
+			}),
+		);
+	});
+
 	it("shows a rejected value in the snackbar and keeps the editor open", async () => {
 		stubApi(
 			[

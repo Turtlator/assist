@@ -4,10 +4,9 @@ import {
 	saveConfig,
 	saveGlobalConfig,
 } from "../../shared/loadConfig";
+import { isGlobalOnlyConfigKey } from "./isGlobalOnlyConfigKey";
 import { setNestedValue } from "./setNestedValue";
 import { validateConfig } from "./validateConfig";
-
-const GLOBAL_ONLY_KEYS = ["sync.autoConfirm"];
 
 export type ConfigScalar = string | number | boolean;
 
@@ -21,7 +20,7 @@ export function applyConfigSet(
 	global: boolean,
 	cwd: string = process.cwd(),
 ): ConfigSetResult {
-	if (!global && isGlobalOnly(key)) {
+	if (!global && isGlobalOnlyConfigKey(key)) {
 		return {
 			ok: false,
 			errors: [
@@ -39,8 +38,4 @@ export function applyConfigSet(
 	}
 	saveConfig(updated, cwd);
 	return { ok: true, target: "project" };
-}
-
-function isGlobalOnly(key: string): boolean {
-	return GLOBAL_ONLY_KEYS.some((k) => key.startsWith(k));
 }
