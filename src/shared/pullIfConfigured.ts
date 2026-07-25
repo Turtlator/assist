@@ -13,11 +13,31 @@ export function pullIfConfigured(): void {
 		);
 		return;
 	}
+	if (!hasUpstream()) {
+		console.warn(
+			chalk.yellow(
+				"git pull skipped: the current branch has no upstream. Continuing.",
+			),
+		);
+		return;
+	}
 	try {
 		execSync("git pull --ff-only", { stdio: "inherit" });
 	} catch {
 		console.error(chalk.red("git pull --ff-only failed; aborting."));
 		process.exit(1);
+	}
+}
+
+function hasUpstream(): boolean {
+	try {
+		execSync("git rev-parse --abbrev-ref --symbolic-full-name @{upstream}", {
+			encoding: "utf8",
+			stdio: ["ignore", "pipe", "ignore"],
+		});
+		return true;
+	} catch {
+		return false;
 	}
 }
 

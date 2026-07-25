@@ -49,7 +49,9 @@ function runInstall(
 	}
 	const windows = /^[A-Za-z]:[\\/]/.test(worktreePath);
 	const shell = windows ? "cmd.exe" : (process.env.SHELL ?? "bash");
-	const shellArgs = windows ? ["/c", command] : ["-l", "-c", command];
+	const shellArgs = windows
+		? ["/c", `cd /d ${quoteForCmd(worktreePath)} && ${command}`]
+		: ["-l", "-c", `cd ${quoteForPosixShell(worktreePath)} && ${command}`];
 	daemonLog(`worktree ${worktreePath} installing deps: ${command}`);
 	execFile(shell, shellArgs, { cwd: worktreePath }, (error) => {
 		daemonLog(
@@ -59,6 +61,14 @@ function runInstall(
 		);
 		onSeeded();
 	});
+}
+
+function quoteForPosixShell(value: string): string {
+	return `'${value.replaceAll("'", `'\\''`)}'`;
+}
+
+function quoteForCmd(value: string): string {
+	return `"${value.replaceAll('"', "")}"`;
 }
 
 function message(error: unknown): string {

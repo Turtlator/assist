@@ -52,12 +52,29 @@ describe("pullIfConfigured", () => {
 	it("exits with code 1 when the pull fails", () => {
 		mockLoadConfig.mockReturnValue({ commit: { pull: true } });
 		mockExecSync.mockImplementation((command: string) => {
-			if (command === "git status --porcelain") return "";
-			throw new Error("pull failed");
+			if (command === "git pull --ff-only") throw new Error("pull failed");
+			return "";
 		});
 
 		expect(() => pullIfConfigured()).toThrow("process.exit");
 		expect(exitSpy).toHaveBeenCalledWith(1);
+	});
+
+	it("skips the pull when the branch has no upstream", () => {
+		mockLoadConfig.mockReturnValue({ commit: { pull: true } });
+		const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+		mockExecSync.mockImplementation((command: string) => {
+			if (command.includes("@{upstream}")) throw new Error("no upstream");
+			return "";
+		});
+
+		pullIfConfigured();
+
+		expect(mockExecSync).not.toHaveBeenCalledWith("git pull --ff-only", {
+			stdio: "inherit",
+		});
+		expect(warnSpy).toHaveBeenCalled();
+		expect(exitSpy).not.toHaveBeenCalled();
 	});
 
 	it("skips the pull when the working copy has local changes", () => {
