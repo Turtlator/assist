@@ -44,6 +44,13 @@ function input() {
 }
 
 describe("FilePalette", () => {
+	it("focuses the search field on open", () => {
+		stubFiles([]);
+		renderPalette();
+
+		expect(document.activeElement).toBe(input());
+	});
+
 	it("queries the selected repo on each keypress", async () => {
 		const fetch = stubFiles(["src/useDaemonState.ts"]);
 		renderPalette();

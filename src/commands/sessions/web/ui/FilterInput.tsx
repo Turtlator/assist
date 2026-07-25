@@ -7,15 +7,18 @@ export function FilterInput({
 	onChange,
 	onKeyDown,
 	placeholder,
+	autoFocus,
 }: {
 	inputRef: Ref<HTMLInputElement>;
 	value: string;
 	onChange: (value: string) => void;
 	onKeyDown: (e: KeyboardEvent) => void;
 	placeholder: string;
+	autoFocus?: boolean;
 }) {
 	return (
 		<TextField
+			autoFocus={autoFocus}
 			inputRef={inputRef}
 			value={value}
 			onChange={(e) => onChange(e.target.value)}

@@ -1,5 +1,5 @@
 import Dialog from "@mui/material/Dialog";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { filePaletteMessage } from "./filePaletteMessage";
 import { FilePaletteResults } from "./FilePaletteResults";
@@ -16,10 +16,6 @@ export function FilePalette({ onClose }: { onClose: () => void }) {
 	const search = useFileSearch(selectedCwd, query);
 	const navigate = useNavigate();
 	const inputRef = useRef<HTMLInputElement>(null);
-
-	useEffect(() => {
-		inputRef.current?.focus();
-	}, []);
 
 	const openFile = (path: string) =>
 		navigate(`/file?path=${encodeURIComponent(path)}`);
@@ -42,9 +38,13 @@ export function FilePalette({ onClose }: { onClose: () => void }) {
 			onClose={onClose}
 			maxWidth="sm"
 			fullWidth
-			slotProps={{ paper: { sx: paperSx } }}
+			slotProps={{
+				paper: { sx: paperSx },
+				transition: { onEntered: () => inputRef.current?.focus() },
+			}}
 		>
 			<FilterInput
+				autoFocus
 				inputRef={inputRef}
 				value={query}
 				onChange={setQuery}
