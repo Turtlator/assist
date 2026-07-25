@@ -78,6 +78,18 @@ describe("CardBody git status counts", () => {
 		);
 	});
 
+	it("carries the claude session id into the counts request and the diff link", async () => {
+		renderBody(session({ claudeSessionId: "sess-1" }), false);
+
+		expect(await screen.findByText("+1")).toBeTruthy();
+		expect(fetch).toHaveBeenCalledWith(
+			"/api/git-status?cwd=%2Fgit%2Frepo-2&session=sess-1",
+		);
+		expect(screen.getByRole("link").getAttribute("href")).toBe(
+			"/diff?cwd=%2Fgit%2Frepo-2&session=sess-1",
+		);
+	});
+
 	it("shows no counts while the card is starting or closing", async () => {
 		renderBody(session({ closing: true }), true);
 

@@ -114,6 +114,24 @@ describe("gitStatus", () => {
 		expect(counts.new).toEqual([]);
 	});
 
+	it("resolves the base for the requested session", async () => {
+		resolveDiffBaseMock.mockResolvedValue("HEAD");
+		withGit(() => "");
+
+		await request("/api/git-status?cwd=%2Frepo&session=sess-1");
+
+		expect(resolveDiffBaseMock).toHaveBeenCalledWith("/repo", "sess-1");
+	});
+
+	it("resolves the base without a session when none is given", async () => {
+		resolveDiffBaseMock.mockResolvedValue("HEAD");
+		withGit(() => "");
+
+		await request();
+
+		expect(resolveDiffBaseMock).toHaveBeenCalledWith("/repo", undefined);
+	});
+
 	it("returns empty groups when git fails", async () => {
 		resolveDiffBaseMock.mockResolvedValue("HEAD");
 		execGitMock.mockRejectedValue(new Error("not a repo"));

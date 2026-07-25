@@ -22,6 +22,8 @@ export function collectCommitRefs(message: string): GitRef[] {
 		const subject = message.split("\n", 1)[0];
 		if (subject) ref.title = subject;
 		refs.push(ref);
+		const parent = git("rev-parse HEAD^");
+		if (parent) refs.push({ kind: "commit-parent", ref: parent });
 	}
 	return refs;
 }

@@ -2,20 +2,17 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import { parseDiff, type ViewType } from "react-diff-view";
-import { useSearchParams } from "react-router";
 import { DiffToolbar } from "./DiffToolbar";
 import { diffSx } from "./diffSx";
 import { FileDiff, fileKey } from "./FileDiff";
 import { type DiffChangeType, filterDiffFiles } from "./filterDiffFiles";
 import { PageShell } from "./PageShell";
 import { useDiff } from "./useDiff";
-import { useRepoSelectionContext } from "./useRepoSelectionContext";
+import { useDiffTarget } from "./useDiffTarget";
 
 export function DiffView() {
-	const [searchParams] = useSearchParams();
-	const { selectedCwd } = useRepoSelectionContext();
-	const cwd = searchParams.get("cwd") || selectedCwd;
-	const { diff, loading, error } = useDiff(cwd);
+	const { cwd, sessionId } = useDiffTarget();
+	const { diff, loading, error } = useDiff(cwd, sessionId);
 	const [viewType, setViewType] = useState<ViewType>("split");
 	const [search, setSearch] = useState("");
 	const [changeType, setChangeType] = useState<DiffChangeType>("all");

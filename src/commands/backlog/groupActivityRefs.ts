@@ -1,6 +1,8 @@
 const ACTIVITY_COMMIT_LIMIT = 10;
 
-type ActivityRef = { kind: "branch" | "commit" | "pr" | "slack" };
+type ActivityRef = {
+	kind: "branch" | "commit" | "commit-parent" | "pr" | "slack";
+};
 
 type GroupedActivity<T extends ActivityRef> = {
 	branches: T[];

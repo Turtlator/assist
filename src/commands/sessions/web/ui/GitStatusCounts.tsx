@@ -1,8 +1,14 @@
 import { GitStatusLink, GROUPS } from "./GitStatusLink";
 import { useGitStatusCounts } from "./useGitStatusCounts";
 
-export function GitStatusCounts({ cwd }: { cwd: string }) {
-	const counts = useGitStatusCounts(cwd);
+export function GitStatusCounts({
+	cwd,
+	sessionId,
+}: {
+	cwd: string;
+	sessionId?: string;
+}) {
+	const counts = useGitStatusCounts(cwd, sessionId);
 
 	const groups = counts
 		? GROUPS.map((g) => ({ ...g, count: counts[g.key].length })).filter(
@@ -11,5 +17,5 @@ export function GitStatusCounts({ cwd }: { cwd: string }) {
 		: [];
 	if (!counts || groups.length === 0) return null;
 
-	return <GitStatusLink cwd={cwd} groups={groups} />;
+	return <GitStatusLink cwd={cwd} sessionId={sessionId} groups={groups} />;
 }

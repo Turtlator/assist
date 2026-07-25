@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import type { GitStatusCounts } from "../parseGitStatus";
+import { diffQuery } from "./diffQuery";
 
 const POLL_INTERVAL_MS = 5000;
 
-export function useGitStatusCounts(cwd: string): GitStatusCounts | null {
+export function useGitStatusCounts(
+	cwd: string,
+	sessionId?: string,
+): GitStatusCounts | null {
 	const [counts, setCounts] = useState<GitStatusCounts | null>(null);
 
 	useEffect(() => {
@@ -14,9 +18,7 @@ export function useGitStatusCounts(cwd: string): GitStatusCounts | null {
 		let cancelled = false;
 		const poll = async () => {
 			try {
-				const res = await fetch(
-					`/api/git-status?cwd=${encodeURIComponent(cwd)}`,
-				);
+				const res = await fetch(`/api/git-status?${diffQuery(cwd, sessionId)}`);
 				const body = await res.json();
 				if (!cancelled) setCounts(body ?? null);
 			} catch {
@@ -29,7 +31,7 @@ export function useGitStatusCounts(cwd: string): GitStatusCounts | null {
 			cancelled = true;
 			clearInterval(id);
 		};
-	}, [cwd]);
+	}, [cwd, sessionId]);
 
 	return counts;
 }

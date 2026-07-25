@@ -37,6 +37,7 @@ export function CardBody({
 				status={session.status}
 				elapsed={elapsed}
 				cwd={session.cwd}
+				sessionId={session.claudeSessionId}
 				restored={session.restored}
 				usedPct={session.usedPct}
 				undurable={session.undurable}

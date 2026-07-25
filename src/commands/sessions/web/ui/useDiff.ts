@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { diffQuery } from "./diffQuery";
 
 const POLL_INTERVAL_MS = 5000;
 
@@ -8,7 +9,7 @@ type DiffState = {
 	error: boolean;
 };
 
-export function useDiff(cwd: string): DiffState {
+export function useDiff(cwd: string, sessionId?: string): DiffState {
 	const [state, setState] = useState<DiffState>({
 		diff: "",
 		loading: true,
@@ -24,7 +25,7 @@ export function useDiff(cwd: string): DiffState {
 		setState({ diff: "", loading: true, error: false });
 		const poll = async () => {
 			try {
-				const res = await fetch(`/api/diff?cwd=${encodeURIComponent(cwd)}`);
+				const res = await fetch(`/api/diff?${diffQuery(cwd, sessionId)}`);
 				if (!res.ok) throw new Error(`HTTP ${res.status}`);
 				const body = await res.text();
 				if (!cancelled) setState({ diff: body, loading: false, error: false });
@@ -38,7 +39,7 @@ export function useDiff(cwd: string): DiffState {
 			cancelled = true;
 			clearInterval(id);
 		};
-	}, [cwd]);
+	}, [cwd, sessionId]);
 
 	return state;
 }

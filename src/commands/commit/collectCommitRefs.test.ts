@@ -33,9 +33,10 @@ describe("collectCommitRefs", () => {
 		vi.clearAllMocks();
 	});
 
-	it("captures the branch and the HEAD commit with the message subject", () => {
+	it("captures the branch, the HEAD commit with the message subject, and its parent", () => {
 		stubGit({
 			"rev-parse --abbrev-ref HEAD": "feature\n",
+			"rev-parse HEAD^": "cafe1234\n",
 			"rev-parse HEAD": "deadbeef\n",
 		});
 
@@ -53,18 +54,33 @@ describe("collectCommitRefs", () => {
 				url: "https://github.com/acme/widgets/commit/deadbeef",
 				title: "feat: add login",
 			},
+			{ kind: "commit-parent", ref: "cafe1234" },
+		]);
+	});
+
+	it("omits the parent for a root commit", () => {
+		stubGit({
+			"rev-parse --abbrev-ref HEAD": "feature\n",
+			"rev-parse HEAD^": new Error("unknown revision"),
+			"rev-parse HEAD": "deadbeef\n",
+		});
+
+		expect(collectCommitRefs("fix: thing").map((r) => r.kind)).toEqual([
+			"branch",
+			"commit",
 		]);
 	});
 
 	it("omits the branch on a detached HEAD", () => {
 		stubGit({
 			"rev-parse --abbrev-ref HEAD": "HEAD",
+			"rev-parse HEAD^": "cafe1234",
 			"rev-parse HEAD": "deadbeef",
 		});
 
 		const refs = collectCommitRefs("fix: thing");
 
-		expect(refs.map((r) => r.kind)).toEqual(["commit"]);
+		expect(refs.map((r) => r.kind)).toEqual(["commit", "commit-parent"]);
 	});
 
 	it("returns nothing when git reads fail", () => {

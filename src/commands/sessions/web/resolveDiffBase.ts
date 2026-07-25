@@ -1,5 +1,6 @@
 import { loadConfigFrom } from "../../../shared/loadConfigFrom";
 import { execGit } from "./execGit";
+import { sessionCommitAnchor } from "./sessionCommitAnchor";
 import { toGitCwd } from "./toGitCwd";
 
 function baseCandidates(defaultBranch: string | undefined): string[] {
@@ -22,7 +23,20 @@ async function refExists(cwd: string, ref: string): Promise<boolean> {
 	}
 }
 
-export async function resolveDiffBase(cwd: string): Promise<string> {
+async function anchoredBase(
+	cwd: string,
+	sessionId: string,
+): Promise<string | undefined> {
+	const { commit, parent } = await sessionCommitAnchor(sessionId);
+	if (parent && (await refExists(cwd, parent))) return parent;
+	if (commit && (await refExists(cwd, `${commit}^`))) return `${commit}^`;
+	return undefined;
+}
+
+export async function resolveDiffBase(
+	cwd: string,
+	sessionId?: string,
+): Promise<string> {
 	let defaultBranch: string | undefined;
 	try {
 		const config = loadConfigFrom(toGitCwd(cwd));
@@ -30,6 +44,11 @@ export async function resolveDiffBase(cwd: string): Promise<string> {
 		defaultBranch = config.branch?.defaultBranch;
 	} catch {
 		return "HEAD";
+	}
+
+	if (sessionId) {
+		const anchored = await anchoredBase(cwd, sessionId);
+		if (anchored) return anchored;
 	}
 
 	for (const candidate of baseCandidates(defaultBranch)) {

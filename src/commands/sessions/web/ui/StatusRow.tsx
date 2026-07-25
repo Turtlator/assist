@@ -8,6 +8,7 @@ export function StatusRow({
 	status,
 	elapsed,
 	cwd,
+	sessionId,
 	restored,
 	usedPct,
 	undurable,
@@ -15,6 +16,7 @@ export function StatusRow({
 	status: SessionStatus;
 	elapsed: string;
 	cwd?: string;
+	sessionId?: string;
 	restored?: boolean;
 	usedPct?: number;
 	undurable?: { reason: string };
@@ -28,7 +30,7 @@ export function StatusRow({
 				undurable={undurable}
 			/>
 			<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-				{cwd && <GitStatusCounts cwd={cwd} />}
+				{cwd && <GitStatusCounts cwd={cwd} sessionId={sessionId} />}
 				<Typography variant="caption" color="text.disabled">
 					{elapsed}
 				</Typography>

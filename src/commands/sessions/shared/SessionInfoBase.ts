@@ -36,6 +36,7 @@ export type SessionInfoBase = {
 	remoteOrigin?: string;
 	assistArgs?: string[];
 	cwd?: string;
+	claudeSessionId?: string;
 	repoGroup?: RepoGroup;
 	restored?: boolean;
 	error?: string;

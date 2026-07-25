@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { respondJson } from "../../../shared/web";
 import { execGit } from "./execGit";
 import { getCwdParam } from "./getCwdParam";
+import { getSessionParam } from "./getSessionParam";
 import { parseDiffNameStatus } from "./parseDiffNameStatus";
 import { type GitStatusCounts, parseGitStatus } from "./parseGitStatus";
 import { resolveDiffBase } from "./resolveDiffBase";
@@ -41,7 +42,7 @@ export async function gitStatus(
 	const cwd = getCwdParam(req, res);
 	if (!cwd) return;
 	try {
-		const base = await resolveDiffBase(cwd);
+		const base = await resolveDiffBase(cwd, getSessionParam(req));
 		respondJson(
 			res,
 			200,

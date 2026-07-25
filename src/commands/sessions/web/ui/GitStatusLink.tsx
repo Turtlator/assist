@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
 import { Link as RouterLink } from "react-router";
+import { diffQuery } from "./diffQuery";
 import { StopCardActivation } from "./StopCardActivation";
 
 const containerSx = {
@@ -34,16 +35,18 @@ function GitStatusChips({ groups }: { groups: StatusGroup[] }) {
 
 export function GitStatusLink({
 	cwd,
+	sessionId,
 	groups,
 }: {
 	cwd: string;
+	sessionId?: string;
 	groups: StatusGroup[];
 }) {
 	return (
 		<StopCardActivation>
 			<Link
 				component={RouterLink}
-				to={`/diff?cwd=${encodeURIComponent(cwd)}`}
+				to={`/diff?${diffQuery(cwd, sessionId)}`}
 				variant="caption"
 				underline="hover"
 				color="inherit"

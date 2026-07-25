@@ -25,7 +25,7 @@ export const sessionsConfigHelp: ConfigHelpEntry[] = [
 	{
 		key: "sessions.includeCommittedChanges",
 		setter: "assist config set sessions.includeCommittedChanges true -g",
-		note: "session card counts and /diff span the whole branch (merge-base with the default branch) instead of just uncommitted work (default off)",
+		note: "session card counts and /diff span the whole session (its first commit's parent, else merge-base with the default branch) instead of just uncommitted work (default off)",
 	},
 	{
 		key: "worktree.enabled",
