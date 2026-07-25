@@ -1,3 +1,10 @@
+# [0.434.0](https://github.com/staff0rd/assist/compare/v0.433.5...v0.434.0) (2026-07-25)
+
+
+### Features
+
+* render markdown from diff viewer ([07e76e4](https://github.com/staff0rd/assist/commit/07e76e41a097e02b2b7e98fccddb31a64db6b71f))
+
 ## [0.433.5](https://github.com/staff0rd/assist/compare/v0.433.4...v0.433.5) (2026-07-25)
 
 
