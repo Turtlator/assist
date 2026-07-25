@@ -33,10 +33,14 @@ const sessions: SessionInfo[] = [
 	},
 ];
 
-function renderArea(activeId: string | null, initialized: Set<string>) {
+function renderArea(
+	activeId: string | null,
+	initialized: Set<string>,
+	list: SessionInfo[] = sessions,
+) {
 	render(
 		<SessionArea
-			sessions={sessions}
+			sessions={list}
 			activeId={activeId}
 			initialized={initialized}
 			onOutput={() => () => {}}
@@ -62,6 +66,20 @@ describe("SessionArea loading state", () => {
 
 	it("does not show a loading indicator when there is no active session", () => {
 		renderArea(null, new Set());
+		expect(screen.queryByText("Starting session…")).toBeNull();
+	});
+
+	it("does not show a loading indicator for a stopped session with no process", () => {
+		renderArea("3", new Set(), [
+			{
+				id: "3",
+				name: "held",
+				commandType: "claude",
+				status: "stopped",
+				startedAt: 0,
+				undurable: { reason: "uncommitted changes" },
+			},
+		]);
 		expect(screen.queryByText("Starting session…")).toBeNull();
 	});
 });

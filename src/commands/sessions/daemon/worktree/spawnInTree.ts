@@ -16,16 +16,22 @@ export type TreeSpawnContext = {
 	sessions: Map<string, Session>;
 	spawnWith: (create: (id: string) => Session) => string;
 	notify: () => void;
+	startHeld: (session: Session) => void;
 };
 
 function allocateAndBind(
 	ctx: TreeSpawnContext,
 	cwd: string | undefined,
-	create: (id: string, resolvedCwd: string | undefined) => Session,
+	create: (
+		id: string,
+		resolvedCwd: string | undefined,
+		holdUntilSeeded: boolean,
+	) => Session,
 ): string {
 	const alloc = allocateTree(cwd, boundTreeRoots(ctx.sessions));
-	const id = ctx.spawnWith((sid) => create(sid, alloc.cwd));
-	bindNewWorktree(ctx.sessions.get(id), alloc, ctx.notify);
+	const needsSeeding = alloc.kind === "worktree" && alloc.created === true;
+	const id = ctx.spawnWith((sid) => create(sid, alloc.cwd, needsSeeding));
+	bindNewWorktree(ctx.sessions.get(id), alloc, ctx.notify, ctx.startHeld);
 	return id;
 }
 
@@ -36,8 +42,8 @@ export function spawnInTree(
 	design: boolean | undefined,
 	harness: HarnessKind | undefined,
 ): string {
-	return allocateAndBind(ctx, cwd, (sid, resolvedCwd) =>
-		createSession(sid, prompt, resolvedCwd, design, harness),
+	return allocateAndBind(ctx, cwd, (sid, resolvedCwd, holdUntilSeeded) =>
+		createSession(sid, prompt, resolvedCwd, design, harness, holdUntilSeeded),
 	);
 }
 
@@ -47,8 +53,8 @@ export function spawnAssistInTree(
 	cwd: string | undefined,
 	meta: AssistSessionMeta | undefined,
 ): string {
-	return allocateAndBind(ctx, cwd, (sid, resolvedCwd) =>
-		createAssistSession(sid, assistArgs, resolvedCwd, meta),
+	return allocateAndBind(ctx, cwd, (sid, resolvedCwd, holdUntilSeeded) =>
+		createAssistSession(sid, assistArgs, resolvedCwd, meta, holdUntilSeeded),
 	);
 }
 

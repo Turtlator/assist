@@ -1,5 +1,6 @@
 import type { Session } from "./createSession";
 import { daemonLog } from "./daemonLog";
+import { exitReason } from "./exitReason";
 import { handleFailedResume } from "./handleFailedResume";
 import { handleStoppedExit } from "./handleStoppedExit";
 import type { OnStatusChange } from "./types";
@@ -34,7 +35,7 @@ export function handlePtyExit(
 	if (handleFailedResume(session, exitCode, onStatusChange)) return;
 	const priorStatus = session.status;
 	if (exitCode !== 0) {
-		session.error = `process exited with code ${exitCode}`;
+		session.error = exitReason(session, exitCode);
 		daemonLog(
 			`session ${session.id} ("${session.name}") pty exited with code ${exitCode} from status "${priorStatus}" — unexpected exit, marking error`,
 		);

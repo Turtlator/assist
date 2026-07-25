@@ -67,6 +67,31 @@ describe("applyStatusChange worktree reap gating", () => {
 		expect(session.status).toBe("waiting");
 	});
 
+	it("keeps the worktree when a done transition chains straight into an auto-run", () => {
+		const session = backlogRun({
+			status: "running",
+			name: "assist draft --once something",
+			assistArgs: ["draft", "--once", "something"],
+			autoRun: true,
+			activity: {
+				kind: "command",
+				name: "draft",
+				itemId: 772,
+				startedAt: 1,
+			},
+		});
+		const reuseForRun = vi.fn();
+
+		applyStatusChange(session, "done", 0, vi.fn(), vi.fn(), reuseForRun);
+
+		expect(resolveMock).not.toHaveBeenCalled();
+		expect(reuseForRun).toHaveBeenCalledWith(session, 772);
+		expect(session.worktree).toEqual({
+			path: "/git/repo-2",
+			clone: "/git/repo",
+		});
+	});
+
 	it("skips the gate for a done transition on a non-worktree session", () => {
 		const session = backlogRun({ status: "waiting", worktree: undefined });
 

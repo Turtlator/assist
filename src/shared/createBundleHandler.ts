@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Handler } from "./web";
@@ -9,13 +9,14 @@ export function createBundleHandler(
 	bundlePath: string,
 	contentType = "application/javascript",
 ): Handler {
-	const dir = dirname(fileURLToPath(importMetaUrl));
-	let cache: { body: string; etag: string } | undefined;
+	const file = join(dirname(fileURLToPath(importMetaUrl)), bundlePath);
+	let cache: { body: string; etag: string; mtimeMs: number } | undefined;
 	return (req, res) => {
-		if (!cache) {
-			const body = readFileSync(join(dir, bundlePath), "utf8");
+		const mtimeMs = statSync(file).mtimeMs;
+		if (cache?.mtimeMs !== mtimeMs) {
+			const body = readFileSync(file, "utf8");
 			const etag = `"${createHash("sha256").update(body).digest("hex").slice(0, 16)}"`;
-			cache = { body, etag };
+			cache = { body, etag, mtimeMs };
 		}
 		// why: fixed /bundle.js URL means an upgraded CLI would otherwise serve the browser's cached old bundle; revalidate so newer UI appears
 		const headers = {

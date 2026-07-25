@@ -24,7 +24,7 @@ import {
 	restartManagedSession,
 	type RestartResult,
 } from "./restartManagedSession";
-import { restoreAll } from "./restoreAll";
+import { restoreAllSessions } from "./restoreAllSessions";
 import type { ServerConflictInfo } from "./serverConflictInfo";
 import type { ServerRunMeta } from "./serverRunMeta";
 import { runRetry } from "./runRetry";
@@ -33,11 +33,10 @@ import { reuseSessionForRun } from "./reuseSessionForRun";
 import { sessionLimits } from "./sessionLimits";
 import { shutdownSessions } from "./shutdownSessions";
 import { toSessionInfo } from "./toSessionInfo";
+import { treeSpawnContext } from "./treeSpawnContext";
 import { wireSessionWatchers } from "./wireSessionWatchers";
 import { WindowsProxy } from "./WindowsProxy";
 import { wirePtyEvents } from "./wirePtyEvents";
-import { reconcileWorktreesOnRestore } from "./worktree/reconcileWorktreesOnRestore";
-import { rearmStoppedSessions } from "./worktree/rearmStoppedSessions";
 import {
 	resumeInTree,
 	spawnAssistInTree,
@@ -90,10 +89,7 @@ export class SessionManager {
 	}
 
 	restore(): string[] {
-		const names = restoreAll(this.spawnWith, this.sessions);
-		reconcileWorktreesOnRestore(this.sessions);
-		rearmStoppedSessions(this.sessions, this.notify);
-		return names;
+		return restoreAllSessions(this.spawnWith, this.sessions, this.notify);
 	}
 
 	drain = (): number => drainSessions(this.sessions, this.notify);
@@ -109,11 +105,13 @@ export class SessionManager {
 		this.add(create(sessionLimits.nextId(this.sessions.size, this.idCounter)));
 
 	private treeCtx(): TreeSpawnContext {
-		return {
-			sessions: this.sessions,
-			spawnWith: this.spawnWith,
-			notify: this.notify,
-		};
+		return treeSpawnContext(
+			this.sessions,
+			this.spawnWith,
+			this.notify,
+			this.clients,
+			this.onStatusChange,
+		);
 	}
 
 	spawn(

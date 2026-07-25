@@ -1,4 +1,4 @@
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { mkdtempSync, utimesSync, writeFileSync } from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -31,9 +31,15 @@ function createRes() {
 
 function createHandler(contents: string) {
 	const dir = mkdtempSync(join(tmpdir(), "bundle-"));
-	writeFileSync(join(dir, "bundle.js"), contents);
+	const file = join(dir, "bundle.js");
+	writeFileSync(file, contents);
 	const importMetaUrl = pathToFileURL(join(dir, "handler.js")).href;
-	return createBundleHandler(importMetaUrl, "bundle.js");
+	return Object.assign(createBundleHandler(importMetaUrl, "bundle.js"), {
+		rebuild: (next: string) => {
+			writeFileSync(file, next);
+			utimesSync(file, new Date(), new Date(Date.now() + 1000));
+		},
+	});
 }
 
 describe("createBundleHandler", () => {
@@ -64,6 +70,28 @@ describe("createBundleHandler", () => {
 
 			expect(second.status()).toBe(304);
 			expect(second.body()).toBeUndefined();
+		});
+	});
+
+	describe("when the bundle is rebuilt while the server keeps running", () => {
+		it("serves the new bundle instead of the copy cached in memory", () => {
+			const handler = createHandler("console.log('old')");
+			const first = createRes();
+			handler({ headers: {} } as IncomingMessage, first.res);
+			const staleEtag = first.headers().ETag;
+
+			handler.rebuild("console.log('new')");
+			const second = createRes();
+			handler(
+				{
+					headers: { "if-none-match": staleEtag },
+				} as unknown as IncomingMessage,
+				second.res,
+			);
+
+			expect(second.status()).toBe(200);
+			expect(second.body()).toBe("console.log('new')");
+			expect(second.headers().ETag).not.toBe(staleEtag);
 		});
 	});
 

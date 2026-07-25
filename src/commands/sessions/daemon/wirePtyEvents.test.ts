@@ -140,6 +140,62 @@ describe("wirePtyEvents exit handling", () => {
 		expect(line).toContain("marking error");
 	});
 
+	it("writes the failure reason to the terminal when the process dies without output", () => {
+		const { pty, exit } = fakePty();
+		const session = fakeSession({ pty, status: "running", scrollback: "" });
+		const client = { send: vi.fn() };
+
+		wirePtyEvents(
+			session,
+			new Set<SessionClient>([client as unknown as SessionClient]),
+			(s, status) => {
+				s.status = status;
+			},
+		);
+		exit(1);
+
+		expect(session.scrollback).toContain("process exited with code 1");
+		expect(client.send).toHaveBeenCalledWith(
+			expect.stringContaining("process exited with code 1"),
+		);
+	});
+
+	it("names the vanished working directory so a reaped-tree failure explains itself", () => {
+		const { pty, exit } = fakePty();
+		const session = fakeSession({
+			pty,
+			status: "running",
+			cwd: "/git/repo-4-was-reaped",
+			scrollback: "",
+		});
+
+		wirePtyEvents(session, new Set<SessionClient>(), (s, status) => {
+			s.status = status;
+		});
+		exit(1);
+
+		expect(session.error).toBe(
+			"process exited with code 1: working directory /git/repo-4-was-reaped no longer exists",
+		);
+		expect(session.scrollback).toContain("no longer exists");
+	});
+
+	it("leaves the terminal alone when the failing process already printed output", () => {
+		const { pty, exit } = fakePty();
+		const session = fakeSession({
+			pty,
+			status: "running",
+			scrollback: "real error from the process",
+		});
+
+		wirePtyEvents(session, new Set<SessionClient>(), (s, status) => {
+			s.status = status;
+		});
+		exit(1);
+
+		expect(session.scrollback).toBe("real error from the process");
+	});
+
 	it("clears the dead pty handle when the process exits", () => {
 		const { pty, exit } = fakePty();
 		const session = fakeSession({ pty, status: "running" });

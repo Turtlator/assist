@@ -31,6 +31,10 @@ where you are or where any in-progress changes live. The tool tracks that; you d
 
 - A workspace is only ever removed when the card reaches **done** or the user closes
   it — **never** while a backlog run moves between phases, regardless of push state.
+- End of life means the **stream** is over, not that a command in it finished. A card
+  that carries straight on into more work keeps its workspace, so the work that
+  follows continues where the last one left off — a drafted item picked up by
+  auto-run, or a run continuing to its next phase.
 - Even then it is removed only if nothing is unpushed; otherwise it stops (see 3).
 
 ## 5. Recovery is automatic — never manual

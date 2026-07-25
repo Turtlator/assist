@@ -4,23 +4,11 @@ import { type ServerRunMeta, serverRunMeta } from "./serverRunMeta";
 import { spawnClaude } from "./spawnClaude";
 import { spawnPi } from "./spawnPi";
 import { spawnRun } from "./spawnRun";
-import type { Session, SessionStatus } from "./types";
+import { startOrHoldPty } from "./startOrHoldPty";
+import type { Session } from "./types";
+import { sessionBase } from "./sessionBase";
 
 export type { Session, SessionInfo, SessionStatus } from "./types";
-
-function sessionBase(id: string, status: SessionStatus) {
-	const startedAt = Date.now();
-	return {
-		id,
-		status,
-		startedAt,
-		runningMs: 0,
-		/* why: runningMs counts only running stretches, so a session that starts
-		 * waiting (idle, awaiting first input) has no open stretch to stamp. */
-		runningSince: status === "running" ? startedAt : null,
-		scrollback: "",
-	};
-}
 
 export function createSession(
 	id: string,
@@ -28,8 +16,9 @@ export function createSession(
 	cwd?: string,
 	design?: boolean,
 	harness?: HarnessKind,
+	holdPty?: boolean,
 ): Session {
-	if (harness === "pi") return createPiSession(id, prompt, cwd);
+	if (harness === "pi") return createPiSession(id, prompt, cwd, holdPty);
 	/* why: assign the claude conversation id up front so the card binds to the
 	 * transcript this process writes, not the newest unclaimed .jsonl in the cwd
 	 * (which races concurrent sessions in the same repo) (#413). */
@@ -42,7 +31,11 @@ export function createSession(
 		...sessionBase(id, prompt ? "running" : "waiting"),
 		name: prompt?.slice(0, 40) || `Session ${id}`,
 		commandType: "claude",
-		pty: spawnClaude({ prompt, cwd, sessionId: id, claudeSessionId, design }),
+		...startOrHoldPty(
+			() =>
+				spawnClaude({ prompt, cwd, sessionId: id, claudeSessionId, design }),
+			holdPty,
+		),
 		cwd,
 		claudeSessionId,
 		initialPrompt: prompt,
@@ -50,13 +43,18 @@ export function createSession(
 	};
 }
 
-function createPiSession(id: string, prompt?: string, cwd?: string): Session {
+function createPiSession(
+	id: string,
+	prompt?: string,
+	cwd?: string,
+	holdPty?: boolean,
+): Session {
 	return {
 		...sessionBase(id, prompt ? "running" : "waiting"),
 		name: prompt?.slice(0, 40) || `Session ${id}`,
 		commandType: "claude",
 		harness: "pi",
-		pty: spawnPi({ prompt, cwd, sessionId: id }),
+		...startOrHoldPty(() => spawnPi({ prompt, cwd, sessionId: id }), holdPty),
 		cwd,
 		initialPrompt: prompt,
 	};

@@ -25,7 +25,8 @@ export function applyStatusChange(
 	 * to avoid a broadcast storm during a long tool-heavy turn. */
 	if (session.status === status) return;
 	const deps = { dismiss, notify, reuseForRun };
-	if (status === "done" && session.worktree) {
+	const chainsToNextRun = shouldAutoRun(session, status).run;
+	if (status === "done" && session.worktree && !chainsToNextRun) {
 		void resolveDoneDurability(
 			session,
 			() => finishStatusChange(session, "done", exitCode, deps),

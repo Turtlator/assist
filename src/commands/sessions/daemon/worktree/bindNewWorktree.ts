@@ -15,11 +15,13 @@ export function bindNewWorktree(
 	session: Session | undefined,
 	alloc: Allocation,
 	notify: () => void,
+	startHeld: (session: Session) => void = () => {},
 ): void {
 	if (alloc.kind !== "worktree" || !alloc.cwd || !alloc.clone || !session)
 		return;
 	session.worktree = { path: alloc.cwd, clone: alloc.clone };
-	if (alloc.created) seedWorktree(alloc.cwd, alloc.clone);
+	if (alloc.created)
+		seedWorktree(alloc.cwd, alloc.clone, () => startHeld(session));
 	notify();
 }
 

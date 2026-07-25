@@ -4,12 +4,15 @@ type AutoRunDecision =
 	| { run: true; itemId: number }
 	| { run: false; reason: string | null };
 
-export function shouldAutoRun(session: Session): AutoRunDecision {
+export function shouldAutoRun(
+	session: Session,
+	status: Session["status"] = session.status,
+): AutoRunDecision {
 	if (!session.autoRun) return { run: false, reason: null };
-	if (session.status !== "done")
+	if (status !== "done")
 		return {
 			run: false,
-			reason: `session status is "${session.status}", not "done"`,
+			reason: `session status is "${status}", not "done"`,
 		};
 	if (session.commandType !== "assist")
 		return {

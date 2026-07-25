@@ -1,16 +1,8 @@
-import { broadcast, type SessionClient } from "./broadcast";
+import type { SessionClient } from "./broadcast";
 import type { Session } from "./createSession";
+import { emitSessionOutput } from "./emitSessionOutput";
 import { handlePtyExit } from "./handlePtyExit";
 import type { OnStatusChange } from "./types";
-
-const MAX_SCROLLBACK = 256 * 1024;
-
-function appendScrollback(session: Session, data: string): void {
-	session.scrollback += data;
-	if (session.scrollback.length > MAX_SCROLLBACK) {
-		session.scrollback = session.scrollback.slice(-MAX_SCROLLBACK);
-	}
-}
 
 export function wirePtyEvents(
 	session: Session,
@@ -25,11 +17,22 @@ export function wirePtyEvents(
 	 * prompt (spinner/status line) is indistinguishable from active work by output
 	 * alone, and inferring flipped an awaiting-input card to running (#449).
 	 * done/error still come from exit. */
-	session.pty.onData((data) => {
-		appendScrollback(session, data);
-		broadcast(clients, { type: "output", sessionId: session.id, data });
+	session.pty.onData((data) => emitSessionOutput(session, clients, data));
+	session.pty.onExit(({ exitCode }) => {
+		handlePtyExit(session, exitCode, onStatusChange);
+		reportSilentFailure(session, clients);
 	});
-	session.pty.onExit(({ exitCode }) =>
-		handlePtyExit(session, exitCode, onStatusChange),
+}
+
+function reportSilentFailure(
+	session: Session,
+	clients: Set<SessionClient>,
+): void {
+	if (session.status !== "error" || !session.error) return;
+	if (session.scrollback.length > 0) return;
+	emitSessionOutput(
+		session,
+		clients,
+		`\r\n\x1b[31m${session.error}\x1b[0m\r\n`,
 	);
 }

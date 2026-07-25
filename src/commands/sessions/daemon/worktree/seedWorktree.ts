@@ -5,10 +5,14 @@ import { daemonLog } from "../daemonLog";
 import { resolveInstallCommand } from "./resolveInstallCommand";
 import { worktreeConfigFor } from "./worktreeConfigFor";
 
-export function seedWorktree(worktreePath: string, clone: string): void {
+export function seedWorktree(
+	worktreePath: string,
+	clone: string,
+	onSeeded: () => void = () => {},
+): void {
 	const cfg = worktreeConfigFor(clone);
 	copyConfigFiles(worktreePath, clone, cfg.copy);
-	runInstall(worktreePath, clone, cfg.install);
+	runInstall(worktreePath, clone, cfg.install, onSeeded);
 }
 
 function copyConfigFiles(
@@ -36,9 +40,13 @@ function runInstall(
 	worktreePath: string,
 	clone: string,
 	install: boolean | string,
+	onSeeded: () => void,
 ): void {
 	const command = resolveInstallCommand(clone, install);
-	if (!command) return;
+	if (!command) {
+		onSeeded();
+		return;
+	}
 	const windows = /^[A-Za-z]:[\\/]/.test(worktreePath);
 	const shell = windows ? "cmd.exe" : (process.env.SHELL ?? "bash");
 	const shellArgs = windows ? ["/c", command] : ["-l", "-c", command];
@@ -49,6 +57,7 @@ function runInstall(
 				? `worktree ${worktreePath} install failed: ${error.message}`
 				: `worktree ${worktreePath} install complete`,
 		);
+		onSeeded();
 	});
 }
 

@@ -11,6 +11,7 @@ export function isSessionStarting(
 	return (
 		!initialized.has(session.id) &&
 		session.status !== "done" &&
-		session.status !== "error"
+		session.status !== "error" &&
+		session.status !== "stopped"
 	);
 }

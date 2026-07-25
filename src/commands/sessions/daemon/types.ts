@@ -64,6 +64,7 @@ export type Session = {
 	pendingPrPreview?: PrPreview;
 	pendingRestart?: () => void;
 	pendingDismiss?: () => void;
+	pendingStart?: () => Session["pty"];
 	cols?: number;
 	rows?: number;
 	usedPct?: number;

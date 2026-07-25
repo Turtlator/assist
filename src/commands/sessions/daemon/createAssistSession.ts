@@ -1,5 +1,6 @@
 import type { Session } from "./createSession";
 import { spawnPty } from "./spawnPty";
+import { startOrHoldPty } from "./startOrHoldPty";
 
 export type AssistSessionMeta = { title?: string; subtitle?: string };
 
@@ -8,6 +9,7 @@ export function createAssistSession(
 	assistArgs: string[],
 	cwd?: string,
 	meta?: AssistSessionMeta,
+	holdPty?: boolean,
 ): Session {
 	const startedAt = Date.now();
 	return {
@@ -20,7 +22,10 @@ export function createAssistSession(
 		startedAt,
 		runningMs: 0,
 		runningSince: startedAt,
-		pty: spawnPty(["assist", ...assistArgs], cwd, id),
+		...startOrHoldPty(
+			() => spawnPty(["assist", ...assistArgs], cwd, id),
+			holdPty,
+		),
 		scrollback: "",
 		assistArgs,
 		cwd,
