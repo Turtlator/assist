@@ -1,10 +1,11 @@
 import type { ConfigHelpEntry } from "../shared/configHelp";
+import { autoConfirmHintCommand } from "./sync/printAutoConfirmHint";
 
 export const rootConfigHelp: Record<string, ConfigHelpEntry[]> = {
 	sync: [
 		{
 			key: "sync.autoConfirm",
-			setter: "assist config set sync.autoConfirm true",
+			setter: autoConfirmHintCommand,
 			note: "skip the settings.json overwrite prompt",
 		},
 	],
