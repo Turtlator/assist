@@ -22,8 +22,12 @@ const labelButtonSx = {
 	...translucentHoverOverlaySx,
 	display: "block",
 	maxWidth: "100%",
-	px: 0.75,
+	px: 1,
+	py: 0.5,
+	border: 0,
+	bgcolor: "transparent",
 	fontSize: FONT_SIZE,
+	lineHeight: 1.2,
 	letterSpacing: "0.02em",
 	textAlign: "left",
 	whiteSpace: "nowrap",
@@ -60,7 +64,7 @@ export function ItemNavigatorRow({ section, onSelect }: ItemNavigatorRowProps) {
 				tint
 					? {
 							...circleButtonSx,
-							ml: 2,
+							ml: 1.5,
 							bgcolor: tint.bgcolor,
 							borderColor: tint.borderColor,
 							...(tint.ring ? { boxShadow: "0 0 0 2px" } : {}),

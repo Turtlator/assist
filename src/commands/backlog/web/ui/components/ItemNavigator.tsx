@@ -17,8 +17,10 @@ const panelSx = {
 	top: APP_BAR_HEIGHT + STICKY_PINNED_HEADER_HEIGHT,
 	left: gutterLeft,
 	right: 8,
+	bottom: 8,
 	minWidth: 0,
 	alignItems: "flex-start",
+	overflowY: "auto",
 } as const;
 
 function scrollToSection(id: string) {
@@ -34,7 +36,7 @@ export function ItemNavigator({ item }: { item: BacklogItem }) {
 	const sections = itemNavSections(item);
 	if (!wideEnough || sections.length === 0) return null;
 	return (
-		<Stack component="nav" spacing={0.25} sx={panelSx}>
+		<Stack component="nav" spacing={1} sx={panelSx}>
 			{sections.map((section) => (
 				<ItemNavigatorRow
 					key={section.id}
