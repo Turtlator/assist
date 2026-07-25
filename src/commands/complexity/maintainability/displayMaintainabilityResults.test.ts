@@ -8,14 +8,12 @@ function entry(
 	file: string,
 	minMaintainability: number,
 	override?: number,
-	largestFunction = "bigFn",
 ): ResultEntry {
 	return {
 		file,
 		avgMaintainability: minMaintainability,
 		minMaintainability,
 		override,
-		largestFunction,
 	};
 }
 
@@ -119,16 +117,18 @@ describe("displayMaintainabilityResults", () => {
 			expect(out).not.toContain("avg:");
 		});
 
-		it("should name the largest function as the extraction candidate", () => {
+		it("should name the failing file with a placeholder extract template", () => {
 			displayMaintainabilityResults(
-				[entry("src/foo/bar.ts", 40, undefined, "doEverything")],
+				[entry("src/foo/bar.ts", 40)],
 				60,
 				cleanGit,
 			);
 
 			const out = output();
-			expect(out).toContain("doEverything");
-			expect(out).toContain("assist refactor extract");
+			expect(out).toContain("src/foo/bar.ts");
+			expect(out).toContain(
+				"assist refactor extract <file> <functionName> <destination> --apply",
+			);
 			expect(out).toContain("extract a responsibility to a new file");
 		});
 	});

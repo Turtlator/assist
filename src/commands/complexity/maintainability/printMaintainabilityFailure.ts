@@ -3,17 +3,11 @@ import chalk from "chalk";
 import type { MaintainabilityGitState } from "./getMaintainabilityGitState";
 import type { ResultEntry } from "./ResultEntry";
 
-function suggestDestination(file: string, functionName: string): string {
-	return path.join(path.dirname(file), `${functionName}.ts`);
-}
+const extractTemplate =
+	"assist refactor extract <file> <functionName> <destination> --apply";
 
 function remediationLine(entry: ResultEntry): string {
-	const { file, largestFunction } = entry;
-	if (largestFunction === "" || largestFunction.startsWith("<"))
-		return `  Move the largest responsibility out of ${chalk.bold(file)} into a new file with 'assist refactor extract'.`;
-	const dest = suggestDestination(file, largestFunction);
-	const command = `assist refactor extract ${file} ${largestFunction} ${dest} --apply`;
-	return `  ${chalk.bold(file)} → extract '${largestFunction}' to a new file:\n    ${chalk.cyan(command)}`;
+	return `  ${chalk.bold(entry.file)}\n    Pick a responsibility and extract it:\n    ${chalk.cyan(extractTemplate)}`;
 }
 
 function cheatLine(
