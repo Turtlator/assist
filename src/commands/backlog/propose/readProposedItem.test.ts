@@ -36,7 +36,10 @@ function expectFailure() {
 
 describe("readProposedItem", () => {
 	it("reads and validates a payload from a file", async () => {
-		expect(await readProposedItem(writePayload(payload))).toEqual(payload);
+		expect(await readProposedItem(writePayload(payload))).toEqual({
+			...payload,
+			phases: [],
+		});
 	});
 
 	it("reads a payload from stdin", async () => {
@@ -44,15 +47,72 @@ describe("readProposedItem", () => {
 			Readable.from([JSON.stringify(payload)]) as typeof process.stdin,
 		);
 
-		expect(await readProposedItem("-")).toEqual(payload);
+		expect(await readProposedItem("-")).toEqual({ ...payload, phases: [] });
 	});
 
-	it("defaults acceptance criteria to an empty list", async () => {
+	it("defaults acceptance criteria and phases to empty lists", async () => {
 		const item = await readProposedItem(
 			writePayload({ name: "n", type: "story" }),
 		);
 
 		expect(item.acceptanceCriteria).toEqual([]);
+		expect(item.phases).toEqual([]);
+	});
+
+	it("reads phases with their tasks and manual checks", async () => {
+		const item = await readProposedItem(
+			writePayload({
+				name: "n",
+				type: "story",
+				phases: [
+					{ name: "Wire it up", tasks: ["Add the pane"] },
+					{
+						name: "Polish",
+						tasks: ["Tidy the chip"],
+						manualChecks: ["Open the pane"],
+					},
+				],
+			}),
+		);
+
+		expect(item.phases).toEqual([
+			{ name: "Wire it up", tasks: ["Add the pane"], manualChecks: [] },
+			{
+				name: "Polish",
+				tasks: ["Tidy the chip"],
+				manualChecks: ["Open the pane"],
+			},
+		]);
+	});
+
+	it("exits non-zero when a phase has no tasks", async () => {
+		const errorSpy = expectFailure();
+
+		await expect(
+			readProposedItem(
+				writePayload({
+					name: "n",
+					type: "story",
+					phases: [{ name: "Empty", tasks: [] }],
+				}),
+			),
+		).rejects.toThrow("process.exit");
+		expect(errorSpy.mock.calls.join("\n")).toContain("at least one task");
+	});
+
+	it("exits non-zero on an unknown field inside a phase", async () => {
+		const errorSpy = expectFailure();
+
+		await expect(
+			readProposedItem(
+				writePayload({
+					name: "n",
+					type: "story",
+					phases: [{ name: "P", tasks: ["t"], checks: ["oops"] }],
+				}),
+			),
+		).rejects.toThrow("process.exit");
+		expect(errorSpy.mock.calls.join("\n")).toContain("checks");
 	});
 
 	it("exits non-zero when the payload is not valid JSON", async () => {

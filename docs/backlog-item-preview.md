@@ -33,7 +33,15 @@ The backlog preview is text plus inline comments only. It has no screenshot atta
 	"name": "Preview backlog items before creation",
 	"type": "story",
 	"description": "**Repro:**\n\n1. …",
-	"acceptanceCriteria": ["The pane opens", "Approval creates the item"]
+	"acceptanceCriteria": ["The pane opens", "Approval creates the item"],
+	"phases": [
+		{ "name": "Render the plan", "tasks": ["Extend the payload"] },
+		{
+			"name": "Insert the phases",
+			"tasks": ["Write every phase"],
+			"manualChecks": ["Run /draft end to end"]
+		}
+	]
 }
 ```
 
@@ -43,8 +51,11 @@ The backlog preview is text plus inline comments only. It has no screenshot atta
 | `type`               | yes      | `story` or `bug`                                         |
 | `description`        | no       | Markdown; real newlines, not escaped `\n` sequences      |
 | `acceptanceCriteria` | no       | Defaults to `[]`; each entry non-empty after trimming    |
+| `phases`             | no       | Defaults to `[]`; ordered, and written in payload order  |
 
-Phases (`name`, `tasks`, `manualChecks`) join this payload when plan authoring moves onto `propose`; until then a bug's default `Fix` phase is still applied on insert, as `assist backlog add` does.
+Each phase is `{ name, tasks, manualChecks }`. `name` and every task are non-empty after trimming, `tasks` needs at least one entry, and `manualChecks` defaults to `[]` — most phases have none.
+
+`phases` and a bug's default `Fix` phase are mutually exclusive: when the payload carries phases they are the plan, and the default is only applied to a `bug` proposed with no phases, matching what `assist backlog add` does.
 
 ## Wire protocol
 

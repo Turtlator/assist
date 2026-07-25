@@ -13,7 +13,12 @@ import {
 } from "vitest";
 import { createTestDb } from "../../../shared/db/createTestDb";
 import type { Db } from "../../../shared/db/Db";
-import { items, itemSubtasks, planPhases } from "../../../shared/db/schema";
+import {
+	items,
+	itemSubtasks,
+	planPhases,
+	planTasks,
+} from "../../../shared/db/schema";
 import type { AssistConfig } from "../../../shared/types";
 import { propose } from "./index";
 
@@ -49,6 +54,21 @@ const bug = {
 	type: "bug",
 	description: "**Repro:**\n\n1. File a bug",
 	acceptanceCriteria: ["The pane opens", "Approval creates the item"],
+};
+
+const story = {
+	name: "Preview backlog items",
+	type: "story",
+	description: "## Background\n\nItems need a gate.",
+	acceptanceCriteria: ["The plan is reviewed"],
+	phases: [
+		{ name: "Render the plan", tasks: ["Extend the payload", "Render it"] },
+		{
+			name: "Insert the phases",
+			tasks: ["Write every phase"],
+			manualChecks: ["Run /draft end to end"],
+		},
+	],
 };
 
 function writePayload(content: unknown): string {
@@ -147,6 +167,80 @@ describe("propose inside a web session", () => {
 				.from(itemSubtasks)
 				.where(eq(itemSubtasks.itemId, item.id)),
 		).toEqual([{ title: "Write tests" }]);
+	});
+
+	it("renders the plan in the previewed body", async () => {
+		mockRequestPreviewDecision.mockResolvedValue({ decision: "approve" });
+
+		await propose({ json: writePayload(story) });
+
+		const body = mockRequestPreviewDecision.mock.calls[0][0].body as string;
+		expect(body).toContain("## Plan");
+		expect(body).toContain("### Phase 1: Render the plan");
+		expect(body).toContain("- Extend the payload");
+		expect(body).toContain("### Phase 2: Insert the phases");
+		expect(body).toContain("**Manual checks:**");
+		expect(body).toContain("- Run /draft end to end");
+	});
+
+	it("writes every phase in order on approval", async () => {
+		mockRequestPreviewDecision.mockResolvedValue({ decision: "approve" });
+
+		await propose({ json: writePayload(story) });
+
+		const [item] = await allItems();
+		expect(
+			await orm
+				.select({
+					idx: planPhases.idx,
+					name: planPhases.name,
+					manualChecks: planPhases.manualChecks,
+				})
+				.from(planPhases)
+				.where(eq(planPhases.itemId, item.id))
+				.orderBy(asc(planPhases.idx)),
+		).toEqual([
+			{ idx: 0, name: "Render the plan", manualChecks: null },
+			{
+				idx: 1,
+				name: "Insert the phases",
+				manualChecks: JSON.stringify(["Run /draft end to end"]),
+			},
+		]);
+		expect(
+			await orm
+				.select({
+					phaseIdx: planTasks.phaseIdx,
+					idx: planTasks.idx,
+					task: planTasks.task,
+				})
+				.from(planTasks)
+				.where(eq(planTasks.itemId, item.id))
+				.orderBy(asc(planTasks.phaseIdx), asc(planTasks.idx)),
+		).toEqual([
+			{ phaseIdx: 0, idx: 0, task: "Extend the payload" },
+			{ phaseIdx: 0, idx: 1, task: "Render it" },
+			{ phaseIdx: 1, idx: 0, task: "Write every phase" },
+		]);
+	});
+
+	it("uses the payload's phases instead of a bug's default Fix phase", async () => {
+		mockRequestPreviewDecision.mockResolvedValue({ decision: "approve" });
+
+		await propose({
+			json: writePayload({
+				...bug,
+				phases: [{ name: "Patch the guard", tasks: ["Add the check"] }],
+			}),
+		});
+
+		const [item] = await allItems();
+		expect(
+			await orm
+				.select({ name: planPhases.name })
+				.from(planPhases)
+				.where(eq(planPhases.itemId, item.id)),
+		).toEqual([{ name: "Patch the guard" }]);
 	});
 
 	it("exits non-zero without creating the item when the preview is rejected", async () => {

@@ -24,7 +24,16 @@ Ask one question at a time. Wait for the user's response before asking the next.
 
 ## Step 3: Propose the item
 
-Once you have enough context, propose a complete backlog item. Show it to the user in a readable format:
+Where the review happens depends on whether this is a web session — check it once:
+
+```
+echo "${ASSIST_SESSION:-0}"
+```
+
+- **`1` (web session):** do NOT print the item in the terminal. Skip straight to Step 5 — `assist backlog propose` slides the whole item, plan included, into the web UI preview pane, where the user approves it, rejects it, or leaves inline comments on specific lines. That pane is the review gate.
+- **anything else:** show the user the item in chat as below, iterate (Step 4), then save.
+
+Either way you compose the same content, so draft it before you call `propose`:
 
 **Name:** (concise title)
 **Type:** story or bug
@@ -83,27 +92,39 @@ Most phases should NOT have manual checks. Only add `manualChecks` to a phase wh
 
 ## Step 4: Iterate
 
-Ask the user if they want to change anything. Iterate until they confirm.
+In a web session, skip this step — the preview pane handles it.
+
+Otherwise, ask the user if they want to change anything. Iterate until they confirm.
 
 ## Step 5: Save
 
-Once confirmed, create the item and its phases via CLI commands.
-
-First, add the item and capture the id it prints:
+Propose the item and capture the id it prints. Use `propose`, not `assist backlog add` plus `add-phase` — `propose` is the reviewed path for an agent-authored item, and it writes the item and every phase on a single approval:
 
 ```
-assist backlog add --name "Item name" --type story --desc "$(printf '## Background\n\nShort paragraph.\n\n## Goal\n\n- Bullet one\n- Bullet two')" --ac "criterion 1" --ac "criterion 2" 2>&1
+cat <<'JSON' | assist backlog propose --json - 2>&1
+{
+  "name": "Item name",
+  "type": "story",
+  "description": "## Background\n\nShort paragraph.\n\n## Goal\n\n- Bullet one\n- Bullet two",
+  "acceptanceCriteria": ["criterion 1", "criterion 2"],
+  "phases": [
+    { "name": "Phase one name", "tasks": ["Task 1", "Task 2"] },
+    { "name": "Phase two name", "tasks": ["Task 1"], "manualChecks": ["optional check"] }
+  ]
+}
+JSON
 ```
 
-Pass the description as real markdown with line breaks preserved (use `printf` or a quoted heredoc so `\n` becomes actual newlines, not the literal `\n` characters).
+The payload is strict JSON — an unknown key is an error. `\n` inside the `description` string is a JSON escape and becomes a real newline, which is what the markdown rendering needs. Each phase needs at least one task; omit `manualChecks` for the phases that don't need any (most of them).
+
+In a web session this blocks until the user decides in the preview pane:
+
+- **Approved** — the item and all of its phases are created, and the item id is printed.
+- **Rejected** — the command exits non-zero and prints the reason plus every inline comment with the excerpt it was left on. Do not retry verbatim: address each comment — including ones about the plan — then call `propose` again with the revised payload. Repeat until it is approved.
+
+Outside a web session the rendered item is printed and created straight away.
 
 Note the created item id from the output — you'll pass it to the done signal below.
-
-Then add each phase:
-
-```
-assist backlog add-phase a<id> "Phase name" --task "Task 1" --task "Task 2" --manual-check "optional check" 2>&1
-```
 
 ### Associate an external tracker
 
