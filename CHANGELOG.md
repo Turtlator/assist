@@ -1,3 +1,10 @@
+# [0.440.0](https://github.com/staff0rd/assist/compare/v0.439.2...v0.440.0) (2026-07-25)
+
+
+### Features
+
+* preview backlog items on create ([1717045](https://github.com/staff0rd/assist/commit/1717045c45d988f474025a649ec85fc3a1de63df))
+
 ## [0.439.2](https://github.com/staff0rd/assist/compare/v0.439.1...v0.439.2) (2026-07-25)
 
 
