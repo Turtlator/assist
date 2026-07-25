@@ -1,21 +1,22 @@
 import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
-import Tooltip from "@mui/material/Tooltip";
 import { Link as RouterLink } from "react-router";
-import { GitStatusTooltip, type StatusGroup } from "./GitStatusTooltip";
+import { StopCardActivation } from "./StopCardActivation";
 
 const containerSx = {
 	display: "flex",
 	alignItems: "center",
-	gap: 1,
-	ml: 2,
+	gap: 0.75,
 	fontFamily: "monospace",
-	fontSize: 13,
 } as const;
 
-const tooltipSlotProps = {
-	tooltip: { sx: { maxWidth: "none" } },
-} as const;
+type StatusGroup = {
+	key: string;
+	label: string;
+	prefix: string;
+	color: string;
+	count: number;
+};
 
 export const GROUPS = [
 	{ key: "new", label: "New", prefix: "+", color: "success.main" },
@@ -32,21 +33,25 @@ function GitStatusChips({ groups }: { groups: StatusGroup[] }) {
 	));
 }
 
-export function GitStatusLink({ groups }: { groups: StatusGroup[] }) {
+export function GitStatusLink({
+	cwd,
+	groups,
+}: {
+	cwd: string;
+	groups: StatusGroup[];
+}) {
 	return (
-		<Tooltip
-			title={<GitStatusTooltip groups={groups} />}
-			slotProps={tooltipSlotProps}
-		>
+		<StopCardActivation>
 			<Link
 				component={RouterLink}
-				to="/diff"
+				to={`/diff?cwd=${encodeURIComponent(cwd)}`}
+				variant="caption"
 				underline="hover"
 				color="inherit"
 				sx={containerSx}
 			>
 				<GitStatusChips groups={groups} />
 			</Link>
-		</Tooltip>
+		</StopCardActivation>
 	);
 }

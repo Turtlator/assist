@@ -11,13 +11,11 @@ export function GitStatusCounts({
 	const counts = useGitStatusCounts(cwd, paused);
 
 	const groups = counts
-		? GROUPS.map((g) => ({
-				...g,
-				count: counts[g.key].length,
-				paths: counts[g.key],
-			})).filter((g) => g.count > 0)
+		? GROUPS.map((g) => ({ ...g, count: counts[g.key].length })).filter(
+				(g) => g.count > 0,
+			)
 		: [];
 	if (!counts || groups.length === 0) return null;
 
-	return <GitStatusLink groups={groups} />;
+	return <GitStatusLink cwd={cwd} groups={groups} />;
 }

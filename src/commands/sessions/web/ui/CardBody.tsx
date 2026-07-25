@@ -36,6 +36,7 @@ export function CardBody({
 			<StatusRow
 				status={session.status}
 				elapsed={elapsed}
+				cwd={session.cwd}
 				restored={session.restored}
 				usedPct={session.usedPct}
 				undurable={session.undurable}
