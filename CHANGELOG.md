@@ -1,3 +1,10 @@
+## [0.434.1](https://github.com/staff0rd/assist/compare/v0.434.0...v0.434.1) (2026-07-25)
+
+
+### Bug Fixes
+
+* hold any tree with unlanded work ([aed4398](https://github.com/staff0rd/assist/commit/aed4398b2afac7e6da2c85b2f4200efe5469b281))
+
 # [0.434.0](https://github.com/staff0rd/assist/compare/v0.433.5...v0.434.0) (2026-07-25)
 
 
