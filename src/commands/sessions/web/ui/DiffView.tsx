@@ -1,9 +1,11 @@
 import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import { parseDiff, type ViewType } from "react-diff-view";
 import { DiffToolbar } from "./DiffToolbar";
 import { diffSx } from "./diffSx";
 import { FileDiff, fileKey } from "./FileDiff";
+import { type DiffChangeType, filterDiffFiles } from "./filterDiffFiles";
 import { PageShell } from "./PageShell";
 import { useDiff } from "./useDiff";
 import { useRepoSelectionContext } from "./useRepoSelectionContext";
@@ -12,8 +14,11 @@ export function DiffView() {
 	const { selectedCwd } = useRepoSelectionContext();
 	const { diff, loading, error } = useDiff(selectedCwd);
 	const [viewType, setViewType] = useState<ViewType>("split");
+	const [search, setSearch] = useState("");
+	const [changeType, setChangeType] = useState<DiffChangeType>("all");
 
 	const files = error || !diff ? [] : parseDiff(diff);
+	const filtered = filterDiffFiles(files, { query: search, changeType });
 
 	return (
 		<PageShell
@@ -22,17 +27,30 @@ export function DiffView() {
 			emptyMessage={error ? "Failed to load diff." : "No working-tree changes."}
 			maxWidth={false}
 		>
-			<DiffToolbar viewType={viewType} onChange={setViewType} />
-			<Box sx={diffSx}>
-				{files.map((file) => (
-					<FileDiff
-						key={fileKey(file)}
-						file={file}
-						viewType={viewType}
-						cwd={selectedCwd}
-					/>
-				))}
-			</Box>
+			<DiffToolbar
+				viewType={viewType}
+				onChange={setViewType}
+				search={search}
+				onSearchChange={setSearch}
+				changeType={changeType}
+				onChangeTypeChange={setChangeType}
+			/>
+			{filtered.length === 0 ? (
+				<Typography color="text.secondary" align="center" sx={{ py: 6 }}>
+					No files match your filter.
+				</Typography>
+			) : (
+				<Box sx={diffSx}>
+					{filtered.map((file) => (
+						<FileDiff
+							key={fileKey(file)}
+							file={file}
+							viewType={viewType}
+							cwd={selectedCwd}
+						/>
+					))}
+				</Box>
+			)}
 		</PageShell>
 	);
 }

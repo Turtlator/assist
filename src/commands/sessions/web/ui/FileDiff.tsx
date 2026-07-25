@@ -10,7 +10,7 @@ export function fileKey(file: FileData): string {
 	return `${file.oldRevision}-${file.newRevision}-${file.newPath || file.oldPath}`;
 }
 
-function filePath(file: FileData): string {
+export function filePath(file: FileData): string {
 	return file.newPath && file.newPath !== "/dev/null"
 		? file.newPath
 		: file.oldPath;
