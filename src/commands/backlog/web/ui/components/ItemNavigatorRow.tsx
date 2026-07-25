@@ -1,39 +1,49 @@
-import { Box, ButtonBase, Typography } from "@mui/material";
+import { ButtonBase } from "@mui/material";
 import type { ItemNavSection } from "./itemNavSections";
 import { phaseStatusStyles } from "./phaseStatusStyles";
 
 const FONT_SIZE = "1.75rem";
 
-const baseRowSx = {
-	justifyContent: "flex-start",
-	width: "100%",
-	pr: 1,
-	py: 0.25,
+const translucentHoverOverlaySx = {
+	position: "relative",
 	borderRadius: 1,
-	textAlign: "left",
-	"&:hover": { bgcolor: "action.hover" },
+	"&::after": {
+		content: '""',
+		position: "absolute",
+		inset: 0,
+		borderRadius: "inherit",
+		pointerEvents: "none",
+	},
+	"&:hover::after": { bgcolor: "action.hover" },
+	"&:active::after": { bgcolor: "action.selected" },
 } as const;
 
-const labelSx = {
+const labelButtonSx = {
+	...translucentHoverOverlaySx,
+	display: "block",
+	maxWidth: "100%",
+	px: 0.75,
 	fontSize: FONT_SIZE,
 	letterSpacing: "0.02em",
+	textAlign: "left",
 	whiteSpace: "nowrap",
 	overflow: "hidden",
 	textOverflow: "ellipsis",
 	color: "text.secondary",
 } as const;
 
-const circleSx = {
+const circleButtonSx = {
+	...translucentHoverOverlaySx,
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
 	fontSize: FONT_SIZE,
 	width: "2em",
 	height: "2em",
 	flexShrink: 0,
+	lineHeight: 1,
 	borderRadius: "50%",
 	border: 1,
-	display: "flex",
-	alignItems: "center",
-	justifyContent: "center",
-	lineHeight: 1,
 	color: "text.primary",
 } as const;
 
@@ -46,24 +56,21 @@ export function ItemNavigatorRow({ section, onSelect }: ItemNavigatorRowProps) {
 	const tint = section.status && phaseStatusStyles[section.status];
 	return (
 		<ButtonBase
-			sx={{ ...baseRowSx, pl: section.nested ? 2 : 1 }}
+			sx={
+				tint
+					? {
+							...circleButtonSx,
+							ml: 2,
+							bgcolor: tint.bgcolor,
+							borderColor: tint.borderColor,
+							...(tint.ring ? { boxShadow: "0 0 0 2px" } : {}),
+						}
+					: labelButtonSx
+			}
 			onClick={() => onSelect(section.id)}
 			title={section.title ?? section.label}
 		>
-			{tint ? (
-				<Box
-					sx={{
-						...circleSx,
-						bgcolor: tint.bgcolor,
-						borderColor: tint.borderColor,
-						...(tint.ring ? { boxShadow: "0 0 0 2px" } : {}),
-					}}
-				>
-					{section.label}
-				</Box>
-			) : (
-				<Typography sx={labelSx}>{section.label}</Typography>
-			)}
+			{section.label}
 		</ButtonBase>
 	);
 }

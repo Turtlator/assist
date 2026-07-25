@@ -1,4 +1,4 @@
-import { Paper, Stack, useMediaQuery } from "@mui/material";
+import { Stack, useMediaQuery } from "@mui/material";
 import type { Theme } from "@mui/material";
 import type { BacklogItem } from "../types";
 import { itemNavSections } from "./itemNavSections";
@@ -18,8 +18,7 @@ const panelSx = {
 	left: gutterLeft,
 	right: 8,
 	minWidth: 0,
-	overflow: "hidden",
-	p: 0.5,
+	alignItems: "flex-start",
 } as const;
 
 function scrollToSection(id: string) {
@@ -35,16 +34,14 @@ export function ItemNavigator({ item }: { item: BacklogItem }) {
 	const sections = itemNavSections(item);
 	if (!wideEnough || sections.length === 0) return null;
 	return (
-		<Paper variant="outlined" component="nav" sx={panelSx}>
-			<Stack>
-				{sections.map((section) => (
-					<ItemNavigatorRow
-						key={section.id}
-						section={section}
-						onSelect={scrollToSection}
-					/>
-				))}
-			</Stack>
-		</Paper>
+		<Stack component="nav" spacing={0.25} sx={panelSx}>
+			{sections.map((section) => (
+				<ItemNavigatorRow
+					key={section.id}
+					section={section}
+					onSelect={scrollToSection}
+				/>
+			))}
+		</Stack>
 	);
 }
