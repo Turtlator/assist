@@ -1,3 +1,4 @@
+import { repoGroupCwd } from "./repoGroupKey";
 import type { HistoricalSession, SessionInfo } from "./types";
 
 export function deriveActiveCwd(
@@ -7,7 +8,7 @@ export function deriveActiveCwd(
 ): string | undefined {
 	if (!activeId) return undefined;
 	const live = sessions.find((s) => s.id === activeId);
-	if (live) return live.cwd;
+	if (live) return repoGroupCwd(live);
 	const past = history.find((h) => h.sessionId === activeId);
-	return past?.cwd;
+	return past && repoGroupCwd(past);
 }

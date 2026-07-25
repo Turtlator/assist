@@ -86,6 +86,45 @@ describe("groupSessionsByRepo", () => {
 		]);
 	});
 
+	it("groups a clone and its worktrees under one entry named after the clone", () => {
+		const group = { origin: "host/org/assist", clone: "/git/assist" };
+		const sessions = [
+			{ ...session("a", "/git/assist"), repoGroup: group },
+			{ ...session("b", "/git/assist-2"), repoGroup: group },
+		];
+
+		const groups = groupSessionsByRepo(sessions, () => false);
+
+		expect(groups).toEqual([
+			{
+				kind: "repo",
+				key: "host/org/assist",
+				label: "assist",
+				sessions: [sessions[0], sessions[1]],
+			},
+		]);
+	});
+
+	it("keeps clones of different repos apart even in the same directory tree", () => {
+		const sessions = [
+			{
+				...session("a", "/git/assist"),
+				repoGroup: { origin: "host/org/assist", clone: "/git/assist" },
+			},
+			{
+				...session("b", "/git/other"),
+				repoGroup: { origin: "host/org/other", clone: "/git/other" },
+			},
+		];
+
+		const groups = groupSessionsByRepo(sessions, () => false);
+
+		expect(groups).toEqual([
+			{ kind: "single", session: sessions[0] },
+			{ kind: "single", session: sessions[1] },
+		]);
+	});
+
 	it("treats repos sharing a last segment but differing in full path as distinct", () => {
 		const sessions = [
 			session("a", "/home/me/work/assist"),

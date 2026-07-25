@@ -71,4 +71,46 @@ describe("uniqueRepos", () => {
 	it("returns an empty list when there is no cwd or history", () => {
 		expect(uniqueRepos("", [])).toEqual([]);
 	});
+
+	it("lists a clone and its worktrees as one entry, pointing at the clone", () => {
+		const group = { origin: "host/org/assist", clone: "/git/assist" };
+		const history = [
+			{ ...session("/git/assist-2"), repoGroup: group },
+			{ ...session("/git/assist"), repoGroup: group },
+			{ ...session("/git/assist-3"), repoGroup: group },
+		];
+
+		expect(uniqueRepos("", history)).toEqual(["/git/assist"]);
+	});
+
+	it("does not add the cwd again when a session already places it in a group", () => {
+		const group = { origin: "host/org/assist", clone: "/git/assist" };
+		const history = [
+			{ ...session("/git/assist"), repoGroup: group },
+			{ ...session("/git/assist-2"), repoGroup: group },
+		];
+
+		expect(uniqueRepos("/git/assist-2", history)).toEqual(["/git/assist"]);
+	});
+
+	it("keeps a windows checkout separate from its wsl counterpart", () => {
+		const history = [
+			{
+				...session("/git/assist"),
+				repoGroup: { origin: "host/org/assist", clone: "/git/assist" },
+			},
+			{
+				...session(String.raw`C:\git\assist`),
+				repoGroup: {
+					origin: "windows:host/org/assist",
+					clone: String.raw`C:\git\assist`,
+				},
+			},
+		];
+
+		expect(uniqueRepos("", history)).toEqual([
+			"/git/assist",
+			String.raw`C:\git\assist`,
+		]);
+	});
 });

@@ -8,11 +8,23 @@ type WorktreeRecord = {
 	origin: string;
 };
 
-type Registry = Record<string, { clone: string; origin: string }>;
+type Registry = Record<
+	string,
+	{ clone: string; origin: string; reaped?: boolean }
+>;
 
 export function readWorktreeRegistry(): WorktreeRecord[] {
 	const data = loadJson<Registry>(REGISTRY_FILE);
-	return Object.entries(data).map(([path, record]) => ({ path, ...record }));
+	return Object.entries(data)
+		.filter(([, record]) => !record.reaped)
+		.map(([path, record]) => ({ path, ...record }));
+}
+
+export function worktreeAttributionIncludingReaped(
+	path: string,
+): { clone: string; origin: string } | undefined {
+	const record = loadJson<Registry>(REGISTRY_FILE)[path];
+	return record ? { clone: record.clone, origin: record.origin } : undefined;
 }
 
 export function recordWorktree(
@@ -27,7 +39,8 @@ export function recordWorktree(
 
 export function forgetWorktree(path: string): void {
 	const data = loadJson<Registry>(REGISTRY_FILE);
-	if (!(path in data)) return;
-	delete data[path];
+	const record = data[path];
+	if (!record || record.reaped) return;
+	data[path] = { ...record, reaped: true };
 	saveJson(REGISTRY_FILE, data);
 }

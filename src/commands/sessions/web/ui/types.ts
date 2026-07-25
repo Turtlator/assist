@@ -1,6 +1,7 @@
 import type { HarnessKind } from "../../../../shared/harnesses";
 import type { SessionType } from "../../shared/deriveHistoryFields";
 import type { SessionOrigin } from "../../shared/parseSessionFile";
+import type { RepoGroup } from "../../shared/RepoGroup";
 import type { SessionInfoBase } from "../../shared/SessionInfoBase";
 
 export type SessionStatus =
@@ -38,6 +39,7 @@ export type HistoricalSession = {
 	project: string;
 	cwd: string;
 	timestamp: string;
+	repoGroup?: RepoGroup;
 	origin?: SessionOrigin;
 	sessionType?: SessionType;
 	itemId?: number;

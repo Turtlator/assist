@@ -20,6 +20,15 @@ const sessions: SessionInfo[] = [
 		status: "running",
 		startedAt: 0,
 	},
+	{
+		id: "live-worktree",
+		name: "worktree",
+		commandType: "claude",
+		status: "running",
+		startedAt: 0,
+		cwd: "/repos/live-2",
+		repoGroup: { origin: "host/org/live", clone: "/repos/live" },
+	},
 ];
 
 const history: HistoricalSession[] = [
@@ -60,6 +69,15 @@ describe("useSyncRepoToActiveCard", () => {
 		rerender({ id: "hist-1" });
 
 		expect(setSelectedCwd).toHaveBeenCalledWith("/repos/hist");
+	});
+
+	it("selects the clone when the clicked card runs in one of its worktrees", () => {
+		const setSelectedCwd = vi.fn();
+		const { rerender } = renderSync(setSelectedCwd, null);
+
+		rerender({ id: "live-worktree" });
+
+		expect(setSelectedCwd).toHaveBeenCalledWith("/repos/live");
 	});
 
 	it("leaves the selection unchanged for a card with no cwd", () => {

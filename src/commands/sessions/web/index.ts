@@ -3,10 +3,15 @@ import { WebSocketServer } from "ws";
 import { isGitRepo } from "../../../shared/getInstallDir";
 import { startWebServer } from "../../../shared/web";
 import { ensureDaemonRunning } from "../daemon/ensureDaemonRunning";
+import { repoGroupForCwd } from "../daemon/repoGroupForCwd";
 import { handleRequest } from "./handleRequest";
 import { handleSocket, type RelayContext } from "./handleSocket";
 import { installRestartMenu } from "./restartMenu/installRestartMenu";
 import { streamDaemonLogs } from "./streamDaemonLogs";
+
+function repoEntryCwd(serverCwd: string): string {
+	return repoGroupForCwd(serverCwd)?.clone ?? serverCwd;
+}
 
 export async function web(options: {
 	port: string;
@@ -24,7 +29,7 @@ export async function web(options: {
 	const serverCwd = process.cwd();
 	const ctx: RelayContext = {
 		serverCwd,
-		repoCwd: isGitRepo(serverCwd) ? serverCwd : undefined,
+		repoCwd: isGitRepo(serverCwd) ? repoEntryCwd(serverCwd) : undefined,
 	};
 
 	const wss = new WebSocketServer({ noServer: true });

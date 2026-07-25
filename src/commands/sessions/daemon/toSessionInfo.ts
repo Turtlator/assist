@@ -1,5 +1,6 @@
 import type { Session, SessionInfo } from "./createSession";
 import { originForCwd } from "./originForCwd";
+import { repoGroupForCwd } from "./repoGroupForCwd";
 
 export function toSessionInfo({
 	id,
@@ -49,6 +50,7 @@ export function toSessionInfo({
 		remoteOrigin: serverOrigin ?? originForCwd(cwd),
 		assistArgs,
 		cwd,
+		repoGroup: repoGroupForCwd(cwd),
 		restored,
 		error,
 		activity,

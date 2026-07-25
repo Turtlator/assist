@@ -1,3 +1,4 @@
+import { repoGroupCwd, repoGroupKey } from "./repoGroupKey";
 import { repoLabel } from "./repoLabel";
 import type { SessionInfo } from "./types";
 
@@ -11,16 +12,18 @@ export function groupSessionsByRepo(
 ): SessionGroup[] {
 	const order: string[] = [];
 	const buckets = new Map<string, SessionInfo[]>();
+	const labels = new Map<string, string>();
 
 	sessions.forEach((session, index) => {
 		const ungroupedKey = ` nogroup:${index}`;
-		const key = session.cwd ?? ungroupedKey;
+		const key = repoGroupKey(session) ?? ungroupedKey;
 		const existing = buckets.get(key);
 		if (existing) {
 			existing.push(session);
 		} else {
 			order.push(key);
 			buckets.set(key, [session]);
+			labels.set(key, repoLabel(repoGroupCwd(session) ?? key));
 		}
 	});
 
@@ -38,7 +41,7 @@ export function groupSessionsByRepo(
 		result.push({
 			kind: "repo",
 			key,
-			label: repoLabel(key),
+			label: labels.get(key)!,
 			sessions: starredFirst,
 		});
 	}

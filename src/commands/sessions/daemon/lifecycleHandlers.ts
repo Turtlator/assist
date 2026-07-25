@@ -2,12 +2,13 @@ import { discoverSessions } from "../shared/discoverSessions";
 import { parseTranscript } from "../shared/parseTranscript";
 import { type SessionClient, sendTo } from "./broadcast";
 import type { SessionManager } from "./SessionManager";
+import { withRepoGroups } from "./withRepoGroups";
 
 type Msg = Record<string, unknown>;
 
 function handleHistory(client: SessionClient): void {
 	discoverSessions().then((sessions) =>
-		sendTo(client, { type: "history", sessions }),
+		sendTo(client, { type: "history", sessions: withRepoGroups(sessions) }),
 	);
 }
 

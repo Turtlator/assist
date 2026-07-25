@@ -1,5 +1,6 @@
 import type { Activity } from "../../../shared/emitActivity";
 import type { HarnessKind } from "../../../shared/harnesses";
+import type { RepoGroup } from "./RepoGroup";
 
 export type CommandType = "claude" | "run" | "assist";
 
@@ -35,6 +36,7 @@ export type SessionInfoBase = {
 	remoteOrigin?: string;
 	assistArgs?: string[];
 	cwd?: string;
+	repoGroup?: RepoGroup;
 	restored?: boolean;
 	error?: string;
 	activity?: Activity;

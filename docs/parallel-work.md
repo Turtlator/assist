@@ -12,6 +12,10 @@ where you are or where any in-progress changes live. The tool tracks that; you d
 - A workspace counts as free once nothing live is working in it and it holds nothing
   unlanded. A finished card left sitting on the board does not push the next session
   somewhere new — it reuses the workspace it is standing in.
+- A repo reads as **one place** wherever you pick or browse it. The repo selector and
+  the history list show it once — its own working copy and every `<repo>-N` workspace
+  under the same remote — and sessions that ran in a workspace since cleaned away are
+  still listed there, under the repo they belong to.
 - Isolation is per session, not per task. The same piece of work is never started
   twice: ask to run a backlog item that already has a live run and the tool
   **refuses and points at the run that holds it**, rather than isolating a duplicate

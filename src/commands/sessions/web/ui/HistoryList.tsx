@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { HistoryCard } from "./HistoryCard";
-import { repoName } from "./RepoList";
+import { repoGroupKey, repoKeyForCwd } from "./repoGroupKey";
 import type { HistoricalSession, HistoryCardHandlers } from "./types";
 import { useRepoSelectionContext } from "./useRepoSelectionContext";
 
@@ -43,8 +43,9 @@ export function HistoryList({
 	onResume,
 }: { sessions: HistoricalSession[] } & HistoryCardHandlers) {
 	const { selectedCwd } = useRepoSelectionContext();
+	const selectedKey = repoKeyForCwd(selectedCwd, sessions);
 	const filtered = selectedCwd
-		? sessions.filter((s) => s.project === repoName(selectedCwd))
+		? sessions.filter((s) => repoGroupKey(s) === selectedKey)
 		: [];
 
 	return (
