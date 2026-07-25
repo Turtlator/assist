@@ -1,6 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { execGit } from "./execGit";
 import { getCwdParam } from "./getCwdParam";
+import { resolveDiffBase } from "./resolveDiffBase";
 
 const MAX_DIFF_BYTES = 50 * 1024 * 1024;
 
@@ -31,7 +32,8 @@ export async function diff(
 	const cwd = getCwdParam(req, res);
 	if (!cwd) return;
 	try {
-		const tracked = await execGit(cwd, ["diff", "HEAD"], {
+		const base = await resolveDiffBase(cwd);
+		const tracked = await execGit(cwd, ["diff", base], {
 			maxBuffer: MAX_DIFF_BYTES,
 		});
 		const untracked = await untrackedDiff(cwd);

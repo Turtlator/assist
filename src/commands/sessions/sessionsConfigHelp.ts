@@ -23,6 +23,11 @@ export const sessionsConfigHelp: ConfigHelpEntry[] = [
 		note: "Windows daemon version mismatch handling: block | warn | off",
 	},
 	{
+		key: "sessions.includeCommittedChanges",
+		setter: "assist config set sessions.includeCommittedChanges true -g",
+		note: "session card counts and /diff span the whole branch (merge-base with the default branch) instead of just uncommitted work (default off)",
+	},
+	{
 		key: "worktree.enabled",
 		setter: "assist config set worktree.enabled true -g --repo",
 		note: "opt in per repo: spill concurrent sessions into adjacent <clone>-N worktrees (default off)",
