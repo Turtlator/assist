@@ -69,6 +69,8 @@ assist backlog remove-phase <id> <phase>
 assist backlog add-phase <id> "Phase name" --task "Task 1" --task "Task 2"
 ```
 
+In a web session this slides the phase into the preview pane and blocks until the user approves it. On rejection the command exits non-zero with the reason and each inline comment and writes nothing — revise the phase and run it again.
+
 ### Phase design rules
 
 When adding or restructuring plan phases, follow the same rules as /draft:

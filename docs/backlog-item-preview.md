@@ -89,12 +89,18 @@ Shared plumbing lives in `src/commands/sessions/shared/`, not under `prs/`, beca
 | `add-phase` by an agent in a web session     | Previewed; the phase is written only on approval |
 | `add-phase` by a human, or outside a session | Unchanged                                        |
 
-A web session is detected the same way `prs raise` detects it: `ASSIST_SESSION === "1"` with an `ASSIST_SESSION_ID`.
+An agent is detected with `isClaudeCode()` — the `CLAUDECODE` environment variable Claude Code sets on every command it runs. A web session is detected the same way `prs raise` detects it: `ASSIST_SESSION === "1"` with an `ASSIST_SESSION_ID`.
+
+`add` checks for an agent before anything else — before the git-remote check and before any prompt — and exits non-zero with a message naming `propose`, so nothing is read from the terminal and nothing is written. The whole interactive path, including `--name/--type/--desc/--ac`, is untouched for a human.
+
+`add-phase` gates on **both** conditions: the caller is an agent _and_ it is running in a web session. Either alone writes directly, because a human does not need to approve their own phase and an agent outside a web session has no pane to approve in — that is the same fallback `propose` takes. The gate sits after the item is resolved and the insert position is validated, so a bad id or an out-of-range `--position` still fails without opening a pane. The previewed body is the single phase being added, rendered by the same `renderPhaseSection` that renders each phase inside a `propose` preview, so a phase looks the same whether it arrives with its story or later. The title names the target item (`Add a phase to a774: <item name>`) and the chip carries that item's type.
 
 ## Invariants
 
 - Nothing is written to the backlog before an approval. A rejected or abandoned preview leaves no item, no phase and no sub-task behind.
 - An approval writes the item and every phase in the payload — never a subset.
+- No un-approved phase can be bolted onto a just-approved story. A rejected `add-phase` preview leaves the item's existing plan exactly as it was, and never renumbers a phase.
+- There is no agent path to the backlog that skips the gate: `add` refuses agents outright, and `add-phase` previews them.
 - A rejection exits non-zero and prints the reason plus every inline comment with its quoted excerpt, so the agent has enough to revise without asking the user to repeat themselves.
 - The preview renders exactly the markdown that will be stored, so what the reviewer marked up is what gets written.
 - The backlog preview never carries images.

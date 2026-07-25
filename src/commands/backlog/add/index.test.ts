@@ -21,9 +21,14 @@ vi.mock("../../../shared/db/getDb", () => ({
 }));
 
 let remoteOrigin = true;
+let claudeCode = false;
 
 vi.mock("../shared", () => ({
 	getOrigin: () => "test",
+}));
+
+vi.mock("../../../lib/isClaudeCode", () => ({
+	isClaudeCode: () => claudeCode,
 }));
 
 vi.mock("../ensureRemoteOrigin", () => ({
@@ -76,10 +81,14 @@ beforeEach(async () => {
 	({ orm, close } = await createTestDb());
 	mockConfig = {} as AssistConfig;
 	remoteOrigin = true;
+	claudeCode = false;
+	process.exitCode = 0;
 });
 
 afterEach(async () => {
 	await close();
+	vi.restoreAllMocks();
+	process.exitCode = 0;
 });
 
 describe("add", () => {
@@ -150,6 +159,19 @@ describe("add", () => {
 
 		const id = await onlyItemId();
 		expect(await getSubtasks(id)).toEqual([]);
+	});
+
+	it("refuses an agent invocation, pointing at propose", async () => {
+		claudeCode = true;
+		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+		await add({ type: "story", name: "Feature", desc: "", ac: [] });
+
+		expect(errorSpy.mock.calls.map((c) => c.join(" ")).join("\n")).toContain(
+			"assist backlog propose --json",
+		);
+		expect(process.exitCode).toBe(1);
+		expect(await orm.select({ id: items.id }).from(items)).toEqual([]);
 	});
 
 	it("refuses to add an item when there is no git remote", async () => {

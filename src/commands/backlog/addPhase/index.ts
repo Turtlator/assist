@@ -1,10 +1,11 @@
 import chalk from "chalk";
-import { formatItemId } from "./formatItemId";
-import { insertPhaseAt } from "./insertPhaseAt";
-import { resolveInsertPosition } from "./resolveInsertPosition";
-import { serializeManualChecks } from "./serializeManualChecks";
-import { ensureRemoteOrigin } from "./ensureRemoteOrigin";
-import { findOneItem } from "./shared";
+import { ensureRemoteOrigin } from "../ensureRemoteOrigin";
+import { formatItemId } from "../formatItemId";
+import { insertPhaseAt } from "../insertPhaseAt";
+import { resolveInsertPosition } from "../resolveInsertPosition";
+import { serializeManualChecks } from "../serializeManualChecks";
+import { findOneItem } from "../shared";
+import { reviewProposedPhase } from "./reviewProposedPhase";
 
 export async function addPhase(
 	id: string,
@@ -28,6 +29,12 @@ export async function addPhase(
 
 	const phaseIdx = await resolveInsertPosition(orm, itemId, options.position);
 	if (phaseIdx === undefined) return;
+
+	await reviewProposedPhase(found.item, phaseIdx, {
+		name,
+		tasks,
+		manualChecks: options.manualCheck,
+	});
 
 	await insertPhaseAt(
 		orm,

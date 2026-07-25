@@ -1,19 +1,5 @@
+import { renderPhaseSection } from "../renderPhaseSection";
 import type { ProposedItem } from "./proposedItemSchema";
-
-function renderPhase(phase: ProposedItem["phases"][number], i: number): string {
-	const parts = [
-		`### Phase ${i + 1}: ${phase.name}`,
-		phase.tasks.map((task) => `- ${task}`).join("\n"),
-	];
-
-	if (phase.manualChecks.length > 0)
-		parts.push(
-			"**Manual checks:**",
-			phase.manualChecks.map((check) => `- ${check}`).join("\n"),
-		);
-
-	return parts.join("\n\n");
-}
 
 export function renderProposedItem(item: ProposedItem): string {
 	const sections = [`**Type:** ${item.type}`];
@@ -27,7 +13,7 @@ export function renderProposedItem(item: ProposedItem): string {
 		);
 
 	if (item.phases.length > 0)
-		sections.push("## Plan", ...item.phases.map(renderPhase));
+		sections.push("## Plan", ...item.phases.map(renderPhaseSection));
 
 	return sections.join("\n\n");
 }

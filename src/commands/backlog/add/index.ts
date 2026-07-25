@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import { isClaudeCode } from "../../../lib/isClaudeCode";
 import { createItemWithDefaults } from "../createItemWithDefaults";
 import { ensureRemoteOrigin } from "../ensureRemoteOrigin";
 import { formatItemId } from "../formatItemId";
@@ -18,6 +19,16 @@ type AddOptions = {
 };
 
 export async function add(options: AddOptions): Promise<void> {
+	if (isClaudeCode()) {
+		console.error(
+			chalk.red(
+				"Error: 'assist backlog add' is for human use. Compose the whole item — name, type, description, acceptance criteria and every phase — and run 'assist backlog propose --json <file|->' so it is previewed and approved before anything is written.",
+			),
+		);
+		process.exitCode = 1;
+		return;
+	}
+
 	if (!ensureRemoteOrigin()) return;
 
 	const type = (options.type as BacklogType) ?? (await promptType());
