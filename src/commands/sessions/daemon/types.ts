@@ -7,6 +7,7 @@ import type {
 	SessionInfoBase,
 } from "../shared/SessionInfoBase";
 import type { spawnClaude } from "./spawnClaude";
+import type { StateWatcher } from "./worktree/watchGitState";
 
 export type SessionStatus =
 	| "running"
@@ -50,7 +51,7 @@ export type Session = {
 	activity?: Activity;
 	activityWatcher?: FSWatcher;
 	transcriptWatcher?: FSWatcher;
-	gitWatcher?: FSWatcher;
+	gitWatcher?: StateWatcher;
 	watchedTranscriptId?: string;
 	worktree?: { path: string; clone: string };
 	undurable?: { reason: string; removesTree?: boolean };

@@ -6,11 +6,8 @@ import {
 import { createSession, type Session } from "../createSession";
 import { resumeSession } from "../resumeSession";
 import { allocateTree } from "./allocateTree";
-import {
-	bindNewWorktree,
-	bindResumedWorktree,
-	boundTreeRoots,
-} from "./bindNewWorktree";
+import { bindNewWorktree, bindResumedWorktree } from "./bindNewWorktree";
+import { boundTreeRoots } from "./boundTreeRoots";
 
 export type TreeSpawnContext = {
 	sessions: Map<string, Session>;

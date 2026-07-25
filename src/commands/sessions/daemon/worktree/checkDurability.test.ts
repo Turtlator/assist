@@ -1,26 +1,34 @@
 import { existsSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { gitResult } from "./git";
-import { checkDurability } from "./treeDurability";
+import { gitResult, gitSyncResult } from "./git";
+import { checkDurability, checkDurabilitySync } from "./treeDurability";
 
 vi.mock("node:fs", () => ({ existsSync: vi.fn(() => true) }));
-vi.mock("./git", () => ({ gitResult: vi.fn() }));
+vi.mock("./git", () => ({ gitResult: vi.fn(), gitSyncResult: vi.fn() }));
 vi.mock("../../../../shared/loadConfigFrom", () => ({
 	loadConfigFrom: vi.fn(() => ({ commit: { push: false } })),
 }));
 
 const existsMock = existsSync as unknown as ReturnType<typeof vi.fn>;
 const gitMock = gitResult as unknown as ReturnType<typeof vi.fn>;
+const gitSyncMock = gitSyncResult as unknown as ReturnType<typeof vi.fn>;
 
-function gitReplies(replies: Record<string, { ok: boolean; out?: string }>) {
-	gitMock.mockImplementation((_cwd: string, args: string[]) => {
-		const reply = replies[args[0] as string] ?? { ok: false };
-		return Promise.resolve(
-			reply.ok
-				? { ok: true, out: reply.out ?? "" }
-				: { ok: false, error: "fatal: not a git repository" },
-		);
-	});
+type Replies = Record<string, { ok: boolean; out?: string }>;
+
+function reply(replies: Replies, args: string[]) {
+	const match = replies[args[0] as string] ?? { ok: false };
+	return match.ok
+		? { ok: true, out: match.out ?? "" }
+		: { ok: false, error: "fatal: not a git repository" };
+}
+
+function gitReplies(replies: Replies) {
+	gitMock.mockImplementation((_cwd: string, args: string[]) =>
+		Promise.resolve(reply(replies, args)),
+	);
+	gitSyncMock.mockImplementation((_cwd: string, args: string[]) =>
+		reply(replies, args),
+	);
 }
 
 describe("checkDurability", () => {
@@ -77,5 +85,49 @@ describe("checkDurability", () => {
 			durable: false,
 			reason: "unpushed commits",
 		});
+	});
+});
+
+describe("checkDurabilitySync", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		existsMock.mockReturnValue(true);
+	});
+
+	it("reaches the same verdict as the awaited check on a landed tree", () => {
+		gitReplies({
+			status: { ok: true, out: "" },
+			"rev-parse": { ok: true, out: "origin/main" },
+			"rev-list": { ok: true, out: "0" },
+		});
+
+		expect(checkDurabilitySync("/git/repo-2")).toEqual({ durable: true });
+	});
+
+	it("holds a dirty tree without awaiting anything", () => {
+		gitReplies({ status: { ok: true, out: " M src/a.ts" } });
+
+		expect(checkDurabilitySync("/git/repo-2")).toEqual({
+			durable: false,
+			reason: "uncommitted changes",
+		});
+	});
+
+	it("never reports unpushed commits when the tree state cannot be read", () => {
+		gitReplies({});
+
+		const durability = checkDurabilitySync("/git/broken");
+
+		expect(durability.durable).toBe(false);
+		expect(durability.durable === false ? durability.reason : "").not.toContain(
+			"unpushed commits",
+		);
+	});
+
+	it("treats a tree that no longer exists as durable", () => {
+		existsMock.mockReturnValue(false);
+
+		expect(checkDurabilitySync("/git/repo-3")).toEqual({ durable: true });
+		expect(gitSyncMock).not.toHaveBeenCalled();
 	});
 });

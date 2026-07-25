@@ -111,6 +111,33 @@ describe("persistLiveSessions", () => {
 		]);
 	});
 
+	it("persists a pty-less stopped card so its held work survives a restart", () => {
+		const sessions = new Map<string, Session>([
+			[
+				"1",
+				fakeSession({
+					name: "repo-2",
+					status: "stopped",
+					pty: null,
+					runningSince: null,
+					cwd: "/repo-2",
+					undurable: { reason: "unpushed commits", removesTree: true },
+				}),
+			],
+		]);
+
+		persistLiveSessions(sessions);
+
+		expect(saveJsonMock).toHaveBeenCalledWith("sessions.json", [
+			expect.objectContaining({
+				name: "repo-2",
+				status: "stopped",
+				cwd: "/repo-2",
+				undurable: { reason: "unpushed commits", removesTree: true },
+			}),
+		]);
+	});
+
 	it("folds the in-flight running stretch into the persisted runningMs", () => {
 		const sessions = new Map<string, Session>([
 			["1", fakeSession({ runningMs: 1000, runningSince: NOW - 2000 })],

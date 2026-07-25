@@ -21,6 +21,8 @@ export function respawnPlan(session: Session): RespawnPlan | null {
 				status: "waiting",
 			};
 		if (initialPrompt) return freshClaudePlan(session, initialPrompt, cwd);
+		if (cwd && session.harness !== "pi")
+			return freshClaudePlan(session, undefined, cwd);
 		return null;
 	}
 	if (commandType === "assist" && assistArgs) {
@@ -41,7 +43,7 @@ export function respawnPlan(session: Session): RespawnPlan | null {
 
 function freshClaudePlan(
 	session: Session,
-	prompt: string,
+	prompt: string | undefined,
 	cwd: string | undefined,
 ): RespawnPlan {
 	const claudeSessionId = randomUUID();
@@ -55,6 +57,6 @@ function freshClaudePlan(
 				claudeSessionId,
 			});
 		},
-		status: "running",
+		status: prompt ? "running" : "waiting",
 	};
 }

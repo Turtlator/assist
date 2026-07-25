@@ -44,10 +44,15 @@ function holdStopped(
 	session.undurable = { reason, removesTree: tree.removable };
 	session.closing = undefined;
 	setStatus(session, "stopped");
-	if (!session.gitWatcher)
+	if (!session.gitWatcher) {
+		let rechecking = false;
 		session.gitWatcher = watchGitState(tree.path, () => {
-			if (session.status !== "stopped") return;
-			void resolveCloseDurability(session, finalize, notify);
+			if (session.status !== "stopped" || rechecking) return;
+			rechecking = true;
+			void resolveCloseDurability(session, finalize, notify).finally(() => {
+				rechecking = false;
+			});
 		});
+	}
 	notify();
 }

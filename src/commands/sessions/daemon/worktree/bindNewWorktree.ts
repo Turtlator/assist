@@ -1,15 +1,7 @@
-import { findRepoRoot } from "../../../../shared/findRepoRoot";
 import type { Session } from "../createSession";
 import type { Allocation } from "./allocateTree";
 import { detectExistingWorktree } from "./detectExistingWorktree";
 import { seedWorktree } from "./seedWorktree";
-
-export function boundTreeRoots(sessions: Map<string, Session>): Set<string> {
-	const roots = new Set<string>();
-	for (const session of sessions.values())
-		if (session.cwd) roots.add(findRepoRoot(session.cwd) ?? session.cwd);
-	return roots;
-}
 
 export function bindNewWorktree(
 	session: Session | undefined,

@@ -9,6 +9,9 @@ where you are or where any in-progress changes live. The tool tracks that; you d
 - Each is a fully independent working copy — one session's edits never touch another's.
 - You never choose, name, or manage these. You start a session on the repo; the tool
   places it.
+- A workspace counts as free once nothing live is working in it and it holds nothing
+  unlanded. A finished card left sitting on the board does not push the next session
+  somewhere new — it reuses the workspace it is standing in.
 - Isolation is per session, not per task. The same piece of work is never started
   twice: ask to run a backlog item that already has a live run and the tool
   **refuses and points at the run that holds it**, rather than isolating a duplicate
@@ -55,6 +58,9 @@ where you are or where any in-progress changes live. The tool tracks that; you d
 
 - If the system breaks down or leaves stray state behind, **the tool cleans up after
   itself** — recovering never means removing or pruning workspaces by hand.
+- A workspace whose session died with it — a crash, a kill, a reboot — is picked back
+  up on the next start: one holding nothing is cleaned away silently, one still
+  holding unlanded work **comes back as a visible stopped card** with the actions from 3. It is watched from then on, so it clears itself the moment the work lands.
 - What can't be determined is never guessed. A workspace already gone from disk holds
   nothing and pins no card; one whose state can't be read says so, rather than being
   reported as work you don't have.

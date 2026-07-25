@@ -3,12 +3,8 @@ import { basename, dirname } from "node:path";
 import { expandTilde } from "../../../../shared/expandTilde";
 import { getCurrentOrigin } from "../../../backlog/getCurrentOrigin";
 import { daemonLog } from "../daemonLog";
-import {
-	gitSync,
-	gitSyncOrNull,
-	listLocalBranches,
-	listWorktreePaths,
-} from "./git";
+import { gitSync, gitSyncOrNull } from "./git";
+import { listLocalBranches, listWorktreePaths } from "./listWorktreePaths";
 import { nextWorktreePath } from "./planAllocation";
 import { recordWorktree } from "./readWorktreeRegistry";
 

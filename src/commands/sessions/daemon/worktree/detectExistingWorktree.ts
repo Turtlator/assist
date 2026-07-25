@@ -1,5 +1,5 @@
 import { findRepoRoot } from "../../../../shared/findRepoRoot";
-import { mainWorktree } from "./git";
+import { mainWorktree } from "./listWorktreePaths";
 import { worktreeConfigFor } from "./worktreeConfigFor";
 
 export function detectExistingWorktree(

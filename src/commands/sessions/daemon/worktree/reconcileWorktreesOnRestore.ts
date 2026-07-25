@@ -2,60 +2,66 @@ import { existsSync } from "node:fs";
 import { basename } from "node:path";
 import type { Session } from "../createSession";
 import { daemonLog } from "../daemonLog";
-import { loadPersistedSessions } from "../loadPersistedSessions";
+import { accountedTrees } from "./accountedTrees";
 import { bindRestoredWorktrees } from "./bindNewWorktree";
-import { git, listLocalBranches } from "./git";
 import { readWorktreeRegistry } from "./readWorktreeRegistry";
 import { reapWorktree } from "./reapWorktree";
+import { reclaimVanishedWorktrees } from "./reclaimVanishedWorktrees";
+import {
+	type OrphanedWorktree,
+	resurfaceOrphanedWorktree,
+	type SpawnSession,
+} from "./resurfaceOrphanedWorktree";
+import { checkDurability } from "./treeDurability";
 
 export function reconcileWorktreesOnRestore(
 	sessions: Map<string, Session>,
+	spawnWith: SpawnSession,
+	notify: () => void,
 ): void {
 	bindRestoredWorktrees(sessions);
-	void pruneWorktrees([...sessions.values()].map((s) => s.cwd));
+	void recoverOrphanedWorktrees(sessions, spawnWith, notify);
 }
 
-async function pruneWorktrees(liveCwds: (string | undefined)[]): Promise<void> {
-	const accounted = new Set<string>();
-	for (const cwd of liveCwds) if (cwd) accounted.add(cwd);
-	for (const s of loadPersistedSessions()) accounted.add(s.cwd);
-
-	const clonesToPrune = new Set<string>();
-	const orphanBranches: { clone: string; branch: string }[] = [];
+async function recoverOrphanedWorktrees(
+	sessions: Map<string, Session>,
+	spawnWith: SpawnSession,
+	notify: () => void,
+): Promise<void> {
+	const accounted = accountedTrees(sessions);
+	const vanished = new Map<string, { path: string; branch: string }[]>();
 	for (const { path, clone } of readWorktreeRegistry()) {
 		if (accounted.has(path)) continue;
 		if (!existsSync(path)) {
-			clonesToPrune.add(clone);
-			orphanBranches.push({ clone, branch: basename(path) });
+			vanished.set(clone, [
+				...(vanished.get(clone) ?? []),
+				{ path, branch: basename(path) },
+			]);
 			continue;
 		}
-		daemonLog(`worktree ${path} orphaned across restart; reconciling`);
-		await reapWorktree(path);
+		await recoverOrphan(sessions, spawnWith, { path, clone }, notify);
 	}
-
-	for (const clone of clonesToPrune) {
-		if (!existsSync(clone)) continue;
-		try {
-			await git(clone, ["worktree", "prune"]);
-			daemonLog(`worktree bookkeeping pruned for clone ${clone}`);
-		} catch {}
-	}
-
-	for (const { clone, branch } of orphanBranches)
-		if (existsSync(clone)) await pruneStaleWorktreeBranch(clone, branch);
+	for (const [clone, paths] of vanished)
+		await reclaimVanishedWorktrees(clone, paths);
 }
 
-async function pruneStaleWorktreeBranch(
-	clone: string,
-	branch: string,
+async function recoverOrphan(
+	sessions: Map<string, Session>,
+	spawnWith: SpawnSession,
+	orphan: OrphanedWorktree,
+	notify: () => void,
 ): Promise<void> {
-	if (!listLocalBranches(clone).includes(branch)) return;
-	try {
-		await git(clone, ["branch", "-d", branch]);
-		daemonLog(`stale worktree branch ${branch} pruned from clone ${clone}`);
-	} catch {
-		daemonLog(
-			`stale worktree branch ${branch} retained (unmerged; surfaced not destroyed) in clone ${clone}`,
-		);
+	daemonLog(`worktree ${orphan.path} orphaned across restart; reconciling`);
+	const durability = await checkDurability(orphan.path);
+	if (durability.durable) {
+		await reapWorktree(orphan.path);
+		return;
 	}
+	resurfaceOrphanedWorktree(
+		sessions,
+		spawnWith,
+		orphan,
+		durability.reason,
+		notify,
+	);
 }

@@ -123,6 +123,28 @@ describe("restartSession", () => {
 		expect(spawnClaudeMock).not.toHaveBeenCalled();
 	});
 
+	it("opens a fresh agent in the workspace of a recovered card with no conversation", () => {
+		const session = makeSession({
+			status: "stopped",
+			claudeSessionId: undefined,
+			initialPrompt: undefined,
+			cwd: "/home/user/repo-2",
+			worktree: { path: "/home/user/repo-2", clone: "/home/user/repo" },
+			undurable: { reason: "uncommitted changes", removesTree: true },
+		});
+
+		expect(restartSession(session, new Set(), vi.fn())).toBe(true);
+
+		expect(spawnClaudeMock).toHaveBeenCalledWith({
+			prompt: undefined,
+			cwd: "/home/user/repo-2",
+			sessionId: "1",
+			claudeSessionId: expect.any(String),
+		});
+		expect(session.status).toBe("waiting");
+		expect(session.undurable).toBeUndefined();
+	});
+
 	it("restarts a claude session fresh from its prompt when no conversation id is known", () => {
 		const session = makeSession({
 			claudeSessionId: undefined,

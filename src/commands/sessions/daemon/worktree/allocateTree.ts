@@ -1,6 +1,6 @@
 import { findRepoRoot } from "../../../../shared/findRepoRoot";
 import { createWorktree } from "./createWorktree";
-import { mainWorktree } from "./git";
+import { mainWorktree } from "./listWorktreePaths";
 import { planAllocation } from "./planAllocation";
 import { worktreeConfigFor } from "./worktreeConfigFor";
 

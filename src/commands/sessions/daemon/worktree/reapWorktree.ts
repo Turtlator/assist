@@ -1,6 +1,9 @@
 import { existsSync } from "node:fs";
 import { daemonLog } from "../daemonLog";
-import { git, gitOrNull, mainWorktree } from "./git";
+import { git, gitOrNull } from "./git";
+import { mainWorktree } from "./listWorktreePaths";
+import { forgetWorktree } from "./readWorktreeRegistry";
+import { removeTree } from "./removeTree";
 import { checkDurability } from "./treeDurability";
 
 export async function reapWorktree(
@@ -24,22 +27,11 @@ export async function reapWorktree(
 		"--short",
 		"HEAD",
 	]);
-	try {
-		await git(clone, [
-			"worktree",
-			"remove",
-			...(force ? ["--force"] : []),
-			worktreePath,
-		]);
-		if (branch) await deleteBranch(clone, branch);
-		daemonLog(`worktree ${worktreePath} reaped${force ? " (forced)" : ""}`);
-		return true;
-	} catch (error) {
-		daemonLog(
-			`worktree ${worktreePath} reap failed: ${error instanceof Error ? error.message : String(error)}`,
-		);
-		return false;
-	}
+	if (!(await removeTree(clone, worktreePath, force))) return false;
+	if (branch) await deleteBranch(clone, branch);
+	forgetWorktree(worktreePath);
+	daemonLog(`worktree ${worktreePath} reaped${force ? " (forced)" : ""}`);
+	return true;
 }
 
 async function deleteBranch(clone: string, branch: string): Promise<void> {

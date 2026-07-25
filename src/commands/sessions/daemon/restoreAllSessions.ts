@@ -9,7 +9,7 @@ export function restoreAllSessions(
 	notify: () => void,
 ): string[] {
 	const names = restoreAll(spawnWith, sessions);
-	reconcileWorktreesOnRestore(sessions);
+	reconcileWorktreesOnRestore(sessions, spawnWith, notify);
 	rearmStoppedSessions(sessions, notify);
 	return names;
 }

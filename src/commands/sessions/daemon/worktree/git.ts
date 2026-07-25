@@ -34,12 +34,27 @@ export async function gitOrNull(
 	}
 }
 
+export type GitResult =
+	| { ok: true; out: string }
+	| { ok: false; error: string };
+
 export async function gitResult(
 	cwd: string,
 	args: string[],
-): Promise<{ ok: true; out: string } | { ok: false; error: string }> {
+): Promise<GitResult> {
 	try {
 		return { ok: true, out: (await git(cwd, args)).trim() };
+	} catch (error) {
+		return {
+			ok: false,
+			error: error instanceof Error ? error.message : String(error),
+		};
+	}
+}
+
+export function gitSyncResult(cwd: string, args: string[]): GitResult {
+	try {
+		return { ok: true, out: gitSync(cwd, args).trim() };
 	} catch (error) {
 		return {
 			ok: false,
@@ -62,34 +77,4 @@ export function gitSyncOrNull(cwd: string, args: string[]): string | null {
 	} catch {
 		return null;
 	}
-}
-
-export function listWorktreePaths(cwd: string): string[] {
-	const out = gitSyncOrNull(cwd, ["worktree", "list", "--porcelain"]);
-	if (!out) return [];
-	return out
-		.split("\n")
-		.filter((line) => line.startsWith("worktree "))
-		.map((line) => line.slice("worktree ".length).trim());
-}
-
-export function mainWorktree(cwd: string): string | null {
-	return listWorktreePaths(cwd)[0] ?? null;
-}
-
-export function listLocalBranches(cwd: string): string[] {
-	const out = gitSyncOrNull(cwd, [
-		"for-each-ref",
-		"--format=%(refname:short)",
-		"refs/heads",
-	]);
-	return out ? out.split("\n").map((line) => line.trim()) : [];
-}
-
-export function gitCommonDir(cwd: string): string | null {
-	return gitSyncOrNull(cwd, [
-		"rev-parse",
-		"--path-format=absolute",
-		"--git-common-dir",
-	]);
 }

@@ -391,6 +391,28 @@ describe("restoreSession", () => {
 		expect(session.startedAt).toBe(123);
 	});
 
+	it("brings a stopped card back pty-less, still holding its unlanded work", () => {
+		const persisted: PersistedSession = {
+			name: "repo-2",
+			commandType: "claude",
+			status: "stopped",
+			cwd: "/home/user/repo-2",
+			startedAt: 123,
+			undurable: { reason: "unpushed commits", removesTree: true },
+		};
+
+		const session = restoreSession("1", persisted);
+
+		expect(spawnClaudeMock).not.toHaveBeenCalled();
+		expect(spawnPtyMock).not.toHaveBeenCalled();
+		expect(session.status).toBe("stopped");
+		expect(session.pty).toBeNull();
+		expect(session.undurable).toEqual({
+			reason: "unpushed commits",
+			removesTree: true,
+		});
+	});
+
 	it("returns a not-restored stub for a run session, keeping retry args", () => {
 		const persisted: PersistedSession = {
 			name: "repo/run: build",

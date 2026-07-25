@@ -24,3 +24,10 @@ export function recordWorktree(
 	data[path] = { clone, origin };
 	saveJson(REGISTRY_FILE, data);
 }
+
+export function forgetWorktree(path: string): void {
+	const data = loadJson<Registry>(REGISTRY_FILE);
+	if (!(path in data)) return;
+	delete data[path];
+	saveJson(REGISTRY_FILE, data);
+}
