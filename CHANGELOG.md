@@ -1,3 +1,10 @@
+# [0.437.0](https://github.com/staff0rd/assist/compare/v0.436.0...v0.437.0) (2026-07-25)
+
+
+### Features
+
+* scrollable diagrams in md preview ([a2be45e](https://github.com/staff0rd/assist/commit/a2be45e07243fc10159947f21b3ff79f86579016))
+
 # [0.436.0](https://github.com/staff0rd/assist/compare/v0.435.2...v0.436.0) (2026-07-25)
 
 
