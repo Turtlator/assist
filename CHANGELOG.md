@@ -1,3 +1,10 @@
+# [0.442.0](https://github.com/staff0rd/assist/compare/v0.441.0...v0.442.0) (2026-07-25)
+
+
+### Features
+
+* commit before manual checks ([d7050ca](https://github.com/staff0rd/assist/commit/d7050ca2e5c5d926e60918da602673a2579bd6e9))
+
 # [0.441.0](https://github.com/staff0rd/assist/compare/v0.440.0...v0.441.0) (2026-07-25)
 
 
