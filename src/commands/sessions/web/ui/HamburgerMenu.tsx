@@ -1,6 +1,5 @@
 import Menu from "@mui/material/Menu";
 import { useState } from "react";
-import { useNavigate } from "react-router";
 import { hamburgerMenuItems } from "./hamburgerMenuItems";
 import { HamburgerMenuDialogs } from "./HamburgerMenuDialogs";
 import { MenuTriggerButton } from "./MenuTriggerButton";
@@ -16,7 +15,6 @@ export function HamburgerMenu({
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const [pending, setPending] = useState<RestartTarget | null>(null);
 	const [updatePending, setUpdatePending] = useState(false);
-	const navigate = useNavigate();
 	const open = Boolean(anchorEl);
 	const close = () => setAnchorEl(null);
 
@@ -35,10 +33,6 @@ export function HamburgerMenu({
 					onToggleColorMode: () => {
 						toggle();
 						close();
-					},
-					onConfig: () => {
-						close();
-						navigate("/config");
 					},
 					onRestart: (target) => {
 						close();

@@ -1,6 +1,7 @@
 import MenuIcon from "@mui/icons-material/Menu";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
+import { ConfigButton } from "./ConfigButton";
 import { VersionBadge } from "./VersionBadge";
 
 export function MenuTriggerButton({
@@ -24,6 +25,7 @@ export function MenuTriggerButton({
 			}}
 		>
 			<VersionBadge />
+			<ConfigButton />
 			<IconButton
 				onClick={(e) => onOpen(e.currentTarget)}
 				size="small"

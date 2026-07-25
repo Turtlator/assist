@@ -1,3 +1,4 @@
+import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -14,26 +15,25 @@ type Props = {
 
 export function ConfigGroupCard({ group, cwd, onSaved, onError }: Props) {
 	return (
-		<Paper variant="outlined">
-			<Typography
-				variant="subtitle2"
-				sx={{ px: 2, py: 1, fontFamily: "monospace" }}
-			>
+		<Box>
+			<Typography variant="h6" sx={{ mb: 1, fontFamily: "monospace" }}>
 				{group.name}
 			</Typography>
-			<Table size="small">
-				<TableBody>
-					{group.entries.map((entry) => (
-						<ConfigRow
-							key={entry.key}
-							entry={entry}
-							cwd={cwd}
-							onSaved={onSaved}
-							onError={onError}
-						/>
-					))}
-				</TableBody>
-			</Table>
-		</Paper>
+			<Paper variant="outlined">
+				<Table size="small">
+					<TableBody>
+						{group.entries.map((entry) => (
+							<ConfigRow
+								key={entry.key}
+								entry={entry}
+								cwd={cwd}
+								onSaved={onSaved}
+								onError={onError}
+							/>
+						))}
+					</TableBody>
+				</Table>
+			</Paper>
+		</Box>
 	);
 }

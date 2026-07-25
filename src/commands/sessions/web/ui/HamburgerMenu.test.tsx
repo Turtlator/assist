@@ -45,11 +45,10 @@ describe("HamburgerMenu", () => {
 		expect(armUpdateReload).toHaveBeenCalledTimes(1);
 	});
 
-	it("navigates to the config page", () => {
+	it("navigates to the config page from the cog beside the menu", () => {
 		renderMenu(vi.fn());
 
-		fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
-		fireEvent.click(screen.getByText("Config"));
+		fireEvent.click(screen.getByRole("button", { name: "Config" }));
 
 		expect(screen.getByText("config page")).toBeTruthy();
 	});
