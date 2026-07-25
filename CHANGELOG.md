@@ -1,3 +1,10 @@
+## [0.439.1](https://github.com/staff0rd/assist/compare/v0.439.0...v0.439.1) (2026-07-25)
+
+
+### Bug Fixes
+
+* space out item navigator buttons ([24b2704](https://github.com/staff0rd/assist/commit/24b2704d64572d736cb26c69416bb61f27e72767))
+
 # [0.439.0](https://github.com/staff0rd/assist/compare/v0.438.0...v0.439.0) (2026-07-25)
 
 
