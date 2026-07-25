@@ -12,8 +12,8 @@ const baseRowSx = {
 } as const;
 
 const baseLabelSx = {
-	fontSize: "0.7rem",
-	letterSpacing: "0.04em",
+	fontSize: "0.875rem",
+	letterSpacing: "0.02em",
 	whiteSpace: "nowrap",
 	overflow: "hidden",
 	textOverflow: "ellipsis",
@@ -41,7 +41,7 @@ export function ItemNavigatorRow({ section, onSelect }: ItemNavigatorRowProps) {
 					...baseLabelSx,
 					color: section.status ? "text.primary" : "text.secondary",
 				}}
-				title={section.label}
+				title={section.title ?? section.label}
 			>
 				{section.label}
 			</Typography>

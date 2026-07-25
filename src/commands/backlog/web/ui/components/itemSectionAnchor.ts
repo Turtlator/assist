@@ -9,18 +9,20 @@ export const ITEM_SECTION_IDS = {
 
 type ItemSectionKey = keyof typeof ITEM_SECTION_IDS;
 
-const STICKY_PINNED_HEADER_HEIGHT = "140px";
+export const STICKY_PINNED_HEADER_HEIGHT = 140;
+
+const scrollMarginTop = `${STICKY_PINNED_HEADER_HEIGHT}px`;
 
 export function itemSectionAnchor(key: ItemSectionKey) {
 	return {
 		id: ITEM_SECTION_IDS[key],
-		sx: { mb: 2, scrollMarginTop: STICKY_PINNED_HEADER_HEIGHT },
+		sx: { mb: 2, scrollMarginTop },
 	};
 }
 
 export function phaseAnchor(index: number) {
 	return {
 		id: `item-phase-${index}`,
-		sx: { scrollMarginTop: STICKY_PINNED_HEADER_HEIGHT },
+		sx: { scrollMarginTop },
 	};
 }

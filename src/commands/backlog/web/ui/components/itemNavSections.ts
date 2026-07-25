@@ -5,6 +5,7 @@ import { phaseStatus, REVIEW_PHASE } from "./sessionsByPhase";
 export type ItemNavSection = {
 	id: string;
 	label: string;
+	title?: string;
 	status?: PhaseStatus;
 	nested?: boolean;
 };
@@ -17,10 +18,11 @@ function planSections(item: BacklogItem): ItemNavSection[] {
 	);
 	const allPhases = hasReview ? [...phases, REVIEW_PHASE] : phases;
 	return [
-		{ id: ITEM_SECTION_IDS.plan, label: "Plan" },
+		{ id: ITEM_SECTION_IDS.plan, label: "Phases" },
 		...allPhases.map((phase, i) => ({
 			id: phaseAnchor(i).id,
-			label: `${i + 1}. ${phase.name}`,
+			label: `${i + 1}`,
+			title: phase.name,
 			status: phaseStatus(i, item.currentPhase),
 			nested: true,
 		})),

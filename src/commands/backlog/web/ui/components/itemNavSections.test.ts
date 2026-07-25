@@ -16,7 +16,7 @@ describe("itemNavSections", () => {
 		expect(itemNavSections(item())).toEqual([]);
 	});
 
-	it("renders a nested row per phase, numbered and status-tinted", () => {
+	it("renders a nested numbered row per phase, status-tinted, named only in the title", () => {
 		const sections = itemNavSections(
 			item({
 				plan: [
@@ -29,17 +29,25 @@ describe("itemNavSections", () => {
 		);
 
 		expect(sections).toEqual([
-			{ id: "item-section-plan", label: "Plan" },
-			{ id: "item-phase-0", label: "1. First", status: "done", nested: true },
+			{ id: "item-section-plan", label: "Phases" },
+			{
+				id: "item-phase-0",
+				label: "1",
+				title: "First",
+				status: "done",
+				nested: true,
+			},
 			{
 				id: "item-phase-1",
-				label: "2. Second",
+				label: "2",
+				title: "Second",
 				status: "current",
 				nested: true,
 			},
 			{
 				id: "item-phase-2",
-				label: "3. Third",
+				label: "3",
+				title: "Third",
 				status: "upcoming",
 				nested: true,
 			},
@@ -63,11 +71,14 @@ describe("itemNavSections", () => {
 			}),
 		);
 
-		expect(withoutReview.map((s) => s.label)).toEqual(["Plan", "1. First"]);
-		expect(withReview.map((s) => s.label)).toEqual([
-			"Plan",
-			"1. First",
-			"2. Review",
+		expect(withoutReview.map((s) => s.title ?? s.label)).toEqual([
+			"Phases",
+			"First",
+		]);
+		expect(withReview.map((s) => s.title ?? s.label)).toEqual([
+			"Phases",
+			"First",
+			"Review",
 		]);
 	});
 
@@ -85,8 +96,8 @@ describe("itemNavSections", () => {
 		expect(sections.map((s) => s.label)).toEqual([
 			"Description",
 			"Sub-tasks",
-			"Plan",
-			"1. First",
+			"Phases",
+			"1",
 			"Activity",
 			"Comments",
 		]);
