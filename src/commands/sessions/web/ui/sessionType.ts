@@ -13,7 +13,8 @@ export function sessionType(session: SessionInfo): SessionType {
 				cmd === "bug" ||
 				cmd === "next" ||
 				cmd === "refine" ||
-				cmd === "review"
+				cmd === "review" ||
+				cmd === "update"
 			)
 				return cmd;
 			return "prompt";

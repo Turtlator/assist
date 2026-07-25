@@ -15,7 +15,14 @@ function makeSession(overrides: Partial<SessionInfo>): SessionInfo {
 
 describe("sessionType", () => {
 	it("derives the assist command as the type", () => {
-		for (const cmd of ["draft", "bug", "next", "refine", "review"] as const) {
+		for (const cmd of [
+			"draft",
+			"bug",
+			"next",
+			"refine",
+			"review",
+			"update",
+		] as const) {
 			const session = makeSession({
 				commandType: "assist",
 				assistArgs: [cmd, "--once"],

@@ -6,7 +6,8 @@ export type SessionType =
 	| "review"
 	| "design"
 	| "prompt"
-	| "run";
+	| "run"
+	| "update";
 
 type HistoryFields = {
 	sessionType?: SessionType;
@@ -21,6 +22,7 @@ const KNOWN: SessionType[] = [
 	"refine",
 	"review",
 	"run",
+	"update",
 ];
 
 /**
