@@ -1,3 +1,10 @@
+## [0.433.5](https://github.com/staff0rd/assist/compare/v0.433.4...v0.433.5) (2026-07-25)
+
+
+### Bug Fixes
+
+* say Closing while a card closes ([3743f7d](https://github.com/staff0rd/assist/commit/3743f7d79b2679bbdcdcb63fa285c7c873d3b02e))
+
 ## [0.433.4](https://github.com/staff0rd/assist/compare/v0.433.3...v0.433.4) (2026-07-25)
 
 
