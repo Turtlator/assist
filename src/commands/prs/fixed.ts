@@ -1,4 +1,5 @@
 import { execSync } from "node:child_process";
+import { pushCommit } from "../commit/pushCommit";
 import { resolveCommentWithReply } from "./resolveCommentWithReply";
 import { getRepoInfo, isGhNotInstalled } from "./shared";
 
@@ -20,7 +21,7 @@ export function fixed(commentId: number, sha: string): void {
 		const repoUrl = `https://github.com/${org}/${repo}`;
 		const message = `Fixed in [${fullSha}](${repoUrl}/commit/${fullSha})`;
 
-		execSync("git push", { stdio: "inherit" });
+		pushCommit();
 		resolveCommentWithReply(commentId, message);
 	} catch (error) {
 		if (isGhNotInstalled(error)) {

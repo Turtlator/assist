@@ -1,6 +1,6 @@
-import { execFileSync } from "node:child_process";
 import { emitActivity } from "../../shared/emitActivity";
 import { findRepoRoot } from "../../shared/findRepoRoot";
+import { checkoutPr } from "./checkoutPr";
 import { reviewPr } from "./reviewPr";
 
 export type ReviewOptions = {
@@ -34,19 +34,11 @@ function validateOptions(options: ReviewOptions): void {
 	}
 }
 
-function checkoutPr(number: string): void {
-	try {
-		execFileSync("gh", ["pr", "checkout", number], { stdio: "inherit" });
-	} catch {
-		console.error(`gh pr checkout ${number} failed; aborting.`);
-		process.exit(1);
-	}
-}
-
 export async function review(options: ReviewOptions = {}): Promise<void> {
 	validateOptions(options);
-	const repoRoot = resolveRepoRoot();
+	const invokedIn = resolveRepoRoot();
 	emitActivity({ kind: "command", name: "review" });
-	if (options.number) checkoutPr(options.number);
-	await reviewPr(repoRoot, options);
+	if (!options.number) return reviewPr(invokedIn, options);
+	await checkoutPr(options.number);
+	return reviewPr(resolveRepoRoot(), options);
 }

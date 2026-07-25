@@ -8,7 +8,10 @@ import { checkDurability } from "./treeDurability";
 vi.mock("node:fs", () => ({ existsSync: vi.fn(() => true) }));
 vi.mock("../daemonLog", () => ({ daemonLog: vi.fn() }));
 vi.mock("./git", () => ({ git: vi.fn(), gitOrNull: vi.fn() }));
-vi.mock("./listWorktreePaths", () => ({ mainWorktree: () => "/git/repo" }));
+vi.mock("./listWorktreePaths", () => ({
+	mainWorktree: () => "/git/repo",
+	listLocalBranches: vi.fn(() => ["main", "repo-2"]),
+}));
 vi.mock("./readWorktreeRegistry", () => ({ forgetWorktree: vi.fn() }));
 vi.mock("./treeDurability", () => ({ checkDurability: vi.fn() }));
 
@@ -39,6 +42,17 @@ describe("reapWorktree", () => {
 		expect(gitCalls()).toContainEqual(["worktree", "remove", "/git/repo-2"]);
 		expect(gitCalls()).toContainEqual(["branch", "-D", "repo-2"]);
 		expect(forgetMock).toHaveBeenCalledWith("/git/repo-2");
+	});
+
+	it("leaves the session's own feature branch alone, deleting only the worktree branch", async () => {
+		gitOrNullMock.mockImplementation((cwd: string) =>
+			Promise.resolve(cwd === "/git/repo" ? "main" : "feat/thing"),
+		);
+
+		expect(await reapWorktree("/git/repo-2")).toBe(true);
+
+		expect(gitCalls()).toContainEqual(["branch", "-D", "repo-2"]);
+		expect(gitCalls()).not.toContainEqual(["branch", "-D", "feat/thing"]);
 	});
 
 	it("never touches an undurable tree and keeps its record for recovery", async () => {

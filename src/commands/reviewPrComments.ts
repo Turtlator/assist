@@ -1,18 +1,10 @@
-import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import chalk from "chalk";
 import { emitActivity } from "../shared/emitActivity";
 import { spawnClaude } from "../shared/spawnClaude";
+import { checkoutPr } from "./review/checkoutPr";
 
 export async function reviewPrComments(number?: string): Promise<void> {
-	if (number) {
-		try {
-			execFileSync("gh", ["pr", "checkout", number], { stdio: "inherit" });
-		} catch {
-			console.error(chalk.red(`gh pr checkout ${number} failed; aborting.`));
-			process.exit(1);
-		}
-	}
+	if (number) await checkoutPr(number);
 	/* why: assign the conversation id up front and report it via activity so the
 	 * daemon binds the card to this transcript rather than guessing via the cwd
 	 * poller, which races concurrent sessions in the same repo (#413). */

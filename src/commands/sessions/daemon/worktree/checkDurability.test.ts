@@ -5,9 +5,6 @@ import { checkDurability, checkDurabilitySync } from "./treeDurability";
 
 vi.mock("node:fs", () => ({ existsSync: vi.fn(() => true) }));
 vi.mock("./git", () => ({ gitResult: vi.fn(), gitSyncResult: vi.fn() }));
-vi.mock("../../../../shared/loadConfigFrom", () => ({
-	loadConfigFrom: vi.fn(() => ({ commit: { push: false } })),
-}));
 
 const existsMock = existsSync as unknown as ReturnType<typeof vi.fn>;
 const gitMock = gitResult as unknown as ReturnType<typeof vi.fn>;
@@ -79,6 +76,29 @@ describe("checkDurability", () => {
 			status: { ok: true, out: "" },
 			"rev-parse": { ok: true, out: "origin/main" },
 			"rev-list": { ok: true, out: "2" },
+		});
+
+		expect(await checkDurability("/git/repo-2")).toEqual({
+			durable: false,
+			reason: "unpushed commits",
+		});
+	});
+
+	it("is durable on an untracked worktree branch whose HEAD is on a remote", async () => {
+		gitReplies({
+			status: { ok: true, out: "" },
+			"rev-parse": { ok: false },
+			branch: { ok: true, out: "  origin/main" },
+		});
+
+		expect(await checkDurability("/git/repo-2")).toEqual({ durable: true });
+	});
+
+	it("holds an untracked worktree branch whose commits are on no remote", async () => {
+		gitReplies({
+			status: { ok: true, out: "" },
+			"rev-parse": { ok: false },
+			branch: { ok: true, out: "" },
 		});
 
 		expect(await checkDurability("/git/repo-2")).toEqual({

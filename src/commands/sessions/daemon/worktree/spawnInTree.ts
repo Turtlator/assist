@@ -5,9 +5,10 @@ import {
 } from "../createAssistSession";
 import { createSession, type Session } from "../createSession";
 import { resumeSession } from "../resumeSession";
-import { allocateTree } from "./allocateTree";
+import { type AllocateOptions, allocateTree } from "./allocateTree";
 import { bindNewWorktree, bindResumedWorktree } from "./bindNewWorktree";
 import { boundTreeRoots } from "./boundTreeRoots";
+import { isPrCheckoutArgs } from "./isPrCheckoutArgs";
 
 export type TreeSpawnContext = {
 	sessions: Map<string, Session>;
@@ -24,8 +25,9 @@ function allocateAndBind(
 		resolvedCwd: string | undefined,
 		holdUntilSeeded: boolean,
 	) => Session,
+	options: AllocateOptions = {},
 ): string {
-	const alloc = allocateTree(cwd, boundTreeRoots(ctx.sessions));
+	const alloc = allocateTree(cwd, boundTreeRoots(ctx.sessions), options);
 	const needsSeeding = alloc.kind === "worktree" && alloc.created === true;
 	const id = ctx.spawnWith((sid) => create(sid, alloc.cwd, needsSeeding));
 	bindNewWorktree(ctx.sessions.get(id), alloc, ctx.notify, ctx.startHeld);
@@ -50,8 +52,12 @@ export function spawnAssistInTree(
 	cwd: string | undefined,
 	meta: AssistSessionMeta | undefined,
 ): string {
-	return allocateAndBind(ctx, cwd, (sid, resolvedCwd, holdUntilSeeded) =>
-		createAssistSession(sid, assistArgs, resolvedCwd, meta, holdUntilSeeded),
+	return allocateAndBind(
+		ctx,
+		cwd,
+		(sid, resolvedCwd, holdUntilSeeded) =>
+			createAssistSession(sid, assistArgs, resolvedCwd, meta, holdUntilSeeded),
+		{ forCheckout: isPrCheckoutArgs(assistArgs) },
 	);
 }
 

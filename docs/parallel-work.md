@@ -16,6 +16,11 @@ where you are or where any in-progress changes live. The tool tracks that; you d
   the history list show it once — its own working copy and every `<repo>-N` workspace
   under the same remote — and sessions that ran in a workspace since cleaned away are
   still listed there, under the repo they belong to.
+- Checking out someone else's PR — to review it, or to work through its comments —
+  is placed the same way, and it never takes over a workspace that holds work in
+  progress. A workspace is only reused for a checkout when it holds nothing
+  unlanded, so whatever you had going is left exactly where it was; otherwise the
+  PR gets a workspace of its own.
 - Isolation is per session, not per task. The same piece of work is never started
   twice: ask to run a backlog item that already has a live run and the tool
   **refuses and points at the run that holds it**, rather than isolating a duplicate
@@ -75,5 +80,10 @@ Two per-repo settings, both **default off**:
 
 - **Parallel work on/off** — off by default. Off means all sessions on the repo share
   its single working copy; there is no `<repo>-N` isolation.
-- **Trunk-based on/off** — off by default. Off means work lands on a branch; on means
-  it lands straight on the mainline.
+- **Trunk-based on/off** — off by default. Off means work lands on a branch: a workspace
+  starts from the remote default with no mainline tracking and the session raises its own
+  branch and PR. On means it lands straight on the mainline.
+
+Turning either on and back off again leaves **no trace on the repo**. Neither writes
+settings into the repo's own git configuration, so how the repo pushes when you work in
+it by hand is never changed underneath you.

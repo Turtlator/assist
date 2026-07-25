@@ -1,10 +1,8 @@
 import { existsSync } from "node:fs";
-import { loadConfigFrom } from "../../../../shared/loadConfigFrom";
 import { type GitResult, gitResult, gitSyncResult } from "./git";
 
 type TreeState = {
 	dirty: boolean;
-	push: boolean;
 	localOnlyCommits: boolean;
 };
 
@@ -12,14 +10,12 @@ type Durability = { durable: true } | { durable: false; reason: string };
 
 export function treeDurability(state: TreeState): Durability {
 	if (state.dirty) return { durable: false, reason: "uncommitted changes" };
-	if (!state.push && state.localOnlyCommits)
+	if (state.localOnlyCommits)
 		return { durable: false, reason: "unpushed commits" };
 	return { durable: true };
 }
 
-function* durabilityProbes(
-	cwd: string,
-): Generator<string[], Durability, GitResult> {
+function* durabilityProbes(): Generator<string[], Durability, GitResult> {
 	const status = yield ["status", "--porcelain"];
 	if (!status.ok)
 		return { durable: false, reason: `tree state unreadable: ${status.error}` };
@@ -37,24 +33,12 @@ function* durabilityProbes(
 		const remoteBranches = yield ["branch", "-r", "--contains", "HEAD"];
 		localOnlyCommits = !remoteBranches.ok || remoteBranches.out === "";
 	}
-	return treeDurability({
-		dirty: status.out !== "",
-		push: pushOnCommit(cwd),
-		localOnlyCommits,
-	});
-}
-
-function pushOnCommit(cwd: string): boolean {
-	try {
-		return loadConfigFrom(cwd).commit.push;
-	} catch {
-		return false;
-	}
+	return treeDurability({ dirty: status.out !== "", localOnlyCommits });
 }
 
 export async function checkDurability(cwd: string): Promise<Durability> {
 	if (!existsSync(cwd)) return { durable: true };
-	const probes = durabilityProbes(cwd);
+	const probes = durabilityProbes();
 	let step = probes.next();
 	while (!step.done) step = probes.next(await gitResult(cwd, step.value));
 	return step.value;
@@ -62,7 +46,7 @@ export async function checkDurability(cwd: string): Promise<Durability> {
 
 export function checkDurabilitySync(cwd: string): Durability {
 	if (!existsSync(cwd)) return { durable: true };
-	const probes = durabilityProbes(cwd);
+	const probes = durabilityProbes();
 	let step = probes.next();
 	while (!step.done) step = probes.next(gitSyncResult(cwd, step.value));
 	return step.value;

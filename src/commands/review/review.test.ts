@@ -2,9 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockExecFileSync = vi.fn();
 const mockReviewPr = vi.fn();
+const mockMoveToPrCheckoutTree = vi.fn();
 
 vi.mock("node:child_process", () => ({
 	execFileSync: (...args: unknown[]) => mockExecFileSync(...args),
+}));
+
+vi.mock("./moveToPrCheckoutTree", () => ({
+	moveToPrCheckoutTree: () => mockMoveToPrCheckoutTree(),
 }));
 
 vi.mock("../../shared/findRepoRoot", () => ({
@@ -37,6 +42,12 @@ describe("review", () => {
 			);
 			expect(mockReviewPr).toHaveBeenCalledWith("/repo", { number: "123" });
 		});
+
+		it("should route the checkout through the worktree allocator", async () => {
+			await review({ number: "123" });
+
+			expect(mockMoveToPrCheckoutTree).toHaveBeenCalled();
+		});
 	});
 
 	describe("when the checkout fails", () => {
@@ -57,6 +68,12 @@ describe("review", () => {
 
 			expect(mockExecFileSync).not.toHaveBeenCalled();
 			expect(mockReviewPr).toHaveBeenCalledWith("/repo", {});
+		});
+
+		it("should stay in the tree it was invoked in", async () => {
+			await review();
+
+			expect(mockMoveToPrCheckoutTree).not.toHaveBeenCalled();
 		});
 	});
 
