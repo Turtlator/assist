@@ -4,6 +4,7 @@ import type { Session } from "../createSession";
 import { daemonLog } from "../daemonLog";
 import { accountedTrees } from "./accountedTrees";
 import { bindRestoredWorktrees } from "./bindNewWorktree";
+import { describeHeldWork } from "./describeHeldWork";
 import { readWorktreeRegistry } from "./readWorktreeRegistry";
 import { reapWorktree } from "./reapWorktree";
 import { reclaimVanishedWorktrees } from "./reclaimVanishedWorktrees";
@@ -57,11 +58,11 @@ async function recoverOrphan(
 		await reapWorktree(orphan.path);
 		return;
 	}
+	const held = await describeHeldWork(orphan.path, durability.reason);
 	resurfaceOrphanedWorktree(
 		sessions,
 		spawnWith,
-		orphan,
-		durability.reason,
+		{ orphan, reason: durability.reason, held },
 		notify,
 	);
 }

@@ -26,6 +26,14 @@ vi.mock("./reclaimVanishedWorktrees", () => ({
 	reclaimVanishedWorktrees: vi.fn(() => Promise.resolve()),
 }));
 vi.mock("./rearmStoppedSessions", () => ({ armStoppedSession: vi.fn() }));
+vi.mock("./describeHeldWork", () => ({
+	describeHeldWork: vi.fn(() =>
+		Promise.resolve({
+			summary: "2 uncommitted files",
+			items: [" M src/a.ts", " M src/b.ts"],
+		}),
+	),
+}));
 vi.mock("./treeDurability", () => ({ checkDurability: vi.fn() }));
 
 const existsMock = existsSync as unknown as ReturnType<typeof vi.fn>;
@@ -73,6 +81,10 @@ describe("reconcileWorktreesOnRestore", () => {
 
 		const card = [...sessions.values()][0];
 		expect(card?.status).toBe("stopped");
+		expect(card?.name).toBe("recovered repo-2");
+		expect(card?.subtitle).toBe("2 uncommitted files in /git/repo-2");
+		expect(card?.scrollback).toContain("Recovered workspace /git/repo-2");
+		expect(card?.scrollback).toContain(" M src/a.ts");
 		expect(card?.pty).toBeNull();
 		expect(card?.cwd).toBe("/git/repo-2");
 		expect(card?.worktree).toEqual({ path: "/git/repo-2", clone: "/git/repo" });
