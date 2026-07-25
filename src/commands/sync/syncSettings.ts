@@ -3,6 +3,8 @@ import * as path from "node:path";
 import chalk from "chalk";
 import { promptConfirm } from "../../shared/promptConfirm";
 import { printDiff } from "../../utils/printDiff";
+import { printAutoConfirmHint } from "./printAutoConfirmHint";
+
 export async function syncSettings(
 	claudeDir: string,
 	targetBase: string,
@@ -35,6 +37,7 @@ export async function syncSettings(
 				);
 				console.log();
 				printDiff(targetContent, mergedContent);
+				printAutoConfirmHint();
 
 				const confirm = await promptConfirm(
 					chalk.red("Overwrite existing settings.json?"),

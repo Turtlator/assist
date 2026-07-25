@@ -1,13 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { postRestart } from "./postRestart";
 
 const RESTART_TIMEOUT_MS = 15_000;
 
-export function useWebserverRestart(reconnecting: boolean) {
+export function useWebserverRestart(
+	reconnecting: boolean,
+	onBeforeReload?: () => void,
+) {
 	const [pending, setPending] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const sawDisconnect = useRef(false);
 	const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+	const beforeReloadRef = useRef(onBeforeReload);
+	beforeReloadRef.current = onBeforeReload;
 
 	useEffect(() => {
 		if (!pending) return;
@@ -15,13 +20,14 @@ export function useWebserverRestart(reconnecting: boolean) {
 			sawDisconnect.current = true;
 		} else if (sawDisconnect.current) {
 			clearTimeout(timeoutRef.current);
+			beforeReloadRef.current?.();
 			globalThis.location.reload();
 		}
 	}, [pending, reconnecting]);
 
 	useEffect(() => () => clearTimeout(timeoutRef.current), []);
 
-	async function restart(): Promise<void> {
+	const restart = useCallback(async (): Promise<void> => {
 		setPending(true);
 		sawDisconnect.current = false;
 		timeoutRef.current = setTimeout(() => {
@@ -36,7 +42,7 @@ export function useWebserverRestart(reconnecting: boolean) {
 			setPending(false);
 			setError("Failed to restart web server");
 		}
-	}
+	}, []);
 
 	return { pending, error, clearError: () => setError(null), restart };
 }

@@ -1,54 +1,41 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { SessionInfo } from "./types";
 import type { SuccessNotice } from "./useNotices";
 import { RELOAD_FLAG, useReloadNotice } from "./useReloadNotice";
-
-function isDoneUpdateSession(s: SessionInfo): boolean {
-	return (
-		s.commandType === "assist" &&
-		s.assistArgs?.[0] === "update" &&
-		s.status === "done"
-	);
-}
+import { useUpdateCompletion } from "./useUpdateCompletion";
+import { useWebserverRestart } from "./useWebserverRestart";
 
 export function useUpdateReload(
 	sessions: SessionInfo[],
 	reconnecting: boolean,
 	setSuccess: (notice: SuccessNotice) => void,
+	setError: (message: string) => void,
 ) {
-	const [armed, setArmed] = useState(false);
-	const sawDisconnect = useRef(false);
-	const reloadedRef = useRef(false);
-	const sessionsRef = useRef(sessions);
-	sessionsRef.current = sessions;
-	const preArmedDoneIds = useRef<Set<string>>(new Set());
+	const { arm, completed } = useUpdateCompletion(sessions, reconnecting);
+	const restartRequested = useRef(false);
 
-	const armUpdateReload = useCallback(() => {
-		sawDisconnect.current = false;
-		preArmedDoneIds.current = new Set(
-			sessionsRef.current.filter(isDoneUpdateSession).map((s) => s.id),
-		);
-		setArmed(true);
+	const markReloadedOnNewBundle = useCallback(() => {
+		globalThis.sessionStorage?.setItem(RELOAD_FLAG, "1");
 	}, []);
+	const { error: restartError, restart: restartWebserver } =
+		useWebserverRestart(reconnecting, markReloadedOnNewBundle);
 
 	useReloadNotice(setSuccess);
 
 	useEffect(() => {
-		if (!armed) return;
-		if (reconnecting) {
-			sawDisconnect.current = true;
-			return;
-		}
-		if (reloadedRef.current || !sawDisconnect.current) return;
-		const completedNew = sessions.some(
-			(s) => isDoneUpdateSession(s) && !preArmedDoneIds.current.has(s.id),
-		);
-		if (completedNew) {
-			reloadedRef.current = true;
-			globalThis.sessionStorage?.setItem(RELOAD_FLAG, "1");
-			globalThis.location.reload();
-		}
-	}, [armed, reconnecting, sessions]);
+		if (restartError) setError(restartError);
+	}, [restartError, setError]);
+
+	useEffect(() => {
+		if (!completed || restartRequested.current) return;
+		restartRequested.current = true;
+		void restartWebserver();
+	}, [completed, restartWebserver]);
+
+	const armUpdateReload = useCallback(() => {
+		restartRequested.current = false;
+		arm();
+	}, [arm]);
 
 	return { armUpdateReload };
 }

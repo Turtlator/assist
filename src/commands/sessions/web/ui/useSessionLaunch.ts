@@ -8,6 +8,7 @@ export function useSessionLaunch(socket: ReturnType<typeof useSessionSocket>) {
 		socket.sessions,
 		socket.reconnecting,
 		socket.setSuccess,
+		socket.setError,
 	);
 	const launch = useMemo(
 		() => ({ launchAssist: socket.createAssistSession, armUpdateReload }),

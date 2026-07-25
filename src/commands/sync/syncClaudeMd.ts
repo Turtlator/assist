@@ -3,6 +3,7 @@ import * as path from "node:path";
 import chalk from "chalk";
 import { promptConfirm } from "../../shared/promptConfirm";
 import { printDiff } from "../../utils/printDiff";
+import { printAutoConfirmHint } from "./printAutoConfirmHint";
 
 export async function syncClaudeMd(
 	claudeDir: string,
@@ -22,16 +23,18 @@ export async function syncClaudeMd(
 			console.log();
 			printDiff(targetContent, sourceContent);
 
-			const confirm =
-				options?.yes ||
-				(await promptConfirm(
+			if (!options?.yes) {
+				printAutoConfirmHint();
+
+				const confirm = await promptConfirm(
 					chalk.red("Overwrite existing CLAUDE.md?"),
 					false,
-				));
+				);
 
-			if (!confirm) {
-				console.log("Skipped CLAUDE.md");
-				return;
+				if (!confirm) {
+					console.log("Skipped CLAUDE.md");
+					return;
+				}
 			}
 		}
 	}

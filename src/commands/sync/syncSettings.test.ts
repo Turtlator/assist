@@ -2,14 +2,27 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { autoConfirmHintCommand } from "./printAutoConfirmHint";
 import { syncSettings } from "./syncSettings";
+
+const mockPromptConfirm = vi.fn();
+
+vi.mock("../../shared/promptConfirm", () => ({
+	promptConfirm: (...args: unknown[]) => mockPromptConfirm(...args),
+}));
 
 describe("syncSettings", () => {
 	let claudeDir: string;
 	let targetBase: string;
+	let logs: string[];
 
 	beforeEach(() => {
-		vi.spyOn(console, "log").mockImplementation(() => {});
+		mockPromptConfirm.mockReset();
+		mockPromptConfirm.mockResolvedValue(true);
+		logs = [];
+		vi.spyOn(console, "log").mockImplementation((...args: unknown[]) => {
+			logs.push(args.join(" "));
+		});
 		claudeDir = mkdtempSync(join(tmpdir(), "assist-sync-source-"));
 		targetBase = mkdtempSync(join(tmpdir(), "assist-sync-target-"));
 	});
@@ -90,4 +103,28 @@ describe("syncSettings", () => {
 
 		expect(readTarget()).toEqual({ permissions: { allow: ["Read"] } });
 	});
+
+	it("prints the sync.autoConfirm hint alongside the overwrite prompt", async () => {
+		writeSource({ permissions: { allow: ["Read"] } });
+		writeTarget({ permissions: { allow: ["Bash"] } });
+
+		await syncSettings(claudeDir, targetBase);
+
+		expect(mockPromptConfirm).toHaveBeenCalled();
+		expect(logged()).toContain(autoConfirmHintCommand);
+	});
+
+	it("does not print the hint when overwriting without prompting", async () => {
+		writeSource({ permissions: { allow: ["Read"] } });
+		writeTarget({ permissions: { allow: ["Bash"] } });
+
+		await syncSettings(claudeDir, targetBase, { yes: true });
+
+		expect(mockPromptConfirm).not.toHaveBeenCalled();
+		expect(logged()).not.toContain(autoConfirmHintCommand);
+	});
+
+	function logged(): string {
+		return logs.join("\n");
+	}
 });
