@@ -1,3 +1,15 @@
+# [0.473.0](https://github.com/staff0rd/assist/compare/v0.472.0...v0.473.0) (2026-07-26)
+
+
+### Bug Fixes
+
+* waitingSince in title generation tests ([e15bb46](https://github.com/staff0rd/assist/commit/e15bb462cf67eb75e9e439f01c84aa50e1372d30))
+
+
+### Features
+
+* title promptless sessions from transcript ([5351214](https://github.com/staff0rd/assist/commit/5351214f0375e0a76911feab422642fd2e0fd2be))
+
 # [0.472.0](https://github.com/staff0rd/assist/compare/v0.471.0...v0.472.0) (2026-07-26)
 
 
