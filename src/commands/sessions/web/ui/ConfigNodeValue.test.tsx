@@ -30,16 +30,16 @@ function textsUnder(label: string): string[] {
 }
 
 describe("ConfigNodeValue", () => {
-	it("renders an array of objects as numbered blocks of labelled fields", () => {
+	it("renders an array of objects as blocks of labelled fields", () => {
 		renderNode("sql.connections", [
 			{ name: "local", server: "localhost", port: 1433 },
 			{ name: "prod", server: "db.example.com" },
 		]);
 
-		expect(textsUnder("[0]")).toEqual(["local", "localhost", "1433"]);
-		expect(textsUnder("[1]")).toEqual(["prod", "db.example.com"]);
+		expect(textsUnder("port")).toEqual(["1433"]);
 		expect(screen.getAllByText("server")).toHaveLength(2);
-		expect(screen.getByText("port")).toBeTruthy();
+		expect(screen.getByText("local")).toBeTruthy();
+		expect(screen.getByText("db.example.com")).toBeTruthy();
 		expect(screen.queryByText(/^{/)).toBeNull();
 	});
 
@@ -95,7 +95,7 @@ describe("ConfigNodeValue", () => {
 
 		expect(textsUnder("params")).toEqual(["stage", "true"]);
 		expect(screen.getByText("required")).toBeTruthy();
-		expect(screen.getAllByText("[0]")).toHaveLength(2);
+		expect(screen.getAllByText("name")).toHaveLength(2);
 		expect(textsUnder("LOG")).toEqual(["debug"]);
 	});
 

@@ -33,9 +33,10 @@ export function ConfigRecordRow({
 		<Box sx={{ display: "flex", gap: 1, width: "100%" }}>
 			<TextField
 				size="small"
-				label={`${label} key ${position}`}
+				placeholder="key"
 				value={name}
 				disabled={disabled}
+				slotProps={{ htmlInput: { "aria-label": `${label} key ${position}` } }}
 				onChange={(event) => onRename(event.target.value)}
 				sx={{ minWidth: 180 }}
 			/>

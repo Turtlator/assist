@@ -20,11 +20,11 @@ export function ConfigTextInput({
 	return (
 		<TextField
 			size="small"
-			label={label}
 			type={numeric ? "number" : "text"}
 			value={value}
 			disabled={disabled}
 			helperText={helperText}
+			slotProps={{ htmlInput: { "aria-label": label } }}
 			onChange={(event) => onChange(event.target.value)}
 			sx={{ minWidth: 220 }}
 		/>

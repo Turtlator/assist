@@ -13,10 +13,10 @@ export function ConfigListInput({ label, value, disabled, onChange }: Props) {
 			multiline
 			minRows={2}
 			size="small"
-			label={label}
 			value={value}
 			disabled={disabled}
 			helperText="one entry per line"
+			slotProps={{ htmlInput: { "aria-label": label } }}
 			onChange={(event) => onChange(event.target.value)}
 			sx={{ minWidth: 320 }}
 		/>

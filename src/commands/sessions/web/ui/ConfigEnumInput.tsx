@@ -20,9 +20,9 @@ export function ConfigEnumInput({
 		<TextField
 			select
 			size="small"
-			label={label}
 			value={value}
 			disabled={disabled}
+			slotProps={{ select: { inputProps: { "aria-label": label } } }}
 			onChange={(event) => onChange(event.target.value)}
 			sx={{ minWidth: 180 }}
 		>

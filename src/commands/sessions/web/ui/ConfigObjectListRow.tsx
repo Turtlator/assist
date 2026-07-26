@@ -1,13 +1,12 @@
 import Box from "@mui/material/Box";
 import type { ConfigNode } from "../../../../shared/ConfigNode";
 import { ConfigEntryActions } from "./ConfigEntryActions";
-import { ConfigFieldRow } from "./ConfigFieldRow";
+import { ConfigEntryBlock } from "./ConfigEntryBlock";
 import type { ConfigNodeEditorRenderer } from "./ConfigNodeEditorRenderer";
 
 type Props = {
 	node: ConfigNode;
 	label: string;
-	index: number;
 	value: unknown;
 	disabled: boolean;
 	onChange: (value: unknown) => void;
@@ -20,7 +19,6 @@ type Props = {
 export function ConfigObjectListRow({
 	node,
 	label,
-	index,
 	value,
 	disabled,
 	onChange,
@@ -31,7 +29,7 @@ export function ConfigObjectListRow({
 }: Props) {
 	return (
 		<Box sx={{ display: "flex", gap: 1, width: "100%" }}>
-			<ConfigFieldRow label={`[${index}]`}>
+			<ConfigEntryBlock>
 				<Render
 					node={node}
 					label={label}
@@ -39,7 +37,7 @@ export function ConfigObjectListRow({
 					disabled={disabled}
 					onChange={onChange}
 				/>
-			</ConfigFieldRow>
+			</ConfigEntryBlock>
 			<ConfigEntryActions
 				label={label}
 				disabled={disabled}

@@ -3,7 +3,7 @@ import type {
 	ConfigObjectListNode,
 	ConfigScalarListNode,
 } from "../../../../shared/ConfigNode";
-import { ConfigFieldRow } from "./ConfigFieldRow";
+import { ConfigEntryBlock } from "./ConfigEntryBlock";
 import type { ConfigNodeRenderer } from "./ConfigNodeRenderer";
 import { ConfigScalarText } from "./ConfigScalarText";
 import { EmptyConfigValue } from "./EmptyConfigValue";
@@ -30,9 +30,9 @@ export function ConfigListValue({ node, value, render: Render }: Props) {
 	return (
 		<Stack spacing={0.75}>
 			{value.map((entry, index) => (
-				<ConfigFieldRow key={`[${index}]`} label={`[${index}]`}>
+				<ConfigEntryBlock key={`[${index}]`}>
 					<Render node={item} value={entry} />
-				</ConfigFieldRow>
+				</ConfigEntryBlock>
 			))}
 		</Stack>
 	);

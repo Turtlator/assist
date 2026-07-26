@@ -36,7 +36,6 @@ export function ConfigObjectListEditor({
 					key={`[${index}]`}
 					node={node.item}
 					label={`${label}[${index}]`}
-					index={index}
 					value={item}
 					disabled={disabled}
 					render={render}
