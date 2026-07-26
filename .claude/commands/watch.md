@@ -12,9 +12,9 @@ When it exits, branch on the exit code:
 
 - **0** — the upstream moved and was fast-forwarded. Invoke the `/auto-build` skill, report the built version, the commit table (see below) and the restarts the pull makes necessary, then run `assist watch wait --pull --timeout 60m` in the background again.
 - **2** — the timeout elapsed with no movement. Say so in one line and run `assist watch wait --pull --timeout 60m` in the background again.
-- **3** — the upstream moved but the pull was not a clean fast-forward. Stop watching and report git's reason. Do not force, rebase, or reset anything.
-- **1** — waiting is impossible (no upstream, detached HEAD, not a repo). Stop watching and report the reason.
-- **130** — interrupted. Stop watching.
+- **3** — the pull was not a clean fast-forward. Clear it yourself and keep watching: stash/pull/restore a dirty tree, `git merge --ff-only @{u}` if merely behind, and if the fetch already moved the branch and only the rebase step failed, treat it as pulled. Then build and re-wait as for 0. Stop only on real divergence (local commits not on the remote, a rebase or merge in progress, conflicts): report git's reason, never force or reset.
+- **1** — cannot wait at all (no upstream, detached HEAD, not a repo). Stop.
+- **130** — user interrupt. Stop. A killed or torn-down task is not an interrupt — start a new wait.
 
 ## Why the pull is part of the wait
 
