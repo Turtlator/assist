@@ -1,3 +1,10 @@
+# [0.476.0](https://github.com/staff0rd/assist/compare/v0.475.2...v0.476.0) (2026-07-26)
+
+
+### Features
+
+* dismiss X on the session top bar ([4856d4f](https://github.com/staff0rd/assist/commit/4856d4fbd9741720f26e39c108928e0ef7cbd32b))
+
 ## [0.475.2](https://github.com/staff0rd/assist/compare/v0.475.1...v0.475.2) (2026-07-26)
 
 
