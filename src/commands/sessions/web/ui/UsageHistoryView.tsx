@@ -1,44 +1,42 @@
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
-import TablePagination from "@mui/material/TablePagination";
-import { useLayoutEffect, useRef, useState } from "react";
+import Typography from "@mui/material/Typography";
 import { PageShell } from "./PageShell";
-import { UsagePeaksTable } from "./UsagePeaksTable";
+import { usagePeakWindow } from "./usagePeakWindow";
+import { UsagePeaksPager } from "./UsagePeaksPager";
+import { UsageWindowFilter } from "./UsageWindowFilter";
 import { useUsageHistoryPage } from "./useUsageHistoryPage";
 
 export function UsageHistoryView() {
-	const { page, setPage, rows, total, loaded, fetching, error, pageSize } =
-		useUsageHistoryPage();
-	const tableRef = useRef<HTMLDivElement>(null);
-	const [fullPageHeight, setFullPageHeight] = useState<number>();
-
-	useLayoutEffect(() => {
-		if (rows.length === pageSize && tableRef.current) {
-			setFullPageHeight(tableRef.current.offsetHeight);
-		}
-	}, [rows, pageSize]);
+	const history = useUsageHistoryPage();
+	const { window, total, error } = history;
 
 	if (error) throw error;
 
 	return (
 		<PageShell
-			loading={!loaded}
+			loading={!history.loaded}
 			title="Usage history"
-			isEmpty={total === 0}
+			isEmpty={total === 0 && window === "all"}
 			emptyMessage="No usage peaks recorded yet."
 		>
-			<Box sx={{ height: 4, mb: 1 }}>{fetching && <LinearProgress />}</Box>
-			<Box ref={tableRef} sx={{ minHeight: fullPageHeight }}>
-				<UsagePeaksTable peaks={rows} />
+			<UsageWindowFilter window={window} onChange={history.selectWindow} />
+			<Box sx={{ height: 4, my: 1 }}>
+				{history.fetching && <LinearProgress />}
 			</Box>
-			<TablePagination
-				component="div"
-				count={total}
-				page={page}
-				rowsPerPage={pageSize}
-				rowsPerPageOptions={[pageSize]}
-				onPageChange={(_, next) => setPage(next)}
-			/>
+			{window !== "all" && total === 0 ? (
+				<Typography color="text.secondary" align="center" sx={{ py: 6 }}>
+					No {usagePeakWindow[window].label} usage peaks recorded yet.
+				</Typography>
+			) : (
+				<UsagePeaksPager
+					rows={history.rows}
+					total={total}
+					page={history.page}
+					pageSize={history.pageSize}
+					onPageChange={history.setPage}
+				/>
+			)}
 		</PageShell>
 	);
 }

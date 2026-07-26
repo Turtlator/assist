@@ -1,48 +1,14 @@
 import { useEffect, useState } from "react";
-import type { UsagePeakRow } from "../../../../shared/db/listUsagePeaks";
+import type { UsageWindowFilterValue } from "./UsageWindowFilter";
+import { useUsageHistoryFetch } from "./useUsageHistoryFetch";
 
 const PAGE_SIZE = 30;
 
-type UsageHistoryPage = { rows: UsagePeakRow[]; total: number };
-
-async function fetchUsageHistory(page: number): Promise<UsageHistoryPage> {
-	const res = await fetch(
-		`/api/usage/history?page=${page}&pageSize=${PAGE_SIZE}`,
-	);
-	if (!res.ok)
-		throw new Error(`Failed to load usage history (HTTP ${res.status}).`);
-	return res.json();
-}
-
 export function useUsageHistoryPage() {
 	const [page, setPage] = useState(0);
-	const [rows, setRows] = useState<UsagePeakRow[]>([]);
-	const [total, setTotal] = useState(0);
-	const [loaded, setLoaded] = useState(false);
-	const [fetching, setFetching] = useState(false);
-	const [loadError, setLoadError] = useState<Error | null>(null);
-
-	useEffect(() => {
-		let cancelled = false;
-		setFetching(true);
-		fetchUsageHistory(page).then(
-			(data) => {
-				if (cancelled) return;
-				setRows(data.rows);
-				setTotal(data.total);
-				setLoaded(true);
-				setFetching(false);
-			},
-			(error: unknown) => {
-				if (cancelled) return;
-				setLoadError(error instanceof Error ? error : new Error(String(error)));
-				setFetching(false);
-			},
-		);
-		return () => {
-			cancelled = true;
-		};
-	}, [page]);
+	const [window, setWindow] = useState<UsageWindowFilterValue>("all");
+	const fetched = useUsageHistoryFetch(page, PAGE_SIZE, window);
+	const { total } = fetched;
 
 	useEffect(() => {
 		if (total === 0) return;
@@ -50,14 +16,17 @@ export function useUsageHistoryPage() {
 		if (page > lastPage) setPage(lastPage);
 	}, [page, total]);
 
+	const selectWindow = (next: UsageWindowFilterValue) => {
+		setWindow(next);
+		setPage(0);
+	};
+
 	return {
+		...fetched,
 		page,
 		setPage,
-		rows,
-		total,
-		loaded,
-		fetching,
-		error: loadError,
+		window,
+		selectWindow,
 		pageSize: PAGE_SIZE,
 	};
 }

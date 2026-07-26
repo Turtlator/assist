@@ -1,10 +1,19 @@
-import { and, count, desc, eq, getTableColumns, sql } from "drizzle-orm";
+import { and, desc, eq, getTableColumns } from "drizzle-orm";
+import { avgContextPerCycle } from "./avgContextPerCycle";
 import type { Db } from "./Db";
-import { phaseCycleContext, usagePeaks } from "./schema";
+import { usagePeaks } from "./schema";
 
 export type UsagePeakRow = typeof usagePeaks.$inferSelect & {
 	avgContextPct: number | null;
 	phaseCount: number | null;
+};
+
+export type UsagePeakWindow = UsagePeakRow["window"];
+
+type ListUsagePeaksOptions = {
+	limit?: number;
+	offset?: number;
+	window?: UsagePeakWindow;
 };
 
 /**
@@ -12,27 +21,14 @@ export type UsagePeakRow = typeof usagePeaks.$inferSelect & {
  * `window` as a stable cross-window tiebreak, then `createdAt` descending so a
  * cycle's segments stack newest-first by when each reading landed — the current
  * post-reset value on top, earlier (badged) pre-reset peaks beneath. `segment`
- * is a final tiebreak should two readings share a timestamp.
+ * is a final tiebreak should two readings share a timestamp. An optional
+ * `window` narrows the result to one rate-limit bucket.
  */
 export async function listUsagePeaks(
 	db: Db,
-	paging?: { limit: number; offset: number },
+	options?: ListUsagePeaksOptions,
 ): Promise<UsagePeakRow[]> {
-	const avgContext = db
-		.select({
-			window: phaseCycleContext.window,
-			resetsAt: phaseCycleContext.resetsAt,
-			avgContextPct: sql<
-				number | null
-			>`cast(avg(${phaseCycleContext.peakContextPct}) as double precision)`.as(
-				"avg_context_pct",
-			),
-			phaseCount: count().as("phase_count"),
-		})
-		.from(phaseCycleContext)
-		.groupBy(phaseCycleContext.window, phaseCycleContext.resetsAt)
-		.as("avg_context");
-
+	const avgContext = avgContextPerCycle(db);
 	const query = db
 		.select({
 			...getTableColumns(usagePeaks),
@@ -47,19 +43,15 @@ export async function listUsagePeaks(
 				eq(usagePeaks.resetsAt, avgContext.resetsAt),
 			),
 		)
+		.where(options?.window ? eq(usagePeaks.window, options.window) : undefined)
 		.orderBy(
 			desc(usagePeaks.resetsAt),
 			usagePeaks.window,
 			desc(usagePeaks.createdAt),
 			desc(usagePeaks.segment),
 		);
-	if (paging) {
-		return query.limit(paging.limit).offset(paging.offset);
+	if (options?.limit !== undefined) {
+		return query.limit(options.limit).offset(options.offset ?? 0);
 	}
 	return query;
-}
-
-export async function countUsagePeaks(db: Db): Promise<number> {
-	const [row] = await db.select({ value: count() }).from(usagePeaks);
-	return row?.value ?? 0;
 }

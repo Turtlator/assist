@@ -1,21 +1,36 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+} from "vitest";
 import type { RateLimits } from "../RateLimits";
+import { countUsagePeaks } from "./countUsagePeaks";
 import { createTestDb } from "./createTestDb";
 import type { Db } from "./Db";
-import { countUsagePeaks, listUsagePeaks } from "./listUsagePeaks";
+import { listUsagePeaks } from "./listUsagePeaks";
 import { recordPhaseCycleContext } from "./recordPhaseCycleContext";
 import { recordUsagePeak } from "./recordUsagePeak";
-import { items } from "./schema";
+import { items, phaseCycleContext, usagePeaks } from "./schema";
 
 describe("listUsagePeaks", () => {
 	let orm: Db;
 	let close: () => Promise<void>;
 
-	beforeEach(async () => {
+	beforeAll(async () => {
 		({ orm, close } = await createTestDb());
 	});
 
 	afterEach(async () => {
+		await orm.delete(usagePeaks);
+		await orm.delete(phaseCycleContext);
+		await orm.delete(items);
+	});
+
+	afterAll(async () => {
 		await close();
 	});
 
@@ -183,6 +198,72 @@ describe("listUsagePeaks", () => {
 	describe("when no peaks have been recorded", () => {
 		it("counts zero", async () => {
 			expect(await countUsagePeaks(orm)).toBe(0);
+		});
+	});
+
+	describe("when filtering by window", () => {
+		beforeEach(async () => {
+			await record({
+				five_hour: { used_percentage: 10, resets_at: 1000 },
+				seven_day: { used_percentage: 15, resets_at: 1000 },
+			});
+			await record({
+				five_hour: { used_percentage: 20, resets_at: 2000 },
+			});
+			await record({
+				seven_day: { used_percentage: 25, resets_at: 3000 },
+			});
+		});
+
+		it("lists only the five hour peaks", async () => {
+			const rows = await listUsagePeaks(orm, { window: "five_hour" });
+
+			expect(rows.map((r) => [r.window, r.resetsAt])).toEqual([
+				["five_hour", 2000],
+				["five_hour", 1000],
+			]);
+		});
+
+		it("lists only the seven day peaks", async () => {
+			const rows = await listUsagePeaks(orm, { window: "seven_day" });
+
+			expect(rows.map((r) => [r.window, r.resetsAt])).toEqual([
+				["seven_day", 3000],
+				["seven_day", 1000],
+			]);
+		});
+
+		it("pages within the filtered window", async () => {
+			const page0 = await listUsagePeaks(orm, {
+				window: "seven_day",
+				limit: 1,
+				offset: 0,
+			});
+			const page1 = await listUsagePeaks(orm, {
+				window: "seven_day",
+				limit: 1,
+				offset: 1,
+			});
+
+			expect(page0.map((r) => r.resetsAt)).toEqual([3000]);
+			expect(page1.map((r) => r.resetsAt)).toEqual([1000]);
+		});
+
+		it("counts only the peaks in the given window", async () => {
+			expect(await countUsagePeaks(orm, "five_hour")).toBe(2);
+			expect(await countUsagePeaks(orm, "seven_day")).toBe(2);
+			expect(await countUsagePeaks(orm)).toBe(4);
+		});
+	});
+
+	describe("when only one window has peaks", () => {
+		it("returns nothing for the other window", async () => {
+			await record({
+				five_hour: { used_percentage: 10, resets_at: 1000 },
+			});
+
+			expect(await listUsagePeaks(orm, { window: "seven_day" })).toEqual([]);
+			expect(await countUsagePeaks(orm, "seven_day")).toBe(0);
 		});
 	});
 
