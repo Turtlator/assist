@@ -1,3 +1,10 @@
+## [0.461.3](https://github.com/staff0rd/assist/compare/v0.461.2...v0.461.3) (2026-07-26)
+
+
+### Bug Fixes
+
+* right-align card status on chips line ([6b4cda9](https://github.com/staff0rd/assist/commit/6b4cda930bd3fe9ddb72f342b4d2cbeaff3ffd6f))
+
 ## [0.461.2](https://github.com/staff0rd/assist/compare/v0.461.1...v0.461.2) (2026-07-26)
 
 
