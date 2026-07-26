@@ -1,3 +1,10 @@
+## [0.469.1](https://github.com/staff0rd/assist/compare/v0.469.0...v0.469.1) (2026-07-26)
+
+
+### Bug Fixes
+
+* trim the card status dot by 20% ([259da0d](https://github.com/staff0rd/assist/commit/259da0d93bdfde369153b7ba22b33d535594457c))
+
 # [0.469.0](https://github.com/staff0rd/assist/compare/v0.468.1...v0.469.0) (2026-07-26)
 
 
