@@ -1,3 +1,15 @@
+# [0.482.0](https://github.com/staff0rd/assist/compare/v0.481.0...v0.482.0) (2026-07-26)
+
+
+### Bug Fixes
+
+* Enter submits empty prompt dropdowns ([d81439f](https://github.com/staff0rd/assist/commit/d81439f6ba7c0481c434ef8256d76d293b994e94))
+
+
+### Features
+
+* badge the clone-tree session card ([af92274](https://github.com/staff0rd/assist/commit/af92274da4b7ec13df152569066ace8749d0ee45))
+
 # [0.481.0](https://github.com/staff0rd/assist/compare/v0.480.0...v0.481.0) (2026-07-26)
 
 
