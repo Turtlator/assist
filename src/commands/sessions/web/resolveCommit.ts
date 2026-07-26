@@ -2,16 +2,21 @@ import { execGit } from "./execGit";
 
 const GIT_EMPTY_TREE_HASH = "4b825dc642cb6eb9a060e54bf8d69288fbee4904";
 
+export async function commitBase(
+	cwd: string,
+	sha: string,
+): Promise<string | undefined> {
+	if (!(await commitExists(cwd, sha))) return undefined;
+	return (await parentOf(cwd, sha)) ?? GIT_EMPTY_TREE_HASH;
+}
+
 export async function resolveCommit(
 	cwd: string,
 	sha: string,
 ): Promise<{ base: string; paths: string[] } | undefined> {
-	if (!(await commitExists(cwd, sha))) return undefined;
-	const parent = await parentOf(cwd, sha);
-	return {
-		base: parent ?? GIT_EMPTY_TREE_HASH,
-		paths: await commitPaths(cwd, sha),
-	};
+	const base = await commitBase(cwd, sha);
+	if (!base) return undefined;
+	return { base, paths: await commitPaths(cwd, sha) };
 }
 
 async function commitExists(cwd: string, sha: string): Promise<boolean> {

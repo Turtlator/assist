@@ -1,49 +1,13 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { execGit } from "./execGit";
+import { respondJson } from "../../../shared/web";
 import { getCwdParam } from "./getCwdParam";
 import { getSessionParam } from "./getSessionParam";
-import { type ChangeGroup, itemChangeSet } from "./itemChangeSet";
+import { resolveDiffScope } from "./resolveDiffScope";
+import { scopedDiff } from "./scopedDiff";
 
-const MAX_DIFF_BYTES = 50 * 1024 * 1024;
-
-async function untrackedFileDiff(cwd: string, path: string): Promise<string> {
-	return execGit(cwd, ["diff", "--no-index", "--", "/dev/null", path], {
-		maxBuffer: MAX_DIFF_BYTES,
-		allowFailure: true,
-	});
-}
-
-async function untrackedDiff(cwd: string): Promise<string> {
-	const list = await execGit(cwd, [
-		"ls-files",
-		"--others",
-		"--exclude-standard",
-	]);
-	const paths = list.split("\n").filter(Boolean);
-	const diffs = await Promise.all(
-		paths.map((path) => untrackedFileDiff(cwd, path)),
-	);
-	return diffs.join("");
-}
-
-async function groupedDiff(
-	cwd: string,
-	groups: ChangeGroup[],
-): Promise<string> {
-	const diffs = await Promise.all(
-		groups.map((group) =>
-			execGit(cwd, ["diff", group.base, "--", ...group.paths], {
-				maxBuffer: MAX_DIFF_BYTES,
-			}),
-		),
-	);
-	return diffs.join("");
-}
-
-async function trackedDiff(cwd: string, session?: string): Promise<string> {
-	const changeSet = await itemChangeSet(cwd, session);
-	if (changeSet) return groupedDiff(cwd, changeSet.groups);
-	return execGit(cwd, ["diff", "HEAD"], { maxBuffer: MAX_DIFF_BYTES });
+function getScopeParam(req: IncomingMessage): string | undefined {
+	const url = new URL(req.url ?? "/", "http://localhost");
+	return url.searchParams.get("scope") ?? undefined;
 }
 
 export async function diff(
@@ -52,11 +16,16 @@ export async function diff(
 ): Promise<void> {
 	const cwd = getCwdParam(req, res);
 	if (!cwd) return;
+	const session = getSessionParam(req);
 	try {
-		const tracked = await trackedDiff(cwd, getSessionParam(req));
-		const untracked = await untrackedDiff(cwd);
+		const scope = await resolveDiffScope(cwd, session, getScopeParam(req));
+		if (!scope) {
+			respondJson(res, 400, { error: "Invalid scope" });
+			return;
+		}
+		const body = await scopedDiff(cwd, session, scope);
 		res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
-		res.end(tracked + untracked);
+		res.end(body);
 	} catch {
 		res.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });
 		res.end("");

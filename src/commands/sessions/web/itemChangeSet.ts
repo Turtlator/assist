@@ -1,8 +1,7 @@
 import type { CommitRef } from "../../../shared/db/listCommitRefs";
-import { loadConfigFrom } from "../../../shared/loadConfigFrom";
 import { execGit } from "./execGit";
 import { committedPaths } from "./committedPaths";
-import { toGitCwd } from "./toGitCwd";
+import { includesCommittedChanges } from "./includesCommittedChanges";
 
 export type ChangeGroup = { base: string; paths: string[] };
 
@@ -20,16 +19,6 @@ export async function itemChangeSet(
 	const dirty = await dirtyPaths(cwd, bases);
 	if (dirty.length > 0) groups.push({ base: "HEAD", paths: dirty });
 	return { commits, groups };
-}
-
-function includesCommittedChanges(cwd: string): boolean {
-	try {
-		return Boolean(
-			loadConfigFrom(toGitCwd(cwd)).sessions?.includeCommittedChanges,
-		);
-	} catch {
-		return false;
-	}
 }
 
 function groupByBase(bases: Map<string, string>): ChangeGroup[] {

@@ -9,7 +9,11 @@ type DiffState = {
 	error: boolean;
 };
 
-export function useDiff(cwd: string, sessionId?: string): DiffState {
+export function useDiff(
+	cwd: string,
+	sessionId?: string,
+	scope?: string,
+): DiffState {
 	const [state, setState] = useState<DiffState>({
 		diff: "",
 		loading: true,
@@ -25,7 +29,9 @@ export function useDiff(cwd: string, sessionId?: string): DiffState {
 		setState({ diff: "", loading: true, error: false });
 		const poll = async () => {
 			try {
-				const res = await fetch(`/api/diff?${diffQuery(cwd, sessionId)}`);
+				const res = await fetch(
+					`/api/diff?${diffQuery(cwd, sessionId, scope)}`,
+				);
 				if (!res.ok) throw new Error(`HTTP ${res.status}`);
 				const body = await res.text();
 				if (!cancelled) setState({ diff: body, loading: false, error: false });
@@ -39,7 +45,7 @@ export function useDiff(cwd: string, sessionId?: string): DiffState {
 			cancelled = true;
 			clearInterval(id);
 		};
-	}, [cwd, sessionId]);
+	}, [cwd, sessionId, scope]);
 
 	return state;
 }

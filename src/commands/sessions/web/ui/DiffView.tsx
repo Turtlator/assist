@@ -1,24 +1,22 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import { parseDiff, type ViewType } from "react-diff-view";
+import { DiffFileList } from "./DiffFileList";
 import { DiffToolbar } from "./DiffToolbar";
-import { diffSx } from "./diffSx";
-import { FileDiff, fileKey } from "./FileDiff";
 import { type DiffChangeType, filterDiffFiles } from "./filterDiffFiles";
 import { PageShell } from "./PageShell";
 import { useDiff } from "./useDiff";
+import { useDiffScopes } from "./useDiffScopes";
 import { useDiffTarget } from "./useDiffTarget";
 
 export function DiffView() {
-	const { cwd, sessionId } = useDiffTarget();
-	const { diff, loading, error } = useDiff(cwd, sessionId);
+	const { cwd, sessionId, scope, setScope } = useDiffTarget();
+	const { diff, loading, error } = useDiff(cwd, sessionId, scope);
+	const scopeCommits = useDiffScopes(cwd, sessionId);
 	const [viewType, setViewType] = useState<ViewType>("split");
 	const [search, setSearch] = useState("");
 	const [changeType, setChangeType] = useState<DiffChangeType>("all");
 
 	const files = error || !diff ? [] : parseDiff(diff);
-	const filtered = filterDiffFiles(files, { query: search, changeType });
 
 	return (
 		<PageShell
@@ -34,23 +32,15 @@ export function DiffView() {
 				onSearchChange={setSearch}
 				changeType={changeType}
 				onChangeTypeChange={setChangeType}
+				scope={scope}
+				scopeCommits={scopeCommits}
+				onScopeChange={setScope}
 			/>
-			{filtered.length === 0 ? (
-				<Typography color="text.secondary" align="center" sx={{ py: 6 }}>
-					No files match your filter.
-				</Typography>
-			) : (
-				<Box sx={diffSx}>
-					{filtered.map((file) => (
-						<FileDiff
-							key={fileKey(file)}
-							file={file}
-							viewType={viewType}
-							cwd={cwd}
-						/>
-					))}
-				</Box>
-			)}
+			<DiffFileList
+				files={filterDiffFiles(files, { query: search, changeType })}
+				viewType={viewType}
+				cwd={cwd}
+			/>
 		</PageShell>
 	);
 }
