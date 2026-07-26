@@ -1,3 +1,10 @@
+# [0.483.0](https://github.com/staff0rd/assist/compare/v0.482.1...v0.483.0) (2026-07-26)
+
+
+### Features
+
+* repo-scoped config writes ([b0fca45](https://github.com/staff0rd/assist/commit/b0fca4567943bf85533c35bec3ef9d8569b191aa))
+
 ## [0.482.1](https://github.com/staff0rd/assist/compare/v0.482.0...v0.482.1) (2026-07-26)
 
 
