@@ -2,7 +2,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { execGit } from "./execGit";
 import { getCwdParam } from "./getCwdParam";
 import { getSessionParam } from "./getSessionParam";
-import { resolveDiffBase } from "./resolveDiffBase";
+import { type ChangeGroup, itemChangeSet } from "./itemChangeSet";
 
 const MAX_DIFF_BYTES = 50 * 1024 * 1024;
 
@@ -26,6 +26,26 @@ async function untrackedDiff(cwd: string): Promise<string> {
 	return diffs.join("");
 }
 
+async function groupedDiff(
+	cwd: string,
+	groups: ChangeGroup[],
+): Promise<string> {
+	const diffs = await Promise.all(
+		groups.map((group) =>
+			execGit(cwd, ["diff", group.base, "--", ...group.paths], {
+				maxBuffer: MAX_DIFF_BYTES,
+			}),
+		),
+	);
+	return diffs.join("");
+}
+
+async function trackedDiff(cwd: string, session?: string): Promise<string> {
+	const changeSet = await itemChangeSet(cwd, session);
+	if (changeSet) return groupedDiff(cwd, changeSet.groups);
+	return execGit(cwd, ["diff", "HEAD"], { maxBuffer: MAX_DIFF_BYTES });
+}
+
 export async function diff(
 	req: IncomingMessage,
 	res: ServerResponse,
@@ -33,10 +53,7 @@ export async function diff(
 	const cwd = getCwdParam(req, res);
 	if (!cwd) return;
 	try {
-		const base = await resolveDiffBase(cwd, getSessionParam(req));
-		const tracked = await execGit(cwd, ["diff", base], {
-			maxBuffer: MAX_DIFF_BYTES,
-		});
+		const tracked = await trackedDiff(cwd, getSessionParam(req));
 		const untracked = await untrackedDiff(cwd);
 		res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
 		res.end(tracked + untracked);
