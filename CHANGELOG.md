@@ -1,3 +1,10 @@
+# [0.455.0](https://github.com/staff0rd/assist/compare/v0.454.1...v0.455.0) (2026-07-26)
+
+
+### Features
+
+* editable unions and string lists ([3167ba6](https://github.com/staff0rd/assist/commit/3167ba693a4e59fb1953f57b8ae1f9a5cffb1f0c))
+
 ## [0.454.1](https://github.com/staff0rd/assist/compare/v0.454.0...v0.454.1) (2026-07-25)
 
 
