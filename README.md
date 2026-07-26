@@ -41,33 +41,33 @@ After installation, the `assist` command will be available globally. You can als
 ## Claude Commands
 
 - `/add-command` - Add a new run command to assist.yml
-- `/branch <description> [--jira KEY]` - Create a branch off the fresh remote default via `assist branch`, deriving a kebab-case slug from the description and auto-filling the Jira key from the session's backlog item when one is associated
+- `/branch <description> [--jira KEY]` - Create a branch off the fresh remote default, deriving a kebab-case slug from the description
 - `/bug` - File a bug with reproduction steps, expected and actual behavior
 - `/comment` - Add pending review comments to the current PR
 - `/commit` - Commit only relevant files from the session
 - `/devlog` - Generate devlog entry for the next unversioned day
 - `/draft` - Draft a new backlog item with LLM-assisted questioning
-- `/forward-comments` - Split a coarse PR comment (e.g. from Slack) into per-line review comments on the current branch's PR, attributed to the original reviewer
-- `/handover` - Write a session handover note for the next conversation and save it to the backlog DB (scoped by git origin, never on disk). Can be run any number of times; each call appends a note with a one-line summary. The SessionStart hook advises how many unrecalled handovers exist
-- `/pr` - Raise a PR with a concise description, then watch CI in the background (`gh pr checks --watch`) so work can continue; on return, report a pass or the failing checks and offer to fix them
+- `/forward-comments` - Split a coarse PR comment into per-line review comments, attributed to the original reviewer
+- `/handover` - Write a session handover note for the next conversation
+- `/pr` - Raise a PR with a concise description, then watch CI in the background
 - `/prs-slack <number>` - Post a PR's title and URL to the Slack channel configured in `prs.slack`
 - `/refactor` - Run refactoring checks for code quality
 - `/prompts` - Analyze denied tool calls and suggest settings changes to auto-allow recurring prompts
-- `/recall` - Recall the most recent handover note for this repo from the backlog DB, emit it as a `# Recall` block, and mark it recalled. Reads DB handovers only (no transcripts or disk files)
+- `/recall` - Recall the most recent handover note for this repo
 - `/refine` - Refine an existing backlog item through conversation
 - `/restructure` - Analyze and restructure tightly-coupled files
 - `/review-pr-comments` - Process PR review comments one by one
-- `/jira [action] [KEY] [args]` - Dispatch Jira actions. `view` (default for a bare key) fetches and displays the issue; `associate <KEY> [id]` associates a ticket with a backlog item via `assist backlog associate-jira`; `update [KEY]` posts a concise session-summary comment via MCP (attaches a passed key to the session item first, else reads the key from it; retargets sub-task comments to the parent; previews before posting); `started [KEY]` assigns it to the current Atlassian user and transitions it to In Progress; `done [KEY]` transitions it to Done with no assignment change; `help` (or bare `/jira`) lists the actions. A `[KEY]` is optional for every action — when omitted it resolves from the session's current backlog item; started/done act on the exact issue with no parent retargeting
-- `/github [action] [ref] [args]` - Dispatch GitHub issue actions via the `gh` CLI (`ref` is `owner/repo#number` shorthand or an issue URL). `view` (default for a bare ref) fetches and displays the issue; `associate <ref> [id]` associates an issue with a backlog item via `assist backlog associate-github`; `update [ref]` posts a concise session-summary comment (attaches a passed ref to the session item first, else reads it from the item; previews before posting); `started [ref]` assigns it to you (GitHub has no In Progress state); `done [ref]` closes it with no assignment change; `help` (or bare `/github`) lists the actions. A `[ref]` is optional for every action — when omitted it resolves from the session's current backlog item's `GitHub:` line
-- `/journal` - Append a journal entry summarising recent work, decisions, and notable observations
-- `/next [id]` - Signal completion and chain into the next backlog item; pass an `id` to run a specific item directly (falls back to the picker if the id is missing, done, won't-do, or blocked)
+- `/jira [action] [KEY] [args]` - Jira actions: `view`, `associate`, `update`, `started`, `done`, `help`. `[KEY]` is optional — it resolves from the session's backlog item
+- `/github [action] [ref] [args]` - GitHub issue actions: `view`, `associate`, `update`, `started`, `done`, `help`. `[ref]` is optional — it resolves from the session's backlog item
+- `/journal` - Append a journal entry summarising recent work
+- `/next [id]` - Signal completion and chain into the next backlog item
 - `/standup` - Summarise recent journal entries as a standup update
-- `/subtask <text>` - Add a sub-task to the backlog item this session is working on (errors if there is no current item) by calling `assist backlog add-subtask`
-- `/strip-code-comments` - Enforce self-documenting code: declare the comment policy in CLAUDE.md if absent, then strip redundant comments, commented-out code, and section banners from tracked source files (functional directives and genuine workaround comments are preserved); edits are left unstaged
+- `/subtask <text>` - Add a sub-task to the session's current backlog item
+- `/strip-code-comments` - Strip redundant comments from tracked source files
 - `/sync` - Sync commands and settings to ~/.claude
-- `/design <prompt>` - Adopt the vendored design system prompt (`~/.claude/system-prompt.md`) and its design skills (`~/.claude/skills/`, both installed by `assist sync`) as context, then apply that design guidance to `<prompt>`
+- `/design <prompt>` - Apply the vendored design system prompt to a design task
 - `/test-cover` - Incrementally increase test coverage by identifying and testing uncovered files
-- `/test-review` - Review existing tests for quality, coverage gaps, and adherence to conventions
+- `/test-review` - Review existing tests for quality, coverage gaps, and conventions
 - `/inspect` - Run .NET code inspections on changed files
 - `/screenshot` - Capture a screenshot of a running application window
 - `/raven` - Query and manage RavenDB connections and collections
@@ -84,282 +84,317 @@ After installation, the `assist` command will be available globally. You can als
 
 ## CLI Commands
 
+Every command supports `--help` for full detail on its flags and behaviour.
+
+### Database
+
+- `assist backup [-o, --out <dir>]` - Dump the entire backlog database to `<dir>/backup-<timestamp>.dump` (default `~/.assist/backups`, or `backup.dir`)
+- `assist backup schedule --every <duration>` - Install or update a crontab block running `assist backup` on a cadence (e.g. `5m`, `6h`)
+- `assist backup schedule status` - Print the active backup cadence and cron expression
+- `assist backup schedule remove` - Remove the backup schedule block from the crontab
+- `assist db migrate` - Apply pending backlog database migrations in order
+- `assist db status` - Report whether the database is in sync with the build's bundled migrations
+
+### Git and GitHub
+
+- `assist sync` - Copy commands, settings, `CLAUDE.md` and design assets to `~/.claude` (plus `~/.codex` and `~/.pi` when those CLIs are on PATH)
 - `assist activity [--since <date>]` - Chart GitHub commit activity per day (defaults to last 30 days)
-- `assist backup [-o, --out <dir>]` - Write a dump of the entire backlog database to `<dir>/backup-<timestamp>.dump` (default dir `~/.assist/backups`, overridable via the `backup.dir` config key or `--out`) and record the dump's path and byte size in the backups table; on failure no row is recorded and the command exits with an error
-- `assist backup schedule --every <duration>` - Install or update a marked crontab block that runs `assist backup` on a recurring cadence (e.g. `5m` → `*/5 * * * *`, `6h` → `0 */6 * * *`), appending output to `<backup.dir>/cron.log`; re-running with a new duration replaces the block without duplicating it. Durations cron cannot represent evenly (sub-minute, or non-divisor intervals like `90m`) are rejected
-- `assist backup schedule status` - Print the active backup cadence and cron expression, or report that none is set
-- `assist backup schedule remove` - Remove the marked backup schedule block from the crontab, leaving all other crontab lines intact (reports if none is set)
-- `assist db migrate` - Apply pending backlog database migrations in order, recording each in the `applied_migrations` table; a no-op when the database is already up to date. Run this after installing a build that ships new migrations
-- `assist db status` - Report whether the database is in sync with the build's bundled migrations, behind (run `assist db migrate`), or ahead (update assist)
-- `assist init` - Initialize project with VS Code and verify configurations
-- `assist new vite` - Initialize a new Vite React TypeScript project
-- `assist new cli` - Initialize a new tsup CLI project
-- `assist sync` - Copy command files to `~/.claude/commands`, sync `settings.json` and `CLAUDE.md`, and install the design assets — `claude/system-prompt.md` to `~/.claude/system-prompt.md` and `claude/skills/*` into `~/.claude/skills` (existing files in that directory are preserved). When the `codex` CLI is detected on PATH, additionally installs each command as a Codex skill at `~/.codex/skills/<name>/SKILL.md`, `CLAUDE.md` as `~/.codex/AGENTS.md`, and registers the `assist codex-hook` auto-approval hook (`PreToolUse` for `Bash`, plus `PermissionRequest`) in a managed block in `~/.codex/config.toml`, leaving the `~/.claude` copy untouched. When the `pi` CLI is detected on PATH, additionally installs each command as a pi prompt template (native slash-command) at `~/.pi/agent/prompts/<name>.md`, `CLAUDE.md` as `~/.pi/agent/AGENTS.md`, and installs the assist pi extensions at `~/.pi/agent/extensions/assist-*.ts` — the `assist pi-hook` permission gate (reconciling pi's run-everything default with the shared allowlist) and the status driver (pushing running/waiting to the sessions daemon via `assist sessions set-status`) — leaving the `~/.claude` and `~/.codex` copies untouched
 - `assist commit status` - Show git status and diff
-- `assist commit <message>` - Commit staged changes with validation
 - `assist commit <message> [files...]` - Stage files and create a git commit with validation
-- `assist branch <slug> [--jira <key>] [--from <ref>]` - Create and switch to a new branch off the fresh remote default branch. Assembles the name as `[<prefix>/][<JIRA>-]<slug>` (prefix from the optional `branch.prefix` config, Jira key used verbatim), fetches and branches from `origin/<default>` (resolved live from the remote, falling back to `main`, overridable via `branch.defaultBranch`), and rejects slugs whose numeric tokens look like backlog IDs. Pass `--from <ref>` to base the branch off `<ref>` verbatim (a local branch, tag, or `origin/*` remote-tracking ref) instead of the remote default; the ref is still fetched first and validated with `git rev-parse --verify`, failing fast if it does not resolve. A long free-text slug is first shortened to a concise, LLM-assisted kebab-case name (falling back to a word-boundary trim if the model is unavailable) so branch names stay brief
-- `assist watch wait [--interval <duration>] [--timeout <duration>] [--pull]` - Block until the current branch's upstream gains commits, then exit. Waiting costs no agent turns, so a watcher wakes only when a commit actually lands rather than on a clock tick. Fetches every `--interval` (default `30s`) and compares `@` against `@{u}`; a branch that is already behind returns immediately without fetching, and a transient fetch failure is ignored rather than ending the wait. Durations are a whole number followed by `s`, `m`, or `h`. `--pull` fast-forwards the branch with `git pull --ff-only` once movement is detected and prints the resulting sha; there is no force, rebase, or reset path, so a pull that is not a clean fast-forward is reported rather than resolved and the working tree is left untouched. The exit code is the interface: `0` the upstream moved (prints the `from..to` sha range and commit count) and, with `--pull`, was fast-forwarded cleanly, `2` timed out after `--timeout` (default `60m`) with no movement — just wait again, `3` the upstream moved but the `--pull` was not a clean fast-forward (prints git's own reason) — stop and report, `1` cannot wait at all (no upstream, detached HEAD, or not a repo), `130` interrupted
+- `assist branch <slug> [--jira <key>] [--from <ref>]` - Create and switch to a new branch off the fresh remote default (or `--from <ref>`); name is `[<prefix>/][<JIRA>-]<slug>`, long slugs shortened by LLM
+- `assist watch wait [--interval <d>] [--timeout <d>] [--pull]` - Block until the current branch's upstream gains commits, then exit. Exit codes: `0` moved (and cleanly pulled with `--pull`), `2` timed out, `3` pull was not a fast-forward, `1` cannot wait, `130` interrupted
 - `assist prs` - List pull requests for the current repository
-- `assist prs raise --title <title> --what <what> --why <why> [--how <how>] [--resolves <key>] [--force]` - Raise a pull request, assembling the body from `## What`, `## Why` (with `--resolves` Jira URLs appended inline), and an optional `## How`. When run inside an assist web session, the drafted title and body are shown in a 50/50 preview pane beside the terminal for approve/reject before the PR is created or updated (the command blocks until you decide; rejecting exits non-zero); in a plain terminal it places the PR directly, erroring if one already exists unless `--force` overwrites its title and body. In the web preview pane you can attach inline comments to spans of the body, and drop or paste screenshots anywhere on the pane — each image is hosted via the [`gh-image`](https://github.com/drogers0/gh-image) gh extension (`gh extension install drogers0/gh-image`), shown in a Screenshots section, and on approval appended to the PR body under a `## Screenshots` heading (discarded on rejection). Run `assist prs raise --help` for full authoring guidance (which itself adapts to the terminal-vs-web context)
-- `assist prs edit [--title <title>] [--what <what>] [--why <why>] [--how <how>] [--resolves <key>]` - Update only the supplied sections of the current branch's pull request, preserving every other section of its body
+- `assist prs raise --title <t> --what <w> --why <y> [--how <h>] [--resolves <key>] [--force]` - Raise a PR, assembling the body from What/Why/How. In a web session the draft is previewed for approve/reject (with inline comments and pasted screenshots, hosted via the [`gh-image`](https://github.com/drogers0/gh-image) gh extension) before the PR is created
+- `assist prs edit [--title <t>] [--what <w>] [--why <y>] [--how <h>] [--resolves <key>]` - Update only the supplied sections of the current PR's body
 - `assist prs list-comments` - List all comments on the current branch's pull request
 - `assist prs fixed <comment-id> <sha>` - Reply with commit link and resolve thread
 - `assist prs wontfix <comment-id> <reason>` - Reply with reason and resolve thread
 - `assist prs reply <comment-id> <body>` - Reply to a comment thread without resolving it
 - `assist prs comment <path> <line> <body>` - Add a line comment to the pending review
-- `assist review [number] [options]` - Run Claude and Codex in parallel to review the open PR for the current branch. The diff is fetched from GitHub (base SHA → head SHA via `gh pr diff`), so stale local base branches don't pollute the review; fails fast if no PR is open. By default, prompts before posting line-bound comments and then prompts again to submit the pending review (defaulting to no). Findings whose lines fall outside the diff are skipped with a warning rather than being silently dropped by GitHub. Cached `claude.md` / `codex.md` / `synthesis.md` are reused when present; if any reviewer is re-run, the synthesis is invalidated.
-  - `[number]` - Run `gh pr checkout <number>` first, then review that PR's branch. If the checkout fails (dirty working tree, unknown PR number), the review aborts. On a repo with parallel work enabled the checkout is placed by the worktree allocator rather than taking over the tree it was invoked in, so a workspace holding uncommitted or unpushed work is left untouched and the PR lands in its own `<repo>-N` (see [docs/parallel-work.md](docs/parallel-work.md))
+- `assist review [number]` - Run Claude and Codex in parallel to review the current branch's PR, then post line-bound comments. The diff comes from GitHub, so stale local base branches don't pollute the review; cached `claude.md` / `codex.md` / `synthesis.md` are reused when present
+  - `[number]` - `gh pr checkout <number>` first, placed by the worktree allocator on a repo with parallel work enabled (see [docs/parallel-work.md](docs/parallel-work.md))
   - `--no-prompt` - Skip all confirmations
-  - `--submit` - Default the submit prompt to yes (or auto-submit when combined with `--no-prompt`)
+  - `--submit` - Default the submit prompt to yes
   - `--force` - Clear all cached files and re-run every phase
-  - `--refine` - Skip posting; launch an interactive Claude session that walks through `synthesis.md` and edits it in place. A subsequent `assist review` reuses the refined file and posts only the surviving findings
-  - `--apply` - Skip posting; launch an interactive Claude session that walks through each finding asking apply/skip. Applied findings are fixed in the working tree (unstaged) and removed from `synthesis.md`; skipped findings stay so a subsequent `assist review` posts them. Cannot be combined with `--refine`
-  - `--backlog` - Skip posting; launch an interactive Claude session running `/bug` that files all findings (including `already-raised`) as a single bug backlog item with one phase per finding. `synthesis.md` is left untouched; `--submit` is ignored. Cannot be combined with `--refine` or `--apply`
-  - `--verbose` - Disable the stacked-spinner UI and fall back to per-line log output. Non-TTY environments (CI) automatically use this mode
-- `assist github commits <org>` - Report commit activity across a GitHub organisation over the last 30 days: repos ranked by commits to their default branch, top committers, and a per-repo author breakdown (empty repos are skipped; commits with no linked GitHub account fall back to the raw author name)
-  - `--since <date>` - Start of the window as `YYYY-MM-DD` instead of the default 30 days ago
-  - `--top <n>` - Only report the top `n` repos by commit count; committers and the author breakdown then cover those repos only (also caps the per-repo author queries, which speeds up large orgs)
-  - `--json` - Output all three views as structured JSON instead of tables
+  - `--refine` - Skip posting; walk through `synthesis.md` interactively and edit it in place
+  - `--apply` - Skip posting; walk through each finding asking apply/skip. Applied findings are fixed in the working tree
+  - `--backlog` - Skip posting; file all findings as a single bug backlog item with one phase per finding
+  - `--verbose` - Per-line log output instead of the stacked-spinner UI (automatic in CI)
+- `assist github commits <org> [--since <date>] [--top <n>] [--json]` - Report commit activity across a GitHub organisation: repos ranked by commits, top committers, and a per-repo author breakdown
 - `assist news add [url]` - Add an RSS feed URL (rendered in the sessions web News tab)
-  Backlog data is stored in a global Postgres database (shared across all repos, scoped per repository by git origin), so a connection string is required. Set it via the `ASSIST_DATABASE_URL` environment variable or the `database.url` key in `assist.yml`; the environment variable takes precedence. Without one, every `assist backlog` command exits with a setup message. (There is no SQLite/JSONL fallback.) Commands default to the current repository's items; pass `--all-repos` to span every repository.
 
-The first backlog command in a repository that still has a local `.assist/backlog.jsonl` automatically migrates it into Postgres — but only as a one-time bootstrap into an empty origin. If Postgres has **no** items for the repo's origin yet, it runs `git pull` (best-effort) to fetch the latest committed copy, imports every item under the origin with fresh global IDs (rewriting links to other items), and verifies the result. If Postgres **already** has items for that origin (a prior run, another clone, or a pre-seeded database), the import is skipped to avoid creating duplicates. Either way the local `.assist/backlog.jsonl` and `.assist/backlog.db` are renamed to `*.bak`, so the migration never re-runs and a local copy is retained.
+### Backlog
 
-Backlog item ids are written and displayed in an `a`-prefixed form (e.g. item 555 is `a555`) to disambiguate them from GitHub PR/issue numbers (`#42`) and Jira keys. Commands and web API routes that take an `<id>` accept either the prefixed form (`a555`) or a bare number (`555`).
+Backlog data is stored in a global Postgres database (shared across all repos, scoped per repository by git origin), so a connection string is required. Set it via the `ASSIST_DATABASE_URL` environment variable or the `database.url` key in `assist.yml`; the environment variable takes precedence. Without one, every `assist backlog` command exits with a setup message. Commands default to the current repository's items; pass `--all-repos` to span every repository.
 
-- `assist backlog [--dir <path>]` - Open the backlog tab in the web dashboard (same as `backlog web`). `--dir` overrides the directory used to resolve the current repository's git origin
-- `assist backlog list [--status <type>] [-a, --all] [--all-repos] [-v]` - List backlog items with status icons (alias: `ls`). Defaults to the current repository's todo/in-progress items; `--all` includes done/wontdo, `--all-repos` lists items across all repositories. Also available as the top-level shortcut `assist list` / `assist ls` with the same flags
-- `assist backlog add` - Add a new backlog item interactively (prompts for type: story/bug). Human CLI use only: an agent invocation errors out and points at `assist backlog propose`, so an agent-authored item cannot skip the preview
-- `assist backlog add --name <n> --type <t> --desc <d> --ac <criterion...>` - Add a backlog item from CLI options (same agent restriction)
-- `assist backlog propose --json <file|->` - Review a complete agent-authored backlog item before it is created, from a JSON payload read from a file or stdin (`name`, `type`, `description`, `acceptanceCriteria`, and `phases` of `{ name, tasks, manualChecks }`). In a web session it slides the rendered item — plan included — into the preview pane and blocks: approval writes the item and every phase in order (plus any configured sub-tasks, and a bug's default `Fix` phase when no phases were given) and prints its id, while rejection exits non-zero with the reviewer's reason and each inline comment so the caller can revise and re-propose. Outside a web session it prints the rendered item and creates it. Used by `/draft` and `/bug`; the payload is strict, so an unknown key is an error. See [docs/backlog-item-preview.md](docs/backlog-item-preview.md)
-- `assist backlog add-phase <id> <name> --task <t...> [--manual-check <c...>] [--position <pos>]` - Add a phase to an existing item (appends by default; `--position` inserts at a 1-indexed position). An agent invocation in a web session previews the phase in the pane first and writes it only on approval; a human invocation, or an agent outside a web session, writes it directly
-- `assist backlog add-subtask <id> --title <t> [--desc <d>]` - Add a sub-task (status `todo`) to a backlog item. Sub-tasks listed under the `subtasks` key (each `title` and optional `description`) in `assist.yml` and `~/.assist.yml` are auto-applied to every newly created item (stories and bugs); the global and project lists are combined
-- `assist backlog edit-subtask <id> <idx> [--title <t>] [--desc <d>] [--status <s>]` - Edit a sub-task by its 1-based index from `backlog show`; updates any combination of title, description, and status (omitted fields are left unchanged). `--desc` supports Markdown and `\n` line breaks (pass `--desc ""` to clear it); `--status` must be one of `todo`, `in-progress`, `done`
-- `assist backlog remove-subtask <id> <idx>` - Remove a sub-task by its 1-based index from `backlog show`; the remaining sub-tasks are re-indexed so they stay contiguous
-- `assist backlog subtask-status <id> <idx> <status>` - Set a sub-task's status (`todo`, `in-progress`, `done`) by its 1-based index from `backlog show`
-- `assist backlog update-field <id> [--name <n>] [--desc <d>] [--type <t>] [--ac <criterion...>]` - Update fields on a backlog item
-- `assist backlog update-field <id> [--add-ac <text>] [--edit-ac <n> <text>] [--remove-ac <n>]` - Granular acceptance-criteria edits using 1-based indices matching `backlog show`: `--add-ac` appends (repeatable), `--edit-ac` replaces criterion n in place, `--remove-ac` deletes criterion n and renumbers the rest (cannot be combined with the whole-list `--ac`)
-- `assist backlog update-field <id> --origin [url-or-key]` - Retag a single item to a different repo, moving just that item (normalized like `move-repo`, so URL or `git@` forms are accepted); with no value, retags to the current repo's origin; a no-op with a clear message when the item is already on that origin
-- `assist backlog update-phase <id> <phase> [--name <n>] [--task <t...>] [--manual-check <c...>]` - Modify a plan phase (name, tasks, or manual checks); aliased as `edit-phase`
-- `assist backlog update-phase <id> <phase> [--add-task <text>] [--edit-task <n> <text>] [--remove-task <n>] [--add-check <text>] [--edit-check <n> <text>] [--remove-check <n>]` - Granular task and manual-check edits using 1-based indices matching `backlog show`: `--add-*` appends (repeatable), `--edit-*` replaces entry n in place, `--remove-*` deletes entry n and renumbers the rest (task ops cannot be combined with `--task`; check ops cannot be combined with `--manual-check`)
-- `assist backlog remove-phase <id> <phase>` - Remove a plan phase from a backlog item
-- `assist backlog move-phase <id> <from> <to>` - Reorder a plan phase from one 1-based position to another, carrying its tasks and manual checks with it
-- `assist backlog update-plan <id> --json <file|->` - Replace an existing item's whole plan from a JSON payload of `{ phases: [{ name, tasks, manualChecks }] }` read from a file or stdin, so any combination of adding, editing, removing and reordering phases lands behind one approval. The payload is the complete desired plan rather than a patch: a phase left out is removed, and reordering is sending the phases in a different order. In a web session it renders the change into the preview pane as a single diff against the current plan — each phase marked unchanged, added, edited or moved (with its previous name and position, and its previous tasks where they changed), removed phases listed under their own heading, phases the item has already completed flagged as such, and any clamp of `currentPhase` into a shorter plan shown at the top — and blocks: approval replaces every phase and task in one transaction and applies the clamp, while rejection exits non-zero with the reviewer's reason and writes nothing at all. Outside a web session it prints the diff and applies it. The payload is strict, so an unknown key is an error. This is the path the `/refine` command and agent sessions use for every plan change; the per-phase commands above remain for quick one-liners at a terminal
-- `assist backlog next [id] [--once]` - Pick and run the next backlog item, or open `/draft` if none remain; pass an `id` to run that item first, then continue chaining; `--once` exits after the first completed item run instead of prompting for another
-- `assist backlog refine [id] [--once] [--harness <claude|codex|pi>]` - Alias for `refine`
-- `assist backlog start <id>` - Set a backlog item to in-progress
-- `assist backlog stop` - Revert all in-progress backlog items to todo and reset their phase to 1
-- `assist backlog done <id>` - Set a backlog item to done (blocked while any sub-task is not done)
-- `assist backlog wontdo <id> [reason]` - Set a backlog item to won't do
-- `assist backlog set-status <id> <status>` - Set a backlog item to a specific status (`todo`, `in-progress`, `done`, `wontdo`)
-- `assist backlog star <id>` - Star a backlog item to pin it ahead of unstarred items in the web view
-- `assist backlog unstar <id>` - Remove the star from a backlog item
-- `assist backlog delete <id>` - Delete a backlog item
+Backlog item ids are written and displayed in an `a`-prefixed form (e.g. item 555 is `a555`) to disambiguate them from GitHub PR/issue numbers (`#42`) and Jira keys. Commands and web API routes that take an `<id>` accept either form.
+
+- `assist backlog [--dir <path>]` - Open the backlog tab in the web dashboard (same as `backlog web`)
+- `assist backlog list [--status <type>] [-a, --all] [--all-repos] [-v]` - List backlog items with status icons (alias: `ls`; also `assist list` / `assist ls`)
+- `assist backlog add` - Add a new backlog item interactively (human CLI use only; agents must use `propose`)
+- `assist backlog add --name <n> --type <t> --desc <d> --ac <criterion...>` - Add a backlog item from CLI options
+- `assist backlog propose --json <file|->` - Create an agent-authored item from a JSON payload, previewed for approval in a web session. Used by `/draft` and `/bug`. See [docs/backlog-item-preview.md](docs/backlog-item-preview.md)
 - `assist backlog show <id>` - Display full detail for a backlog item (alias: `view`)
 - `assist backlog plan <id>` - Display the phased plan for a backlog item
+- `assist backlog update-field <id> [--name <n>] [--desc <d>] [--type <t>] [--ac <criterion...>]` - Update fields on a backlog item
+- `assist backlog update-field <id> [--add-ac <text>] [--edit-ac <n> <text>] [--remove-ac <n>]` - Granular 1-based acceptance-criteria edits
+- `assist backlog update-field <id> --origin [url-or-key]` - Retag a single item to a different repo
+- `assist backlog add-phase <id> <name> --task <t...> [--manual-check <c...>] [--position <pos>]` - Add a phase to an existing item
+- `assist backlog update-phase <id> <phase> [--name <n>] [--task <t...>] [--manual-check <c...>]` - Modify a plan phase (alias: `edit-phase`)
+- `assist backlog update-phase <id> <phase> [--add-task <t>] [--edit-task <n> <t>] [--remove-task <n>] [--add-check <c>] [--edit-check <n> <c>] [--remove-check <n>]` - Granular 1-based task and manual-check edits
+- `assist backlog remove-phase <id> <phase>` - Remove a plan phase from a backlog item
+- `assist backlog move-phase <id> <from> <to>` - Reorder a plan phase between 1-based positions
+- `assist backlog update-plan <id> --json <file|->` - Replace an item's whole plan from a JSON payload, previewed as a single diff for approval. The path `/refine` and agent sessions use for every plan change
+- `assist backlog add-subtask <id> --title <t> [--desc <d>]` - Add a sub-task. Sub-tasks under the `subtasks` key in `assist.yml` / `~/.assist.yml` are auto-applied to every new item
+- `assist backlog edit-subtask <id> <idx> [--title <t>] [--desc <d>] [--status <s>]` - Edit a sub-task by its 1-based index
+- `assist backlog remove-subtask <id> <idx>` - Remove a sub-task by its 1-based index
+- `assist backlog subtask-status <id> <idx> <status>` - Set a sub-task's status (`todo`, `in-progress`, `done`)
+- `assist backlog start <id>` - Set a backlog item to in-progress
+- `assist backlog stop` - Revert all in-progress items to todo and reset their phase to 1
+- `assist backlog done <id>` - Set a backlog item to done (blocked while any sub-task is not done)
+- `assist backlog wontdo <id> [reason]` - Set a backlog item to won't do
+- `assist backlog set-status <id> <status>` - Set status (`todo`, `in-progress`, `done`, `wontdo`)
+- `assist backlog star <id>` / `assist backlog unstar <id>` - Pin an item ahead of unstarred items in the web view
+- `assist backlog delete <id>` - Delete a backlog item
 - `assist backlog comment <id> <text>` - Add a comment to a backlog item
 - `assist backlog comments <id>` - List comments and summaries for a backlog item
-- `assist backlog delete-comment <id> <comment-id>` - Delete a comment from a backlog item (summaries cannot be deleted)
-- `assist backlog phase-done <id> <phase> <summary>` - Signal that a plan phase is complete with a summary (used by orchestrator)
-- `assist backlog rewind <id> <phase> --reason <reason>` - Rewind a backlog item to an earlier phase, setting status to in-progress
-- `assist backlog run <id>` - Run a backlog item's plan phase-by-phase with Claude; `--resume-session <id>` resumes an interrupted Claude session for the current phase (used by the sessions daemon when it restarts a running item). Refuses to start when another live process is already running that item (naming its pid), so the same phase is never implemented twice — in the web UI the item's Build button is disabled while its run is live
-- `assist backlog export [file]` - Export every table in the backlog database (discovered by live schema introspection, so new tables are covered automatically) to a file, or stdout if omitted
-- `assist backlog import [file]` - Restore every table present in a dump (file or stdin) back into the backlog database in foreign-key-safe order, faithfully replacing all data and resyncing identity sequences; prompts for confirmation (use `-y, --yes` to skip; required when reading from stdin)
-- `assist backlog associate-jira <id> [key]` - Associate a Jira ticket with a backlog item; accepts a bare key (`PROJ-123`) or an Atlassian browse URL, validates the key shape, fetches the issue to confirm it exists, and stores the key (re-running with a different key replaces it). Clears any GitHub issue on the item (one external tracker per item). Use `--clear` to remove the association
-- `assist backlog associate-github <id> [issue]` - Associate a GitHub issue with a backlog item; accepts a full issue URL or `owner/repo#number` shorthand, normalises to `owner/repo#number`, and fetches the issue title via the `gh` CLI to confirm it. Clears any Jira key on the item (one external tracker per item). Use `--clear` to remove the association
-- `assist backlog add-activity <id> <kind> <ref>` - Attach an activity ref to a backlog item, where `kind` is `branch`, `commit`, `commit-parent`, `pr`, or `slack`; `branch`/`commit` auto-fill their GitHub URL. Use `--title`, `--url`, `--state` to supply or override metadata. Re-adding the same kind and ref upserts rather than duplicating
-- `assist backlog record-slack <url>` - Attach a Slack thread permalink to the current session's backlog item (resolved from `ASSIST_BACKLOG_ITEM_ID`) as a `slack` activity ref; used by `/prs-slack` after posting. Use `--title` to label the ref with the PR title. Re-recording the same permalink upserts rather than duplicating, and outside a backlog session it is a silent no-op
-- `assist backlog move-repo <old-origin> [new-origin]` - Retag all items from one origin to another after a repo rename; the new origin defaults to the current repo's remote, both accept URL or `git@` forms, and a bare repo name works for the old origin when unambiguous. Prompts for confirmation (use `-y, --yes` to skip)
-- `assist backlog clone <origin>` - Clone a repo over SSH into the configured base directory (`clone.baseDir`, default `~/git`), deriving the SSH remote from a stored origin (`host/org/repo` -> `git@host:org/repo.git`) and cloning into `<base-dir>/<repo>`; `local:` origins have no remote and are not clonable
-- `assist backlog web [-p, --port <number>] [--no-open]` - Open the backlog tab in the web dashboard (default port 3100); `--no-open` skips opening a browser on startup
-- `assist roam auth` - Authenticate with Roam via OAuth (opens browser, saves tokens to ~/.assist.yml)
-- `assist roam show-claude-code-icon` - Forward Claude Code hook activity to Roam local API
-- `assist run <name> [params...]` - Run a configured command from assist.yml (positional params are matched to `params` config; supports `pre` array of commands to run first). If `<name>` is a backlog item id (`a555` or a bare `555`) and matches no configured command, it is treated as an alias for `assist backlog run <name>` and forwards `--write`/`--no-write`/`-w`.
+- `assist backlog delete-comment <id> <comment-id>` - Delete a comment (summaries cannot be deleted)
+- `assist backlog phase-done <id> <phase> <summary>` - Signal that a plan phase is complete
+- `assist backlog rewind <id> <phase> --reason <reason>` - Rewind an item to an earlier phase
+- `assist backlog next [id] [--once]` - Pick and run the next backlog item, or open `/draft` if none remain
+- `assist backlog refine [id] [--once] [--harness <claude|codex|pi>]` - Alias for `refine`
+- `assist backlog run <id>` - Run a backlog item's plan phase-by-phase with Claude; refuses to start when another live process is already running that item
+- `assist backlog export [file]` - Export every table in the backlog database to a file, or stdout
+- `assist backlog import [file]` - Restore every table present in a dump back into the database (`-y, --yes` skips the prompt)
+- `assist backlog associate-jira <id> [key]` - Associate a Jira ticket (bare key or browse URL); clears any GitHub issue on the item. `--clear` removes it
+- `assist backlog associate-github <id> [issue]` - Associate a GitHub issue (URL or `owner/repo#number`); clears any Jira key on the item. `--clear` removes it
+- `assist backlog add-activity <id> <kind> <ref>` - Attach an activity ref (`branch`, `commit`, `commit-parent`, `pr`, `slack`); `--title`, `--url`, `--state` override metadata
+- `assist backlog record-slack <url>` - Attach a Slack thread permalink to the current session's item; used by `/prs-slack`
+- `assist backlog move-repo <old-origin> [new-origin]` - Retag all items from one origin to another after a repo rename (`-y, --yes` skips the prompt)
+- `assist backlog clone <origin>` - Clone a repo over SSH into `clone.baseDir` (default `~/git`)
+- `assist backlog web [-p, --port <number>] [--no-open]` - Open the backlog tab in the web dashboard (default port 3100)
+
+### Config and run commands
+
+- `assist run <name> [params...]` - Run a configured command from assist.yml. A backlog item id (`a555` / `555`) with no matching command forwards to `assist backlog run`
 - `assist run add` - Add a new run configuration to assist.yml and create a Claude command file
 - `assist run link <path> --prefix <prefix>` - Link run configurations from another project's assist.yml
-- `assist run remove <name>` - Remove a run configuration from assist.yml and delete its Claude command file
-- `assist config set <key> <value>` - Set a config value (e.g. commit.push true). Add `--global` to write to `~/.assist.yml`, or `-g --repo` to write into `~/.assist.yml` under the current repo's identity (a per-repo override that lands nothing in the repo working tree). `--repo` requires `-g` — it scopes the global write rather than replacing it. `-g --repo <name>` targets a named repo instead of the current one, matching an existing `repos` key by full origin, `org/repo`, or bare repo name
-- `assist config unset <key>` - Remove a config value from the repo `assist.yml`, so the key falls back to the global value or the schema default. Add `-g`/`--global` to remove it from `~/.assist.yml` instead. Removing the last leaf of an object prunes the now-empty parent, and the result is validated before saving, so an unset the schema rejects fails without writing. A key that is not set in the targeted layer is reported and nothing is written. `--repo` is not supported
+- `assist run remove <name>` - Remove a run configuration and delete its Claude command file
 - `assist config get <key>` - Get a config value
 - `assist config list` - List all config values
-  - `prs.slack` - The Slack channel (e.g. `#example`) that `/prs-slack` posts pull requests to via the Slack MCP connector (optional; can be omitted when only `prs.required` is set)
-  - `prs.required` - When `true` (default `false`), `assist backlog run` auto-branches a story that has no recorded branch at run start, so a new story never inherits the previous story's branch
-  - `prs.promptJira` - When `true` (default `false`), the `assist prs raise --help` `--resolves` guidance instructs asking the user for a Jira key; when `false`, `--resolves` stays documented but the prompt instruction is omitted
-- `assist verify` - Run all verify:\* commands in parallel (from run configs in assist.yml and scripts in package.json)
+- `assist config set <key> <value>` - Set a config value. `--global` writes to `~/.assist.yml`; `-g --repo [name]` writes a per-repo override there
+- `assist config unset <key>` - Remove a config value so the key falls back to the global value or schema default (`-g` targets `~/.assist.yml`)
+
+### Verify and lint
+
+- `assist verify` - Run all verify:\* commands in parallel (from assist.yml run configs and package.json scripts)
 - `assist verify all` - Run all checks, ignoring diff-based filters
-- `assist verify --measure` - After the run, print a summary table of each command's status and duration (slowest first) plus a wall-clock total
-- `assist verify init` - Add verify scripts to a project (writes to `assist.yml` by default; pass `--package-json` to write to `package.json` scripts instead)
-- `assist verify hardcoded-colors` - Check for hardcoded hex colors in src/ (supports `hardcodedColors.ignore` globs in config)
-- `assist verify block-code-comments` - Fail on any comment on a changed line (staged + unstaged), whether newly added or edited, reporting each offending file:line; functional machine directives are exempt and `blockCodeComments.ignore` globs in config scope which files are scanned. Yaml `.yml`/`.yaml` files are scanned for `#` comments with no directive exemptions
-- `assist verify forbidden-strings` - Check configured JSON files for disallowed values. Each `forbiddenStrings` rule names a `file`, a list of dot-`paths` to inspect (string or string[] values are scanned; other types skipped), and a `disallowed` wildcard matched via minimatch; any matching value fails the check. Zero rules is a no-op that passes
-- `assist verify config-keys` - Check that every leaf key in `assistConfigSchema` is surfaced in some command's `--help` via the `configHelp` helper. Fails when a schema key is documented by no command (add it with `configHelp`) or when a declared key is not in the schema. Keys not yet migrated are tracked in a `pendingConfigDocumentation` list that must be drained as commands adopt `configHelp`
-- `assist verify migrations` - Check the bundled DB migrations under `src/shared/db/migrations/` are safe to ship: sequentially numbered `1..N` in `index.ts` order with a matching file per id, append-only (fails if a migration already present on the default branch is edited or removed — add a new numbered migration instead), and free of unacknowledged destructive DDL (`DROP TABLE`, `DROP COLUMN`, `RENAME COLUMN` must carry a `-- destructive-ok` marker in the migration's SQL)
-- `assist lint [-f, --fix]` - Run lint checks for conventions not enforced by oxlint (use `-f` to auto-fix)
+- `assist verify --measure` - Print a summary table of each command's status and duration
+- `assist verify init [--package-json]` - Add verify scripts to a project
+- `assist verify hardcoded-colors` - Check for hardcoded hex colors in src/ (`hardcodedColors.ignore`)
+- `assist verify block-code-comments` - Fail on any comment on a changed line (`blockCodeComments.ignore`); machine directives exempt
+- `assist verify forbidden-strings` - Check configured JSON files for disallowed values (`forbiddenStrings` rules)
+- `assist verify config-keys` - Check every leaf key in `assistConfigSchema` is surfaced in some command's `--help` via `configHelp`
+- `assist verify migrations` - Check bundled DB migrations are sequentially numbered, append-only, and free of unacknowledged destructive DDL
+- `assist lint [-f, --fix]` - Run lint checks for conventions not enforced by oxlint
 - `assist lint init` - Initialize oxlint with baseline linter config
+
+### Refactoring
+
 - `assist refactor check [pattern]` - Check for files that exceed the maximum line count
 - `assist refactor ignore <file>` - Add a file to the refactor ignore list
-- `assist refactor rename file <source> <destination>` - Rename/move a TypeScript file and update all imports (dry-run by default, use `--apply` to execute)
-- `assist refactor rename symbol <file> <oldName> <newName>` - Rename a variable, function, class, or type across the project (dry-run by default, use `--apply` to execute)
-- `assist refactor extract <file> <functionName> <destination>` - Extract a function and its private dependencies to a new file (dry-run by default, use `--apply` to execute)
-- `assist refactor restructure [pattern]` - Analyze import graph and restructure tightly-coupled files into nested directories
+- `assist refactor rename file <source> <destination>` - Rename/move a TypeScript file and update all imports (`--apply` to execute)
+- `assist refactor rename symbol <file> <oldName> <newName>` - Rename a symbol across the project (`--apply` to execute)
+- `assist refactor extract <file> <functionName> <destination>` - Extract a function and its private dependencies to a new file (`--apply` to execute)
+- `assist refactor restructure [pattern]` - Analyze the import graph and restructure tightly-coupled files into nested directories
+
+### Devlog
+
 - `assist devlog list` - Group git commits by date
 - `assist devlog next` - Show commits for the day after the last versioned entry
 - `assist devlog repos` - Show which github.com/staff0rd repos are missing devlog entries
 - `assist devlog skip <date>` - Add a date to the skip list
 - `assist devlog version` - Show current repo name and version info
-- `assist cli-hook` - PreToolUse hook for auto-approving CLI commands (reads from `allowed.cli-reads` and `allowed.cli-writes`, also auto-approves read-only `gh api` calls). Supports compound commands (`|`, `&&`, `||`, `;`) by checking each sub-command independently.
+
+### Hooks
+
+- `assist cli-hook` - PreToolUse hook auto-approving CLI commands from `allowed.cli-reads` / `allowed.cli-writes` (plus read-only `gh api`), checking each sub-command of a compound command independently
 - `assist cli-hook add <cli>` - Discover a CLI's commands and auto-permit read-only ones
-- `assist cli-hook check <command> [--tool <tool>]` - Check whether a command would be auto-approved by `cli-hook` (tool defaults to `Bash`)
+- `assist cli-hook check <command> [--tool <tool>]` - Check whether a command would be auto-approved
 - `assist cli-hook deny` - List all deny rules
 - `assist cli-hook deny add <pattern> <message>` - Add a deny rule for a command pattern
 - `assist cli-hook deny remove <pattern>` - Remove a deny rule by pattern
-- `assist codex-hook` - Codex `PreToolUse`/`PermissionRequest` hook that auto-approves read-only CLI commands, reading Codex's hook JSON from stdin and emitting Codex's decision shape. Reuses the same allowlist and deny logic as `cli-hook`; installed by `assist sync` when `codex` is on PATH
-- `assist pi-hook` - pi permission-gate adapter that reads a `{ toolName, command }` tool-call descriptor from stdin and emits an `{ decision: "allow" | "deny" | "gate", reason }` JSON decision. Reuses the same allowlist and deny logic as `cli-hook`, so read-only commands auto-approve, deny-listed commands block, and everything else gates. Called by the `assist-permission-gate` pi extension that `assist sync` installs when `pi` is on PATH
+- `assist codex-hook` - Codex `PreToolUse`/`PermissionRequest` hook reusing the `cli-hook` allowlist; installed by `assist sync` when `codex` is on PATH
+- `assist pi-hook` - pi permission-gate adapter reusing the `cli-hook` allowlist, emitting `allow` / `deny` / `gate`; installed by `assist sync` when `pi` is on PATH
 - `assist edit-hook` - PreToolUse hook that blocks `Edit`/`Write`/`MultiEdit` calls from adding, changing, or removing a `// assist-maintainability-override` marker, or from introducing a code comment (use `code-comment set`/`confirm` for the rare comment that belongs)
-- `assist code-comment set <file> <line> <text>` - Validate a single-line comment (max 50 chars; no block comments for `.ts`/`.js`) and issue a pin authorising its insertion; inserts `#` for `#`-comment files (`.yml`/`.yaml`, Dockerfile, `*.env`, `*.sh`) and `//` otherwise
+- `assist code-comment set <file> <line> <text>` - Validate a comment (max 50 chars, single-line) and issue a pin authorising its insertion
 - `assist code-comment confirm <pin>` - Insert the pinned comment at its file/line and clear the pin state
-- `assist db-migration unlock` - Page a human to approve creating the next new database migration module: issues a pin via desktop notification and records the pending migration id
-- `assist db-migration confirm <pin>` - Confirm a pin from `db-migration unlock` to record a one-shot approval for that migration id, allowing the edit hook to let its `migrationNNNN*.ts` write through once
+- `assist db-migration unlock` - Page a human to approve creating the next new migration module, issuing a pin via desktop notification
+- `assist db-migration confirm <pin>` - Confirm a pin from `db-migration unlock`, letting that migration's file write through once
+- `assist notify` - Show desktop notification from JSON stdin (macOS, Windows, WSL)
+- `assist status-line` - Format Claude Code status line from JSON stdin
+
+### .NET
+
+- `assist dotnet inspect [sln]` - Run JetBrains inspections on changed .cs files to find dead code
+  - `--scope all|base:<ref>|commit:<ref>` - Inspect the whole solution, everything changed since a base ref, or one commit
+  - `--only <ids...>` / `--suppress <ids...>` - Show only, or suppress, specific issue type IDs
+  - `--roslyn` - Use Roslyn analyzers via msbuild instead of JetBrains
+  - `--swea` - Enable solution-wide error analysis (slower but more thorough)
+- `assist dotnet check-locks` - Check if build output files are locked by a debugger
+- `assist dotnet deps <csproj>` - Show .csproj project dependency tree and solution membership
+- `assist dotnet in-sln <csproj>` - Check whether a .csproj is referenced by any .sln file
+
+### Data sources
+
+- `assist jira auth` - Authenticate with Jira via API token
+- `assist jira ac <issue-key>` - Print acceptance criteria for a Jira issue
+- `assist jira view <issue-key>` - Print the title and description of a Jira issue
+  - Note: Claude fetches Jira context via the MCP Atlassian server, so `/jira` and Jira-key mentions go through MCP. These CLI commands remain for direct human use.
+- `assist ravendb auth add` - Add a new RavenDB connection
+- `assist ravendb auth list` - List configured RavenDB connections
+- `assist ravendb auth remove <name>` - Remove a configured connection
+- `assist ravendb set-connection <name>` - Set the default connection
+- `assist ravendb query [connection] [collection]` - Query a RavenDB collection (`--page-size`, `--sort`, `--query`, `--limit`)
+- `assist ravendb collections [connection]` - List collections and document counts
+- `assist seq auth add` - Add a new Seq connection
+- `assist seq auth list` - List configured Seq connections
+- `assist seq auth remove <name>` - Remove a configured connection
+- `assist seq set-connection <name>` - Set the default Seq connection
+- `assist seq query <filter>` - Query Seq events (`-c <connection>`, `--json`, `-n <count>`, `--from <date>`, `--to <date>`)
+- `assist sql auth add` - Add a new MSSQL connection
+- `assist sql auth list` - List configured SQL connections
+- `assist sql auth remove <name>` - Remove a configured connection
+- `assist sql set-connection <name>` - Set the default SQL connection
+- `assist sql query "<sql>" [connection]` - Execute a read-only SQL statement and print a table (rejects mutating statements)
+- `assist sql mutate "<sql>" [connection]` - Execute a mutating SQL statement and print rows affected
+- `assist sql tables [connection]` - List tables in the connected database
+- `assist sql columns <table> [connection]` - List columns for a table (`schema.table` for a non-default schema)
+
+### Other
+
+- `assist netcap [-p, --port <port>] [-o, --out <dir>] [-f, --filter <pattern>]` - Capture browser network traffic to `capture.jsonl` under `--out` (default `~/.assist/netcap`), paired with the [netcap browser extension](#netcap-browser-extension)
+- `assist netcap extract-linkedin-posts [file]` - Parse a netcap capture into structured LinkedIn posts, written to `posts.json` beside the capture
+- `assist screenshot <process>` - Capture a screenshot of a running application window (`screenshot.outputDir`, default `./screenshots`)
+- `assist handover save --summary <s>` - Save a session handover note (content from stdin), scoped by the repo's git origin
+- `assist handover list` - List unrecalled handovers for this repo, most recent first
+- `assist handover recall [id]` - Print an unrecalled handover and mark it recalled (most recent by default)
+- `assist handover load` - SessionStart hook entry point advising how many unrecalled handovers exist
+- `assist mermaid export [file.md]` - Render each fenced mermaid block to `<stem>-<index>.svg` via [Kroki](https://kroki.io) (`--out`, `--index`, `mermaid.krokiUrl`)
+- `assist prompts` - Show top 10 denied tool calls by frequency with count and repo breakdown
+
+### Project setup
+
+- `assist init` - Initialize project with VS Code and verify configurations
+- `assist new vite` - Initialize a new Vite React TypeScript project
+- `assist new cli` - Initialize a new tsup CLI project
 - `assist update` - Update assist to the latest version and sync commands
 - `assist vscode init` - Add VS Code configuration files
 - `assist deploy init` - Initialize Netlify project and configure deployment
 - `assist deploy redirect` - Add trailing slash redirect script to index.html
-- `assist notify` - Show desktop notification from JSON stdin (supports macOS, Windows, WSL)
-- `assist status-line` - Format Claude Code status line from JSON stdin
-- `assist dotnet inspect [sln]` - Run JetBrains inspections on changed .cs files to find dead code
-- `assist dotnet inspect [sln] --scope all` - Inspect the full solution
-- `assist dotnet inspect [sln] --scope base:<ref>` - Inspect all .cs files changed since diverging from a base ref (e.g. `--scope base:main` for a full PR)
-- `assist dotnet inspect [sln] --scope commit:<ref>` - Inspect .cs files changed in a specific commit
-- `assist dotnet inspect [sln] --only <ids...>` - Show only the specified issue type IDs (e.g. `--only CommentedCode`)
-- `assist dotnet inspect [sln] --suppress <ids...>` - Suppress specific issue type IDs on the command line
-- `assist dotnet inspect [sln] --roslyn` - Use Roslyn analyzers via msbuild instead of JetBrains
-- `assist dotnet inspect [sln] --swea` - Enable solution-wide error analysis (slower but more thorough)
-- `assist dotnet check-locks` - Check if build output files are locked by a debugger
-- `assist dotnet deps <csproj>` - Show .csproj project dependency tree and solution membership
-- `assist dotnet in-sln <csproj>` - Check whether a .csproj is referenced by any .sln file
-- `assist jira auth` - Authenticate with Jira via API token (saves site/email to ~/.assist/jira.json)
-- `assist jira ac <issue-key>` - Print acceptance criteria for a Jira issue
-- `assist jira view <issue-key>` - Print the title and description of a Jira issue
-  - Note: Claude is wired to the MCP Atlassian server (`mcp__claude_ai_Atlassian__getJiraIssue`) for fetching Jira context, so the `/jira` slash command and Jira-key mentions go through MCP. These `assist jira` CLI commands remain for direct human use.
-- `assist ravendb auth add` - Add a new RavenDB connection (prompts for name, URL, database, op:// secret reference)
-- `assist ravendb auth list` - List configured RavenDB connections
-- `assist ravendb auth remove <name>` - Remove a configured connection
-- `assist ravendb set-connection <name>` - Set the default connection for query/collections commands
-- `assist ravendb query [connection] [collection]` - Query a RavenDB collection (outputs JSON to stdout)
-- `assist ravendb query [connection] [collection] --page-size <n> --sort <field> --query <lucene> --limit <n>` - Query with options
-- `assist ravendb collections [connection]` - List collections and document counts in a database
-- `assist seq auth add` - Add a new Seq connection (prompts for name, URL, API token)
-- `assist seq auth list` - List configured Seq connections
-- `assist seq auth remove <name>` - Remove a configured connection
-- `assist seq set-connection <name>` - Set the default Seq connection
-- `assist seq query <filter>` - Query Seq events with a filter expression
-- `assist seq query <filter> -c <connection>` - Query using a specific connection
-- `assist seq query <filter> --json` - Output raw JSON
-- `assist seq query <filter> -n <count>` - Fetch a specific number of events (default 50)
-- `assist seq query <filter> --from <date>` - Start of query window (UTC date or relative e.g. 5m, 1h, 2d)
-- `assist seq query <filter> --to <date>` - End of query window (UTC date or relative e.g. 5m, 1h, 2d)
-- `assist sql auth add` - Add a new MSSQL connection (prompts for name, server, port, user, password, database)
-- `assist sql auth list` - List configured SQL connections
-- `assist sql auth remove <name>` - Remove a configured connection
-- `assist sql set-connection <name>` - Set the default SQL connection
-- `assist sql query "<sql>" [connection]` - Execute a read-only SQL statement and print results in table format (rejects INSERT/UPDATE/DELETE/DROP/CREATE/ALTER/TRUNCATE/MERGE/GRANT/REVOKE/EXEC)
-- `assist sql mutate "<sql>" [connection]` - Execute a mutating SQL statement and print rows affected (rejects non-mutating statements like pure SELECTs)
-- `assist sql tables [connection]` - List tables in the connected database (via INFORMATION_SCHEMA.TABLES)
-- `assist sql columns <table> [connection]` - List columns for a table (use `schema.table` for non-default schema; via INFORMATION_SCHEMA.COLUMNS)
-- `assist netcap [-p, --port <port>] [-o, --out <dir>] [-f, --filter <pattern>]` - Start a local receiver that captures browser network traffic to a JSONL file (`capture.jsonl` under `--out`, default `~/.assist/netcap`), paired with the netcap browser extension. Sends permissive CORS, logs each ping/capture live, and runs until Ctrl-C, then prints a capture count (default port `8723`). `--filter` bakes a URL substring into the extension so only matching requests forward. See [netcap browser extension](#netcap-browser-extension)
-- `assist netcap extract-linkedin-posts [file]` - Parse a netcap capture file into structured LinkedIn posts (`text`, `markdown` with mentions linked, `author`, `mentions`, `hashtags`, `links`, `relatedPosts`, `permalink` to the post, and `postedAt` decoded from the activity id) and write them to `posts.json` beside the capture (defaults to `~/.assist/netcap/capture.jsonl`). Reads both the LinkedIn SDUI (rsc-action) responses rendered on first paint and the voyager GraphQL profile-updates responses loaded on scroll, deduped by activity urn keeping the richest copy of each post
-- `assist screenshot <process>` - Capture a screenshot of a running application window (e.g. `assist screenshot notepad`). Output directory is configurable via `screenshot.outputDir` (default `./screenshots`)
-- `assist handover save --summary <s>` - Save a session handover note to the backlog DB (content read from stdin), scoped by the repo's git origin. Appends a new row each call; `--summary` is the one-line description shown when recalling
-- `assist handover list` - List unrecalled handovers for this repo, most recent first, one per line as tab-separated `id`, ISO-8601 created timestamp, and one-line summary. Prints nothing when none are pending
-- `assist handover recall [id]` - Print an unrecalled handover for this repo and mark it recalled (so it drops out of the SessionStart advisory and future recalls). Recalls the most recent by default, or the given `id`. Prints nothing when none match
-- `assist handover load` - SessionStart hook entry point: reads `{cwd, session_id}` from stdin, migrates any legacy disk handovers (`.assist/HANDOVER.md` and notes under `.assist/handovers/`) into the backlog DB then deletes them, and emits `{ hookSpecificOutput: { hookEventName: "SessionStart" }, systemMessage }` advising how many unrecalled handovers exist. Emits nothing when there are none (use `/recall` to load one)
-- `assist mermaid export [file.md]` - Render each fenced mermaid block to `<stem>-<index>.svg` via [Kroki](https://kroki.io). With no file, scans `*.md` in the current directory (non-recursive). Use `--out <dir>` to override the output directory. Use `--index <n>` to render only the nth mermaid block (1-based; requires a file argument). Endpoint is configurable via `mermaid.krokiUrl` (default `https://kroki.io`).
-- `assist prompts` - Show top 10 denied tool calls by frequency with count and repo breakdown
+- `assist roam auth` - Authenticate with Roam via OAuth
+- `assist roam show-claude-code-icon` - Forward Claude Code hook activity to Roam local API
+
+### Complexity
+
 - `assist coverage` - Print global statement coverage percentage
 - `assist complexity <pattern>` - Analyze a file (all metrics if single match, maintainability if multiple)
 - `assist complexity cyclomatic [pattern]` - Calculate cyclomatic complexity per function
 - `assist complexity halstead [pattern]` - Calculate Halstead metrics per function
-- `assist complexity maintainability [pattern]` - Calculate maintainability index per file (`--ignore <glob>`, repeatable, excludes extra files on top of `complexity.ignore`). A file can declare its own threshold with a `// assist-maintainability-override: N` comment in its first ~10 lines (integer 0-100); that value replaces the global `--threshold` for that file only and the output annotates it with `(override: N)`
+- `assist complexity maintainability [pattern]` - Calculate maintainability index per file (`--ignore <glob>`, plus `complexity.ignore`). A file can declare its own threshold with a `// assist-maintainability-override: N` comment in its first ~10 lines, replacing `--threshold` for that file only
 - `assist complexity sloc [pattern]` - Count source lines of code per file
+
+### Transcripts and voice
+
 - `assist transcript configure` - Configure transcript directories
 - `assist transcript list` - List raw .vtt filenames waiting in the pick-up directory
 - `assist transcript move <file>` - Convert a raw .vtt to a dated markdown transcript and archive the original
 - `assist voice setup` - Download required voice models (VAD, STT)
-- `assist voice start` - Start the voice daemon (always-on, listens for wake word)
-- `assist voice start --foreground` - Start in foreground for debugging
+- `assist voice start [--foreground]` - Start the voice daemon (always-on, listens for wake word)
 - `assist voice stop` - Stop the voice daemon
 - `assist voice status` - Check voice daemon status and recent events
 - `assist voice devices` - List available audio input devices
 - `assist voice logs [-n <count>]` - Show recent voice daemon log entries
+
+### Sessions
+
 - `assist sessions` - Start the web dashboard (same as `sessions web`)
-- `assist sessions web [-p, --port <number>] [--no-open]` - Start the web dashboard with Sessions, Backlog and News tabs, xterm.js terminals with clickable http(s) links (default port 3100); `--no-open` skips opening a browser on startup; press Ctrl+R in the foreground terminal for an in-terminal restart menu (Restart daemon, Restart webserver, Restart both); in the browser press Ctrl+. to jump to the next session card waiting on input, following the sidebar order and wrapping from the last back to the first (works from any view and from inside a terminal, and scrolls the target card into view); Restart webserver re-execs the foreground process (passing `--no-open` so no browser pops on restart) so the connected browser auto-reconnects
-- `assist sessions summarise [-f, --force] [-n, --limit <count>]` - Generate one-line summaries for unsummarised Claude sessions (force re-generates all; limit caps how many to process)
-- `assist sessions set-status <status>` - Report the current session's status (`running`/`waiting`) to the sessions daemon; reads the session id from `$ASSIST_SESSION_ID` and is invoked by the Claude Code hooks the daemon wires into each session (exits silently when run outside a daemon session). Running/waiting is reconciled level-triggered from the transcript, so per-tool-call hints are best-effort; pass `--source <hook>` to tag the originating hook and `--ack` to use acknowledged, retrying delivery (used only for the blocking/terminal `PermissionRequest`/`Stop`/`Notification` hooks, whose state the transcript cannot show)
-- `assist daemon run` - Run the sessions daemon in the foreground (normally auto-spawned detached by `assist sessions`)
-- `assist daemon status` - Show sessions daemon status, live sessions, and any stray daemon processes or stolen socket
+- `assist sessions web [-p, --port <number>] [--no-open]` - Start the web dashboard with Sessions, Backlog and News tabs (default port 3100). Ctrl+R in the foreground terminal opens a restart menu; Ctrl+. in the browser jumps to the next session waiting on input
+- `assist sessions summarise [-f, --force] [-n, --limit <count>]` - Generate one-line summaries for unsummarised Claude sessions
+- `assist sessions set-status <status>` - Report the current session's status (`running`/`waiting`) to the daemon; invoked by the Claude Code hooks the daemon wires into each session
+- `assist daemon run` - Run the sessions daemon in the foreground (normally auto-spawned detached)
+- `assist daemon status` - Show daemon status, live sessions, and any stray processes or stolen socket
 - `assist daemon stop` - Stop the sessions daemon; running claude sessions resume on next start
 - `assist daemon restart` - Restart the sessions daemon, resuming previously running claude sessions
-- `assist daemon drain [--yes]` - Remove all sessions from the local daemon for a clean slate (does not affect the Windows daemon); prompts before closing live sessions (`--yes` skips the prompt, and is required when stdin is not a TTY), and a session holding unpushed work is stopped, not removed
+- `assist daemon drain [--yes]` - Remove all sessions from the local daemon for a clean slate; a session holding unpushed work is stopped, not removed
 
-The sessions topnav has a **Design** dropdown: submitting a prompt launches an interactive `claude` session with the vendored design system prompt appended via `--append-system-prompt` (so the 647-line prompt stays out of the visible conversation) and the prompt sent as the first message; submitting an empty prompt opens a design-configured session with no initial message.
+### Session launchers
 
-Web sessions are owned by a long-lived daemon process, not the web server: the server is a thin client that relays WebSocket traffic to the daemon over a local IPC socket (unix domain socket at `~/.assist/daemon/daemon.sock`; named pipe `\\.\pipe\assist-sessions-daemon` on Windows). Restarting the web server leaves sessions running with scrollback intact. The daemon logs to `~/.assist/daemon/daemon.log` (timestamped lines tagged with the daemon's pid, including why it spawned and which sessions it restored) and auto-exits once no sessions remain and no client has been connected for 60 seconds (it is respawned on demand by the web server). Daemon spawning is arbitrated by an `O_EXCL` lockfile so racing clients start at most one daemon; sessions are only restored after the daemon owns the IPC socket, and a daemon that loses ownership of `daemon.pid` shuts down its sessions and exits rather than running orphaned.
+- `assist next [id] [--once]` - Alias for `backlog next [id]`; `--once` exits after the first completed item run
+- `assist draft [description] [--once]` (alias: `feat`) - Launch Claude in `/draft` mode, chain into next on `/next` signal
+- `assist bug [description] [--once]` - Launch Claude in `/bug` mode, chain into next on `/next` signal
+- `assist refine [id] [--once] [--harness <claude|codex|pi>]` - Launch a coding harness in `/refine` mode; `--harness` picks the engine, defaulting to the configured `harness.engine` (Claude)
+- `assist review-pr-comments [number]` - Launch Claude in `/review-pr-comments` mode; a PR number is checked out first via `gh pr checkout`
+- `assist signal next [id]` - Write a next signal to chain into `assist next`
+- `assist signal done [id]` - Write a done signal marking the session's initial task complete; an optional `id` surfaces the backlog item the session created onto its card
 
-From WSL, the selector can also surface and drive Windows-host repos (requires `assist` installed on the Windows host). Config keys:
+Each launcher accepts `--resume-session <id>` to resume an interrupted Claude session (used by the daemon when it restarts a running item).
 
-- `sessions.windowsProjectsRoot` — the Windows `.claude/projects` directory as seen from WSL (e.g. `/mnt/c/Users/<user>/.claude/projects`); enables discovery of Windows-host repos, tagged with a `Windows` badge. Selecting one launches a native assist daemon on Windows and runs an interactive session there.
+## Sessions dashboard
+
+Web sessions are owned by a long-lived daemon process, not the web server: the server is a thin client relaying WebSocket traffic to the daemon over a local IPC socket (`~/.assist/daemon/daemon.sock`; named pipe `\\.\pipe\assist-sessions-daemon` on Windows). Restarting the web server leaves sessions running with scrollback intact. The daemon logs to `~/.assist/daemon/daemon.log` and auto-exits once no sessions remain and no client has connected for 60 seconds. See [docs/session-lifecycle.md](docs/session-lifecycle.md).
+
+The topnav has a **Design** dropdown: submitting a prompt launches an interactive `claude` session with the vendored design system prompt appended via `--append-system-prompt`.
+
+Every live session card carries an **add-agent** button (👥) that starts a second agent inside that session's existing workspace rather than allocating a new one. While several agents share a workspace, only the last one to leave triggers teardown.
+
+A `run:` entry in `assist.yml` flagged `server: true` (with an optional display-only `port:`) is a singleton **dev server**: at most one may be live per normalised git remote, i.e. across a clone and all its sibling clones. Session cards for such a repo show a **▶ start** button; the daemon rejects a second server run for that remote, and the web UI turns the conflict into a "replace running server?" prompt. The serving card shows a `serving :<port>` chip and a **⏹ stop** button, and the slot frees whenever that session stops. Non-`server` runs are unconstrained.
+
+### Windows-host repos (from WSL)
+
+Requires `assist` installed on the Windows host.
+
+- `sessions.windowsProjectsRoot` — the Windows `.claude/projects` directory as seen from WSL (e.g. `/mnt/c/Users/<user>/.claude/projects`); enables discovery of Windows-host repos, tagged with a `Windows` badge.
 - `sessions.windowsDaemonHost` / `sessions.windowsDaemonPort` — where the WSL daemon reaches the native Windows daemon (defaults `127.0.0.1` / `51764`; set the host to the Windows IP on WSL2 NAT-mode networking).
-- `sessions.windowsVersionCheck` — how the WSL↔Windows daemon handshake reacts to a protocol-version mismatch: `block` (default) refuses creates and auto-heals the host, `warn` logs and proceeds anyway, `off` skips the check. Use `warn`/`off` to keep working across an unfixable version gap.
+- `sessions.windowsVersionCheck` — reaction to a protocol-version mismatch in the WSL↔Windows handshake: `block` (default) refuses creates and auto-heals the host, `warn` proceeds anyway, `off` skips the check.
 
-- `sessions.includeCommittedChanges` — when true (`assist config set sessions.includeCommittedChanges true -g`), the session card's change counts and the `/diff` view span the whole session's work rather than only uncommitted changes, so the change link survives the agent committing. The base is the session's own starting point where that is known: the card passes its Claude session id to `/api/git-status` and `/api/diff`, which map it to a backlog item (via `phase_usage`) and take the parent recorded by `assist commit` for that item's first commit (falling back to `<first commit>^`). Otherwise — no session id, no recorded commit, a root commit, or an unreachable database — it falls back to `git merge-base HEAD <default branch>`, and finally to `HEAD`. Defaults to false; a silent no-op on the default branch, on detached HEAD, or when nothing resolves. The lookup is cached per session so the 5s card poll never waits on Postgres.
+### Session config keys
 
-- `sessions.topBar` — defaults to **true**, which gives the sessions view a sticky top bar inside the terminal panel (served to the UI by `GET /api/session-layout`). The bar stacks the active session's ids (`#<session>` plus the Claude Code conversation id), its backlog chip and story name, and the phase caption; to the right it carries the restored indicator, elapsed time, the Continue/Auto-run/Dismiss switches, and the session's actions with text labels — collapsing to icon-only below 560px so the PR preview split still fits. It stays in the terminal half when that split opens and is absent in the transcript view. Cards then shed the phase caption, elapsed, restored indicator, the switches and the icon action row (keeping close/dismiss), and fold status, context % and change counts onto the chips line; a toggle away from its default leaves a small grey caption (`will auto-run`, `won't continue`, `will dismiss`). Set `assist config set sessions.topBar false -g` to keep all of that on the card, which renders the view as it was before the bar existed.
+- `sessions.includeCommittedChanges` — when true, the card's change counts and the `/diff` view span the whole session's work rather than only uncommitted changes, so the change link survives the agent committing. Defaults to false; a no-op on the default branch or detached HEAD.
+- `sessions.topBar` — defaults to **true**: a sticky top bar inside the terminal panel carrying the session's ids, backlog chip and story name, the phase caption, elapsed time, the Continue/Auto-run/Dismiss switches and the session actions. Set it false to keep all of that on the card instead.
+- `sessions.floatWaiting` — defaults to **true**: sessions that have been `waiting` on input for more than 5 seconds float above the other cards, longest waiting first. Set it false to keep the star-only ordering; starred sessions still sort above everything.
 
-- `sessions.floatWaiting` — defaults to **true**: the sidebar floats sessions that have been `waiting` on input for more than 5 seconds above the other cards, longest waiting first, so a stopped session in a full sidebar is not missed. Set `assist config set sessions.floatWaiting false -g` to keep the previous star-only ordering. Starred sessions still sort above everything. The daemon stamps `waitingSince` whenever a session enters `waiting` (and on restore of a session that comes back waiting), the flag reaches the UI over `GET /api/session-view`, and the sidebar re-sorts on a 1s tick since crossing the threshold produces no socket event.
+## Parallel work
 
-A `run:` entry in `assist.yml` flagged `server: true` (with an optional display-only `port:`) is treated as a singleton **dev server**: at most one may be live per normalised git remote (`getCurrentOrigin`), i.e. across a clone and all its sibling clones of the same repo. Every session card for a repo that defines a `server: true` run shows a **▶ start** button (surfaced by `GET /api/server-runs?cwd=`); clicking it sends `create-run`. The daemon enforces the singleton on `create-run` (and on relaunch via retry) — if a server run is already live for that remote it rejects with a conflict instead of starting a second one that would collide on the port. The web UI turns that conflict into a "replace running server?" prompt; confirming stops the old server and starts the new one, declining leaves it untouched. The serving session's own card shows a `serving :<port>` chip and a **⏹ stop** button (stop leaves a relaunchable card rather than dismissing it), and the slot frees automatically whenever that session stops, exits, or is killed. Non-`server` runs (`build`, `test`, …) are unconstrained.
+Concurrent sessions in one repo can be isolated with native git worktrees instead of keeping multiple physical clones: see [docs/parallel-work.md](docs/parallel-work.md). All three flags **default off**:
 
-Concurrent sessions in one repo can be isolated with native git worktrees instead of keeping multiple physical clones: see [docs/parallel-work.md](docs/parallel-work.md). Two per-repo flags control it, both **default off**:
+- `worktree.enabled` (parallel work) — spill concurrent sessions into adjacent `<clone>-N` worktrees. Off means every session on the repo shares its single working copy.
+- `worktree.trunk` (trunk-based) — on, a spilled worktree's branch tracks `origin/<trunk>` so commits land on the mainline. Off, it starts off the remote default branch with no mainline tracking, leaving the session to raise its own branch and PR.
+- `worktree.includeDrafts` — give draft, bug and refine sessions their own `<clone>-N`. They change no code, so by default they run in the clone's working copy at no worktree, dep-install or teardown cost.
 
-- `worktree.enabled` (parallel work) — spill concurrent sessions into adjacent `<clone>-N` worktrees. Off means every session on the repo shares its single working copy, exactly as before.
-- `worktree.trunk` (trunk-based) — on, a spilled worktree's branch tracks `origin/<trunk>` so commits land on the mainline. Off (the default, branch-workflow) it starts off the remote default branch with no mainline tracking, leaving the session to raise its own branch and PR.
+Neither flag leaves permanent state on the clone: nothing writes to the clone's `.git/config` (`assist commit` derives its push refspec from the current branch), so turning parallel work back off leaves the repo as it was.
 
-Drafting, filing a bug and refining change no code, so with parallel work on they still run in the clone's own working copy — even while a coding session holds it — and cost no worktree, no dep install and no teardown gate when closed. Set `worktree.includeDrafts` (default off) to give them their own `<clone>-N` like any other session. When an exempted card chains into `assist backlog run <item>` on Auto-run, the run is placed then: it stays in the clone if nothing else holds it, otherwise it moves into a fresh seeded worktree and waits for the install before starting.
+## Iterating on assist itself
 
-Every live session card carries an **add-agent** button (👥): submitting a prompt there starts a second agent inside that session's own workspace instead of allocating a new one, so both work on what is already in progress there. Starting a session the ordinary way still gets a fresh isolated stream. While several agents share a workspace, only the last one to leave triggers teardown — closing any other simply removes its card, and a card reaching done keeps the workspace for the agents still working in it.
+Web server changes only need the `assist sessions` process restarted — sessions survive. Daemon/session-core changes need `assist daemon restart`: claude sessions are auto-respawned via `claude --resume` with scrollback starting fresh, while run sessions reappear as not-restored tiles that can be retried.
 
-Neither flag leaves permanent state on the clone: nothing writes to the clone's `.git/config` (`assist commit` derives its push refspec from the current branch instead of relying on `push.default`), so turning parallel work back off leaves the repo as it was. With `worktree.trunk` on, a branch tracking a differently-named upstream is taken as deliberate and the commit is pushed to that upstream (`git push origin HEAD:main`); with it off, such a branch is pushed to its own remote branch (`git push --set-upstream origin HEAD:<branch>`) so a feature branch created off `origin/main` raises its own PR branch rather than landing on the mainline.
+## Other config keys
 
-When iterating on assist itself: web server changes only need the `assist sessions` process restarted — sessions survive. Daemon/session-core changes need `assist daemon restart` to load the new code; this kills the PTYs, then claude sessions — including assist sessions that wrap claude, like `assist draft` — are auto-respawned via `claude --resume` with scrollback starting fresh, while run sessions (and assist sessions whose claude sessionId was never discovered) reappear as not-restored tiles that can be retried. A `--once` draft/bug/refine session is respawned through its assist wrapper instead of bare `claude --resume`, so its `assist signal done` watcher is re-established and the card still auto-closes.
-
-- `assist next [id] [--once]` - Alias for `backlog next [id]`; `--once` exits after the first completed item run instead of prompting for another
-- `assist draft [description] [--once]` (alias: `feat`) - Launch Claude in `/draft` mode, chain into next on `/next` signal; an optional `description` is forwarded as `/draft <description>`; `--once` exits when the done signal arrives after the initial draft completes; `--resume-session <id>` resumes an interrupted Claude session (used by the sessions daemon when it restarts a running item)
-- `assist bug [description] [--once]` - Launch Claude in `/bug` mode, chain into next on `/next` signal; an optional `description` is forwarded as `/bug <description>`; `--once` exits when the done signal arrives after the initial bug report completes; `--resume-session <id>` resumes an interrupted Claude session (used by the sessions daemon when it restarts a running item)
-- `assist refine [id] [--once] [--harness <claude|codex|pi>]` - Launch a coding harness in `/refine` mode to refine a backlog item; prompts for selection when no id given; `--once` exits when the done signal arrives after refinement completes; `--harness` picks the engine (`codex` runs `codex -C <cwd> <prompt>`; `pi` runs `pi <prompt>` in the item's cwd), defaulting to the configured `harness.engine` (Claude); `--resume-session <id>` resumes an interrupted Claude session (used by the sessions daemon when it restarts a running item)
-- `assist review-pr-comments [number]` - Launch Claude in `/review-pr-comments` mode to process PR review comments (single session, no chaining); when a PR number is supplied, checks out that PR via `gh pr checkout` first — placed by the worktree allocator on a repo with parallel work enabled, so the comment pass never disturbs a workspace holding work in progress
-- `assist signal next [id]` - Write a next signal to chain into `assist next`; when `id` is supplied, the parent launcher runs that backlog item directly
-- `assist signal done [id]` - Write a done signal marking the session's initial task complete; an optional `id` surfaces the backlog item the session created onto its session card; `--once` launch sessions exit when it arrives, plain sessions ignore it
-
-When `commit.pull` is enabled in config, `assist draft`, `assist bug`, `assist refine`, `assist next`, and `assist backlog run` run `git pull --ff-only` before doing anything else; if the pull fails the command aborts. `assist next` pulls once per invocation, not per item in its loop.
-
-When `commit.expectedBranch` is set (e.g. `main`), `assist commit` prints a prominent warning if HEAD is on any other branch before committing — so work committed (and pushed) on a stray branch in a repo that lands directly on the expected branch isn't silently orphaned. The warning is non-blocking: the commit still proceeds. With the key unset, behaviour is unchanged and no branch check runs.
-
-When `branch.prefix` is set (e.g. `sw`), `assist branch <slug>` prepends `<prefix>/` to the branch name. With the key unset, no prefix segment is added.
-
-`assist branch` resolves the base branch live from the remote (`git ls-remote --symref origin HEAD`), so it never depends on a stale or unset local `origin/HEAD`. If the remote advertises no default it falls back to `main`. Set `branch.defaultBranch` (e.g. `develop`) to override the base branch outright.
-
-When `prs.required` is `true`, `assist backlog run` checks at run start whether a branch has been recorded against the story; if none has, it uses the same branch-creation code as `assist branch` to cut a fresh branch off `origin/<default>` (a concise, LLM-assisted name derived from the story's title, plus its Jira key when associated) and records it against the story. A story that already has a recorded branch is left untouched, so resumes and later phases never re-branch. With the key unset or `false`, run behaviour is unchanged.
+- `prs.slack` — the Slack channel (e.g. `#example`) that `/prs-slack` posts pull requests to via the Slack MCP connector
+- `prs.required` — when `true` (default `false`), `assist backlog run` cuts and records a fresh branch for a story that has no recorded branch at run start, so a new story never inherits the previous one's branch
+- `prs.promptJira` — when `true` (default `false`), the `assist prs raise --help` `--resolves` guidance instructs asking the user for a Jira key
+- `commit.pull` — when enabled, `assist draft`, `bug`, `refine`, `next` and `backlog run` run `git pull --ff-only` first and abort if it fails (`next` pulls once per invocation, not per item)
+- `commit.expectedBranch` — when set (e.g. `main`), `assist commit` prints a non-blocking warning if HEAD is on any other branch, so work on a stray branch isn't silently orphaned
+- `branch.prefix` — when set (e.g. `sw`), `assist branch <slug>` prepends `<prefix>/` to the branch name
+- `branch.defaultBranch` — override the base branch, which is otherwise resolved live from the remote (`git ls-remote --symref origin HEAD`), falling back to `main`
 
 ## netcap browser extension
 
-`assist netcap` only runs the receiver; the browser side is a raw Manifest V3 extension (no build step) under `netcap-extension/`. A MAIN-world content script patches `fetch`/`XMLHttpRequest` to capture `{url, method, status, requestBody, responseBody, timestamp}`, relays each entry to the background service worker (`window.postMessage` → `chrome.runtime.sendMessage`), and the background worker POSTs it to the receiver. The XHR patch reads the response across every `responseType` (`json`, `blob`, `arraybuffer`, `document`, not just `text`) — LinkedIn's voyager GraphQL calls use `responseType: "json"`, which exposes no `responseText`, so reading `responseText` alone captured those bodies empty. Forwarding happens in the background context, so the page's CSP (`connect-src`) never blocks it — the limitation that killed the earlier console-paste approach.
+`assist netcap` only runs the receiver; the browser side is a raw Manifest V3 extension (no build step) under `netcap-extension/`. A MAIN-world content script patches `fetch`/`XMLHttpRequest` to capture `{url, method, status, requestBody, responseBody, timestamp}` and relays each entry to the background service worker, which POSTs it to the receiver. Forwarding happens in the background context, so the page's CSP (`connect-src`) never blocks it.
 
-1. Run `assist netcap` — it prints the receiver URL, the capture file path, and the absolute path to the extension directory to load. The receiver host/port is baked into the extension's `background.js` at this point. Under WSL (where the browser runs on the Windows host, cannot load from a WSL path, and cannot reach the receiver on `localhost` because WSL2 localhost forwarding is unreliable) it copies the extension to `C:\tools\netcap-extension`, targets the WSL VM's IP, and prints that Windows path instead. Re-run `assist netcap` after a reboot (the WSL IP can change) and reload the extension.
+1. Run `assist netcap` — it prints the receiver URL, the capture file path, and the extension directory to load. The receiver host/port and the optional `--filter` substring are baked into the extension's `background.js` at this point. Under WSL it copies the extension to `C:\tools\netcap-extension` and targets the WSL VM's IP, printing that Windows path instead; re-run after a reboot (the WSL IP can change) and reload the extension.
 2. Load the unpacked extension:
    - **Firefox**: open `about:debugging#/runtime/this-firefox` → **Load Temporary Add-on…** → pick `manifest.json` inside the printed extension directory. (Requires Firefox 128+ for MAIN-world content scripts.)
    - **Chrome**: open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select the extension directory.
 3. On load the background worker pings the receiver; `ping from extension` appears in the `assist netcap` log, confirming browser→server connectivity.
-4. Browse a site (e.g. LinkedIn activity); matching requests append to the capture file live and survive page refreshes (re-loading the extension appends to the same file). Press Ctrl-C to stop the receiver; it prints how many entries were captured.
-
-`assist netcap` bakes the receiver host/port and the optional `--filter` substring into the extension's `background.js` at startup, so you don't normally edit it by hand. With `--filter <pattern>`, the background worker only forwards requests whose URL contains `<pattern>` (case-sensitive substring); the matching logic mirrors `matchesNetcapFilter` in `src/commands/netcap`. Use `--out <dir>` to write `capture.jsonl` into a different directory.
+4. Browse a site; matching requests append to the capture file live and survive page refreshes. Press Ctrl-C to stop the receiver; it prints how many entries were captured.
