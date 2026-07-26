@@ -66,6 +66,29 @@ describe("CardBody busy caption", () => {
 	});
 });
 
+describe("CardBody status caption", () => {
+	const preview = {
+		requestId: "req-1",
+		title: "Bug title",
+		body: "body",
+		prNumber: null,
+		kind: "backlog-item" as const,
+	};
+
+	it("says waiting while a proposed item sits in the preview pane", () => {
+		renderBody(session({ pendingPrPreview: preview }), false);
+
+		expect(screen.getByText("● waiting")).toBeTruthy();
+		expect(screen.queryByText("● running")).toBeNull();
+	});
+
+	it("says running once the preview has been decided", () => {
+		renderBody(session(), false);
+
+		expect(screen.getByText("● running")).toBeTruthy();
+	});
+});
+
 describe("CardBody git status counts", () => {
 	it("links the card's own working-tree counts to that repo's diff", async () => {
 		renderBody(session(), false);

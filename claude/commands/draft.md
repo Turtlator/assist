@@ -117,7 +117,9 @@ JSON
 
 The payload is strict JSON — an unknown key is an error. `\n` inside the `description` string is a JSON escape and becomes a real newline, which is what the markdown rendering needs. Each phase needs at least one task; omit `manualChecks` for the phases that don't need any (most of them).
 
-In a web session this blocks until the user decides in the preview pane:
+In a web session this blocks until the user decides in the preview pane, and the review can take far longer than the default command timeout. Run `propose` **as a background task** so it is never killed mid-review, and do no other work until it returns — the pending preview dies with the process, so a killed `propose` abandons the item.
+
+When it returns:
 
 - **Approved** — the item and all of its phases are created, and the item id is printed.
 - **Rejected** — the command exits non-zero and prints the reason plus every inline comment with the excerpt it was left on. Do not retry verbatim: address each comment — including ones about the plan — then call `propose` again with the revised payload. Repeat until it is approved.
