@@ -1,3 +1,10 @@
+## [0.461.2](https://github.com/staff0rd/assist/compare/v0.461.1...v0.461.2) (2026-07-26)
+
+
+### Bug Fixes
+
+* shrink card toggle captions ([531e425](https://github.com/staff0rd/assist/commit/531e4251464d2b85ce492b3e11fed497da7964d8))
+
 ## [0.461.1](https://github.com/staff0rd/assist/compare/v0.461.0...v0.461.1) (2026-07-26)
 
 
