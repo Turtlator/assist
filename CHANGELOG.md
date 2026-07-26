@@ -1,3 +1,10 @@
+## [0.456.1](https://github.com/staff0rd/assist/compare/v0.456.0...v0.456.1) (2026-07-26)
+
+
+### Bug Fixes
+
+* push feature branches to their own remote ([92779e7](https://github.com/staff0rd/assist/commit/92779e79b6ac5d26d1be7d65347ff8adb8435a38))
+
 # [0.456.0](https://github.com/staff0rd/assist/compare/v0.455.0...v0.456.0) (2026-07-26)
 
 
