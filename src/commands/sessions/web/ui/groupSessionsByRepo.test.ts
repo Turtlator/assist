@@ -125,6 +125,202 @@ describe("groupSessionsByRepo", () => {
 		]);
 	});
 
+	it("floats the waiting member to the top of its group", () => {
+		const sessions = [
+			session("a", "/repo"),
+			session("b", "/repo"),
+			session("c", "/repo"),
+		];
+		const waiting = new Set(["c"]);
+
+		const groups = groupSessionsByRepo(
+			sessions,
+			() => false,
+			(s) => waiting.has(s.id),
+		);
+
+		expect(groups).toEqual([
+			{
+				kind: "repo",
+				key: "/repo",
+				label: "repo",
+				sessions: [sessions[2], sessions[0], sessions[1]],
+			},
+		]);
+	});
+
+	it("keeps a starred member above a waiting one inside a group", () => {
+		const sessions = [
+			session("a", "/repo"),
+			session("b", "/repo"),
+			session("c", "/repo"),
+		];
+		const starred = new Set(["b"]);
+		const waiting = new Set(["c"]);
+
+		const groups = groupSessionsByRepo(
+			sessions,
+			(s) => starred.has(s.id),
+			(s) => waiting.has(s.id),
+		);
+
+		expect(groups).toEqual([
+			{
+				kind: "repo",
+				key: "/repo",
+				label: "repo",
+				sessions: [sessions[1], sessions[2], sessions[0]],
+			},
+		]);
+	});
+
+	it("floats a whole group above the rest when one member is waiting", () => {
+		const sessions = [
+			session("a", "/one"),
+			session("b", "/one"),
+			session("c", "/two"),
+			session("d", "/two"),
+		];
+		const waiting = new Set(["d"]);
+
+		const groups = groupSessionsByRepo(
+			sessions,
+			() => false,
+			(s) => waiting.has(s.id),
+		);
+
+		expect(groups).toEqual([
+			{
+				kind: "repo",
+				key: "/two",
+				label: "two",
+				sessions: [sessions[3], sessions[2]],
+			},
+			{
+				kind: "repo",
+				key: "/one",
+				label: "one",
+				sessions: [sessions[0], sessions[1]],
+			},
+		]);
+	});
+
+	it("keeps a group with a starred member above a group with a waiting one", () => {
+		const sessions = [
+			session("a", "/one"),
+			session("b", "/one"),
+			session("c", "/two"),
+			session("d", "/two"),
+		];
+		const starred = new Set(["b"]);
+		const waiting = new Set(["c"]);
+
+		const groups = groupSessionsByRepo(
+			sessions,
+			(s) => starred.has(s.id),
+			(s) => waiting.has(s.id),
+		);
+
+		expect(
+			groups.map((g) => (g.kind === "repo" ? g.key : g.session.id)),
+		).toEqual(["/one", "/two"]);
+	});
+
+	it("floats a waiting standalone session above a group with none", () => {
+		const sessions = [
+			session("a", "/one"),
+			session("b", "/one"),
+			session("c", "/two"),
+		];
+		const waiting = new Set(["c"]);
+
+		const groups = groupSessionsByRepo(
+			sessions,
+			() => false,
+			(s) => waiting.has(s.id),
+		);
+
+		expect(groups).toEqual([
+			{ kind: "single", session: sessions[2] },
+			{
+				kind: "repo",
+				key: "/one",
+				label: "one",
+				sessions: [sessions[0], sessions[1]],
+			},
+		]);
+	});
+
+	it("keeps floated groups in the order their waiters were given, longest waiting first", () => {
+		const sessions = [
+			session("longest", "/two"),
+			session("shorter", "/one"),
+			session("idle", "/one"),
+			session("other", "/two"),
+		];
+		const waiting = new Set(["longest", "shorter"]);
+
+		const groups = groupSessionsByRepo(
+			sessions,
+			() => false,
+			(s) => waiting.has(s.id),
+		);
+
+		expect(
+			groups.map((g) => (g.kind === "repo" ? g.key : g.session.id)),
+		).toEqual(["/two", "/one"]);
+	});
+
+	it("never splits a group, even when only one member is waiting", () => {
+		const sessions = [
+			session("a", "/one"),
+			session("b", "/one"),
+			session("c", "/two"),
+			session("d", "/two"),
+		];
+		const waiting = new Set(["b"]);
+
+		const groups = groupSessionsByRepo(
+			sessions,
+			() => false,
+			(s) => waiting.has(s.id),
+		);
+
+		expect(groups).toHaveLength(2);
+		expect(groups[0]).toEqual({
+			kind: "repo",
+			key: "/one",
+			label: "one",
+			sessions: [sessions[1], sessions[0]],
+		});
+	});
+
+	it("leaves the order untouched when no waiting predicate is given", () => {
+		const sessions = [
+			session("a", "/one"),
+			session("b", "/one"),
+			session("c", "/two"),
+			session("d", "/two"),
+		];
+
+		const groups = groupSessionsByRepo(sessions, () => false);
+
+		expect(groups).toEqual([
+			{
+				kind: "repo",
+				key: "/one",
+				label: "one",
+				sessions: [sessions[0], sessions[1]],
+			},
+			{
+				kind: "repo",
+				key: "/two",
+				label: "two",
+				sessions: [sessions[2], sessions[3]],
+			},
+		]);
+	});
+
 	it("treats repos sharing a last segment but differing in full path as distinct", () => {
 		const sessions = [
 			session("a", "/home/me/work/assist"),

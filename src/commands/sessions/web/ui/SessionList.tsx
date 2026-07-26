@@ -24,6 +24,7 @@ export function SessionList({
 	onDismiss,
 	onSetAutoRun,
 	onSetAutoAdvance,
+	isFloatingWaiter,
 }: {
 	sessions: SessionInfo[];
 	pendingLaunches: PendingLaunch[];
@@ -31,9 +32,10 @@ export function SessionList({
 	initialized: Set<string>;
 	onSelect: (id: string) => void;
 	onDismissPending: (id: string) => void;
+	isFloatingWaiter?: (session: SessionInfo) => boolean;
 } & SessionListHandlers) {
 	const { isStarred } = useStarredSessions();
-	const groups = groupSessionsByRepo(sessions, isStarred);
+	const groups = groupSessionsByRepo(sessions, isStarred, isFloatingWaiter);
 
 	return (
 		<Box sx={unpaddedScrollportSx}>

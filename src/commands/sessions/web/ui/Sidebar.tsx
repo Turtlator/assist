@@ -22,6 +22,7 @@ type SidebarProps = {
 	onView: (session: HistoricalSession) => void;
 	onResume: (session: HistoricalSession) => void;
 	initialized: Set<string>;
+	isFloatingWaiter?: (session: SessionInfo) => boolean;
 } & SessionListHandlers;
 
 const sidebarSx = {
@@ -56,6 +57,7 @@ export function Sidebar(props: SidebarProps) {
 					onDismiss={props.onDismiss}
 					onSetAutoRun={props.onSetAutoRun}
 					onSetAutoAdvance={props.onSetAutoAdvance}
+					isFloatingWaiter={props.isFloatingWaiter}
 				/>
 			) : (
 				<HistoryList

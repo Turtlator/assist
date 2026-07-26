@@ -1,14 +1,18 @@
 import { repoGroupCwd, repoGroupKey } from "./repoGroupKey";
 import { repoLabel } from "./repoLabel";
 import type { SessionInfo } from "./types";
+import { starredThenWaitingFirst } from "./starredThenWaitingFirst";
 
 type SessionGroup =
 	| { kind: "single"; session: SessionInfo }
 	| { kind: "repo"; key: string; label: string; sessions: SessionInfo[] };
 
+const never = () => false;
+
 export function groupSessionsByRepo(
 	sessions: SessionInfo[],
 	isStarred: (session: SessionInfo) => boolean,
+	isFloatingWaiter: (session: SessionInfo) => boolean = never,
 ): SessionGroup[] {
 	const order: string[] = [];
 	const buckets = new Map<string, SessionInfo[]>();
@@ -27,23 +31,27 @@ export function groupSessionsByRepo(
 		}
 	});
 
-	const result: SessionGroup[] = [];
+	const groups: SessionGroup[] = [];
 	for (const key of order) {
 		const members = buckets.get(key)!;
 		if (members.length < 2) {
-			result.push({ kind: "single", session: members[0]! });
+			groups.push({ kind: "single", session: members[0]! });
 			continue;
 		}
-		const starredFirst = [
-			...members.filter((s) => isStarred(s)),
-			...members.filter((s) => !isStarred(s)),
-		];
-		result.push({
+		groups.push({
 			kind: "repo",
 			key,
 			label: labels.get(key)!,
-			sessions: starredFirst,
+			sessions: starredThenWaitingFirst(members, isStarred, isFloatingWaiter),
 		});
 	}
-	return result;
+	return starredThenWaitingFirst(
+		groups,
+		(group) => groupMembers(group).some(isStarred),
+		(group) => groupMembers(group).some(isFloatingWaiter),
+	);
+}
+
+function groupMembers(group: SessionGroup): SessionInfo[] {
+	return group.kind === "repo" ? group.sessions : [group.session];
 }

@@ -5,6 +5,9 @@ import type { SessionInfo } from "./types";
 export function visibleSessionOrder(
 	sessions: SessionInfo[],
 	isStarred: (session: SessionInfo) => boolean,
+	isFloatingWaiter?: (session: SessionInfo) => boolean,
 ): SessionInfo[] {
-	return flattenSessionGroups(groupSessionsByRepo(sessions, isStarred));
+	return flattenSessionGroups(
+		groupSessionsByRepo(sessions, isStarred, isFloatingWaiter),
+	);
 }

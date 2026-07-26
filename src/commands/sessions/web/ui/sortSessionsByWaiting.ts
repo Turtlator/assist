@@ -2,7 +2,10 @@ import type { SessionInfo } from "./types";
 
 const FLOAT_WAITING_AFTER_MS = 5000;
 
-function hasWaitedPastThreshold(session: SessionInfo, now: number): boolean {
+export function hasWaitedPastThreshold(
+	session: SessionInfo,
+	now: number,
+): boolean {
 	return (
 		session.status === "waiting" &&
 		session.waitingSince != null &&

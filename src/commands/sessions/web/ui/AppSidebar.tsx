@@ -1,14 +1,9 @@
-import { useMemo } from "react";
 import { Sidebar } from "./Sidebar";
-import { sortSessionsByStar } from "./sortSessionsByStar";
-import { sortSessionsByWaiting } from "./sortSessionsByWaiting";
 import type { SidebarTab } from "./types";
 import { useJumpToNextWaiting } from "./useJumpToNextWaiting";
 import type { useSessionSocket } from "./useSessionSocket";
-import { useSessionViewConfig } from "./useSessionViewConfig";
 import { useSidebarNavigation } from "./useSidebarNavigation";
-import { useStarredSessions } from "./useStarredSessions";
-import { useWaitingClock } from "./useWaitingClock";
+import { useSidebarOrdering } from "./useSidebarOrdering";
 
 type Props = {
 	socket: ReturnType<typeof useSessionSocket>;
@@ -17,16 +12,7 @@ type Props = {
 };
 
 export function AppSidebar({ socket, tab, onTabChange }: Props) {
-	const { isStarred } = useStarredSessions();
-	const { floatWaiting } = useSessionViewConfig();
-	const now = useWaitingClock(floatWaiting);
-	const sessions = useMemo(
-		() =>
-			floatWaiting
-				? sortSessionsByWaiting(socket.sessions, isStarred, now)
-				: sortSessionsByStar(socket.sessions, isStarred),
-		[socket.sessions, isStarred, floatWaiting, now],
-	);
+	const { sessions, isFloatingWaiter } = useSidebarOrdering(socket.sessions);
 	const { handleSelect, handleResume, handleView } = useSidebarNavigation(
 		socket,
 		onTabChange,
@@ -38,6 +24,7 @@ export function AppSidebar({ socket, tab, onTabChange }: Props) {
 		tab,
 		onSelect: handleSelect,
 		onTabChange,
+		isFloatingWaiter,
 	});
 
 	return (
@@ -58,6 +45,7 @@ export function AppSidebar({ socket, tab, onTabChange }: Props) {
 			onSetAutoRun={socket.setAutoRun}
 			onSetAutoAdvance={socket.setAutoAdvance}
 			initialized={socket.initialized}
+			isFloatingWaiter={isFloatingWaiter}
 		/>
 	);
 }

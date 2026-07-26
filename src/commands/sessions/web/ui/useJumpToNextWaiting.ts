@@ -12,24 +12,34 @@ export function useJumpToNextWaiting({
 	tab,
 	onSelect,
 	onTabChange,
+	isFloatingWaiter,
 }: {
 	sessions: SessionInfo[];
 	activeId: string | null;
 	tab: SidebarTab;
 	onSelect: (id: string) => void;
 	onTabChange: (tab: SidebarTab) => void;
+	isFloatingWaiter?: (session: SessionInfo) => boolean;
 }): void {
 	const { isStarred } = useStarredSessions();
 	useNextWaitingHotkey(
 		useCallback(() => {
 			const id = nextWaitingSessionId(
-				visibleSessionOrder(sessions, isStarred),
+				visibleSessionOrder(sessions, isStarred, isFloatingWaiter),
 				activeId,
 			);
 			if (!id) return;
 			if (tab !== "active") onTabChange("active");
 			onSelect(id);
 			scrollSessionCardIntoView(id);
-		}, [sessions, isStarred, activeId, tab, onSelect, onTabChange]),
+		}, [
+			sessions,
+			isStarred,
+			isFloatingWaiter,
+			activeId,
+			tab,
+			onSelect,
+			onTabChange,
+		]),
 	);
 }
