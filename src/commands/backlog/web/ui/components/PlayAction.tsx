@@ -1,5 +1,4 @@
 import { type MouseEvent, useState } from "react";
-import { useNavigate } from "react-router";
 import { useLiveSessionsContext } from "../../../../sessions/web/ui/useLiveSessionsContext";
 import { useSessionLaunchContext } from "../../../../sessions/web/ui/useSessionLaunchContext";
 import { formatItemId } from "../../../formatItemId";
@@ -15,7 +14,6 @@ export function PlayAction({
 	compact?: boolean;
 }) {
 	const { launchAssist } = useSessionLaunchContext();
-	const navigate = useNavigate();
 	const cwd = useRepoCwd();
 	const inFlight = runInFlightSession(useLiveSessionsContext(), itemId);
 	// Latch on first click so a double-click can't spawn two sessions before
@@ -27,7 +25,6 @@ export function PlayAction({
 		if (disabled) return;
 		setLaunched(true);
 		launchAssist(["backlog", "run", formatItemId(itemId)], cwd);
-		navigate("/sessions");
 	};
 	return (
 		<PlayButton
