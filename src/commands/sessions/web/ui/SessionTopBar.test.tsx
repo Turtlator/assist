@@ -162,6 +162,29 @@ describe("SessionTopBar", () => {
 		).toBeTruthy();
 	});
 
+	it("leads the id line with the repo the session works in", () => {
+		renderTopBar(session({ id: "7", cwd: "/home/me/assist" }));
+
+		const repo = screen.getByText("assist");
+		expect(repo.getAttribute("title")).toBe("/home/me/assist");
+		expect(
+			repo.compareDocumentPosition(screen.getByText("#7")) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+	});
+
+	it("omits the repo for a session that is not repo scoped", () => {
+		renderTopBar(
+			session({
+				commandType: "assist",
+				assistArgs: ["update"],
+				cwd: "/home/me/assist",
+			}),
+		);
+
+		expect(screen.queryByText("assist")).toBeNull();
+	});
+
 	it("omits the conversation id before the harness reports one", () => {
 		renderTopBar(session({ id: "7" }));
 

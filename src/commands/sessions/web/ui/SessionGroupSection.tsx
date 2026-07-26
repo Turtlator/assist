@@ -1,6 +1,8 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
+import { InRepoGroupContext } from "./useInRepoGroupContext";
+import { useTopBarLayoutContext } from "./useTopBarLayoutContext";
 
 const containerSx = {
 	mb: 1,
@@ -24,6 +26,14 @@ const headerSx = {
 	letterSpacing: 0.5,
 } as const;
 
+const stickyHeaderSx = {
+	...headerSx,
+	position: "sticky",
+	top: 0,
+	zIndex: 1,
+	bgcolor: "background.paper",
+} as const;
+
 export function SessionGroupSection({
 	label,
 	children,
@@ -31,17 +41,20 @@ export function SessionGroupSection({
 	label: string;
 	children: ReactNode;
 }) {
+	const topBar = useTopBarLayoutContext();
 	return (
 		<Box sx={containerSx}>
 			<Typography
 				variant="caption"
 				color="text.secondary"
 				title={label}
-				sx={headerSx}
+				sx={topBar ? stickyHeaderSx : headerSx}
 			>
 				{label}
 			</Typography>
-			{children}
+			<InRepoGroupContext.Provider value>
+				{children}
+			</InRepoGroupContext.Provider>
 		</Box>
 	);
 }
