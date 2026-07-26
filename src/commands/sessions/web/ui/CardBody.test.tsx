@@ -39,7 +39,7 @@ function session(overrides: Partial<SessionInfo> = {}): SessionInfo {
 }
 
 function renderBody(s: SessionInfo, loading: boolean) {
-	render(
+	return render(
 		<MemoryRouter>
 			<CardBody
 				session={s}
@@ -51,18 +51,19 @@ function renderBody(s: SessionInfo, loading: boolean) {
 	);
 }
 
-describe("CardBody busy caption", () => {
-	it("says Closing while the worktree is being torn down", () => {
-		renderBody(session({ closing: true }), true);
+describe("CardBody while busy", () => {
+	it("leaves no bottom row for a session that is booting", () => {
+		const { container } = renderBody(session(), true);
 
-		expect(screen.getByText("Closing…")).toBeTruthy();
+		expect(container.innerHTML).toBe("");
+		expect(screen.queryByRole("progressbar")).toBeNull();
 		expect(screen.queryByText("Starting…")).toBeNull();
 	});
 
-	it("still says Starting for a session that is booting", () => {
-		renderBody(session(), true);
+	it("leaves no bottom row while the worktree is being torn down", () => {
+		const { container } = renderBody(session({ closing: true }), true);
 
-		expect(screen.getByText("Starting…")).toBeTruthy();
+		expect(container.innerHTML).toBe("");
 		expect(screen.queryByText("Closing…")).toBeNull();
 	});
 });
@@ -115,9 +116,9 @@ describe("CardBody git status counts", () => {
 	});
 
 	it("shows no counts while the card is starting or closing", async () => {
-		renderBody(session({ closing: true }), true);
+		const { container } = renderBody(session({ closing: true }), true);
 
-		await waitFor(() => expect(screen.getByText("Closing…")).toBeTruthy());
+		await waitFor(() => expect(container.innerHTML).toBe(""));
 		expect(screen.queryByText("+1")).toBeNull();
 		expect(fetch).not.toHaveBeenCalled();
 	});

@@ -1,6 +1,3 @@
-import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
-import Typography from "@mui/material/Typography";
 import { CardToggles } from "./CardToggles";
 import { displayStatus } from "./displayStatus";
 import { sessionType } from "./sessionType";
@@ -24,15 +21,7 @@ export function CardBody({
 	const elapsed = useElapsed(session.runningMs, session.runningSince);
 	const topBar = useTopBarLayoutContext();
 
-	if (loading)
-		return (
-			<Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
-				<CircularProgress size={12} />
-				<Typography variant="caption" color="text.disabled">
-					{session.closing ? "Closing…" : "Starting…"}
-				</Typography>
-			</Box>
-		);
+	if (loading) return null;
 
 	return (
 		<>

@@ -45,6 +45,7 @@ describe("SessionCard loading state", () => {
 	it("shows a loading indicator and hides the status while uninitialized", () => {
 		renderCard(true);
 		expect(screen.getByText("Starting…")).toBeTruthy();
+		expect(screen.getAllByRole("progressbar").length).toBe(1);
 		expect(screen.queryByText(/● running/)).toBeNull();
 	});
 

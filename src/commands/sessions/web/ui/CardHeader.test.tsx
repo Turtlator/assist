@@ -77,6 +77,23 @@ describe("CardHeader loading", () => {
 		expect(screen.queryByText("repo")).toBeNull();
 	});
 
+	it("leaves the awaiting-activity spinner bare, with no busy caption", () => {
+		const pending: SessionInfo = {
+			...session,
+			commandType: "assist",
+			assistArgs: ["next-backlog-item"],
+			cwd: "/home/me/repo",
+		};
+		render(
+			<CardHeader session={pending} loading={false} onDismiss={() => {}} />,
+			{ wrapper: Stars },
+		);
+
+		expect(screen.getByRole("progressbar")).toBeTruthy();
+		expect(screen.queryByText("Starting…")).toBeNull();
+		expect(screen.queryByText("Closing…")).toBeNull();
+	});
+
 	it("shows chips once an assist session's activity arrives", () => {
 		const resolved: SessionInfo = {
 			...session,
@@ -108,6 +125,35 @@ describe("CardHeader loading", () => {
 
 		expect(screen.queryByRole("progressbar")).toBeNull();
 		expect(screen.getByText("repo")).toBeTruthy();
+	});
+});
+
+describe("CardHeader busy caption", () => {
+	function renderBusy(overrides: Partial<SessionInfo> = {}) {
+		render(
+			<CardHeader
+				session={{ ...session, cwd: "/home/me/repo", ...overrides }}
+				loading
+				onDismiss={() => {}}
+			/>,
+			{ wrapper: Stars },
+		);
+	}
+
+	it("says Starting beside the single spinner for a booting session", () => {
+		renderBusy();
+
+		expect(screen.getAllByRole("progressbar").length).toBe(1);
+		expect(screen.getByText("Starting…")).toBeTruthy();
+		expect(screen.queryByText("Closing…")).toBeNull();
+	});
+
+	it("says Closing while the worktree is being torn down", () => {
+		renderBusy({ closing: true });
+
+		expect(screen.getAllByRole("progressbar").length).toBe(1);
+		expect(screen.getByText("Closing…")).toBeTruthy();
+		expect(screen.queryByText("Starting…")).toBeNull();
 	});
 });
 

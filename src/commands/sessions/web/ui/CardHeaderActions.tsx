@@ -1,5 +1,6 @@
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
 import { areChipsLoading } from "./areChipsLoading";
 import { CardActionButtons } from "./CardActionButtons";
 import { CardChips } from "./CardChips";
@@ -30,7 +31,14 @@ export function CardHeaderActions({
 				<SessionStatusDot status={displayStatus(session)} />
 			)}
 			{areChipsLoading(session, loading) ? (
-				<CircularProgress size={12} />
+				<>
+					<CircularProgress size={12} />
+					{loading && (
+						<Typography variant="caption" color="text.disabled">
+							{session.closing ? "Closing…" : "Starting…"}
+						</Typography>
+					)}
+				</>
 			) : (
 				<CardChips session={session} />
 			)}
