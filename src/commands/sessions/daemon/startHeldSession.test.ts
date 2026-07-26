@@ -63,6 +63,22 @@ describe("startHeldSession", () => {
 		expect(session.pty).toBeNull();
 	});
 
+	it("does not spawn into a tree that is being torn down", () => {
+		const start = vi.fn(() => fakePty());
+		const session = heldSession({ pendingStart: start, closing: true });
+
+		startHeldSession(
+			session,
+			new Map([[session.id, session]]),
+			new Set<SessionClient>(),
+			vi.fn(),
+			vi.fn(),
+		);
+
+		expect(start).not.toHaveBeenCalled();
+		expect(session.pty).toBeNull();
+	});
+
 	it("applies the dimensions the browser reported while the pty was held", () => {
 		const pty = fakePty();
 		const session = heldSession({

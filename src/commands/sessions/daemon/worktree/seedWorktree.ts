@@ -1,8 +1,7 @@
-import { execFile } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { daemonLog } from "../daemonLog";
-import { resolveInstallCommand } from "./resolveInstallCommand";
+import { runInstall } from "./runInstall";
 import { worktreeConfigFor } from "./worktreeConfigFor";
 
 export function seedWorktree(
@@ -34,41 +33,6 @@ function copyConfigFiles(
 			);
 		}
 	}
-}
-
-function runInstall(
-	worktreePath: string,
-	clone: string,
-	install: boolean | string,
-	onSeeded: () => void,
-): void {
-	const command = resolveInstallCommand(clone, install);
-	if (!command) {
-		onSeeded();
-		return;
-	}
-	const windows = /^[A-Za-z]:[\\/]/.test(worktreePath);
-	const shell = windows ? "cmd.exe" : (process.env.SHELL ?? "bash");
-	const shellArgs = windows
-		? ["/c", `cd /d ${quoteForCmd(worktreePath)} && ${command}`]
-		: ["-l", "-c", `cd ${quoteForPosixShell(worktreePath)} && ${command}`];
-	daemonLog(`worktree ${worktreePath} installing deps: ${command}`);
-	execFile(shell, shellArgs, { cwd: worktreePath }, (error) => {
-		daemonLog(
-			error
-				? `worktree ${worktreePath} install failed: ${error.message}`
-				: `worktree ${worktreePath} install complete`,
-		);
-		onSeeded();
-	});
-}
-
-function quoteForPosixShell(value: string): string {
-	return `'${value.replaceAll("'", `'\\''`)}'`;
-}
-
-function quoteForCmd(value: string): string {
-	return `"${value.replaceAll('"', "")}"`;
 }
 
 function message(error: unknown): string {

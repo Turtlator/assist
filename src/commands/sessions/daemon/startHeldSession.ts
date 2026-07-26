@@ -19,6 +19,12 @@ export function startHeldSession(
 		);
 		return;
 	}
+	if (session.closing) {
+		daemonLog(
+			`session ${session.id} not started after seeding: card is closing (${session.worktree?.path ?? "no worktree"})`,
+		);
+		return;
+	}
 	session.startedAt = Date.now();
 	if (session.status === "running") session.runningSince = session.startedAt;
 	session.pty = start();

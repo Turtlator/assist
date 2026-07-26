@@ -3,8 +3,12 @@ import { basename } from "node:path";
 import { daemonLog } from "../daemonLog";
 import { git, gitOrNull } from "./git";
 import { listLocalBranches, mainWorktree } from "./listWorktreePaths";
-import { forgetWorktree } from "./readWorktreeRegistry";
+import {
+	forgetWorktree,
+	worktreeAttributionIncludingReaped,
+} from "./readWorktreeRegistry";
 import { removeTree } from "./removeTree";
+import { stopInstall } from "./stopInstall";
 import { checkDurability } from "./treeDurability";
 
 export async function reapWorktree(
@@ -22,12 +26,24 @@ export async function reapWorktree(
 			return false;
 		}
 	}
-	const clone = mainWorktree(worktreePath) ?? worktreePath;
+	stopInstall(worktreePath);
+	const clone = owningClone(worktreePath);
 	if (!(await removeTree(clone, worktreePath, force))) return false;
 	await deleteWorktreeBranch(clone, basename(worktreePath));
 	forgetWorktree(worktreePath);
 	daemonLog(`worktree ${worktreePath} reaped${force ? " (forced)" : ""}`);
 	return true;
+}
+
+function owningClone(worktreePath: string): string {
+	const recorded = worktreeAttributionIncludingReaped(worktreePath)?.clone;
+	if (recorded && existsSync(recorded)) return recorded;
+	const detected = mainWorktree(worktreePath);
+	if (detected) return detected;
+	daemonLog(
+		`worktree ${worktreePath} has no resolvable clone; tearing it down on its own`,
+	);
+	return worktreePath;
 }
 
 async function deleteWorktreeBranch(

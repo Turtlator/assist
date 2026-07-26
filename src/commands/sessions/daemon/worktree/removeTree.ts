@@ -1,4 +1,6 @@
 import { daemonLog } from "../daemonLog";
+import { deleteStrandedTree } from "./deleteStrandedTree";
+import { deleteTreeDirectly } from "./deleteTreeDirectly";
 import { git } from "./git";
 
 export async function removeTree(
@@ -18,12 +20,18 @@ export async function removeTree(
 		return true;
 	} catch (error) {
 		daemonLog(`worktree ${worktreePath} removal failed: ${reason(error)}`);
+		if (force)
+			return await deleteTreeDirectly(
+				clone,
+				worktreePath,
+				`its work was discarded and git could not remove it: ${reason(error)}`,
+			);
 	}
-	if (force) return false;
-	return await removeIgnoringLeftovers(remove, worktreePath);
+	return await removeIgnoringLeftovers(clone, remove, worktreePath);
 }
 
 async function removeIgnoringLeftovers(
+	clone: string,
 	remove: (forced: boolean) => Promise<string>,
 	worktreePath: string,
 ): Promise<boolean> {
@@ -35,9 +43,9 @@ async function removeIgnoringLeftovers(
 		return true;
 	} catch (error) {
 		daemonLog(
-			`worktree ${worktreePath} left in place for the next reconcile: ${reason(error)}`,
+			`worktree ${worktreePath} forced removal failed: ${reason(error)}`,
 		);
-		return false;
+		return await deleteStrandedTree(clone, worktreePath, error);
 	}
 }
 
