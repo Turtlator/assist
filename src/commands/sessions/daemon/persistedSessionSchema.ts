@@ -4,6 +4,7 @@ import { activitySchema } from "../../../shared/emitActivity";
 export const persistedSessionSchema = z.object({
 	name: z.string(),
 	title: z.string().optional(),
+	generatedTitle: z.string().optional(),
 	subtitle: z.string().optional(),
 	commandType: z.enum(["claude", "run", "assist"]),
 	harness: z.enum(["claude", "codex", "pi"]).optional(),

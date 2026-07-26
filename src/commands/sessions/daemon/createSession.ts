@@ -29,7 +29,7 @@ export function createSession(
 	 * the first turn's Stop (#449). A prompted session is working immediately. */
 	return {
 		...sessionBase(id, prompt ? "running" : "waiting"),
-		name: prompt?.slice(0, 40) || `Session ${id}`,
+		name: `Session ${id}`,
 		commandType: "claude",
 		...startOrHoldPty(
 			() =>
@@ -51,7 +51,7 @@ function createPiSession(
 ): Session {
 	return {
 		...sessionBase(id, prompt ? "running" : "waiting"),
-		name: prompt?.slice(0, 40) || `Session ${id}`,
+		name: `Session ${id}`,
 		commandType: "claude",
 		harness: "pi",
 		...startOrHoldPty(() => spawnPi({ prompt, cwd, sessionId: id }), holdPty),

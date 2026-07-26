@@ -5,6 +5,7 @@ export function restoreBase(id: string, persisted: PersistedSession) {
 		id,
 		name: persisted.name,
 		title: persisted.title,
+		generatedTitle: persisted.generatedTitle,
 		subtitle: persisted.subtitle,
 		commandType: persisted.commandType,
 		harness: persisted.harness,

@@ -87,4 +87,79 @@ describe("sessionTitle", () => {
 
 		expect(sessionTitle(session)).toBe("Add refine mode button");
 	});
+
+	it("shows the generated title for a claude session in place of the name", () => {
+		const session = makeSession({
+			commandType: "claude",
+			name: "Session 7",
+			generatedTitle: "Fix login redirect",
+		});
+
+		expect(sessionTitle(session)).toBe("Fix login redirect");
+	});
+
+	it("shows the generated title for an assist session in place of the raw prompt", () => {
+		const session = makeSession({
+			commandType: "assist",
+			assistArgs: ["draft", "--once", "add dark mode to the settings page"],
+			generatedTitle: "Dark mode setting",
+		});
+
+		expect(sessionTitle(session)).toBe("Dark mode setting");
+	});
+
+	it("prefers an explicit title over a generated one", () => {
+		const session = makeSession({
+			commandType: "assist",
+			title: "Explicit title",
+			generatedTitle: "Generated title",
+		});
+
+		expect(sessionTitle(session)).toBe("Explicit title");
+	});
+
+	it("prefers a backlog item name over a generated title", () => {
+		const session = makeSession({
+			commandType: "assist",
+			assistArgs: ["next", "--once"],
+			generatedTitle: "Generated title",
+			activity: {
+				kind: "backlog",
+				itemId: 129,
+				itemName: "Session card type",
+				phase: 2,
+				totalPhases: 3,
+				startedAt: 0,
+			},
+		});
+
+		expect(sessionTitle(session)).toBe("Session card type");
+	});
+
+	it("prefers a refine session's item name over a generated title", () => {
+		const session = makeSession({
+			commandType: "assist",
+			assistArgs: ["refine", "--once", "254"],
+			generatedTitle: "Generated title",
+			activity: {
+				kind: "command",
+				name: "refine 254",
+				itemId: 254,
+				itemName: "Add refine mode button",
+				startedAt: 0,
+			},
+		});
+
+		expect(sessionTitle(session)).toBe("Add refine mode button");
+	});
+
+	it("keeps the run name for run sessions even with a generated title", () => {
+		const session = makeSession({
+			commandType: "run",
+			runName: "build",
+			generatedTitle: "Generated title",
+		});
+
+		expect(sessionTitle(session)).toBe("run: build");
+	});
 });

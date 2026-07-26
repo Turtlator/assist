@@ -4,7 +4,7 @@ export function sessionTitle(session: SessionInfo): string {
 	const { activity } = session;
 	if (session.title) return session.title;
 	if (activity?.kind === "backlog") {
-		return activity.itemName ?? session.name;
+		return activity.itemName ?? session.generatedTitle ?? session.name;
 	}
 	if (session.assistArgs?.[0] === "refine" && activity?.itemName) {
 		return activity.itemName;
@@ -12,6 +12,7 @@ export function sessionTitle(session: SessionInfo): string {
 	switch (session.commandType) {
 		case "assist":
 			return (
+				session.generatedTitle ??
 				assistPrompt(session.assistArgs) ??
 				session.assistArgs?.[0] ??
 				session.name
@@ -19,7 +20,7 @@ export function sessionTitle(session: SessionInfo): string {
 		case "run":
 			return session.runName ? `run: ${session.runName}` : session.name;
 		default:
-			return session.name;
+			return session.generatedTitle ?? session.name;
 	}
 }
 

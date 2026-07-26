@@ -26,6 +26,7 @@ export type SessionInfoBase = {
 	id: string;
 	name: string;
 	title?: string;
+	generatedTitle?: string;
 	subtitle?: string;
 	commandType: CommandType;
 	harness?: HarnessKind;

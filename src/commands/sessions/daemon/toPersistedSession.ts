@@ -5,6 +5,7 @@ export function toPersistedSession(session: Session): PersistedSession {
 	return {
 		name: session.name,
 		title: session.title,
+		generatedTitle: session.generatedTitle,
 		subtitle: session.subtitle,
 		commandType: session.commandType,
 		harness: session.harness,
