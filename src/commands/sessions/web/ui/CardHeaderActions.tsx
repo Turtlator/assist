@@ -4,6 +4,8 @@ import { areChipsLoading } from "./areChipsLoading";
 import { CardActionButtons } from "./CardActionButtons";
 import { CardChips } from "./CardChips";
 import { CardInlineStatus } from "./CardInlineStatus";
+import { displayStatus } from "./displayStatus";
+import { SessionStatusDot } from "./SessionStatusDot";
 import type { CardHeaderProps } from "./types";
 import { useTopBarLayoutContext } from "./useTopBarLayoutContext";
 
@@ -24,6 +26,9 @@ export function CardHeaderActions({
 				...(topBar ? { flexWrap: "wrap", rowGap: 0.5 } : {}),
 			}}
 		>
+			{topBar && !loading && (
+				<SessionStatusDot status={displayStatus(session)} />
+			)}
 			{areChipsLoading(session, loading) ? (
 				<CircularProgress size={12} />
 			) : (

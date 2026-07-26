@@ -105,6 +105,13 @@ describe("SessionTopBar", () => {
 		expect(screen.queryByText("Phase 2: wire it up")).toBeNull();
 	});
 
+	it("names the session's status beside the elapsed time", () => {
+		renderTopBar(session({ status: "waiting" }));
+
+		expect(screen.getByText("● waiting")).toBeTruthy();
+		expect(screen.getByText("1m 30s")).toBeTruthy();
+	});
+
 	it("says not restored when the session could not be resumed", () => {
 		renderTopBar(session({ restored: false }));
 

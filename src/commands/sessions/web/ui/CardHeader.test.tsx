@@ -168,27 +168,35 @@ describe("CardHeader inline status", () => {
 	it("leaves status, context and counts to the body in the default layout", () => {
 		renderHeader(false);
 
-		expect(screen.queryByText("● running")).toBeNull();
+		expect(screen.queryByTitle("running")).toBeNull();
 		expect(screen.queryByText("42%")).toBeNull();
 	});
 
-	it("puts status, context and the diff counts on the chips line", async () => {
+	it("keeps the status wordless, leaving the name to the top bar", () => {
+		renderHeader(true);
+
+		expect(screen.queryByText("● running")).toBeNull();
+		expect(screen.getByTitle("running").textContent).toBe("●");
+	});
+
+	it("puts the dot, context and the diff counts on the chips line", async () => {
 		renderHeader(true);
 
 		expect(await screen.findByText("+1")).toBeTruthy();
 
 		const chip = screen.getByText("repo").closest(".MuiChip-root");
 		const row = chip?.parentElement;
-		expect(row?.textContent).toContain("● running");
+		expect(row?.textContent).toContain("●");
 		expect(row?.textContent).toContain("42%");
 		expect(row?.textContent).toContain("+1");
 		expect(row?.textContent).not.toContain("my session");
 	});
 
-	it("trails every chip and leads the close button", async () => {
+	it("leads the chips with the dot and trails them with the rest", async () => {
 		renderHeader(true);
 
-		const status = await screen.findByText("● running");
+		const dot = screen.getByTitle("running");
+		const context = await screen.findByText("42%");
 		const row = screen
 			.getByText("repo")
 			.closest(".MuiChip-root")?.parentElement;
@@ -201,15 +209,16 @@ describe("CardHeader inline status", () => {
 
 		expect(chips.length).toBeGreaterThan(0);
 		expect(buttons.length).toBeGreaterThan(0);
-		expect(follows(chips[chips.length - 1] as Node, status)).toBe(true);
-		expect(follows(status, buttons[buttons.length - 1] as Node)).toBe(true);
+		expect(follows(dot, chips[0] as Node)).toBe(true);
+		expect(follows(chips[chips.length - 1] as Node, context)).toBe(true);
+		expect(follows(context, buttons[buttons.length - 1] as Node)).toBe(true);
 	});
 
 	it("holds the status back while the card is still starting", () => {
 		renderHeader(true, true);
 
 		expect(screen.getByRole("progressbar")).toBeTruthy();
-		expect(screen.queryByText("● running")).toBeNull();
+		expect(screen.queryByTitle("running")).toBeNull();
 		expect(fetch).not.toHaveBeenCalled();
 	});
 });

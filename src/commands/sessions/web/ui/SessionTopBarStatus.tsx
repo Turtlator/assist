@@ -1,4 +1,6 @@
 import Typography from "@mui/material/Typography";
+import { displayStatus } from "./displayStatus";
+import { SessionStatusDot } from "./SessionStatusDot";
 import type { SessionInfo } from "./types";
 import { useElapsed } from "./useElapsed";
 
@@ -10,6 +12,7 @@ export function SessionTopBarStatus({ session }: { session: SessionInfo }) {
 
 	return (
 		<>
+			<SessionStatusDot status={displayStatus(session)} label />
 			{restored !== undefined && (
 				<Typography
 					variant="caption"
