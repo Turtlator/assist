@@ -1,3 +1,11 @@
+## [0.475.1](https://github.com/staff0rd/assist/compare/v0.475.0...v0.475.1) (2026-07-26)
+
+
+### Bug Fixes
+
+* plain add buttons, drop type chip ([84aade2](https://github.com/staff0rd/assist/commit/84aade219b738d3883c46814016571babdbdb765))
+* stick group header to list top ([47fbdf6](https://github.com/staff0rd/assist/commit/47fbdf6786f7325574a99e6ffd8e47c91a669819))
+
 # [0.475.0](https://github.com/staff0rd/assist/compare/v0.474.0...v0.475.0) (2026-07-26)
 
 
