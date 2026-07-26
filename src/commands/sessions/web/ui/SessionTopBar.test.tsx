@@ -49,6 +49,7 @@ function renderTopBar(
 		onRetry?: () => void;
 		onRestart?: () => void;
 		onDismiss?: () => void;
+		onSetAutoAdvance?: (enabled: boolean) => void;
 	} = {},
 ) {
 	render(
@@ -58,6 +59,8 @@ function renderTopBar(
 				onRetry={handlers.onRetry}
 				onRestart={handlers.onRestart}
 				onDismiss={handlers.onDismiss ?? (() => {})}
+				onSetAutoRun={() => {}}
+				onSetAutoAdvance={handlers.onSetAutoAdvance ?? (() => {})}
 			/>
 		</StarredSessionsProvider>,
 	);
@@ -111,6 +114,50 @@ describe("SessionTopBar", () => {
 		expect(screen.queryByText("restored")).toBeNull();
 		expect(screen.queryByText("not restored")).toBeNull();
 	});
+
+	it("shows the story name alongside the phase", () => {
+		renderTopBar(
+			session({
+				subtitle: "a subtitle",
+				activity: {
+					kind: "backlog",
+					startedAt: 0,
+					itemName: "Feature-flag the top bar",
+					phaseName: "Phase 3: label the actions",
+				},
+			}),
+		);
+
+		expect(screen.getByText("Feature-flag the top bar")).toBeTruthy();
+		expect(screen.getByText("Phase 3: label the actions")).toBeTruthy();
+	});
+
+	it("shows the assist session id and the Claude Code conversation id", () => {
+		renderTopBar(
+			session({
+				id: "7",
+				claudeSessionId: "2f1c0b8e-dead-beef-cafe-000000000001",
+			}),
+		);
+
+		expect(screen.getByTitle("assist session 7")).toBeTruthy();
+		expect(screen.getByText("#7")).toBeTruthy();
+		expect(
+			screen.getByText("2f1c0b8e-dead-beef-cafe-000000000001"),
+		).toBeTruthy();
+		expect(
+			screen.getByTitle(
+				"Claude Code conversation 2f1c0b8e-dead-beef-cafe-000000000001",
+			),
+		).toBeTruthy();
+	});
+
+	it("omits the conversation id before the harness reports one", () => {
+		renderTopBar(session({ id: "7" }));
+
+		expect(screen.getByText("#7")).toBeTruthy();
+		expect(screen.queryByTitle(/Claude Code conversation/)).toBeNull();
+	});
 });
 
 describe("SessionTopBar actions", () => {
@@ -147,6 +194,30 @@ describe("SessionTopBar actions", () => {
 		renderTopBar(session({ status: "waiting" }));
 
 		expect(screen.queryByTitle("Dismiss session 1")).toBeNull();
+	});
+});
+
+describe("SessionTopBar toggles", () => {
+	it("carries the backlog session's continue switch", () => {
+		const onSetAutoAdvance = vi.fn();
+		renderTopBar(
+			session({
+				activity: { kind: "backlog", startedAt: 0, phase: 1, totalPhases: 3 },
+			}),
+			{ onSetAutoAdvance },
+		);
+
+		expect(screen.getByText("Continue")).toBeTruthy();
+
+		fireEvent.click(screen.getByRole("switch"));
+
+		expect(onSetAutoAdvance).toHaveBeenCalledWith(false);
+	});
+
+	it("offers no switch for a session with nothing to advance", () => {
+		renderTopBar(session());
+
+		expect(screen.queryByRole("switch")).toBeNull();
 	});
 });
 

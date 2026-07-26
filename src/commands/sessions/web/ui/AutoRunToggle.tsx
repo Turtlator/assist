@@ -1,8 +1,0 @@
-import { CardToggle } from "./CardToggle";
-
-export function AutoRunToggle(props: {
-	checked: boolean;
-	onChange: (enabled: boolean) => void;
-}) {
-	return <CardToggle label="Auto-run" {...props} />;
-}

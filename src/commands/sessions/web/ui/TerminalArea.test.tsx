@@ -9,7 +9,7 @@ vi.mock("./TerminalPane", () => ({
 }));
 
 import { TerminalArea } from "./TerminalArea";
-import type { SessionInfo, SessionLifecycleHandlers } from "./types";
+import type { SessionInfo, SessionListHandlers } from "./types";
 import { StarredSessionsProvider } from "./useStarredSessions";
 import { TopBarLayoutContext } from "./useTopBarLayoutContext";
 
@@ -33,7 +33,7 @@ function renderArea(
 	topBar: boolean,
 	sessions: SessionInfo[],
 	activeId: string,
-	lifecycle: Partial<SessionLifecycleHandlers> = {},
+	lifecycle: Partial<SessionListHandlers> = {},
 ) {
 	render(
 		<TopBarLayoutContext.Provider value={topBar}>
@@ -49,6 +49,8 @@ function renderArea(
 						onRetry: vi.fn(),
 						onRestart: vi.fn(),
 						onDismiss: vi.fn(),
+						onSetAutoRun: vi.fn(),
+						onSetAutoAdvance: vi.fn(),
 						...lifecycle,
 					}}
 				/>
@@ -121,6 +123,20 @@ describe("TerminalArea top bar actions", () => {
 		renderArea(false, [session()], "1");
 
 		expect(screen.queryByTitle("Restart session 1")).toBeNull();
+	});
+
+	it("advances the active session's continue switch", () => {
+		const onSetAutoAdvance = vi.fn();
+		const backlog = (id: string) =>
+			session({
+				id,
+				activity: { kind: "backlog", startedAt: 0, phase: 1, totalPhases: 3 },
+			});
+		renderArea(true, [backlog("1"), backlog("2")], "2", { onSetAutoAdvance });
+
+		fireEvent.click(screen.getByRole("switch"));
+
+		expect(onSetAutoAdvance).toHaveBeenCalledWith("2", false);
 	});
 
 	it("leaves close and dismiss to the card", () => {

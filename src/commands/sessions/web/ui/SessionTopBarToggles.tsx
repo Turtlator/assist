@@ -1,10 +1,8 @@
 import { CardToggle } from "./CardToggle";
-import { CardToggleCaptions } from "./CardToggleCaptions";
 import { sessionToggles } from "./sessionToggles";
 import type { SessionInfo } from "./types";
-import { useTopBarLayoutContext } from "./useTopBarLayoutContext";
 
-export function CardToggles({
+export function SessionTopBarToggles({
 	session,
 	onSetAutoRun,
 	onSetAutoAdvance,
@@ -13,16 +11,12 @@ export function CardToggles({
 	onSetAutoRun: (enabled: boolean) => void;
 	onSetAutoAdvance: (enabled: boolean) => void;
 }) {
-	const topBar = useTopBarLayoutContext();
-	const toggles = sessionToggles(session);
-
-	if (topBar) return <CardToggleCaptions toggles={toggles} />;
-
 	return (
 		<>
-			{toggles.map((toggle) => (
+			{sessionToggles(session).map((toggle) => (
 				<CardToggle
 					key={toggle.key}
+					inline
 					label={toggle.label}
 					checked={toggle.checked}
 					onChange={toggle.key === "autoRun" ? onSetAutoRun : onSetAutoAdvance}

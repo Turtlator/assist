@@ -1,9 +1,7 @@
-import Box from "@mui/material/Box";
 import { isSessionStarting } from "./isSessionStarting";
-import { sessionActionHandlers } from "./sessionActionHandlers";
-import { SessionTopBar } from "./SessionTopBar";
 import { TerminalPanes } from "./TerminalPanes";
-import type { SessionInfo, SessionLifecycleHandlers } from "./types";
+import { TerminalWithTopBar } from "./TerminalWithTopBar";
+import type { SessionInfo, SessionListHandlers } from "./types";
 import { useTopBarLayoutContext } from "./useTopBarLayoutContext";
 
 type OutputSubscriber = (
@@ -18,7 +16,7 @@ export type TerminalAreaProps = {
 	onOutput: OutputSubscriber;
 	sendInput: (sessionId: string, data: string) => void;
 	sendResize: (sessionId: string, cols: number, rows: number) => void;
-	lifecycle: SessionLifecycleHandlers;
+	lifecycle: SessionListHandlers;
 };
 
 export function TerminalArea({
@@ -51,15 +49,10 @@ export function TerminalArea({
 	if (!topBar || activeSession === undefined) return panes;
 
 	return (
-		<Box
-			sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}
-		>
-			<SessionTopBar
-				key={activeSession.id}
-				session={activeSession}
-				{...sessionActionHandlers(activeSession, lifecycle)}
-			/>
-			{panes}
-		</Box>
+		<TerminalWithTopBar
+			session={activeSession}
+			lifecycle={lifecycle}
+			panes={panes}
+		/>
 	);
 }

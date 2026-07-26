@@ -26,8 +26,16 @@ function SessionContent({ socket }: { socket: SessionSocket }) {
 			onRetry: socket.retrySession,
 			onRestart: socket.restartSession,
 			onDismiss: socket.dismissSession,
+			onSetAutoRun: socket.setAutoRun,
+			onSetAutoAdvance: socket.setAutoAdvance,
 		}),
-		[socket.retrySession, socket.restartSession, socket.dismissSession],
+		[
+			socket.retrySession,
+			socket.restartSession,
+			socket.dismissSession,
+			socket.setAutoRun,
+			socket.setAutoAdvance,
+		],
 	);
 	return (
 		<SessionArea

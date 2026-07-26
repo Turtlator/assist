@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import { useRef } from "react";
 import { SessionActionButtons } from "./SessionActionButtons";
 import { SessionTopBarCaptions } from "./SessionTopBarCaptions";
+import { SessionTopBarToggles } from "./SessionTopBarToggles";
 import type { SessionInfo } from "./types";
 import { useElementWidth } from "./useElementWidth";
 import { LabelledActionsContext } from "./useLabelledActionsContext";
@@ -28,11 +29,15 @@ export function SessionTopBar({
 	onRetry,
 	onRestart,
 	onDismiss,
+	onSetAutoRun,
+	onSetAutoAdvance,
 }: {
 	session: SessionInfo;
 	onRetry?: () => void;
 	onRestart?: () => void;
 	onDismiss: () => void;
+	onSetAutoRun: (enabled: boolean) => void;
+	onSetAutoAdvance: (enabled: boolean) => void;
 }) {
 	const barRef = useRef<HTMLDivElement>(null);
 	const width = useElementWidth(barRef);
@@ -41,6 +46,11 @@ export function SessionTopBar({
 	return (
 		<Box ref={barRef} sx={barSx}>
 			<SessionTopBarCaptions session={session} />
+			<SessionTopBarToggles
+				session={session}
+				onSetAutoRun={onSetAutoRun}
+				onSetAutoAdvance={onSetAutoAdvance}
+			/>
 			<LabelledActionsContext.Provider value={labelled}>
 				<SessionActionButtons
 					session={session}

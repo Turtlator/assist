@@ -50,6 +50,8 @@ function renderArea(
 				onRetry: () => {},
 				onRestart: () => {},
 				onDismiss: () => {},
+				onSetAutoRun: () => {},
+				onSetAutoAdvance: () => {},
 			}}
 			viewingTranscriptSessionId={null}
 			transcript={null}
@@ -105,6 +107,8 @@ describe("SessionArea transcript view", () => {
 					onRetry: () => {},
 					onRestart: () => {},
 					onDismiss: () => {},
+					onSetAutoRun: () => {},
+					onSetAutoAdvance: () => {},
 				}}
 				transcript={{
 					sessionId: "abc",
@@ -137,6 +141,8 @@ describe("SessionArea transcript view", () => {
 					onRetry: () => {},
 					onRestart: () => {},
 					onDismiss: () => {},
+					onSetAutoRun: () => {},
+					onSetAutoAdvance: () => {},
 				}}
 				transcript={null}
 			/>,

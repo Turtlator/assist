@@ -6,15 +6,17 @@ export function CardToggle({
 	label,
 	checked,
 	onChange,
+	inline = false,
 }: {
 	label: string;
 	checked: boolean;
 	onChange: (enabled: boolean) => void;
+	inline?: boolean;
 }) {
 	return (
 		<StopCardActivation>
 			<FormControlLabel
-				sx={{ m: 0, mt: 0.5 }}
+				sx={inline ? { m: 0, flexShrink: 0 } : { m: 0, mt: 0.5 }}
 				control={
 					<Switch
 						size="small"
