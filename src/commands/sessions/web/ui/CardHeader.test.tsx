@@ -177,13 +177,32 @@ describe("CardHeader inline status", () => {
 
 		expect(await screen.findByText("+1")).toBeTruthy();
 
-		const row = screen
-			.getByText("repo")
-			.closest(".MuiChip-root")?.parentElement;
+		const chip = screen.getByText("repo").closest(".MuiChip-root");
+		const row = chip?.parentElement;
 		expect(row?.textContent).toContain("● running");
 		expect(row?.textContent).toContain("42%");
 		expect(row?.textContent).toContain("+1");
 		expect(row?.textContent).not.toContain("my session");
+	});
+
+	it("trails every chip and leads the close button", async () => {
+		renderHeader(true);
+
+		const status = await screen.findByText("● running");
+		const row = screen
+			.getByText("repo")
+			.closest(".MuiChip-root")?.parentElement;
+		const chips = row?.querySelectorAll(".MuiChip-root") ?? [];
+		const buttons = row?.querySelectorAll("button") ?? [];
+		const follows = (from: Node, to: Node) =>
+			Boolean(
+				from.compareDocumentPosition(to) & Node.DOCUMENT_POSITION_FOLLOWING,
+			);
+
+		expect(chips.length).toBeGreaterThan(0);
+		expect(buttons.length).toBeGreaterThan(0);
+		expect(follows(chips[chips.length - 1] as Node, status)).toBe(true);
+		expect(follows(status, buttons[buttons.length - 1] as Node)).toBe(true);
 	});
 
 	it("holds the status back while the card is still starting", () => {

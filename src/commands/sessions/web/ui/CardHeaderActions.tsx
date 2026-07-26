@@ -29,8 +29,8 @@ export function CardHeaderActions({
 			) : (
 				<CardChips session={session} />
 			)}
-			{topBar && !loading && <CardInlineStatus session={session} />}
 			<Box sx={{ flex: 1 }} />
+			{topBar && !loading && <CardInlineStatus session={session} />}
 			<CardActionButtons
 				session={session}
 				loading={loading}
