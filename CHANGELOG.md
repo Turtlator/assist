@@ -1,3 +1,10 @@
+# [0.471.0](https://github.com/staff0rd/assist/compare/v0.470.0...v0.471.0) (2026-07-26)
+
+
+### Features
+
+* scope picker in the diff viewer ([6d01bfb](https://github.com/staff0rd/assist/commit/6d01bfbc26621f7cbc0520f63fe47312bb1871f2))
+
 # [0.470.0](https://github.com/staff0rd/assist/compare/v0.469.5...v0.470.0) (2026-07-26)
 
 
