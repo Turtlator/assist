@@ -1,3 +1,10 @@
+# [0.463.0](https://github.com/staff0rd/assist/compare/v0.462.0...v0.463.0) (2026-07-26)
+
+
+### Features
+
+* diff the item's own commits ([0041670](https://github.com/staff0rd/assist/commit/0041670504e33912e54737fc6de70772ef8e1de5))
+
 # [0.462.0](https://github.com/staff0rd/assist/compare/v0.461.3...v0.462.0) (2026-07-26)
 
 
