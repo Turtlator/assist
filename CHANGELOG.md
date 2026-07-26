@@ -1,3 +1,10 @@
+# [0.466.0](https://github.com/staff0rd/assist/compare/v0.465.1...v0.466.0) (2026-07-26)
+
+
+### Features
+
+* group header names the repo, not each card ([5f0e4b2](https://github.com/staff0rd/assist/commit/5f0e4b28d040cc63cb5e1f1495f4cfd666785098))
+
 ## [0.465.1](https://github.com/staff0rd/assist/compare/v0.465.0...v0.465.1) (2026-07-26)
 
 
