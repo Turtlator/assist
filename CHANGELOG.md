@@ -1,3 +1,11 @@
+# [0.456.0](https://github.com/staff0rd/assist/compare/v0.455.0...v0.456.0) (2026-07-26)
+
+
+### Features
+
+* /watch blocks on watch wait ([1cc865b](https://github.com/staff0rd/assist/commit/1cc865b50e5b219285beca8cf4f9a374675c72a1))
+* add assist watch wait ([5f4faac](https://github.com/staff0rd/assist/commit/5f4faac02f572551fa2c0df01ce2af1cd3e9b207))
+
 # [0.455.0](https://github.com/staff0rd/assist/compare/v0.454.1...v0.455.0) (2026-07-26)
 
 
