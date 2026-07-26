@@ -111,6 +111,25 @@ describe("FileView", () => {
 		expect(screen.queryByRole("button", { name: "Rendered" })).toBeNull();
 	});
 
+	it("offers a close button for markdown files", async () => {
+		stubContent("# Title\n");
+
+		renderView("/file?path=docs/a.md");
+
+		await waitForBody();
+		expect(screen.getByRole("button", { name: "Close" })).toBeTruthy();
+	});
+
+	it("offers a close button for non-markdown files", async () => {
+		stubContent("const a = 1;\n");
+
+		renderView("/file?path=src/a.ts");
+
+		await waitForBody();
+		expect(screen.queryByRole("button", { name: "Rendered" })).toBeNull();
+		expect(screen.getByRole("button", { name: "Close" })).toBeTruthy();
+	});
+
 	it("asks for a repo when none is selected", () => {
 		renderView("/file?path=src/a.ts", "");
 

@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
+import { CloseViewButton } from "./CloseViewButton";
 import { FileTypeIcon } from "./FileTypeIcon";
 
 export type FileViewMode = "raw" | "rendered";
@@ -23,6 +24,13 @@ const titleSx = {
 	minWidth: 0,
 } as const;
 
+const actionsSx = {
+	display: "flex",
+	alignItems: "center",
+	gap: 1,
+	flexShrink: 0,
+} as const;
+
 export function FileViewHeader({
 	path,
 	mode,
@@ -40,19 +48,22 @@ export function FileViewHeader({
 					{path}
 				</Typography>
 			</Box>
-			{mode && (
-				<ToggleButtonGroup
-					exclusive
-					size="small"
-					value={mode}
-					onChange={(_, next: FileViewMode | null) =>
-						next && onModeChange(next)
-					}
-				>
-					<ToggleButton value="raw">Raw</ToggleButton>
-					<ToggleButton value="rendered">Rendered</ToggleButton>
-				</ToggleButtonGroup>
-			)}
+			<Box sx={actionsSx}>
+				{mode && (
+					<ToggleButtonGroup
+						exclusive
+						size="small"
+						value={mode}
+						onChange={(_, next: FileViewMode | null) =>
+							next && onModeChange(next)
+						}
+					>
+						<ToggleButton value="raw">Raw</ToggleButton>
+						<ToggleButton value="rendered">Rendered</ToggleButton>
+					</ToggleButtonGroup>
+				)}
+				<CloseViewButton />
+			</Box>
 		</Box>
 	);
 }

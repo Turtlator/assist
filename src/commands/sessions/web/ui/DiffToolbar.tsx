@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import type { ViewType } from "react-diff-view";
+import { CloseViewButton } from "./CloseViewButton";
 import { DiffChangeTypeFilter } from "./DiffChangeTypeFilter";
 import { DiffFileSearchInput } from "./DiffFileSearchInput";
 import type { DiffChangeType } from "./filterDiffFiles";
@@ -52,6 +53,7 @@ export function DiffToolbar({
 				onChange={onChangeTypeChange}
 			/>
 			<DiffFileSearchInput search={search} onChange={onSearchChange} />
+			<CloseViewButton sx={{ ml: "auto" }} />
 		</Box>
 	);
 }
