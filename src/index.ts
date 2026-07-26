@@ -44,6 +44,7 @@ import { registerSql } from "./commands/registerSql";
 import { registerTranscript } from "./commands/registerTranscript";
 import { registerVerify } from "./commands/registerVerify";
 import { registerVoice } from "./commands/registerVoice";
+import { registerWatch } from "./commands/registerWatch";
 import { registerRoam } from "./commands/roam/registerRoam";
 import { rootConfigHelp } from "./commands/rootConfigHelp";
 import { registerRun } from "./commands/run/registerRun";
@@ -181,6 +182,7 @@ registerSeq(program);
 registerSql(program);
 registerTranscript(program);
 registerVoice(program);
+registerWatch(program);
 
 registerSessions(program);
 registerDaemon(program);
