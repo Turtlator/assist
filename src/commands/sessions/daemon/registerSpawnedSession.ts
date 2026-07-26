@@ -1,5 +1,6 @@
 import type { SessionClient } from "./broadcast";
 import { logSpawnedSession } from "./logSpawnedSession";
+import { startSessionTitleGeneration } from "./startSessionTitleGeneration";
 import type { OnStatusChange, Session } from "./types";
 import { wirePtyEvents } from "./wirePtyEvents";
 import { wireSessionWatchers } from "./wireSessionWatchers";
@@ -16,5 +17,6 @@ export function registerSpawnedSession(
 	notify();
 	wireSessionWatchers(session, notify, onStatusChange);
 	logSpawnedSession(session);
+	startSessionTitleGeneration(session, notify);
 	return session.id;
 }

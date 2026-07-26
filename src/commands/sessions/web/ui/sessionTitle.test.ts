@@ -46,13 +46,14 @@ describe("sessionTitle", () => {
 		expect(sessionTitle(session)).toBe("fix the bug");
 	});
 
-	it("shows the entered prompt text for an assist session when provided", () => {
+	it("shows the placeholder while a prompted draft card awaits its title", () => {
 		const session = makeSession({
+			id: "11",
 			commandType: "assist",
 			assistArgs: ["draft", "--once", "add dark mode"],
 		});
 
-		expect(sessionTitle(session)).toBe("add dark mode");
+		expect(sessionTitle(session)).toBe("Session 11");
 	});
 
 	it("shows the item name for a backlog activity (id is shown as a chip)", () => {
@@ -151,6 +152,15 @@ describe("sessionTitle", () => {
 		});
 
 		expect(sessionTitle(session)).toBe("Add refine mode button");
+	});
+
+	it("shows the entered prompt text for an assist command that gets no title", () => {
+		const session = makeSession({
+			commandType: "assist",
+			assistArgs: ["next", "--once", "add dark mode"],
+		});
+
+		expect(sessionTitle(session)).toBe("add dark mode");
 	});
 
 	it("keeps the run name for run sessions even with a generated title", () => {

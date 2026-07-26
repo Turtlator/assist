@@ -4,9 +4,8 @@ import {
 	createAssistSession,
 } from "../createAssistSession";
 import { createSession, type Session } from "../createSession";
-import { isDraftCommand } from "../isDraftCommand";
+import { isDraftCommand } from "../../shared/isDraftCommand";
 import { resumeSession } from "../resumeSession";
-import { startSessionTitleGeneration } from "../startSessionTitleGeneration";
 import { type AllocateOptions, allocateTree } from "./allocateTree";
 import { bindNewWorktree, bindResumedWorktree } from "./bindNewWorktree";
 import { boundTreeRoots } from "./boundTreeRoots";
@@ -33,7 +32,6 @@ function allocateAndBind(
 	const needsSeeding = alloc.kind === "worktree" && alloc.created === true;
 	const id = ctx.spawnWith((sid) => create(sid, alloc.cwd, needsSeeding));
 	bindNewWorktree(ctx.sessions.get(id), alloc, ctx.notify, ctx.startHeld);
-	startSessionTitleGeneration(ctx.sessions.get(id), ctx.notify);
 	return id;
 }
 

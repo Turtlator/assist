@@ -7,6 +7,7 @@ import type { Session } from "./types";
 vi.mock("./daemonLog", () => ({ daemonLog: vi.fn() }));
 vi.mock("./generateSessionTitle", () => ({
 	generateSessionTitle: vi.fn(async () => "Fix login redirect"),
+	SESSION_TITLE_MAX_LENGTH: 48,
 }));
 
 const mockGenerate = generateSessionTitle as unknown as ReturnType<
@@ -131,17 +132,31 @@ describe("startSessionTitleGeneration", () => {
 		expect(mockGenerate).not.toHaveBeenCalled();
 	});
 
-	it("leaves the session untouched and logs when generation fails", async () => {
+	it("falls back to a single line of the prompt when generation fails", async () => {
 		mockGenerate.mockResolvedValue(undefined);
-		const session = makeSession({ initialPrompt: "the login page redirects" });
+		const session = makeSession({
+			initialPrompt: "the login page\nredirects  badly",
+		});
 		const notify = vi.fn();
 
 		startSessionTitleGeneration(session, notify);
 		await flush();
 
-		expect(session.generatedTitle).toBeUndefined();
-		expect(notify).not.toHaveBeenCalled();
-		expect(mockLog).toHaveBeenCalledWith("session 7 title generation failed");
+		expect(session.generatedTitle).toBe("the login page redirects badly");
+		expect(notify).toHaveBeenCalledOnce();
+		expect(mockLog).toHaveBeenCalledWith(
+			'session 7 title generation failed; falling back to "the login page redirects badly"',
+		);
+	});
+
+	it("caps the fallback so a failed card never wraps", async () => {
+		mockGenerate.mockResolvedValue(undefined);
+		const session = makeSession({ initialPrompt: "a ".repeat(200) });
+
+		startSessionTitleGeneration(session, vi.fn());
+		await flush();
+
+		expect(session.generatedTitle).toHaveLength(48);
 	});
 
 	it("does not throw when generation rejects", async () => {

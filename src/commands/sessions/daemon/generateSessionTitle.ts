@@ -3,7 +3,7 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
-const MAX_LENGTH = 48;
+export const SESSION_TITLE_MAX_LENGTH = 48;
 
 export async function generateSessionTitle(
 	prompt: string,
@@ -27,7 +27,7 @@ function normaliseTitle(stdout: string): string | undefined {
 		.replace(/["'`]+$/, "")
 		.replace(/[.,:;!?]+$/, "")
 		.trim()
-		.slice(0, MAX_LENGTH)
+		.slice(0, SESSION_TITLE_MAX_LENGTH)
 		.trim();
 	return title || undefined;
 }

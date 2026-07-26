@@ -1,3 +1,4 @@
+import { sessionTitlePrompt } from "../../shared/sessionTitlePrompt";
 import type { SessionInfo } from "./types";
 
 export function sessionTitle(session: SessionInfo): string {
@@ -13,6 +14,7 @@ export function sessionTitle(session: SessionInfo): string {
 		case "assist":
 			return (
 				session.generatedTitle ??
+				awaitingTitle(session) ??
 				assistPrompt(session.assistArgs) ??
 				session.assistArgs?.[0] ??
 				session.name
@@ -26,6 +28,10 @@ export function sessionTitle(session: SessionInfo): string {
 
 // The prompt text (when the user entered one) is the trailing non-flag arg,
 // e.g. ["draft", "--once", "add dark mode"] -> "add dark mode"
+function awaitingTitle(session: SessionInfo): string | undefined {
+	return sessionTitlePrompt(session) ? `Session ${session.id}` : undefined;
+}
+
 function assistPrompt(args?: string[]): string | undefined {
 	const rest = args?.slice(1).filter((a) => !a.startsWith("--"));
 	return rest?.[rest.length - 1];

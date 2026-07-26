@@ -1,5 +1,5 @@
 import type { Session } from "../createSession";
-import { isDraftCommand } from "../isDraftCommand";
+import { isDraftCommand } from "../../shared/isDraftCommand";
 import { worktreeConfigFor } from "./worktreeConfigFor";
 
 export function isCloneBoundDraft(session: Session): boolean {

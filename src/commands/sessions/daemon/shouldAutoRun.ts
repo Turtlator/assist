@@ -1,5 +1,5 @@
 import type { Session } from "./createSession";
-import { isDraftCommand } from "./isDraftCommand";
+import { isDraftCommand } from "../shared/isDraftCommand";
 
 type AutoRunDecision =
 	| { run: true; itemId: number }
