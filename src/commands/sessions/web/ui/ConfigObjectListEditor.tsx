@@ -1,14 +1,9 @@
-import AddIcon from "@mui/icons-material/Add";
-import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import type { ConfigObjectListNode } from "../../../../shared/ConfigNode";
+import { ConfigAddEntryButton } from "./ConfigAddEntryButton";
 import type { ConfigNodeEditorRenderer } from "./ConfigNodeEditorRenderer";
 import { ConfigObjectListRow } from "./ConfigObjectListRow";
-import {
-	moveConfigListItem,
-	removeConfigListItem,
-	replaceConfigListItem,
-} from "./moveConfigListItem";
+import { useConfigObjectList } from "./useConfigObjectList";
 
 type Props = {
 	node: ConfigObjectListNode;
@@ -28,6 +23,7 @@ export function ConfigObjectListEditor({
 	render,
 }: Props) {
 	const items = Array.isArray(value) ? value : [];
+	const list = useConfigObjectList(items, onChange);
 
 	return (
 		<Stack spacing={1} sx={{ alignItems: "flex-start", width: "100%" }}>
@@ -37,26 +33,21 @@ export function ConfigObjectListEditor({
 					node={node.item}
 					label={`${label}[${index}]`}
 					value={item}
+					open={list.isOpen(index)}
 					disabled={disabled}
 					render={render}
-					onChange={(next) =>
-						onChange(replaceConfigListItem(items, index, next))
-					}
-					onMoveUp={() => onChange(moveConfigListItem(items, index, index - 1))}
-					onMoveDown={() =>
-						onChange(moveConfigListItem(items, index, index + 1))
-					}
-					onRemove={() => onChange(removeConfigListItem(items, index))}
+					onToggle={() => list.toggle(index)}
+					onChange={(next) => list.replace(index, next)}
+					onMoveUp={() => list.moveUp(index)}
+					onMoveDown={() => list.moveDown(index)}
+					onRemove={() => list.remove(index)}
 				/>
 			))}
-			<Button
-				size="small"
-				startIcon={<AddIcon fontSize="inherit" />}
+			<ConfigAddEntryButton
+				label={label}
 				disabled={disabled}
-				onClick={() => onChange([...items, {}])}
-			>
-				{`Add ${label} entry`}
-			</Button>
+				onClick={list.add}
+			/>
 		</Stack>
 	);
 }

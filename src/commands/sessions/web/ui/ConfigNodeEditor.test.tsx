@@ -58,6 +58,31 @@ describe("ConfigNodeEditor", () => {
 		]);
 	});
 
+	it("opens one entry at a time, summarising the rest", () => {
+		render(
+			<Harness
+				nodeKey="subtasks"
+				initial={[{ title: "first" }, { title: "second" }]}
+			/>,
+		);
+
+		expect(screen.getByText("first")).toBeTruthy();
+		expect(screen.queryByLabelText("subtasks[0].title")).toBeNull();
+
+		click("Edit subtasks[1]");
+		expect(screen.getByLabelText("subtasks[1].title")).toHaveProperty(
+			"value",
+			"second",
+		);
+		expect(screen.queryByLabelText("subtasks[0].title")).toBeNull();
+
+		click("Edit subtasks[0]");
+		expect(screen.queryByLabelText("subtasks[1].title")).toBeNull();
+
+		click("Done editing subtasks[0]");
+		expect(screen.queryByLabelText("subtasks[0].title")).toBeNull();
+	});
+
 	it("drops a field again when its input is cleared", () => {
 		render(
 			<Harness
@@ -66,6 +91,7 @@ describe("ConfigNodeEditor", () => {
 			/>,
 		);
 
+		click("Edit subtasks[0]");
 		type("subtasks[0].description", "");
 
 		expect(edited()).toEqual([{ title: "a" }]);
@@ -91,6 +117,7 @@ describe("ConfigNodeEditor", () => {
 			<Harness nodeKey="run" initial={[{ name: "build", command: "npm" }]} />,
 		);
 
+		click("Edit run[0]");
 		fireEvent.mouseDown(screen.getByLabelText("run[0] type"));
 		fireEvent.click(screen.getByRole("option", { name: "link + prefix" }));
 		type("run[0].link", "shared.yml");
@@ -104,6 +131,7 @@ describe("ConfigNodeEditor", () => {
 			<Harness nodeKey="run" initial={[{ name: "deploy", command: "sh" }]} />,
 		);
 
+		click("Edit run[0]");
 		click("Add run[0].params entry");
 		type("run[0].params[0].name", "stage");
 		fireEvent.click(screen.getByLabelText("run[0].params[0].required value"));

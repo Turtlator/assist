@@ -1,8 +1,7 @@
-import AddIcon from "@mui/icons-material/Add";
-import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import type { ConfigRecordNode } from "../../../../shared/ConfigNode";
 import { asConfigRecord } from "./asConfigRecord";
+import { ConfigAddEntryButton } from "./ConfigAddEntryButton";
 import type { ConfigNodeEditorRenderer } from "./ConfigNodeEditorRenderer";
 import { ConfigRecordRow } from "./ConfigRecordRow";
 import { emptyConfigEntryValue } from "./emptyConfigEntryValue";
@@ -44,14 +43,11 @@ export function ConfigRecordEditor({
 					onRemove={() => onChange(removeConfigField(record, index))}
 				/>
 			))}
-			<Button
-				size="small"
-				startIcon={<AddIcon fontSize="inherit" />}
+			<ConfigAddEntryButton
+				label={label}
 				disabled={disabled}
 				onClick={() => onChange({ ...record, "": emptyConfigEntryValue(node) })}
-			>
-				{`Add ${label} entry`}
-			</Button>
+			/>
 		</Stack>
 	);
 }
