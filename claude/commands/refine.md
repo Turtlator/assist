@@ -24,7 +24,7 @@ Ask the user what they want to change or improve about this item. Listen for cha
 - **Name** or **description**
 - **Type** (story / bug)
 - **Acceptance criteria**
-- **Plan phases** (add, modify, or remove phases and their tasks)
+- **Plan phases** (add, modify, remove, or reorder phases and their tasks)
 - **External tracker** (a Jira key/URL or a GitHub issue reference to associate)
 - **General feedback** that should be captured as a comment
 
@@ -47,29 +47,31 @@ Note: `--ac` replaces all acceptance criteria, so include the full list (both ex
 
 Descriptions render as markdown in both the terminal (`assist backlog show`) and the web UI, so author them as structured markdown — short paragraphs, `##` headings for longer descriptions, and bullet lists rather than one run-on prose paragraph. Pass the value as real markdown with line breaks preserved (use `printf` or a quoted heredoc so `\n` becomes actual newlines, not literal `\n` characters).
 
-**To modify a plan phase** (phase is 1-based — the first phase is `1`, matching `assist backlog show`):
+**To change the plan** — adding, editing, removing or reordering phases — make one `update-plan` call with the complete desired plan. This is the way every plan change is applied, whether it is a single new phase or a full restructure:
 
 ```
-assist backlog update-phase <id> <phase> --name "New phase name"
-assist backlog update-phase <id> <phase> --task "Task 1" --task "Task 2"
-assist backlog update-phase <id> <phase> --manual-check "Check 1"
+cat <<'JSON' | assist backlog update-plan <id> --json - 2>&1
+{
+  "phases": [
+    { "name": "Phase one name", "tasks": ["Task 1", "Task 2"] },
+    { "name": "Phase two name", "tasks": ["Task 1"], "manualChecks": ["optional check"] }
+  ]
+}
+JSON
 ```
 
-Note: `--task` and `--manual-check` replace the full list for that phase, so include all items.
+The payload is the whole plan, not a patch: every phase you want the item to end up with, in order, each with all of its tasks. Take the current plan from `assist backlog view <id>`, apply the user's changes to it, and send the result — a phase you leave out is removed, and reordering is just sending the phases in a different order. The payload is strict JSON, so an unknown key is an error, and each phase needs at least one task. Omit `manualChecks` for phases that don't need any (most of them).
 
-**To remove a plan phase:**
+Do not chain `add-phase`, `update-phase`, `remove-phase` and `move-phase` calls to build up a change — that is one preview per command and leaves the item half-edited if the user rejects part way. Those commands remain for a human typing a quick one-liner at a terminal.
 
-```
-assist backlog remove-phase <id> <phase>
-```
+In a web session this renders the whole change into the preview pane as one diff — each phase marked unchanged, added, edited or moved, removed phases listed separately, phases the item has already completed flagged, and any clamp of `currentPhase` into the shorter plan shown at the top — and blocks until the user decides. The review can take far longer than the default command timeout, so run `update-plan` **as a background task** and do no other work until it returns; the pending preview dies with the process.
 
-**To add a new plan phase:**
+When it returns:
 
-```
-assist backlog add-phase <id> "Phase name" --task "Task 1" --task "Task 2"
-```
+- **Approved** — the whole plan is written in one transaction and the stored plan matches the payload exactly.
+- **Rejected** — the command exits non-zero and prints the reason plus every inline comment with the excerpt it was left on. Nothing was written. Address each comment, then call `update-plan` again with the revised whole plan.
 
-In a web session this slides the phase into the preview pane and blocks until the user approves it. On rejection the command exits non-zero with the reason and each inline comment and writes nothing — revise the phase and run it again.
+Outside a web session the resulting plan is printed and applied straight away.
 
 ### Phase design rules
 

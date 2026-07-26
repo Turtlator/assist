@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const proposedPhaseSchema = z.strictObject({
+export const proposedPhaseSchema = z.strictObject({
 	name: z.string().trim().min(1, "phase name is required"),
 	tasks: z
 		.array(z.string().trim().min(1))

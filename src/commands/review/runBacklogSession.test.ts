@@ -30,6 +30,15 @@ describe("buildBacklogPrompt", () => {
 		expect(prompt).toContain("already-raised");
 	});
 
+	it("should route the plan through a single update-plan call", () => {
+		const prompt = buildBacklogPrompt("/repo/review/synthesis.md");
+
+		expect(prompt).toContain("assist backlog update-plan <id> --json -");
+		expect(prompt).toContain(
+			"Do not run `assist backlog add-phase` per finding",
+		);
+	});
+
 	it("should instruct leaving the synthesis file untouched", () => {
 		const prompt = buildBacklogPrompt("/repo/review/synthesis.md");
 
