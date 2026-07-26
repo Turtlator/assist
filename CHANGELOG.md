@@ -1,3 +1,10 @@
+## [0.461.1](https://github.com/staff0rd/assist/compare/v0.461.0...v0.461.1) (2026-07-26)
+
+
+### Bug Fixes
+
+* item chip leads the top bar title ([393b9e2](https://github.com/staff0rd/assist/commit/393b9e2d554e09dbfa77003353bd181b13de1383))
+
 # [0.461.0](https://github.com/staff0rd/assist/compare/v0.460.1...v0.461.0) (2026-07-26)
 
 
