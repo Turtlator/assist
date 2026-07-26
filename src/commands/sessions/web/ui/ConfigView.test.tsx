@@ -465,9 +465,10 @@ describe("ConfigView", () => {
 			expect(screen.getByText("sql.connections")).toBeTruthy(),
 		);
 		expect(screen.queryByText("array · read-only")).toBeNull();
-		fireEvent.click(
-			screen.getByRole("button", { name: "Edit sql.connections" }),
-		);
+		expect(
+			screen.queryByRole("button", { name: "Edit sql.connections" }),
+		).toBeNull();
+		expect(screen.queryByRole("button", { name: "Save" })).toBeNull();
 		fireEvent.click(
 			screen.getByRole("button", { name: "Add sql.connections entry" }),
 		);
@@ -505,7 +506,6 @@ describe("ConfigView", () => {
 		renderView("/repo/one");
 
 		await waitFor(() => expect(screen.getByText("run")).toBeTruthy());
-		fireEvent.click(screen.getByRole("button", { name: "Edit run" }));
 		fireEvent.click(screen.getByRole("button", { name: "Move run[1] up" }));
 		fireEvent.click(screen.getByRole("button", { name: "Save" }));
 

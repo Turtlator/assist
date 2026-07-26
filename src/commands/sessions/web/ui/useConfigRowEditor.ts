@@ -18,7 +18,8 @@ function requestValue(entry: ConfigEntry, value: unknown): unknown {
 
 export function useConfigRowEditor({ entry, cwd, onSaved, onError }: Options) {
 	const scopeLocked = entry.globalOnly === true;
-	const [value, setValue] = useState<unknown>(effectiveConfigValue(entry));
+	const saved = effectiveConfigValue(entry);
+	const [value, setValue] = useState<unknown>(saved);
 	const [scope, setScope] = useState<ConfigScope>(
 		scopeLocked ? "global" : "project",
 	);
@@ -55,5 +56,7 @@ export function useConfigRowEditor({ entry, cwd, onSaved, onError }: Options) {
 		save,
 		clear,
 		canClear: entry.source === "project" || entry.source === "global",
+		dirty: JSON.stringify(value) !== JSON.stringify(saved),
+		reset: () => setValue(saved),
 	};
 }
