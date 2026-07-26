@@ -1,3 +1,10 @@
+# [0.475.0](https://github.com/staff0rd/assist/compare/v0.474.0...v0.475.0) (2026-07-26)
+
+
+### Features
+
+* bracketed uncommitted counts on card ([2a96ca2](https://github.com/staff0rd/assist/commit/2a96ca207f451764432c7f050d00360d47be9e53))
+
 # [0.474.0](https://github.com/staff0rd/assist/compare/v0.473.0...v0.474.0) (2026-07-26)
 
 
