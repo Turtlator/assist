@@ -1,10 +1,13 @@
 import { useMemo } from "react";
 import { Sidebar } from "./Sidebar";
 import { sortSessionsByStar } from "./sortSessionsByStar";
+import { sortSessionsByWaiting } from "./sortSessionsByWaiting";
 import type { SidebarTab } from "./types";
 import type { useSessionSocket } from "./useSessionSocket";
+import { useSessionViewConfig } from "./useSessionViewConfig";
 import { useSidebarNavigation } from "./useSidebarNavigation";
 import { useStarredSessions } from "./useStarredSessions";
+import { useWaitingClock } from "./useWaitingClock";
 
 type Props = {
 	socket: ReturnType<typeof useSessionSocket>;
@@ -14,9 +17,14 @@ type Props = {
 
 export function AppSidebar({ socket, tab, onTabChange }: Props) {
 	const { isStarred } = useStarredSessions();
+	const { floatWaiting } = useSessionViewConfig();
+	const now = useWaitingClock(floatWaiting);
 	const sessions = useMemo(
-		() => sortSessionsByStar(socket.sessions, isStarred),
-		[socket.sessions, isStarred],
+		() =>
+			floatWaiting
+				? sortSessionsByWaiting(socket.sessions, isStarred, now)
+				: sortSessionsByStar(socket.sessions, isStarred),
+		[socket.sessions, isStarred, floatWaiting, now],
 	);
 	const { handleSelect, handleResume, handleView } = useSidebarNavigation(
 		socket,

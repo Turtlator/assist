@@ -34,6 +34,7 @@ export type Session = {
 	startedAt: number;
 	runningMs: number;
 	runningSince: number | null;
+	waitingSince: number | null;
 	pty: ReturnType<typeof spawnClaude> | null;
 	scrollback: string;
 	runName?: string;
@@ -79,5 +80,6 @@ export type SessionInfo = SessionInfoBase & {
 	status: string;
 	runningMs: number;
 	runningSince: number | null;
+	waitingSince: number | null;
 	runArgs?: string[];
 };

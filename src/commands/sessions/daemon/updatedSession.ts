@@ -17,6 +17,7 @@ export function updatedSession(
 		startedAt: persisted.startedAt,
 		runningMs: persisted.runningMs ?? 0,
 		runningSince: null,
+		waitingSince: null,
 		pty: null,
 	};
 }

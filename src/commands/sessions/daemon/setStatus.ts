@@ -1,4 +1,5 @@
 import type { Session } from "./createSession";
+import { daemonLog } from "./daemonLog";
 
 /* why: the card timer must count only time spent running. Funnelling every
  * status write through here keeps runningMs the single source of truth: the
@@ -14,5 +15,11 @@ export function setStatus(
 		session.runningMs += now - session.runningSince;
 	}
 	session.runningSince = newStatus === "running" ? now : null;
+	session.waitingSince = newStatus === "waiting" ? now : null;
 	session.status = newStatus;
+	if (newStatus === "waiting") {
+		daemonLog(
+			`session ${session.id} waiting since ${new Date(now).toISOString()}`,
+		);
+	}
 }

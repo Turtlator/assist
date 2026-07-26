@@ -10,6 +10,7 @@ export function sessionBase(id: string, status: SessionStatus) {
 		/* why: runningMs counts only running stretches, so a session that starts
 		 * waiting (idle, awaiting first input) has no open stretch to stamp. */
 		runningSince: status === "running" ? startedAt : null,
+		waitingSince: status === "waiting" ? startedAt : null,
 		scrollback: "",
 	};
 }

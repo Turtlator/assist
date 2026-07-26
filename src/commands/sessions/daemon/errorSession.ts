@@ -15,6 +15,7 @@ export function errorSession(
 		startedAt: persisted.startedAt,
 		runningMs: persisted.runningMs ?? 0,
 		runningSince: null,
+		waitingSince: null,
 		pty: null,
 		runName: persisted.runName,
 		runArgs: persisted.runArgs,

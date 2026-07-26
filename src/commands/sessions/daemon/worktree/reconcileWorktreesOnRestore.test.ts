@@ -115,6 +115,7 @@ describe("reconcileWorktreesOnRestore", () => {
 			startedAt: 1,
 			runningMs: 0,
 			runningSince: null,
+			waitingSince: null,
 			pty: null,
 			scrollback: "",
 			cwd: "/git/repo-2",

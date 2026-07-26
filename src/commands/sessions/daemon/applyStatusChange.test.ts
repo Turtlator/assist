@@ -25,6 +25,7 @@ function backlogRun(overrides: Partial<Session> = {}): Session {
 		startedAt: 1,
 		runningMs: 0,
 		runningSince: 1,
+		waitingSince: null,
 		pty: null,
 		scrollback: "",
 		worktree: { path: "/git/repo-2", clone: "/git/repo" },

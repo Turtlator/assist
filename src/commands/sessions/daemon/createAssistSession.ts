@@ -22,6 +22,7 @@ export function createAssistSession(
 		startedAt,
 		runningMs: 0,
 		runningSince: startedAt,
+		waitingSince: null,
 		...startOrHoldPty(
 			() => spawnPty(["assist", ...assistArgs], cwd, id),
 			holdPty,

@@ -15,6 +15,7 @@ export type SessionInfo = SessionInfoBase & {
 	status: SessionStatus;
 	runningMs?: number;
 	runningSince?: number | null;
+	waitingSince?: number | null;
 };
 
 export type CardHeaderProps = {

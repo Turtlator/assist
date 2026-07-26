@@ -16,6 +16,7 @@ export function resumeSession(
 		startedAt,
 		runningMs: 0,
 		runningSince: null,
+		waitingSince: startedAt,
 		pty: spawnClaude({ resumeSessionId: sessionId, cwd, sessionId: id }),
 		scrollback: "",
 		cwd,

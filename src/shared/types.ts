@@ -189,6 +189,7 @@ export const assistConfigSchema = z.strictObject({
 			windowsVersionCheck: z.enum(["block", "warn", "off"]).default("block"),
 			includeCommittedChanges: z.boolean().default(false),
 			topBar: z.boolean().default(true),
+			floatWaiting: z.boolean().default(false),
 		})
 		.optional(),
 	database: z

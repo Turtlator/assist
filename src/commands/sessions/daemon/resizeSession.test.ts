@@ -16,6 +16,7 @@ function makeSession(overrides: Partial<Session>): Session {
 		startedAt: 1,
 		runningMs: 0,
 		runningSince: null,
+		waitingSince: null,
 		pty: null,
 		scrollback: "",
 		...overrides,

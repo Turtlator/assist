@@ -79,6 +79,7 @@ function fakeSession(overrides: Partial<Session> = {}): Session {
 		startedAt: 1,
 		runningMs: 0,
 		runningSince: 1,
+		waitingSince: null,
 		pty: { kill: vi.fn() } as unknown as Session["pty"],
 		scrollback: "",
 		...overrides,

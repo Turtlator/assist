@@ -23,6 +23,7 @@ function session(overrides: Partial<Session> = {}): Session {
 		startedAt: 1,
 		runningMs: 0,
 		runningSince: null,
+		waitingSince: null,
 		pty: null,
 		scrollback: "",
 		cwd: "/git/repo-2",

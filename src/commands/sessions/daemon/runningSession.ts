@@ -43,6 +43,7 @@ function restoredSession(
 		startedAt,
 		runningMs: persisted.runningMs ?? 0,
 		runningSince: status === "running" ? startedAt : null,
+		waitingSince: status === "waiting" ? startedAt : null,
 		pty,
 		claudeSessionId: persisted.claudeSessionId,
 		restored: true,

@@ -19,6 +19,7 @@ function held(id: string, cwd: string): Session {
 		startedAt: 1,
 		runningMs: 0,
 		runningSince: 1,
+		waitingSince: null,
 		pty: null,
 		pendingStart: () => fakePty(),
 		scrollback: "",

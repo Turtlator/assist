@@ -22,6 +22,7 @@ function backlogSession(overrides: Partial<Session> = {}): Session {
 		startedAt: 1000,
 		runningMs: 0,
 		runningSince: 1000,
+		waitingSince: null,
 		pty: null,
 		scrollback: "",
 		activity: { kind: "backlog", startedAt: 1000, itemId: 7, phase: 2 },

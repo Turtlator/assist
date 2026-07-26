@@ -30,6 +30,7 @@ function makeSession(overrides: Partial<Session>): Session {
 		startedAt: 123,
 		runningMs: 0,
 		runningSince: null,
+		waitingSince: null,
 		pty: null,
 		scrollback: "old output",
 		restored: false,

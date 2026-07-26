@@ -20,6 +20,7 @@ function session(overrides: Partial<Session> = {}): Session {
 		startedAt: 1,
 		runningMs: 0,
 		runningSince: 1,
+		waitingSince: null,
 		pty: null,
 		scrollback: "",
 		activity: { kind: "backlog", itemId: 42, startedAt: 1 },

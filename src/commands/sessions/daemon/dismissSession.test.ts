@@ -24,6 +24,7 @@ function session(overrides: Partial<Session> = {}): Session {
 		startedAt: 1,
 		runningMs: 0,
 		runningSince: 1,
+		waitingSince: null,
 		pty: { pid: 7, kill: vi.fn() } as unknown as Session["pty"],
 		scrollback: "",
 		...overrides,

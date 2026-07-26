@@ -23,6 +23,7 @@ import { prList } from "./prList";
 import { prStatus } from "./prStatus";
 import { restartWeb } from "./restartWeb";
 import { sessionLayout } from "./sessionLayout";
+import { sessionView } from "./sessionView";
 import { setConfig } from "./setConfig";
 import { unsetConfig } from "./unsetConfig";
 import { uploadPrImage } from "./uploadPrImage";
@@ -55,6 +56,7 @@ const routes: Record<string, Handler> = {
 	"GET /api/jira-site": jiraSite,
 	"GET /api/harness": harnessCapabilities,
 	"GET /api/session-layout": sessionLayout,
+	"GET /api/session-view": sessionView,
 	"GET /api/pr-status": prStatus,
 	"GET /api/server-runs": handleServerRuns,
 	"GET /api/pr-list": prList,
