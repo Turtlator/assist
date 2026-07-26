@@ -10,7 +10,7 @@ const pulse = keyframes`
 
 const dotSx = {
 	flexShrink: 0,
-	fontSize: "2.1rem",
+	fontSize: "1.68rem",
 	lineHeight: 0.6,
 } as const;
 
