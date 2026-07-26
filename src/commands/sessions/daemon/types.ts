@@ -27,6 +27,7 @@ export type Session = {
 	name: string;
 	title?: string;
 	generatedTitle?: string;
+	titleGenerationStarted?: boolean;
 	subtitle?: string;
 	commandType: CommandType;
 	harness?: HarnessKind;

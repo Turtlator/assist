@@ -8,7 +8,8 @@ export function wireSessionWatchers(
 	notify: () => void,
 	onStatusChange: OnStatusChange,
 ): void {
-	const wireTranscript = (s: Session) => watchTranscript(s, onStatusChange);
+	const wireTranscript = (s: Session) =>
+		watchTranscript(s, notify, onStatusChange);
 	watchActivity(session, notify, wireTranscript);
 	wireTranscript(session);
 }

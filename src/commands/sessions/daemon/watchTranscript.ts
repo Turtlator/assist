@@ -3,12 +3,14 @@ import { projectDirForCwd } from "../shared/findTranscriptPathSync";
 import type { Session } from "./createSession";
 import { daemonLog } from "./daemonLog";
 import { reconcileTranscriptStatus } from "./reconcileTranscriptStatus";
+import { startTranscriptTitleGeneration } from "./startTranscriptTitleGeneration";
 import type { OnStatusChange } from "./types";
 
 const DEBOUNCE_MS = 100;
 
 export function watchTranscript(
 	session: Session,
+	notify: () => void,
 	onStatusChange: OnStatusChange,
 ): void {
 	if (!session.cwd || !session.claudeSessionId) return;
@@ -28,6 +30,7 @@ export function watchTranscript(
 	const run = () => {
 		timer = null;
 		void reconcileTranscriptStatus(session, onStatusChange);
+		startTranscriptTitleGeneration(session, notify);
 	};
 
 	try {
