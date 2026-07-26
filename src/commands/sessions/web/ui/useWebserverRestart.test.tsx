@@ -67,11 +67,32 @@ describe("useWebserverRestart", () => {
 		expect(reload).not.toHaveBeenCalled();
 
 		rerender({ target: "both", reconnecting: false });
-		await settle();
+		await settle(1_000);
 
 		expect(probe).toHaveBeenCalledWith("/api/session-layout", {
 			cache: "no-store",
 		});
+		expect(reload).toHaveBeenCalledTimes(1);
+	});
+
+	it("does not reload when the server answers once then stops answering", async () => {
+		probe.mockResolvedValueOnce({ ok: true });
+		probe.mockRejectedValue(new Error("connection refused"));
+		const { result, rerender } = render({
+			target: "both",
+			reconnecting: false,
+		});
+
+		await act(() => result.current.restart());
+		rerender({ target: "both", reconnecting: true });
+		rerender({ target: "both", reconnecting: false });
+		await settle(2_000);
+
+		expect(reload).not.toHaveBeenCalled();
+
+		probe.mockResolvedValue({ ok: true });
+		await settle(1_000);
+
 		expect(reload).toHaveBeenCalledTimes(1);
 	});
 
