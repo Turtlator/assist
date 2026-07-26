@@ -1,3 +1,15 @@
+# [0.478.0](https://github.com/staff0rd/assist/compare/v0.477.0...v0.478.0) (2026-07-26)
+
+
+### Bug Fixes
+
+* clamp session titles to one line ([0f95349](https://github.com/staff0rd/assist/commit/0f95349e1aedb8fecaf743c017a7757c3170840d))
+
+
+### Features
+
+* one restart item that reloads page ([3c47144](https://github.com/staff0rd/assist/commit/3c47144d28fb7d08e744bcccf091803c1b6a57ae))
+
 # [0.477.0](https://github.com/staff0rd/assist/compare/v0.476.0...v0.477.0) (2026-07-26)
 
 
