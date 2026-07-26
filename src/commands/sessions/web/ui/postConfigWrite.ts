@@ -2,7 +2,7 @@ export async function postConfigWrite(
 	path: string,
 	body: unknown,
 	failureMessage: string,
-): Promise<{ error?: string }> {
+): Promise<{ error?: string; payload?: Record<string, unknown> }> {
 	try {
 		const res = await fetch(path, {
 			method: "POST",
@@ -11,7 +11,7 @@ export async function postConfigWrite(
 		});
 		const parsed = await res.json().catch(() => null);
 		if (!res.ok) return { error: parsed?.error ?? `HTTP ${res.status}` };
-		return {};
+		return { payload: parsed ?? undefined };
 	} catch {
 		return { error: failureMessage };
 	}

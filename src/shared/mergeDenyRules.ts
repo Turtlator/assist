@@ -1,3 +1,5 @@
+import { deepMergeRawConfig } from "./deepMergeRawConfig";
+
 type DenyRule = { pattern: string; message: string };
 
 /**
@@ -56,7 +58,7 @@ export function mergeRawConfigs(
 		globalRaw.run as Record<string, unknown>[] | undefined,
 		projectRaw.run as Record<string, unknown>[] | undefined,
 	);
-	const merged = { ...globalRaw, ...projectRaw };
+	const merged = deepMergeRawConfig(globalRaw, projectRaw);
 	if (deny !== undefined) {
 		merged.deny = deny;
 	}

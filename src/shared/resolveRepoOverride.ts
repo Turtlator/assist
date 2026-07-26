@@ -12,18 +12,19 @@ export function originKeyCandidates(origin: string): Set<string> {
 	return new Set([origin, displayName, bare]);
 }
 
-export function resolveRepoOverride(
+export function matchRepoConfigKey(
 	globalRaw: Record<string, unknown>,
 	origin: string,
-): Record<string, unknown> {
+): string | undefined {
 	const repos = globalRaw.repos;
-	if (!repos || typeof repos !== "object" || Array.isArray(repos)) return {};
+	if (!repos || typeof repos !== "object" || Array.isArray(repos))
+		return undefined;
 
 	const entries = repos as Record<string, unknown>;
 	const candidates = originKeyCandidates(origin);
 	const matches = Object.keys(entries).filter((key) => candidates.has(key));
 
-	if (matches.length === 0) return {};
+	if (matches.length === 0) return undefined;
 	if (matches.length > 1) {
 		throw new AmbiguousRepoConfigError(
 			`Ambiguous repos config in ~/.assist.yml: keys ${matches
@@ -33,7 +34,17 @@ export function resolveRepoOverride(
 		);
 	}
 
-	const override = entries[matches[0]];
+	return matches[0];
+}
+
+export function resolveRepoOverride(
+	globalRaw: Record<string, unknown>,
+	origin: string,
+): Record<string, unknown> {
+	const matched = matchRepoConfigKey(globalRaw, origin);
+	if (matched === undefined) return {};
+
+	const override = (globalRaw.repos as Record<string, unknown>)[matched];
 	if (!override || typeof override !== "object" || Array.isArray(override))
 		return {};
 	return override as Record<string, unknown>;

@@ -109,6 +109,25 @@ describe("mergeRawConfigs run", () => {
 	});
 });
 
+describe("mergeRawConfigs nested objects", () => {
+	it("keeps global sibling keys when the override touches one nested key", () => {
+		const merged = mergeRawConfigs(
+			{ worktree: { trunk: true, enabled: false } },
+			{ worktree: { enabled: true } },
+		);
+		expect(merged.worktree).toEqual({ trunk: true, enabled: true });
+	});
+
+	it("deep merges every nested object, not just worktree", () => {
+		const merged = mergeRawConfigs(
+			{ prs: { channel: "#a", notify: true }, transcript: { dir: "~/t" } },
+			{ prs: { channel: "#b" }, transcript: { format: "md" } },
+		);
+		expect(merged.prs).toEqual({ channel: "#b", notify: true });
+		expect(merged.transcript).toEqual({ dir: "~/t", format: "md" });
+	});
+});
+
 describe("mergeRawConfigs subtasks", () => {
 	it("leaves subtasks unset when neither side has them", () => {
 		expect(mergeRawConfigs({}, {})).not.toHaveProperty("subtasks");

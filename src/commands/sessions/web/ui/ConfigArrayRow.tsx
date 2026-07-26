@@ -27,7 +27,7 @@ export function ConfigArrayRow({ entry, node, cwd, onSaved, onError }: Props) {
 			/>
 			{editor.dirty && (
 				<ConfigEditorActions
-					entryKey={entry.key}
+					entry={entry}
 					scope={editor.scope}
 					scopeLocked={editor.scopeLocked}
 					saving={editor.saving}

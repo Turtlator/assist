@@ -43,7 +43,7 @@ export function ConfigRowEditor({
 				/>
 			)}
 			<ConfigEditorActions
-				entryKey={entry.key}
+				entry={entry}
 				scope={scope}
 				scopeLocked={scopeLocked}
 				saving={saving}

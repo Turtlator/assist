@@ -9,6 +9,7 @@ const home = join(root, "home");
 const repo = join(root, "repo");
 const repoConfig = join(repo, "assist.yml");
 const globalConfig = join(home, ".assist.yml");
+const repoOriginKey = `local:${repo}`;
 
 mkdirSync(repo, { recursive: true });
 mkdirSync(home, { recursive: true });
@@ -85,6 +86,45 @@ describe("readConfigEntries", () => {
 			kind: "scalar",
 			type: "boolean",
 		});
+	});
+
+	it("keeps global siblings when a repos override sets one nested key", () => {
+		writeFileSync(
+			globalConfig,
+			`repos:\n  "${repoOriginKey}":\n    worktree:\n      enabled: true\nworktree:\n  trunk: true\n`,
+		);
+
+		expect(entryFor("worktree.trunk")).toMatchObject({
+			value: true,
+			source: "global",
+		});
+		expect(entryFor("worktree.enabled")).toMatchObject({
+			value: true,
+			source: "repo",
+			repoKey: repoOriginKey,
+		});
+	});
+
+	it("prefers the project value over a repos override", () => {
+		writeFileSync(
+			globalConfig,
+			`repos:\n  "${repoOriginKey}":\n    commit:\n      push: false\n`,
+		);
+		writeFileSync(repoConfig, "commit:\n  push: true\n");
+
+		expect(entryFor("commit.push")).toMatchObject({
+			value: true,
+			source: "project",
+			sources: ["project", "repo"],
+		});
+	});
+
+	it("lists every layer that sets the key", () => {
+		writeFileSync(globalConfig, "commit:\n  push: false\n");
+		writeFileSync(repoConfig, "commit:\n  push: true\n");
+
+		expect(entryFor("commit.push").sources).toEqual(["project", "global"]);
+		expect(entryFor("worktree.trunk").sources).toEqual([]);
 	});
 
 	it("reports the schema default for a leaf under an unset optional parent", () => {

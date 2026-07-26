@@ -3,22 +3,33 @@ import {
 	getGlobalConfigPath,
 } from "../../shared/loadConfigFrom";
 import { loadRawYaml } from "../../shared/loadRawYaml";
-import { resolveRepoOverride } from "../../shared/resolveRepoOverride";
+import {
+	matchRepoConfigKey,
+	resolveRepoOverride,
+} from "../../shared/resolveRepoOverride";
 import { getCurrentOrigin } from "../backlog/getCurrentOrigin";
 
 export type RawConfigLayers = {
 	project: Record<string, unknown>;
 	global: Record<string, unknown>;
 	repoOverride: Record<string, unknown>;
+	repoKey?: string;
 };
 
 export function readRawConfigLayers(cwd: string): RawConfigLayers {
 	const global = loadRawYaml(getGlobalConfigPath());
+	if (!global.repos)
+		return {
+			project: loadRawYaml(getConfigPathFrom(cwd)),
+			global,
+			repoOverride: {},
+		};
+
+	const origin = getCurrentOrigin(cwd);
 	return {
 		project: loadRawYaml(getConfigPathFrom(cwd)),
 		global,
-		repoOverride: global.repos
-			? resolveRepoOverride(global, getCurrentOrigin(cwd))
-			: {},
+		repoOverride: resolveRepoOverride(global, origin),
+		repoKey: matchRepoConfigKey(global, origin),
 	};
 }

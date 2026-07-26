@@ -1,9 +1,8 @@
 import { useState } from "react";
 import type { ConfigEntry } from "../../../config/readConfigEntries";
 import { effectiveConfigValue } from "./effectiveConfigValue";
-import { normalizeConfigValue } from "./normalizeConfigValue";
-import { type ConfigScope, saveConfigValue } from "./saveConfigValue";
-import { unsetConfigValue } from "./unsetConfigValue";
+import type { ConfigScope } from "./saveConfigValue";
+import { useConfigRowWrites } from "./useConfigRowWrites";
 
 type Options = {
 	entry: ConfigEntry;
@@ -12,10 +11,6 @@ type Options = {
 	onError: (message: string) => void;
 };
 
-function requestValue(entry: ConfigEntry, value: unknown): unknown {
-	return entry.node ? normalizeConfigValue(entry.node, value) : value;
-}
-
 export function useConfigRowEditor({ entry, cwd, onSaved, onError }: Options) {
 	const scopeLocked = entry.globalOnly === true;
 	const saved = effectiveConfigValue(entry);
@@ -23,28 +18,13 @@ export function useConfigRowEditor({ entry, cwd, onSaved, onError }: Options) {
 	const [scope, setScope] = useState<ConfigScope>(
 		scopeLocked ? "global" : "project",
 	);
-	const [saving, setSaving] = useState(false);
-
-	async function save(): Promise<void> {
-		setSaving(true);
-		const { error } = await saveConfigValue({
-			key: entry.key,
-			value: requestValue(entry, value),
-			cwd,
-			scope,
-		});
-		setSaving(false);
-		if (error) onError(error);
-		else onSaved();
-	}
-
-	async function clear(): Promise<void> {
-		setSaving(true);
-		const { error } = await unsetConfigValue({ key: entry.key, cwd, scope });
-		setSaving(false);
-		if (error) onError(error);
-		else onSaved();
-	}
+	const { saving, save, clear } = useConfigRowWrites({
+		entry,
+		cwd,
+		scope,
+		onSaved,
+		onError,
+	});
 
 	return {
 		value,
@@ -53,9 +33,9 @@ export function useConfigRowEditor({ entry, cwd, onSaved, onError }: Options) {
 		setScope,
 		scopeLocked,
 		saving,
-		save,
+		save: () => save(value),
 		clear,
-		canClear: entry.source === "project" || entry.source === "global",
+		canClear: entry.source !== "default",
 		dirty: JSON.stringify(value) !== JSON.stringify(saved),
 		reset: () => setValue(saved),
 	};

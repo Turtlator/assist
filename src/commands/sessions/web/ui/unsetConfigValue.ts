@@ -9,10 +9,15 @@ type UnsetConfigValueRequest = {
 
 export async function unsetConfigValue(
 	request: UnsetConfigValueRequest,
-): Promise<{ error?: string }> {
-	return postConfigWrite(
+): Promise<{ error?: string; removed?: boolean }> {
+	const { error, payload } = await postConfigWrite(
 		"/api/config/unset",
 		request,
 		"Failed to clear config",
 	);
+	if (error) return { error };
+	return {
+		removed:
+			typeof payload?.removed === "boolean" ? payload.removed : undefined,
+	};
 }

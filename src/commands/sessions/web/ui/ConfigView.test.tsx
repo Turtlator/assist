@@ -736,6 +736,146 @@ describe("ConfigView", () => {
 		expect(screen.getByRole("button", { name: "Clear" })).toBeTruthy();
 	});
 
+	it("says which scopes hold a value before Clear is pressed", async () => {
+		stubApi([
+			{
+				key: "worktree.trunk",
+				type: "boolean",
+				value: true,
+				source: "project",
+				sources: ["project", "global"],
+				node: node("worktree.trunk"),
+			},
+		]);
+		renderView();
+
+		await waitFor(() =>
+			expect(screen.getByText("worktree.trunk")).toBeTruthy(),
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Edit worktree.trunk" }),
+		);
+
+		expect(
+			screen.getByText(
+				"Set in project and global. Clear falls back to global.",
+			),
+		).toBeTruthy();
+		expect(
+			screen.getByRole("button", { name: "Clear" }).getAttribute("title"),
+		).toBe("Remove worktree.trunk from the project config");
+
+		fireEvent.click(screen.getByRole("button", { name: "Global" }));
+
+		expect(
+			screen.getByText(
+				"Set in project and global. Clear falls back to project.",
+			),
+		).toBeTruthy();
+	});
+
+	it("warns that Clear does nothing in a scope with no value", async () => {
+		stubApi([
+			{
+				key: "worktree.trunk",
+				type: "boolean",
+				value: true,
+				source: "global",
+				sources: ["global"],
+				node: node("worktree.trunk"),
+			},
+		]);
+		renderView();
+
+		await waitFor(() =>
+			expect(screen.getByText("worktree.trunk")).toBeTruthy(),
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Edit worktree.trunk" }),
+		);
+
+		expect(
+			screen.getByText("Set in global. Nothing to clear in project."),
+		).toBeTruthy();
+		expect(
+			screen.getByRole("button", { name: "Clear" }).getAttribute("title"),
+		).toBe(
+			"worktree.trunk is not set in the project config — nothing to clear",
+		);
+		expect(
+			screen.getByRole("button", { name: "Project" }).getAttribute("title"),
+		).toBe("Not set in this repo's assist.yml");
+	});
+
+	it("reports that nothing was removed when the key is unset in the scope", async () => {
+		stubUnsetApi(
+			[
+				{
+					key: "worktree.trunk",
+					type: "boolean",
+					value: true,
+					source: "global",
+					node: node("worktree.trunk"),
+				},
+			],
+			undefined,
+			{ ok: true, status: 200, body: { target: "project", removed: false } },
+		);
+		renderView();
+
+		await waitFor(() =>
+			expect(screen.getByText("worktree.trunk")).toBeTruthy(),
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Edit worktree.trunk" }),
+		);
+		fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+
+		await waitFor(() =>
+			expect(
+				screen.getByText(
+					"worktree.trunk is not set in the project config — nothing was removed. It comes from the global config.",
+				),
+			).toBeTruthy(),
+		);
+		expect(screen.getByRole("button", { name: "Clear" })).toBeTruthy();
+	});
+
+	it("names the repos override pinning a value that cannot be cleared", async () => {
+		stubUnsetApi(
+			[
+				{
+					key: "worktree.enabled",
+					type: "boolean",
+					value: true,
+					source: "repo",
+					repoKey: "assist",
+					node: node("worktree.enabled"),
+				},
+			],
+			undefined,
+			{ ok: true, status: 200, body: { target: "project", removed: false } },
+		);
+		renderView();
+
+		await waitFor(() =>
+			expect(screen.getByText("worktree.enabled")).toBeTruthy(),
+		);
+		expect(screen.getByText("repo")).toBeTruthy();
+		fireEvent.click(
+			screen.getByRole("button", { name: "Edit worktree.enabled" }),
+		);
+		fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+
+		await waitFor(() =>
+			expect(
+				screen.getByText(
+					"worktree.enabled is not set in the project config — nothing was removed. Its value is pinned by repos.assist in ~/.assist.yml.",
+				),
+			).toBeTruthy(),
+		);
+	});
+
 	it("keeps a leaf the schema does not describe read-only", async () => {
 		stubApi([
 			{ key: "sql.connections", type: "array", value: [], source: "default" },
