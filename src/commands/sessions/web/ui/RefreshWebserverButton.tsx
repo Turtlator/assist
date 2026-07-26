@@ -12,8 +12,10 @@ export function RefreshWebserverButton({
 }: {
 	reconnecting: boolean;
 }) {
-	const { pending, error, clearError, restart } =
-		useWebserverRestart(reconnecting);
+	const { pending, error, clearError, restart } = useWebserverRestart(
+		"webserver",
+		reconnecting,
+	);
 
 	return (
 		<>

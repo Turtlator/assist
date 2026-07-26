@@ -14,6 +14,7 @@ export function ConfirmDialog({
 	message = "Are you sure you want to delete this item?",
 	confirmLabel = "Delete",
 	confirmColor = "error",
+	busy = false,
 }: {
 	onConfirm: () => void;
 	onCancel: () => void;
@@ -21,6 +22,7 @@ export function ConfirmDialog({
 	message?: string;
 	confirmLabel?: string;
 	confirmColor?: "error" | "primary";
+	busy?: boolean;
 }) {
 	return (
 		<Dialog open onClose={onCancel} maxWidth="xs" fullWidth>
@@ -29,8 +31,15 @@ export function ConfirmDialog({
 				<DialogContentText>{message}</DialogContentText>
 			</DialogContent>
 			<DialogActions>
-				<Button onClick={onCancel}>Cancel</Button>
-				<Button variant="contained" color={confirmColor} onClick={onConfirm}>
+				<Button onClick={onCancel} disabled={busy}>
+					Cancel
+				</Button>
+				<Button
+					variant="contained"
+					color={confirmColor}
+					onClick={onConfirm}
+					disabled={busy}
+				>
 					{confirmLabel}
 				</Button>
 			</DialogActions>

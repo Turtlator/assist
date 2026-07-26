@@ -1,25 +1,31 @@
 import { ConfirmDialog } from "../../../backlog/web/ui/components/ConfirmDialog";
-import { postRestart, RESTART_ITEMS, type RestartTarget } from "./postRestart";
+import { ErrorSnackbar } from "./ErrorSnackbar";
+import { RESTART_ITEM } from "./postRestart";
+import { useWebserverRestart } from "./useWebserverRestart";
 
 export function RestartConfirmDialog({
-	target,
+	reconnecting,
 	onClose,
 }: {
-	target: RestartTarget;
+	reconnecting: boolean;
 	onClose: () => void;
 }) {
-	const item = RESTART_ITEMS.find((i) => i.target === target);
-	if (!item) return null;
+	const { pending, error, clearError, restart } = useWebserverRestart(
+		RESTART_ITEM.target,
+		reconnecting,
+	);
+
 	return (
-		<ConfirmDialog
-			title={item.label}
-			message={item.message}
-			confirmLabel="Restart"
-			onConfirm={() => {
-				void postRestart(target);
-				onClose();
-			}}
-			onCancel={onClose}
-		/>
+		<>
+			<ConfirmDialog
+				title={RESTART_ITEM.label}
+				message={RESTART_ITEM.message}
+				confirmLabel="Restart"
+				busy={pending}
+				onConfirm={() => void restart()}
+				onCancel={onClose}
+			/>
+			<ErrorSnackbar error={error} onClose={clearError} />
+		</>
 	);
 }

@@ -3,17 +3,18 @@ import { useState } from "react";
 import { hamburgerMenuItems } from "./hamburgerMenuItems";
 import { HamburgerMenuDialogs } from "./HamburgerMenuDialogs";
 import { MenuTriggerButton } from "./MenuTriggerButton";
-import type { RestartTarget } from "./postRestart";
 
 export function HamburgerMenu({
 	mode,
 	toggle,
+	reconnecting,
 }: {
 	mode: "light" | "dark";
 	toggle: () => void;
+	reconnecting: boolean;
 }) {
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-	const [pending, setPending] = useState<RestartTarget | null>(null);
+	const [restarting, setRestarting] = useState(false);
 	const [updatePending, setUpdatePending] = useState(false);
 	const open = Boolean(anchorEl);
 	const close = () => setAnchorEl(null);
@@ -34,9 +35,9 @@ export function HamburgerMenu({
 						toggle();
 						close();
 					},
-					onRestart: (target) => {
+					onRestart: () => {
 						close();
-						setPending(target);
+						setRestarting(true);
 					},
 					onUpdate: () => {
 						close();
@@ -45,8 +46,9 @@ export function HamburgerMenu({
 				})}
 			</Menu>
 			<HamburgerMenuDialogs
-				restartTarget={pending}
-				onCloseRestart={() => setPending(null)}
+				restarting={restarting}
+				reconnecting={reconnecting}
+				onCloseRestart={() => setRestarting(false)}
 				updating={updatePending}
 				onCloseUpdate={() => setUpdatePending(false)}
 			/>

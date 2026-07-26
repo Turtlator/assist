@@ -5,12 +5,12 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import MenuItem from "@mui/material/MenuItem";
 import { ColorModeIcon } from "./ColorModeIcon";
-import { RESTART_ITEMS, type RestartTarget } from "./postRestart";
+import { RESTART_ITEM } from "./postRestart";
 
 type HamburgerMenuHandlers = {
 	mode: "light" | "dark";
 	onToggleColorMode: () => void;
-	onRestart: (target: RestartTarget) => void;
+	onRestart: () => void;
 	onUpdate: () => void;
 };
 
@@ -28,14 +28,12 @@ export function hamburgerMenuItems({
 			<ListItemText>Toggle dark mode</ListItemText>
 		</MenuItem>,
 		<Divider key="restart-divider" />,
-		...RESTART_ITEMS.map((item) => (
-			<MenuItem key={item.target} onClick={() => onRestart(item.target)}>
-				<ListItemIcon>
-					<RestartAltIcon fontSize="small" />
-				</ListItemIcon>
-				<ListItemText>{item.label}</ListItemText>
-			</MenuItem>
-		)),
+		<MenuItem key="restart" onClick={onRestart}>
+			<ListItemIcon>
+				<RestartAltIcon fontSize="small" />
+			</ListItemIcon>
+			<ListItemText>{RESTART_ITEM.label}</ListItemText>
+		</MenuItem>,
 		<MenuItem key="update" onClick={onUpdate}>
 			<ListItemIcon>
 				<SystemUpdateAltIcon fontSize="small" />

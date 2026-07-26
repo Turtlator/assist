@@ -53,6 +53,10 @@ beforeEach(() => {
 	postRestart.mockReset();
 	postRestart.mockResolvedValue({ ok: true });
 	globalThis.sessionStorage.clear();
+	vi.stubGlobal(
+		"fetch",
+		vi.fn(async () => ({ ok: true })),
+	);
 	Object.defineProperty(globalThis, "location", {
 		configurable: true,
 		value: { reload },
@@ -60,6 +64,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+	vi.unstubAllGlobals();
 	vi.restoreAllMocks();
 });
 
@@ -102,7 +107,7 @@ describe("useUpdateReload", () => {
 		).toBeNull();
 	});
 
-	it("reloads and leaves a breadcrumb only once the re-execed web server is back", () => {
+	it("reloads and leaves a breadcrumb only once the re-execed web server is back", async () => {
 		const { rerender } = armAndCompleteUpdate();
 
 		rerender({ sessions: [updateSession("u2", "done")], reconnecting: true });
@@ -112,7 +117,7 @@ describe("useUpdateReload", () => {
 		).toBeNull();
 
 		rerender({ sessions: [updateSession("u2", "done")], reconnecting: false });
-		expect(reload).toHaveBeenCalledTimes(1);
+		await waitFor(() => expect(reload).toHaveBeenCalledTimes(1));
 		expect(
 			globalThis.sessionStorage.getItem("assist:reloaded-after-update"),
 		).toBe("1");

@@ -18,7 +18,7 @@ export function useUpdateReload(
 		globalThis.sessionStorage?.setItem(RELOAD_FLAG, "1");
 	}, []);
 	const { error: restartError, restart: restartWebserver } =
-		useWebserverRestart(reconnecting, markReloadedOnNewBundle);
+		useWebserverRestart("webserver", reconnecting, markReloadedOnNewBundle);
 
 	useReloadNotice(setSuccess);
 

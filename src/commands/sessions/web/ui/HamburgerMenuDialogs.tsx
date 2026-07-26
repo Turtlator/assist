@@ -1,17 +1,18 @@
-import type { RestartTarget } from "./postRestart";
 import { RestartConfirmDialog } from "./RestartConfirmDialog";
 import { UpdateAssistConfirmDialog } from "./UpdateAssistConfirmDialog";
 import { useSessionLaunchContext } from "./useSessionLaunchContext";
 
 type HamburgerMenuDialogsProps = {
-	restartTarget: RestartTarget | null;
+	restarting: boolean;
+	reconnecting: boolean;
 	onCloseRestart: () => void;
 	updating: boolean;
 	onCloseUpdate: () => void;
 };
 
 export function HamburgerMenuDialogs({
-	restartTarget,
+	restarting,
+	reconnecting,
 	onCloseRestart,
 	updating,
 	onCloseUpdate,
@@ -20,8 +21,11 @@ export function HamburgerMenuDialogs({
 
 	return (
 		<>
-			{restartTarget && (
-				<RestartConfirmDialog target={restartTarget} onClose={onCloseRestart} />
+			{restarting && (
+				<RestartConfirmDialog
+					reconnecting={reconnecting}
+					onClose={onCloseRestart}
+				/>
 			)}
 			{updating && (
 				<UpdateAssistConfirmDialog
