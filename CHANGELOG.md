@@ -1,3 +1,10 @@
+## [0.465.1](https://github.com/staff0rd/assist/compare/v0.465.0...v0.465.1) (2026-07-26)
+
+
+### Bug Fixes
+
+* drop path labels from config editors ([c958ce0](https://github.com/staff0rd/assist/commit/c958ce03e02d2d30d4cc5c995a545d5206a138fc))
+
 # [0.465.0](https://github.com/staff0rd/assist/compare/v0.464.0...v0.465.0) (2026-07-26)
 
 
