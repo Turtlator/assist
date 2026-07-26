@@ -188,7 +188,7 @@ export const assistConfigSchema = z.strictObject({
 			windowsDaemonPort: z.number().optional(),
 			windowsVersionCheck: z.enum(["block", "warn", "off"]).default("block"),
 			includeCommittedChanges: z.boolean().default(false),
-			topBar: z.boolean().default(false),
+			topBar: z.boolean().default(true),
 		})
 		.optional(),
 	database: z

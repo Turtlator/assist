@@ -6,6 +6,6 @@ export function sessionLayout(
 	_req: IncomingMessage,
 	res: ServerResponse,
 ): void {
-	const topBar = loadConfig().sessions?.topBar === true;
+	const topBar = loadConfig().sessions?.topBar ?? true;
 	respondJson(res, 200, { topBar });
 }

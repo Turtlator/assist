@@ -29,8 +29,8 @@ export const sessionsConfigHelp: ConfigHelpEntry[] = [
 	},
 	{
 		key: "sessions.topBar",
-		setter: "assist config set sessions.topBar true -g",
-		note: "move the active session's phase, elapsed, restored indicator and actions off the card into a sticky top bar above the terminal (default off)",
+		setter: "assist config set sessions.topBar false -g",
+		note: "set false to keep the active session's phase, elapsed, restored indicator, toggles and actions on its card instead of a sticky top bar above the terminal (default on)",
 	},
 	{
 		key: "worktree.enabled",

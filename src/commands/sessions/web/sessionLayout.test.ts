@@ -41,14 +41,14 @@ describe("sessionLayout", () => {
 		expect(body).toEqual({ topBar: false });
 	});
 
-	it("defaults the top bar off when the key is absent", () => {
+	it("defaults the top bar on when the key is absent", () => {
 		const [, , body] = run();
-		expect(body).toEqual({ topBar: false });
+		expect(body).toEqual({ topBar: true });
 	});
 
-	it("defaults the top bar off when there is no sessions config at all", () => {
+	it("defaults the top bar on when there is no sessions config at all", () => {
 		mockLoadConfig.mockReturnValue({});
 		const [, , body] = run();
-		expect(body).toEqual({ topBar: false });
+		expect(body).toEqual({ topBar: true });
 	});
 });
