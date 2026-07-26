@@ -1,3 +1,16 @@
+# [0.467.0](https://github.com/staff0rd/assist/compare/v0.466.0...v0.467.0) (2026-07-26)
+
+
+### Bug Fixes
+
+* outline each config array entry ([dd5f8f0](https://github.com/staff0rd/assist/commit/dd5f8f009c2cc3d375f465dd34f372f4bb0edb98))
+* status and restored join the id line ([68989b1](https://github.com/staff0rd/assist/commit/68989b14c8daedfe25b056a27f6d25c838eb8d58))
+
+
+### Features
+
+* unset a config key ([08ed7f7](https://github.com/staff0rd/assist/commit/08ed7f7e91e6a5137582c37d7aab019276b80e7b))
+
 # [0.466.0](https://github.com/staff0rd/assist/compare/v0.465.1...v0.466.0) (2026-07-26)
 
 
