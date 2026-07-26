@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
-import { afterEach, describe, expect, it } from "vitest";
+import { MemoryRouter } from "react-router";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CardHeader } from "./CardHeader";
 import type { SessionInfo } from "./types";
 import { StarredSessionsProvider } from "./useStarredSessions";
@@ -136,5 +137,60 @@ describe("CardHeader phase caption", () => {
 
 		expect(screen.queryByText("Phase 1: flag")).toBeNull();
 		expect(screen.getByText("my session")).toBeTruthy();
+	});
+});
+
+describe("CardHeader inline status", () => {
+	const busy: SessionInfo = { ...session, cwd: "/home/me/repo", usedPct: 42 };
+
+	beforeEach(() => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async () => ({
+				json: async () => ({ new: ["a.ts"], modified: [], deleted: [] }),
+			})),
+		);
+	});
+
+	afterEach(() => vi.unstubAllGlobals());
+
+	function renderHeader(topBar: boolean, loading = false) {
+		render(
+			<MemoryRouter>
+				<TopBarLayoutContext.Provider value={topBar}>
+					<CardHeader session={busy} loading={loading} onDismiss={() => {}} />
+				</TopBarLayoutContext.Provider>
+			</MemoryRouter>,
+			{ wrapper: Stars },
+		);
+	}
+
+	it("leaves status, context and counts to the body in the default layout", () => {
+		renderHeader(false);
+
+		expect(screen.queryByText("● running")).toBeNull();
+		expect(screen.queryByText("42%")).toBeNull();
+	});
+
+	it("puts status, context and the diff counts on the chips line", async () => {
+		renderHeader(true);
+
+		expect(await screen.findByText("+1")).toBeTruthy();
+
+		const row = screen
+			.getByText("repo")
+			.closest(".MuiChip-root")?.parentElement;
+		expect(row?.textContent).toContain("● running");
+		expect(row?.textContent).toContain("42%");
+		expect(row?.textContent).toContain("+1");
+		expect(row?.textContent).not.toContain("my session");
+	});
+
+	it("holds the status back while the card is still starting", () => {
+		renderHeader(true, true);
+
+		expect(screen.getByRole("progressbar")).toBeTruthy();
+		expect(screen.queryByText("● running")).toBeNull();
+		expect(fetch).not.toHaveBeenCalled();
 	});
 });

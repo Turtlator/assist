@@ -139,20 +139,22 @@ describe("CardBody top bar layout", () => {
 		);
 	}
 
-	it("keeps elapsed and the restored indicator in the default layout", async () => {
+	it("keeps the status row in the default layout", async () => {
 		renderWithTopBar(false);
 
 		expect(screen.getByText("1m 5s")).toBeTruthy();
 		expect(screen.getByText("restored")).toBeTruthy();
+		expect(screen.getByText("● running")).toBeTruthy();
 		expect(await screen.findByText("+1")).toBeTruthy();
 	});
 
-	it("drops elapsed and the restored indicator but keeps status and counts", async () => {
+	it("drops the whole status row, which the chips line now carries", () => {
 		renderWithTopBar(true);
 
 		expect(screen.queryByText("1m 5s")).toBeNull();
 		expect(screen.queryByText("restored")).toBeNull();
-		expect(screen.getByText("● running")).toBeTruthy();
-		expect(await screen.findByText("+1")).toBeTruthy();
+		expect(screen.queryByText("● running")).toBeNull();
+		expect(screen.queryByText("+1")).toBeNull();
+		expect(fetch).not.toHaveBeenCalled();
 	});
 });

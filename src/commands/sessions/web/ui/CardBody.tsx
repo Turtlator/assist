@@ -7,6 +7,7 @@ import { sessionType } from "./sessionType";
 import { StatusRow } from "./StatusRow";
 import type { SessionInfo } from "./types";
 import { useElapsed } from "./useElapsed";
+import { useTopBarLayoutContext } from "./useTopBarLayoutContext";
 import { ViewReviewButton } from "./ViewReviewButton";
 
 export function CardBody({
@@ -21,6 +22,7 @@ export function CardBody({
 	onSetAutoAdvance: (enabled: boolean) => void;
 }) {
 	const elapsed = useElapsed(session.runningMs, session.runningSince);
+	const topBar = useTopBarLayoutContext();
 
 	if (loading)
 		return (
@@ -34,15 +36,17 @@ export function CardBody({
 
 	return (
 		<>
-			<StatusRow
-				status={displayStatus(session)}
-				elapsed={elapsed}
-				cwd={session.cwd}
-				sessionId={session.claudeSessionId}
-				restored={session.restored}
-				usedPct={session.usedPct}
-				undurable={session.undurable}
-			/>
+			{!topBar && (
+				<StatusRow
+					status={displayStatus(session)}
+					elapsed={elapsed}
+					cwd={session.cwd}
+					sessionId={session.claudeSessionId}
+					restored={session.restored}
+					usedPct={session.usedPct}
+					undurable={session.undurable}
+				/>
+			)}
 			<CardToggles
 				session={session}
 				onSetAutoRun={onSetAutoRun}

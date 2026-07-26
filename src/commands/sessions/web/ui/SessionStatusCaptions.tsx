@@ -2,7 +2,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { contextColor, statusColors } from "./statusColors";
 import type { SessionStatus } from "./types";
-import { useTopBarLayoutContext } from "./useTopBarLayoutContext";
 
 export function SessionStatusCaptions({
 	status,
@@ -15,7 +14,6 @@ export function SessionStatusCaptions({
 	usedPct?: number;
 	undurable?: { reason: string };
 }) {
-	const topBar = useTopBarLayoutContext();
 	return (
 		<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
 			<Typography variant="caption" sx={{ color: statusColors[status] }}>
@@ -26,7 +24,7 @@ export function SessionStatusCaptions({
 					{undurable.reason}
 				</Typography>
 			)}
-			{!topBar && restored !== undefined && (
+			{restored !== undefined && (
 				<Typography
 					variant="caption"
 					sx={{ color: restored ? "success.main" : "warning.main" }}
