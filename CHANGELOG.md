@@ -1,3 +1,10 @@
+## [0.458.1](https://github.com/staff0rd/assist/compare/v0.458.0...v0.458.1) (2026-07-26)
+
+
+### Bug Fixes
+
+* show waiting while preview pending ([2760292](https://github.com/staff0rd/assist/commit/276029230b3b37376acf240f9d5a7c796a310eb1))
+
 # [0.458.0](https://github.com/staff0rd/assist/compare/v0.457.1...v0.458.0) (2026-07-26)
 
 
