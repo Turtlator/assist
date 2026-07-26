@@ -1,3 +1,10 @@
+## [0.475.2](https://github.com/staff0rd/assist/compare/v0.475.1...v0.475.2) (2026-07-26)
+
+
+### Bug Fixes
+
+* bind transcript watcher in fresh worktrees ([e32f506](https://github.com/staff0rd/assist/commit/e32f5062c33433742c42d79c2d1813ede5362b09))
+
 ## [0.475.1](https://github.com/staff0rd/assist/compare/v0.475.0...v0.475.1) (2026-07-26)
 
 
