@@ -1,3 +1,10 @@
+# [0.468.0](https://github.com/staff0rd/assist/compare/v0.467.0...v0.468.0) (2026-07-26)
+
+
+### Features
+
+* bigger card status dot, pulsing when waiting ([2a61f29](https://github.com/staff0rd/assist/commit/2a61f29c2a87feeb10edcc71cb5a53f74f12e6bb))
+
 # [0.467.0](https://github.com/staff0rd/assist/compare/v0.466.0...v0.467.0) (2026-07-26)
 
 
