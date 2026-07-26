@@ -1,9 +1,9 @@
 import CheckIcon from "@mui/icons-material/Check";
-import IconButton from "@mui/material/IconButton";
 import { useState } from "react";
 import { formatItemId } from "../../../backlog/formatItemId";
 import { updateItemStatus } from "../../../backlog/web/ui/api";
 import { ConfirmDialog } from "../../../backlog/web/ui/components/ConfirmDialog";
+import { ActionButton } from "./ActionButton";
 import type { BacklogTarget } from "./backlogTarget";
 import { ErrorSnackbar } from "./ErrorSnackbar";
 import { StopCardActivation } from "./StopCardActivation";
@@ -33,17 +33,15 @@ export function CompleteButton({
 
 	return (
 		<>
-			<IconButton
-				size="small"
+			<ActionButton
+				label="Done"
+				title="Mark done"
+				icon={<CheckIcon sx={{ fontSize: 16 }} />}
 				onClick={(e) => {
 					e.stopPropagation();
 					setConfirming(true);
 				}}
-				title="Mark done"
-				sx={{ color: "text.disabled", "&:hover": { color: "text.primary" } }}
-			>
-				<CheckIcon sx={{ fontSize: 16 }} />
-			</IconButton>
+			/>
 			{confirming && (
 				<StopCardActivation>
 					<ConfirmDialog

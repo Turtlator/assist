@@ -1,5 +1,6 @@
 import { isSessionStarting } from "./isSessionStarting";
 import { SessionCard } from "./SessionCard";
+import { sessionActionHandlers } from "./sessionActionHandlers";
 import type { SessionListHandlers } from "./types";
 import type { SessionInfo } from "./useSessionSocket";
 
@@ -19,8 +20,11 @@ export function SessionListCard({
 	initialized: Set<string>;
 	onSelect: (id: string) => void;
 } & SessionListHandlers) {
-	const retryable = session.commandType === "run" || needsRelaunch(session);
-	const restartable = session.commandType !== "run";
+	const actions = sessionActionHandlers(session, {
+		onRetry,
+		onRestart,
+		onDismiss,
+	});
 
 	return (
 		<SessionCard
@@ -28,19 +32,11 @@ export function SessionListCard({
 			active={session.id === activeId}
 			loading={session.closing || isSessionStarting(session, initialized)}
 			onClick={() => onSelect(session.id)}
-			onRetry={retryable ? () => onRetry(session.id) : undefined}
-			onRestart={restartable ? () => onRestart(session.id) : undefined}
-			onDismiss={() => onDismiss(session.id)}
+			onRetry={actions.onRetry}
+			onRestart={actions.onRestart}
+			onDismiss={actions.onDismiss}
 			onSetAutoRun={(enabled) => onSetAutoRun(session.id, enabled)}
 			onSetAutoAdvance={(enabled) => onSetAutoAdvance(session.id, enabled)}
 		/>
-	);
-}
-
-function needsRelaunch(session: SessionInfo): boolean {
-	return (
-		session.commandType === "assist" &&
-		session.restored === false &&
-		!!session.assistArgs
 	);
 }

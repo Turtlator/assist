@@ -1,4 +1,5 @@
 import Container from "@mui/material/Container";
+import { useMemo } from "react";
 import { Navigate, Route, Routes } from "react-router";
 import { BacklogView } from "../../../../commands/backlog/web/ui/BacklogView";
 import { AppLayout } from "./AppLayout";
@@ -20,8 +21,17 @@ function BacklogContent({ socket }: { socket: SessionSocket }) {
 }
 
 function SessionContent({ socket }: { socket: SessionSocket }) {
+	const lifecycle = useMemo(
+		() => ({
+			onRetry: socket.retrySession,
+			onRestart: socket.restartSession,
+			onDismiss: socket.dismissSession,
+		}),
+		[socket.retrySession, socket.restartSession, socket.dismissSession],
+	);
 	return (
 		<SessionArea
+			lifecycle={lifecycle}
 			sessions={socket.sessions}
 			activeId={socket.activeId}
 			initialized={socket.initialized}

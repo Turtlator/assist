@@ -1,0 +1,197 @@
+// @vitest-environment jsdom
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { SessionTopBar } from "./SessionTopBar";
+import type { SessionInfo } from "./types";
+import { StarredSessionsProvider } from "./useStarredSessions";
+
+let panelWidth = 1200;
+
+class TestResizeObserver {
+	constructor(private readonly callback: ResizeObserverCallback) {}
+	observe() {
+		this.callback(
+			[{ contentRect: { width: panelWidth } } as ResizeObserverEntry],
+			this as unknown as ResizeObserver,
+		);
+	}
+	unobserve() {}
+	disconnect() {}
+}
+
+beforeEach(() => {
+	panelWidth = 1200;
+	globalThis.ResizeObserver =
+		TestResizeObserver as unknown as typeof ResizeObserver;
+});
+
+afterEach(() => {
+	cleanup();
+	Reflect.deleteProperty(globalThis, "ResizeObserver");
+});
+
+function session(overrides: Partial<SessionInfo> = {}): SessionInfo {
+	return {
+		id: "1",
+		name: "my session",
+		commandType: "claude",
+		status: "running",
+		startedAt: 0,
+		runningMs: 90_000,
+		runningSince: null,
+		...overrides,
+	};
+}
+
+function renderTopBar(
+	info: SessionInfo,
+	handlers: {
+		onRetry?: () => void;
+		onRestart?: () => void;
+		onDismiss?: () => void;
+	} = {},
+) {
+	render(
+		<StarredSessionsProvider sessions={[]} setSessionStarred={() => {}}>
+			<SessionTopBar
+				session={info}
+				onRetry={handlers.onRetry}
+				onRestart={handlers.onRestart}
+				onDismiss={handlers.onDismiss ?? (() => {})}
+			/>
+		</StarredSessionsProvider>,
+	);
+}
+
+describe("SessionTopBar", () => {
+	it("shows the backlog phase name, elapsed and the restored indicator", () => {
+		renderTopBar(
+			session({
+				subtitle: "a subtitle",
+				restored: true,
+				activity: {
+					kind: "backlog",
+					startedAt: 0,
+					phaseName: "Phase 2: wire it up",
+				},
+			}),
+		);
+
+		expect(screen.getByText("Phase 2: wire it up")).toBeTruthy();
+		expect(screen.getByText("1m 30s")).toBeTruthy();
+		expect(screen.getByText("restored")).toBeTruthy();
+	});
+
+	it("falls back to the subtitle once the backlog session is done", () => {
+		renderTopBar(
+			session({
+				status: "done",
+				subtitle: "a subtitle",
+				activity: {
+					kind: "backlog",
+					startedAt: 0,
+					phaseName: "Phase 2: wire it up",
+				},
+			}),
+		);
+
+		expect(screen.getByText("a subtitle")).toBeTruthy();
+		expect(screen.queryByText("Phase 2: wire it up")).toBeNull();
+	});
+
+	it("says not restored when the session could not be resumed", () => {
+		renderTopBar(session({ restored: false }));
+
+		expect(screen.getByText("not restored")).toBeTruthy();
+	});
+
+	it("omits the restored indicator when the session has no restore state", () => {
+		renderTopBar(session());
+
+		expect(screen.queryByText("restored")).toBeNull();
+		expect(screen.queryByText("not restored")).toBeNull();
+	});
+});
+
+describe("SessionTopBar actions", () => {
+	it("carries the session's actions", () => {
+		renderTopBar(session({ cwd: "/git/repo" }), {
+			onRestart: () => {},
+			onRetry: () => {},
+		});
+
+		expect(screen.queryByLabelText("Star")).not.toBeNull();
+		expect(
+			screen.queryAllByLabelText("Open in VS Code").length,
+		).toBeGreaterThan(0);
+		expect(screen.queryByTitle("Restart session 1")).not.toBeNull();
+		expect(screen.queryByTitle("Retry session 1")).not.toBeNull();
+	});
+
+	it("invokes the handler behind an action", () => {
+		const onRetry = vi.fn();
+		renderTopBar(session(), { onRetry });
+
+		fireEvent.click(screen.getByTitle("Retry session 1"));
+
+		expect(onRetry).toHaveBeenCalled();
+	});
+
+	it("withholds restart from a stopped session so the card can offer it", () => {
+		renderTopBar(session({ status: "stopped" }), { onRestart: () => {} });
+
+		expect(screen.queryByTitle("Restart session 1")).toBeNull();
+	});
+
+	it("offers no close or dismiss of its own", () => {
+		renderTopBar(session({ status: "waiting" }));
+
+		expect(screen.queryByTitle("Dismiss session 1")).toBeNull();
+	});
+});
+
+describe("SessionTopBar action labels", () => {
+	it("labels its actions when the panel is wide", () => {
+		renderTopBar(session({ cwd: "/git/repo" }), {
+			onRestart: () => {},
+			onRetry: () => {},
+		});
+
+		expect(screen.getByText("Restart")).toBeTruthy();
+		expect(screen.getByText("Retry")).toBeTruthy();
+		expect(screen.getByText("Star")).toBeTruthy();
+		expect(screen.getByText("VS Code")).toBeTruthy();
+	});
+
+	it("collapses to icons when the panel is narrow", () => {
+		panelWidth = 400;
+		renderTopBar(session({ cwd: "/git/repo" }), {
+			onRestart: () => {},
+			onRetry: () => {},
+		});
+
+		expect(screen.queryByText("Restart")).toBeNull();
+		expect(screen.queryByText("Retry")).toBeNull();
+		expect(screen.queryByText("Star")).toBeNull();
+		expect(screen.queryByText("VS Code")).toBeNull();
+	});
+
+	it("keeps every action reachable once collapsed", () => {
+		panelWidth = 400;
+		const onRetry = vi.fn();
+		renderTopBar(session({ cwd: "/git/repo" }), {
+			onRestart: () => {},
+			onRetry,
+		});
+
+		expect(screen.getByTitle("Restart session 1")).toBeTruthy();
+		expect(screen.getByLabelText("Star")).toBeTruthy();
+		expect(screen.getAllByLabelText("Open in VS Code").length).toBeGreaterThan(
+			0,
+		);
+
+		fireEvent.click(screen.getByTitle("Retry session 1"));
+
+		expect(onRetry).toHaveBeenCalled();
+	});
+});

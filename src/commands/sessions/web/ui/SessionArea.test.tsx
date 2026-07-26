@@ -46,6 +46,11 @@ function renderArea(
 			onOutput={() => () => {}}
 			sendInput={() => {}}
 			sendResize={() => {}}
+			lifecycle={{
+				onRetry: () => {},
+				onRestart: () => {},
+				onDismiss: () => {},
+			}}
 			viewingTranscriptSessionId={null}
 			transcript={null}
 			sendPrDecision={() => {}}
@@ -96,6 +101,11 @@ describe("SessionArea transcript view", () => {
 				sendResize={() => {}}
 				viewingTranscriptSessionId="abc"
 				sendPrDecision={() => {}}
+				lifecycle={{
+					onRetry: () => {},
+					onRestart: () => {},
+					onDismiss: () => {},
+				}}
 				transcript={{
 					sessionId: "abc",
 					messages: [
@@ -123,6 +133,11 @@ describe("SessionArea transcript view", () => {
 				sendResize={() => {}}
 				viewingTranscriptSessionId="abc"
 				sendPrDecision={() => {}}
+				lifecycle={{
+					onRetry: () => {},
+					onRestart: () => {},
+					onDismiss: () => {},
+				}}
 				transcript={null}
 			/>,
 		);

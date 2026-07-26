@@ -22,6 +22,7 @@ import { openInCode } from "./openInCode";
 import { prList } from "./prList";
 import { prStatus } from "./prStatus";
 import { restartWeb } from "./restartWeb";
+import { sessionLayout } from "./sessionLayout";
 import { setConfig } from "./setConfig";
 import { uploadPrImage } from "./uploadPrImage";
 import { createCssHandler } from "./createCssHandler";
@@ -52,6 +53,7 @@ const routes: Record<string, Handler> = {
 	"GET /api/files": listFiles,
 	"GET /api/jira-site": jiraSite,
 	"GET /api/harness": harnessCapabilities,
+	"GET /api/session-layout": sessionLayout,
 	"GET /api/pr-status": prStatus,
 	"GET /api/server-runs": handleServerRuns,
 	"GET /api/pr-list": prList,

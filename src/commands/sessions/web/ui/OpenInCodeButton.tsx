@@ -1,14 +1,8 @@
-import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import { useState } from "react";
+import { ActionButton } from "./ActionButton";
 import { ErrorSnackbar } from "./ErrorSnackbar";
 import { VsCodeIcon } from "./VsCodeIcon";
-
-const toolbarSx = { color: "inherit" } as const;
-const cardSx = {
-	color: "text.disabled",
-	"&:hover": { color: "text.primary" },
-} as const;
 
 export function OpenInCodeButton({
 	cwd,
@@ -41,18 +35,18 @@ export function OpenInCodeButton({
 		<>
 			<Tooltip title="Open in VS Code">
 				<span>
-					<IconButton
-						aria-label="Open in VS Code"
-						size={isCard ? "small" : undefined}
-						sx={isCard ? cardSx : toolbarSx}
+					<ActionButton
+						label="VS Code"
+						ariaLabel="Open in VS Code"
+						tone={isCard ? "muted" : "inherit"}
+						size={isCard ? "small" : "medium"}
 						disabled={!cwd}
+						icon={<VsCodeIcon sx={isCard ? { fontSize: 14 } : undefined} />}
 						onClick={(e) => {
 							e.stopPropagation();
 							void openInCode();
 						}}
-					>
-						<VsCodeIcon sx={isCard ? { fontSize: 14 } : undefined} />
-					</IconButton>
+					/>
 				</span>
 			</Tooltip>
 			<ErrorSnackbar error={error} onClose={() => setError(null)} />

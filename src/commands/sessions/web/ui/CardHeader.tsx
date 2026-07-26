@@ -1,8 +1,10 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { CardHeaderActions } from "./CardHeaderActions";
+import { sessionPhaseCaption } from "./sessionPhaseCaption";
 import { sessionTitle } from "./sessionTitle";
 import type { CardHeaderProps } from "./types";
+import { useTopBarLayoutContext } from "./useTopBarLayoutContext";
 
 export function CardHeader({
 	session,
@@ -11,12 +13,8 @@ export function CardHeader({
 	onRestart,
 	onDismiss,
 }: CardHeaderProps) {
-	const { activity, status } = session;
-	const phaseName =
-		activity?.kind === "backlog" && status !== "done"
-			? activity.phaseName
-			: undefined;
-	const caption = phaseName ?? session.subtitle;
+	const topBar = useTopBarLayoutContext();
+	const caption = topBar ? undefined : sessionPhaseCaption(session);
 	return (
 		<Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
 			<CardHeaderActions

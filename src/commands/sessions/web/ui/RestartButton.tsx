@@ -1,9 +1,9 @@
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import IconButton from "@mui/material/IconButton";
 import { useState } from "react";
 import type { HarnessKind } from "../../../../shared/harnesses";
 import { harnessLabel } from "../../../../shared/harnessLabel";
 import { ConfirmDialog } from "../../../backlog/web/ui/components/ConfirmDialog";
+import { ActionButton } from "./ActionButton";
 
 export function RestartButton({
 	id,
@@ -17,17 +17,15 @@ export function RestartButton({
 	const [confirming, setConfirming] = useState(false);
 	return (
 		<>
-			<IconButton
-				size="small"
+			<ActionButton
+				label="Restart"
+				title={`Restart session ${id}`}
+				icon={<RestartAltIcon sx={{ fontSize: 14 }} />}
 				onClick={(e) => {
 					e.stopPropagation();
 					setConfirming(true);
 				}}
-				title={`Restart session ${id}`}
-				sx={{ color: "text.disabled", "&:hover": { color: "text.primary" } }}
-			>
-				<RestartAltIcon sx={{ fontSize: 14 }} />
-			</IconButton>
+			/>
 			{confirming && (
 				<ConfirmDialog
 					title={`Restart session ${id}`}

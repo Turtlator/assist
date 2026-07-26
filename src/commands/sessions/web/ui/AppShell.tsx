@@ -12,6 +12,8 @@ import { useSessionLaunch } from "./useSessionLaunch";
 import { SessionLaunchContext } from "./useSessionLaunchContext";
 import { useSessionSocket } from "./useSessionSocket";
 import { useSyncRepoToActiveCard } from "./useSyncRepoToActiveCard";
+import { useTopBarLayout } from "./useTopBarLayout";
+import { TopBarLayoutContext } from "./useTopBarLayoutContext";
 
 const appBarSx = {
 	zIndex: (t: { zIndex: { drawer: number } }) => t.zIndex.drawer + 1,
@@ -34,25 +36,28 @@ export function AppShell({
 		selection.setSelectedCwd,
 	);
 	const { launch, viewLaunchedSession } = useSessionLaunch(socket);
+	const topBar = useTopBarLayout();
 
 	return (
-		<RepoSelectionContext.Provider value={selection}>
-			<SessionLaunchContext.Provider value={launch}>
-				<DaemonVersionContext.Provider value={socket.daemonVersion}>
-					<HamburgerMenu mode={mode} toggle={toggle} />
-				</DaemonVersionContext.Provider>
-				<AppBar position="fixed" elevation={1} sx={appBarSx}>
-					<AppToolbar socket={socket} selection={selection} />
-				</AppBar>
-				<Toolbar variant="dense" sx={toolbarSx} />
-				<ServerRunLayer socket={socket}>
-					<AppRoutes socket={socket} />
-				</ServerRunLayer>
-				<AppOverlays
-					socket={socket}
-					onViewLaunchedSession={viewLaunchedSession}
-				/>
-			</SessionLaunchContext.Provider>
-		</RepoSelectionContext.Provider>
+		<TopBarLayoutContext.Provider value={topBar}>
+			<RepoSelectionContext.Provider value={selection}>
+				<SessionLaunchContext.Provider value={launch}>
+					<DaemonVersionContext.Provider value={socket.daemonVersion}>
+						<HamburgerMenu mode={mode} toggle={toggle} />
+					</DaemonVersionContext.Provider>
+					<AppBar position="fixed" elevation={1} sx={appBarSx}>
+						<AppToolbar socket={socket} selection={selection} />
+					</AppBar>
+					<Toolbar variant="dense" sx={toolbarSx} />
+					<ServerRunLayer socket={socket}>
+						<AppRoutes socket={socket} />
+					</ServerRunLayer>
+					<AppOverlays
+						socket={socket}
+						onViewLaunchedSession={viewLaunchedSession}
+					/>
+				</SessionLaunchContext.Provider>
+			</RepoSelectionContext.Provider>
+		</TopBarLayoutContext.Provider>
 	);
 }

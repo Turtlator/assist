@@ -1,5 +1,5 @@
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import IconButton from "@mui/material/IconButton";
+import { ActionButton } from "./ActionButton";
 import { useServerActionsContext } from "./useServerActionsContext";
 
 export function StartServerButton({
@@ -11,16 +11,15 @@ export function StartServerButton({
 }) {
 	const { onStart } = useServerActionsContext();
 	return (
-		<IconButton
-			size="small"
+		<ActionButton
+			label={runName}
+			title={`Start ${runName}`}
+			tone="start"
+			icon={<PlayArrowIcon sx={{ fontSize: 16 }} />}
 			onClick={(e) => {
 				e.stopPropagation();
 				onStart(runName, cwd);
 			}}
-			title={`Start ${runName}`}
-			sx={{ color: "text.disabled", "&:hover": { color: "success.main" } }}
-		>
-			<PlayArrowIcon sx={{ fontSize: 16 }} />
-		</IconButton>
+		/>
 	);
 }

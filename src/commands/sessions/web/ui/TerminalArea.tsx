@@ -1,9 +1,10 @@
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import { isSessionStarting } from "./isSessionStarting";
-import { SessionLoadingOverlay } from "./SessionLoadingOverlay";
-import { TerminalPane } from "./TerminalPane";
-import type { SessionInfo } from "./types";
+import { sessionActionHandlers } from "./sessionActionHandlers";
+import { SessionTopBar } from "./SessionTopBar";
+import { TerminalPanes } from "./TerminalPanes";
+import type { SessionInfo, SessionLifecycleHandlers } from "./types";
+import { useTopBarLayoutContext } from "./useTopBarLayoutContext";
 
 type OutputSubscriber = (
 	sessionId: string,
@@ -17,6 +18,7 @@ export type TerminalAreaProps = {
 	onOutput: OutputSubscriber;
 	sendInput: (sessionId: string, data: string) => void;
 	sendResize: (sessionId: string, cols: number, rows: number) => void;
+	lifecycle: SessionLifecycleHandlers;
 };
 
 export function TerminalArea({
@@ -26,40 +28,38 @@ export function TerminalArea({
 	onOutput,
 	sendInput,
 	sendResize,
+	lifecycle,
 }: TerminalAreaProps) {
 	// why: a new session's terminal is empty until its process emits output, so the previously active pane would otherwise show through
 	const activeSession = sessions.find((s) => s.id === activeId);
 	const activeLoading =
 		activeSession !== undefined &&
 		isSessionStarting(activeSession, initialized);
+	const topBar = useTopBarLayoutContext();
+
+	const panes = (
+		<TerminalPanes
+			sessions={sessions}
+			activeId={activeId}
+			activeLoading={activeLoading}
+			onOutput={onOutput}
+			sendInput={sendInput}
+			sendResize={sendResize}
+		/>
+	);
+
+	if (!topBar || activeSession === undefined) return panes;
 
 	return (
-		<Box sx={{ flex: 1, position: "relative", bgcolor: "background.default" }}>
-			{sessions.map((s) => (
-				<TerminalPane
-					key={s.id}
-					sessionId={s.id}
-					visible={s.id === activeId}
-					onOutput={onOutput}
-					sendInput={sendInput}
-					sendResize={sendResize}
-				/>
-			))}
-			{activeLoading && <SessionLoadingOverlay />}
-			{sessions.length === 0 && (
-				<Box
-					sx={{
-						display: "flex",
-						alignItems: "center",
-						justifyContent: "center",
-						height: "100%",
-					}}
-				>
-					<Typography variant="body2" color="text.disabled">
-						Create a session to get started
-					</Typography>
-				</Box>
-			)}
+		<Box
+			sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}
+		>
+			<SessionTopBar
+				key={activeSession.id}
+				session={activeSession}
+				{...sessionActionHandlers(activeSession, lifecycle)}
+			/>
+			{panes}
 		</Box>
 	);
 }

@@ -1,15 +1,8 @@
-import { AddAgentButton } from "./AddAgentButton";
-import { backlogTarget } from "./backlogTarget";
 import { CardCloseActions } from "./CardCloseActions";
-import { CardPrActions } from "./CardPrActions";
-import { CompleteButton } from "./CompleteButton";
-import { OpenInCodeButton } from "./OpenInCodeButton";
-import { RestartButton } from "./RestartButton";
-import { RetryButton } from "./RetryButton";
-import { ServerRunControls } from "./ServerRunControls";
-import { SessionStarButton } from "./SessionStarButton";
+import { SessionActionButtons } from "./SessionActionButtons";
 import { StopCardActivation } from "./StopCardActivation";
 import type { CardHeaderProps } from "./types";
+import { useTopBarLayoutContext } from "./useTopBarLayoutContext";
 
 export function CardActionButtons({
 	session,
@@ -17,27 +10,14 @@ export function CardActionButtons({
 	onRestart,
 	onDismiss,
 }: CardHeaderProps) {
-	const stopped = session.status === "stopped" || session.closing === true;
-	const target = backlogTarget(session);
+	const topBar = useTopBarLayoutContext();
 	return (
 		<StopCardActivation>
-			<ServerRunControls session={session} />
-			<AddAgentButton session={session} />
-			{session.cwd && <OpenInCodeButton cwd={session.cwd} variant="card" />}
-			<CardPrActions session={session} />
-			{onRestart && !stopped && (
-				<RestartButton
-					id={session.id}
+			{!topBar && (
+				<SessionActionButtons
+					session={session}
+					onRetry={onRetry}
 					onRestart={onRestart}
-					harness={session.harness}
-				/>
-			)}
-			{onRetry && <RetryButton id={session.id} onRetry={onRetry} />}
-			<SessionStarButton session={session} />
-			{target && (
-				<CompleteButton
-					target={target}
-					cwd={session.cwd}
 					onDismiss={onDismiss}
 				/>
 			)}

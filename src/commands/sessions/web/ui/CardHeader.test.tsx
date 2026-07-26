@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { CardHeader } from "./CardHeader";
 import type { SessionInfo } from "./types";
 import { StarredSessionsProvider } from "./useStarredSessions";
+import { TopBarLayoutContext } from "./useTopBarLayoutContext";
 
 afterEach(cleanup);
 
@@ -106,5 +107,34 @@ describe("CardHeader loading", () => {
 
 		expect(screen.queryByRole("progressbar")).toBeNull();
 		expect(screen.getByText("repo")).toBeTruthy();
+	});
+});
+
+describe("CardHeader phase caption", () => {
+	const phased: SessionInfo = {
+		...session,
+		activity: { kind: "backlog", startedAt: 0, phaseName: "Phase 1: flag" },
+	};
+
+	function renderHeader(topBar: boolean) {
+		render(
+			<TopBarLayoutContext.Provider value={topBar}>
+				<CardHeader session={phased} loading={false} onDismiss={() => {}} />
+			</TopBarLayoutContext.Provider>,
+			{ wrapper: Stars },
+		);
+	}
+
+	it("shows the phase caption in the default layout", () => {
+		renderHeader(false);
+
+		expect(screen.getByText("Phase 1: flag")).toBeTruthy();
+	});
+
+	it("drops the phase caption when the top bar owns it", () => {
+		renderHeader(true);
+
+		expect(screen.queryByText("Phase 1: flag")).toBeNull();
+		expect(screen.getByText("my session")).toBeTruthy();
 	});
 });

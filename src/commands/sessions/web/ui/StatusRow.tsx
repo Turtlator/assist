@@ -3,6 +3,7 @@ import Typography from "@mui/material/Typography";
 import { GitStatusCounts } from "./GitStatusCounts";
 import { SessionStatusCaptions } from "./SessionStatusCaptions";
 import type { SessionStatus } from "./types";
+import { useTopBarLayoutContext } from "./useTopBarLayoutContext";
 
 export function StatusRow({
 	status,
@@ -21,6 +22,7 @@ export function StatusRow({
 	usedPct?: number;
 	undurable?: { reason: string };
 }) {
+	const topBar = useTopBarLayoutContext();
 	return (
 		<Box sx={{ display: "flex", justifyContent: "space-between", mt: 0.5 }}>
 			<SessionStatusCaptions
@@ -31,9 +33,11 @@ export function StatusRow({
 			/>
 			<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
 				{cwd && <GitStatusCounts cwd={cwd} sessionId={sessionId} />}
-				<Typography variant="caption" color="text.disabled">
-					{elapsed}
-				</Typography>
+				{!topBar && (
+					<Typography variant="caption" color="text.disabled">
+						{elapsed}
+					</Typography>
+				)}
 			</Box>
 		</Box>
 	);

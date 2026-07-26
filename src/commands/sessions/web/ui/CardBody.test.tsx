@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CardBody } from "./CardBody";
 import type { SessionInfo } from "./types";
+import { TopBarLayoutContext } from "./useTopBarLayoutContext";
 
 beforeEach(() => {
 	vi.stubGlobal(
@@ -119,5 +120,39 @@ describe("CardBody git status counts", () => {
 		await waitFor(() => expect(screen.getByText("Closing…")).toBeTruthy());
 		expect(screen.queryByText("+1")).toBeNull();
 		expect(fetch).not.toHaveBeenCalled();
+	});
+});
+
+describe("CardBody top bar layout", () => {
+	function renderWithTopBar(topBar: boolean) {
+		render(
+			<MemoryRouter>
+				<TopBarLayoutContext.Provider value={topBar}>
+					<CardBody
+						session={session({ runningMs: 65_000, restored: true })}
+						loading={false}
+						onSetAutoRun={vi.fn()}
+						onSetAutoAdvance={vi.fn()}
+					/>
+				</TopBarLayoutContext.Provider>
+			</MemoryRouter>,
+		);
+	}
+
+	it("keeps elapsed and the restored indicator in the default layout", async () => {
+		renderWithTopBar(false);
+
+		expect(screen.getByText("1m 5s")).toBeTruthy();
+		expect(screen.getByText("restored")).toBeTruthy();
+		expect(await screen.findByText("+1")).toBeTruthy();
+	});
+
+	it("drops elapsed and the restored indicator but keeps status and counts", async () => {
+		renderWithTopBar(true);
+
+		expect(screen.queryByText("1m 5s")).toBeNull();
+		expect(screen.queryByText("restored")).toBeNull();
+		expect(screen.getByText("● running")).toBeTruthy();
+		expect(await screen.findByText("+1")).toBeTruthy();
 	});
 });

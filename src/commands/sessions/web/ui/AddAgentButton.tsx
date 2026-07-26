@@ -1,7 +1,7 @@
 import GroupAddOutlinedIcon from "@mui/icons-material/GroupAddOutlined";
-import IconButton from "@mui/material/IconButton";
 import Popover from "@mui/material/Popover";
 import { useState } from "react";
+import { ActionButton } from "./ActionButton";
 import { canAddAgent } from "./canAddAgent";
 import { FreePromptForm } from "./FreePromptForm";
 import type { SessionInfo } from "./types";
@@ -15,18 +15,16 @@ export function AddAgentButton({ session }: { session: SessionInfo }) {
 
 	return (
 		<>
-			<IconButton
-				size="small"
+			<ActionButton
+				label="Add agent"
+				title="Add another agent to this session's workspace"
+				ariaLabel="add agent"
+				icon={<GroupAddOutlinedIcon sx={{ fontSize: 14 }} />}
 				onClick={(e) => {
 					e.stopPropagation();
 					setAnchorEl(e.currentTarget);
 				}}
-				title="Add another agent to this session's workspace"
-				aria-label="add agent"
-				sx={{ color: "text.disabled", "&:hover": { color: "text.primary" } }}
-			>
-				<GroupAddOutlinedIcon sx={{ fontSize: 14 }} />
-			</IconButton>
+			/>
 			<Popover
 				anchorEl={anchorEl}
 				open={Boolean(anchorEl)}

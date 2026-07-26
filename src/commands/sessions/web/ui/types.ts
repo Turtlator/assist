@@ -25,10 +25,13 @@ export type CardHeaderProps = {
 	onDismiss: () => void;
 };
 
-export type SessionListHandlers = {
+export type SessionLifecycleHandlers = {
 	onRetry: (id: string) => void;
 	onRestart: (id: string) => void;
 	onDismiss: (id: string) => void;
+};
+
+export type SessionListHandlers = SessionLifecycleHandlers & {
 	onSetAutoRun: (id: string, enabled: boolean) => void;
 	onSetAutoAdvance: (id: string, enabled: boolean) => void;
 };

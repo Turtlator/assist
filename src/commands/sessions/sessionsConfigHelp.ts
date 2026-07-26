@@ -28,6 +28,11 @@ export const sessionsConfigHelp: ConfigHelpEntry[] = [
 		note: "session card counts and /diff span the whole session (its first commit's parent, else merge-base with the default branch) instead of just uncommitted work (default off)",
 	},
 	{
+		key: "sessions.topBar",
+		setter: "assist config set sessions.topBar true -g",
+		note: "move the active session's phase, elapsed, restored indicator and actions off the card into a sticky top bar above the terminal (default off)",
+	},
+	{
 		key: "worktree.enabled",
 		setter: "assist config set worktree.enabled true -g --repo",
 		note: "opt in per repo: spill concurrent sessions into adjacent <clone>-N worktrees (default off)",

@@ -1,5 +1,5 @@
 import ReplayIcon from "@mui/icons-material/Replay";
-import IconButton from "@mui/material/IconButton";
+import { ActionButton } from "./ActionButton";
 
 export function RetryButton({
 	id,
@@ -9,16 +9,14 @@ export function RetryButton({
 	onRetry: () => void;
 }) {
 	return (
-		<IconButton
-			size="small"
+		<ActionButton
+			label="Retry"
+			title={`Retry session ${id}`}
+			icon={<ReplayIcon sx={{ fontSize: 14 }} />}
 			onClick={(e) => {
 				e.stopPropagation();
 				onRetry();
 			}}
-			title={`Retry session ${id}`}
-			sx={{ color: "text.disabled", "&:hover": { color: "text.primary" } }}
-		>
-			<ReplayIcon sx={{ fontSize: 14 }} />
-		</IconButton>
+		/>
 	);
 }

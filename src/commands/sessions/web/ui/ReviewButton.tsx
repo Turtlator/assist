@@ -1,10 +1,10 @@
 import RateReviewOutlinedIcon from "@mui/icons-material/RateReviewOutlined";
 import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
 import type { PrSummary } from "../prList";
+import { ActionButton } from "./ActionButton";
 import { prLaunchMeta } from "./prLaunchMeta";
 import { reviewButtonModes } from "./reviewButtonModes";
 import { useSessionLaunchContext } from "./useSessionLaunchContext";
@@ -17,17 +17,15 @@ export function ReviewButton({ cwd, pr }: { cwd: string; pr: PrSummary }) {
 
 	return (
 		<>
-			<IconButton
-				size="small"
+			<ActionButton
+				label="Review"
+				title="Review PR"
+				icon={<RateReviewOutlinedIcon sx={{ fontSize: 14 }} />}
 				onClick={(e) => {
 					e.stopPropagation();
 					setAnchorEl(e.currentTarget);
 				}}
-				title="Review PR"
-				sx={{ color: "text.disabled", "&:hover": { color: "text.primary" } }}
-			>
-				<RateReviewOutlinedIcon sx={{ fontSize: 14 }} />
-			</IconButton>
+			/>
 			<Menu
 				anchorEl={anchorEl}
 				open={open}

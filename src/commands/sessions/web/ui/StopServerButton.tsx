@@ -1,20 +1,19 @@
 import StopIcon from "@mui/icons-material/Stop";
-import IconButton from "@mui/material/IconButton";
+import { ActionButton } from "./ActionButton";
 import { useServerActionsContext } from "./useServerActionsContext";
 
 export function StopServerButton({ id }: { id: string }) {
 	const { onStop } = useServerActionsContext();
 	return (
-		<IconButton
-			size="small"
+		<ActionButton
+			label="Stop"
+			title="Stop server"
+			tone="stop"
+			icon={<StopIcon sx={{ fontSize: 16 }} />}
 			onClick={(e) => {
 				e.stopPropagation();
 				onStop(id);
 			}}
-			title="Stop server"
-			sx={{ color: "success.main", "&:hover": { color: "error.main" } }}
-		>
-			<StopIcon sx={{ fontSize: 16 }} />
-		</IconButton>
+		/>
 	);
 }
