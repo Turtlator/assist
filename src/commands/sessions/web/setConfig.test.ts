@@ -399,8 +399,92 @@ describe("setConfig", () => {
 			key: "commit.push",
 			value: true,
 			cwd: paths.repo,
-			scope: "repo",
+			scope: "everywhere",
 		});
 		expect(badScope).toBe(400);
+	});
+
+	it("writes under repos[label] in the global config for the repo scope", async () => {
+		const [status, payload] = await post({
+			key: "worktree.enabled",
+			value: true,
+			cwd: paths.repo,
+			scope: "repo",
+		});
+
+		expect(status).toBe(200);
+		expect(payload).toEqual({ target: "repo", repoKey: "repo" });
+		expect(readYaml(paths.globalConfig)).toEqual({
+			commit: { pull: false },
+			repos: { repo: { worktree: { enabled: true } } },
+		});
+		expect(readYaml(paths.repoConfig)).toEqual({ commit: { push: false } });
+	});
+
+	it("stacks a repo-scoped write into an existing repos entry", async () => {
+		writeFileSync(
+			paths.globalConfig,
+			"repos:\n  repo:\n    worktree:\n      trunk: true\n",
+		);
+
+		const [status] = await post({
+			key: "worktree.enabled",
+			value: true,
+			cwd: paths.repo,
+			scope: "repo",
+		});
+
+		expect(status).toBe(200);
+		expect(readYaml(paths.globalConfig)).toEqual({
+			repos: { repo: { worktree: { trunk: true, enabled: true } } },
+		});
+	});
+
+	it("writes a complex leaf to the repo scope", async () => {
+		const connections = [{ name: "prod", url: "https://seq", apiToken: "t" }];
+		const [status] = await post({
+			key: "seq.connections",
+			value: connections,
+			cwd: paths.repo,
+			scope: "repo",
+		});
+
+		expect(status).toBe(200);
+		expect(readYaml(paths.globalConfig)).toEqual({
+			commit: { pull: false },
+			repos: { repo: { seq: { connections } } },
+		});
+	});
+
+	it("rejects a repo-scoped value the schema refuses and leaves the file untouched", async () => {
+		const [status, payload] = await post({
+			key: "sessions.windowsVersionCheck",
+			value: "sometimes",
+			cwd: paths.repo,
+			scope: "repo",
+		});
+
+		expect(status).toBe(400);
+		expect(payload.errors).toEqual([
+			expect.stringContaining("sessions.windowsVersionCheck"),
+		]);
+		expect(readFileSync(paths.globalConfig, "utf8")).toBe(
+			"commit:\n  pull: false\n",
+		);
+	});
+
+	it("rejects a repo-scoped write of a global-only key", async () => {
+		const [status, payload] = await post({
+			key: "sync.autoConfirm",
+			value: true,
+			cwd: paths.repo,
+			scope: "repo",
+		});
+
+		expect(status).toBe(400);
+		expect(payload.error).toContain("global-only");
+		expect(readFileSync(paths.globalConfig, "utf8")).toBe(
+			"commit:\n  pull: false\n",
+		);
 	});
 });

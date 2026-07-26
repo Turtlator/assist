@@ -189,8 +189,27 @@ describe("unsetConfig", () => {
 		const [badScope] = await post({
 			key: "commit.push",
 			cwd: paths.repo,
-			scope: "repo",
+			scope: "everywhere",
 		});
 		expect(badScope).toBe(400);
+	});
+
+	it("rejects clearing a repos override and leaves the file untouched", async () => {
+		writeFileSync(
+			paths.globalConfig,
+			"repos:\n  repo:\n    commit:\n      push: true\n",
+		);
+
+		const [status, payload] = await post({
+			key: "commit.push",
+			cwd: paths.repo,
+			scope: "repo",
+		});
+
+		expect(status).toBe(400);
+		expect(payload.error).toContain("repos");
+		expect(readFileSync(paths.globalConfig, "utf8")).toBe(
+			"repos:\n  repo:\n    commit:\n      push: true\n",
+		);
 	});
 });

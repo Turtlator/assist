@@ -277,6 +277,54 @@ describe("ConfigView", () => {
 		);
 	});
 
+	it("writes to this repo's entry in the global repos map", async () => {
+		const fetchMock = stubApi(
+			[
+				{
+					key: "worktree.enabled",
+					type: "boolean",
+					value: false,
+					source: "default",
+					repoKey: "assist",
+					node: node("worktree.enabled"),
+				},
+			],
+			{ ok: true, status: 200, body: { target: "repo", repoKey: "assist" } },
+		);
+		renderView("/repo/one");
+
+		await waitFor(() =>
+			expect(screen.getByText("worktree.enabled")).toBeTruthy(),
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Edit worktree.enabled" }),
+		);
+		expect(
+			screen.getByRole("button", { name: "This repo" }).getAttribute("title"),
+		).toBe("Not set in repos.assist in ~/.assist.yml");
+
+		fireEvent.click(screen.getByRole("button", { name: "This repo" }));
+		fireEvent.click(screen.getByLabelText("worktree.enabled value"));
+
+		expect(
+			screen.getByText(
+				"Not set in project or global — showing the schema default. Saving writes to repos.assist in ~/.assist.yml.",
+			),
+		).toBeTruthy();
+		expect(screen.queryByRole("button", { name: "Clear" })).toBeNull();
+
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() =>
+			expect(lastSetBody(fetchMock)).toEqual({
+				key: "worktree.enabled",
+				value: true,
+				cwd: "/repo/one",
+				scope: "repo",
+			}),
+		);
+	});
+
 	it("forces a global write for a global-only key", async () => {
 		const fetchMock = stubApi(
 			[
@@ -301,6 +349,11 @@ describe("ConfigView", () => {
 		);
 		const project = screen.getByRole("button", { name: "Project" });
 		expect(project.hasAttribute("disabled")).toBe(true);
+		expect(
+			screen
+				.getByRole("button", { name: "This repo" })
+				.hasAttribute("disabled"),
+		).toBe(true);
 		expect(
 			screen
 				.getByRole("button", { name: "Global" })

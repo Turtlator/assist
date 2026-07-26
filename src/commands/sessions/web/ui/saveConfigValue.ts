@@ -1,6 +1,7 @@
+import type { ConfigWriteScope } from "../../../config/ConfigWriteScope";
 import { postConfigWrite } from "./postConfigWrite";
 
-export type ConfigScope = "project" | "global";
+export type ConfigScope = ConfigWriteScope;
 
 type SaveConfigValueRequest = {
 	key: string;

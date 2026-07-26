@@ -10,8 +10,19 @@ export function unsetConfig(
 	return handleConfigWrite(req, res, (request) => {
 		if (!isKnownConfigKey(request.key))
 			return { ok: false, errors: [`Unknown config key "${request.key}"`] };
+		if (request.scope === "repo")
+			return {
+				ok: false,
+				errors: [
+					"Clearing a repos override is not supported — remove the key from repos: in ~/.assist.yml",
+				],
+			};
 
-		const result = applyConfigUnset(request.key, request.global, request.cwd);
+		const result = applyConfigUnset(
+			request.key,
+			request.scope === "global",
+			request.cwd,
+		);
 		return result.ok
 			? {
 					ok: true,

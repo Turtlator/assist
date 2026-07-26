@@ -1,6 +1,7 @@
 import type { ConfigEntry } from "../../../config/readConfigEntries";
 import type { ConfigSource } from "../../../config/resolveConfigSources";
 import { configEntrySources } from "./configEntrySources";
+import { configScopeFiles } from "./configScopeFiles";
 import type { ConfigScope } from "./saveConfigValue";
 
 function sourceLabel(
@@ -21,9 +22,16 @@ export function configScopeSummary(
 ): string {
 	const sources = configEntrySources(entry);
 	const label = (source: ConfigSource) => sourceLabel(source, entry.repoKey);
+	const unset = "Not set in project or global — showing the schema default.";
 
-	if (sources.length === 0)
-		return "Not set in project or global — showing the schema default.";
+	if (scope === "repo") {
+		const target = `Saving writes to ${configScopeFiles(entry.repoKey).repo}.`;
+		return sources.length === 0
+			? `${unset} ${target}`
+			: `Set in ${joinLabels(sources.map(label))}. ${target}`;
+	}
+
+	if (sources.length === 0) return unset;
 
 	const where = `Set in ${joinLabels(sources.map(label))}.`;
 	if (!sources.includes(scope)) return `${where} Nothing to clear in ${scope}.`;

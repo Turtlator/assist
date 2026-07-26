@@ -105,6 +105,27 @@ describe("readConfigEntries", () => {
 		});
 	});
 
+	it("names the matching repos key on keys the override does not set", () => {
+		writeFileSync(
+			globalConfig,
+			`repos:\n  "${repoOriginKey}":\n    worktree:\n      enabled: true\n`,
+		);
+
+		expect(entryFor("commit.push")).toMatchObject({
+			source: "default",
+			repoKey: repoOriginKey,
+		});
+	});
+
+	it("leaves repoKey unset when no repos entry matches the repo", () => {
+		writeFileSync(
+			globalConfig,
+			"repos:\n  other/repo:\n    commit:\n      push: true\n",
+		);
+
+		expect(entryFor("commit.push").repoKey).toBeUndefined();
+	});
+
 	it("prefers the project value over a repos override", () => {
 		writeFileSync(
 			globalConfig,

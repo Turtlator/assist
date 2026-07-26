@@ -11,7 +11,7 @@ const DEFAULT_WAKE_WORDS = ["computer"];
 const DEFAULT_MODELS_DIR = "~/.assist/voice/models";
 const DEFAULT_BACKUP_DIR = "~/.assist/backups";
 const DEFAULT_CLONE_DIR = "~/git";
-export const assistConfigSchema = z.strictObject({
+const assistConfigShape = {
 	backup: z
 		.strictObject({
 			dir: z.string().default(DEFAULT_BACKUP_DIR),
@@ -89,7 +89,6 @@ export const assistConfigSchema = z.strictObject({
 			promptJira: z.boolean().default(false),
 		})
 		.optional(),
-	repos: z.record(z.string(), z.record(z.string(), z.unknown())).optional(),
 	worktree: z
 		.strictObject({
 			enabled: z.boolean().default(false),
@@ -251,6 +250,13 @@ export const assistConfigSchema = z.strictObject({
 			modelsDir: DEFAULT_MODELS_DIR,
 			models: {},
 		}),
+};
+
+export const repoConfigSchema = z.strictObject(assistConfigShape).partial();
+
+export const assistConfigSchema = z.strictObject({
+	...assistConfigShape,
+	repos: z.record(z.string(), repoConfigSchema).optional(),
 });
 
 export type AssistConfig = z.infer<typeof assistConfigSchema>;

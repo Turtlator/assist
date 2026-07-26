@@ -1,5 +1,6 @@
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import { configScopeFiles } from "./configScopeFiles";
 import type { ConfigScope } from "./saveConfigValue";
 
 type Props = {
@@ -7,20 +8,27 @@ type Props = {
 	disabled: boolean;
 	lockedToGlobal: boolean;
 	scopesWithValue: ConfigScope[];
+	repoKey?: string;
 	onChange: (scope: ConfigScope) => void;
 };
-
-function presenceTitle(file: string, hasValue: boolean): string {
-	return hasValue ? `Set in ${file}` : `Not set in ${file}`;
-}
 
 export function ConfigScopeToggle({
 	scope,
 	disabled,
 	lockedToGlobal,
 	scopesWithValue,
+	repoKey,
 	onChange,
 }: Props) {
+	const files = configScopeFiles(repoKey);
+	const title = (candidate: ConfigScope): string => {
+		if (lockedToGlobal && candidate !== "global") return "Global-only key";
+		const presence = scopesWithValue.includes(candidate)
+			? "Set in"
+			: "Not set in";
+		return `${presence} ${files[candidate]}`;
+	};
+
 	return (
 		<ToggleButtonGroup
 			size="small"
@@ -34,24 +42,18 @@ export function ConfigScopeToggle({
 			<ToggleButton
 				value="project"
 				disabled={lockedToGlobal}
-				title={
-					lockedToGlobal
-						? "Global-only key"
-						: presenceTitle(
-								"this repo's assist.yml",
-								scopesWithValue.includes("project"),
-							)
-				}
+				title={title("project")}
 			>
 				Project
 			</ToggleButton>
 			<ToggleButton
-				value="global"
-				title={presenceTitle(
-					"~/.assist.yml",
-					scopesWithValue.includes("global"),
-				)}
+				value="repo"
+				disabled={lockedToGlobal}
+				title={title("repo")}
 			>
+				This repo
+			</ToggleButton>
+			<ToggleButton value="global" title={title("global")}>
 				Global
 			</ToggleButton>
 		</ToggleButtonGroup>

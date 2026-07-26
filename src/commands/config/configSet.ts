@@ -29,7 +29,7 @@ export function configSet(
 
 	const coerced = coerceValue(resolved.value);
 	const target = resolved.useRepo
-		? `repo: ${applyRepoConfigSet(resolved.key, coerced, resolved.repoName)}`
+		? `repo: ${applyRepoOrExit(resolved.key, coerced, resolved.repoName)}`
 		: applyOrExit(resolved.key, coerced, options.global ?? false);
 	console.log(
 		chalk.green(`Set ${resolved.key} = ${JSON.stringify(coerced)} (${target})`),
@@ -44,6 +44,16 @@ function applyOrExit(
 	const result = applyConfigSet(key, coerced, global);
 	if (!result.ok) exitWithConfigErrors(result.errors);
 	return result.target;
+}
+
+function applyRepoOrExit(
+	key: string,
+	coerced: string | boolean,
+	repoName: string | undefined,
+): string {
+	const result = applyRepoConfigSet(key, coerced, repoName);
+	if (!result.ok) exitWithConfigErrors(result.errors);
+	return result.label;
 }
 
 function coerceValue(value: string): string | boolean {

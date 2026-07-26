@@ -1,4 +1,8 @@
 import type { IncomingMessage } from "node:http";
+import {
+	type ConfigWriteScope,
+	isConfigWriteScope,
+} from "../../config/ConfigWriteScope";
 import { readJsonBody } from "./readJsonBody";
 
 type ConfigWriteBody = {
@@ -9,7 +13,13 @@ type ConfigWriteBody = {
 };
 
 type ParsedConfigWriteRequest =
-	| { ok: true; key: string; value: unknown; cwd: string; global: boolean }
+	| {
+			ok: true;
+			key: string;
+			value: unknown;
+			cwd: string;
+			scope: ConfigWriteScope;
+	  }
 	| { ok: false; error: string };
 
 export async function parseConfigWriteRequest(
@@ -27,8 +37,8 @@ export async function parseConfigWriteRequest(
 		return { ok: false, error: "Missing key" };
 	if (typeof cwd !== "string" || cwd === "")
 		return { ok: false, error: "Missing cwd" };
-	if (scope !== "project" && scope !== "global")
-		return { ok: false, error: 'scope must be "project" or "global"' };
+	if (!isConfigWriteScope(scope))
+		return { ok: false, error: 'scope must be "project", "global" or "repo"' };
 
-	return { ok: true, key, value: body.value, cwd, global: scope === "global" };
+	return { ok: true, key, value: body.value, cwd, scope };
 }

@@ -1,12 +1,13 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { respondJson } from "../../../shared/web";
+import type { ConfigWriteScope } from "../../config/ConfigWriteScope";
 import { parseConfigWriteRequest } from "./parseConfigWriteRequest";
 
 type ConfigWriteRequest = {
 	key: string;
 	value: unknown;
 	cwd: string;
-	global: boolean;
+	scope: ConfigWriteScope;
 };
 
 type ConfigWriteResult =

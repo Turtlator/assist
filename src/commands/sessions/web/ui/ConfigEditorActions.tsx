@@ -42,6 +42,7 @@ export function ConfigEditorActions({
 					disabled={saving}
 					lockedToGlobal={scopeLocked}
 					scopesWithValue={configScopesWithValue(entry)}
+					repoKey={entry.repoKey}
 					onChange={onScopeChange}
 				/>
 				<ConfigWriteButtons

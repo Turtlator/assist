@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { applyConfigSet } from "../../config/applyConfigSet";
 import { coerceConfigValue } from "../../config/coerceConfigValue";
+import { applyScopedConfigSet } from "./applyScopedConfigSet";
 import { handleConfigWrite } from "./handleConfigWrite";
 
 export function setConfig(
@@ -11,14 +11,11 @@ export function setConfig(
 		const coerced = coerceConfigValue(request.key, request.value);
 		if (!coerced.ok) return { ok: false, errors: [coerced.error] };
 
-		const result = applyConfigSet(
+		return applyScopedConfigSet(
 			request.key,
 			coerced.value,
-			request.global,
 			request.cwd,
+			request.scope,
 		);
-		return result.ok
-			? { ok: true, payload: { target: result.target } }
-			: result;
 	});
 }

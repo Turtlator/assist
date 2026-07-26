@@ -1,3 +1,4 @@
+import type { z } from "zod";
 import { assistConfigSchema } from "../../shared/types";
 
 type ConfigValidationResult = { ok: true } | { ok: false; errors: string[] };
@@ -5,8 +6,9 @@ type ConfigValidationResult = { ok: true } | { ok: false; errors: string[] };
 export function validateConfig(
 	updated: Record<string, unknown>,
 	key: string,
+	schema: z.ZodTypeAny = assistConfigSchema,
 ): ConfigValidationResult {
-	const result = assistConfigSchema.safeParse(updated);
+	const result = schema.safeParse(updated);
 	if (result.success) return { ok: true };
 	return {
 		ok: false,

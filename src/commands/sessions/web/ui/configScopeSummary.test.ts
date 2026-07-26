@@ -42,6 +42,18 @@ describe("configScopeSummary", () => {
 		);
 	});
 
+	it("names the repos entry a repo-scoped save writes to", () => {
+		expect(
+			configScopeSummary(entry(["global"], { repoKey: "assist" }), "repo"),
+		).toBe("Set in global. Saving writes to repos.assist in ~/.assist.yml.");
+	});
+
+	it("describes the repos entry a repo-scoped save creates", () => {
+		expect(configScopeSummary(entry([]), "repo")).toBe(
+			"Not set in project or global — showing the schema default. Saving writes to this repo's entry under repos: in ~/.assist.yml.",
+		);
+	});
+
 	it("names the repos key that keeps pinning the value", () => {
 		expect(
 			configScopeSummary(

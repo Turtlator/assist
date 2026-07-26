@@ -2,7 +2,7 @@ import type { ConfigEntry } from "../../../config/readConfigEntries";
 import { configEntrySources } from "./configEntrySources";
 import type { ConfigScope } from "./saveConfigValue";
 
-const SCOPES: ConfigScope[] = ["project", "global"];
+const SCOPES: ConfigScope[] = ["project", "repo", "global"];
 
 export function configScopesWithValue(entry: ConfigEntry): ConfigScope[] {
 	const sources = configEntrySources(entry);

@@ -38,9 +38,7 @@ export function readConfigEntries(cwd: string): ConfigEntry[] {
 				value: getNestedValue(config, leaf.key),
 				source,
 				sources,
-				...(source === "repo" && layers.repoKey
-					? { repoKey: layers.repoKey }
-					: {}),
+				...(layers.repoKey ? { repoKey: layers.repoKey } : {}),
 				globalOnly: isGlobalOnlyConfigKey(leaf.key),
 				node: configEntryNode(schema, leaf.key),
 			};
