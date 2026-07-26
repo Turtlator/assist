@@ -57,12 +57,45 @@ function stubApi(entries: ConfigEntry[], setResponse: SetResponse = SET_OK) {
 	return fetchMock;
 }
 
-function lastSetBody(fetchMock: ReturnType<typeof stubApi>): unknown {
-	const call = fetchMock.mock.calls.find(([url]) =>
-		String(url).startsWith("/api/config/set"),
-	);
+function postedBody(fetchMock: ReturnType<typeof stubApi>, path: string) {
+	const call = fetchMock.mock.calls.find(([url]) => String(url) === path);
 	const init = call?.[1] as RequestInit | undefined;
 	return JSON.parse(String(init?.body));
+}
+
+function lastSetBody(fetchMock: ReturnType<typeof stubApi>): unknown {
+	return postedBody(fetchMock, "/api/config/set");
+}
+
+const UNSET_OK: SetResponse = {
+	ok: true,
+	status: 200,
+	body: { target: "project", removed: true },
+};
+
+function stubUnsetApi(
+	before: ConfigEntry[],
+	after: ConfigEntry[] = before,
+	response: SetResponse = UNSET_OK,
+) {
+	let cleared = false;
+	const fetchMock = vi.fn(async (url: string, _init?: RequestInit) => {
+		if (String(url) === "/api/config/unset") {
+			cleared = response.ok;
+			return {
+				ok: response.ok,
+				status: response.status,
+				json: async () => response.body,
+			};
+		}
+		return {
+			ok: true,
+			status: 200,
+			json: async () => (cleared ? after : before),
+		};
+	});
+	vi.stubGlobal("fetch", fetchMock);
+	return fetchMock;
 }
 
 function renderView(selectedCwd = "/repo") {
@@ -523,6 +556,141 @@ describe("ConfigView", () => {
 				scope: "project",
 			}),
 		);
+	});
+
+	it("clears a project key and falls back to the schema default", async () => {
+		const fetchMock = stubUnsetApi(
+			[
+				{
+					key: "commit.push",
+					type: "boolean",
+					value: false,
+					source: "project",
+					node: node("commit.push"),
+				},
+			],
+			[
+				{
+					key: "commit.push",
+					type: "boolean",
+					value: undefined,
+					defaultValue: true,
+					source: "default",
+					node: node("commit.push"),
+				},
+			],
+		);
+		renderView("/repo/one");
+
+		await waitFor(() => expect(screen.getByText("commit.push")).toBeTruthy());
+		fireEvent.click(screen.getByRole("button", { name: "Edit commit.push" }));
+		fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+
+		await waitFor(() =>
+			expect(postedBody(fetchMock, "/api/config/unset")).toEqual({
+				key: "commit.push",
+				cwd: "/repo/one",
+				scope: "project",
+			}),
+		);
+		await waitFor(() => expect(screen.getByText("default")).toBeTruthy());
+		expect(screen.getByText("true")).toBeTruthy();
+		expect(screen.queryByText("project")).toBeNull();
+	});
+
+	it("clears a global-only key from the global config", async () => {
+		const fetchMock = stubUnsetApi(
+			[
+				{
+					key: "sync.autoConfirm",
+					type: "boolean",
+					value: true,
+					source: "global",
+					globalOnly: true,
+					node: node("sync.autoConfirm"),
+				},
+			],
+			[
+				{
+					key: "sync.autoConfirm",
+					type: "boolean",
+					value: undefined,
+					defaultValue: false,
+					source: "default",
+					node: node("sync.autoConfirm"),
+				},
+			],
+			{ ok: true, status: 200, body: { target: "global", removed: true } },
+		);
+		renderView("/repo/one");
+
+		await waitFor(() =>
+			expect(screen.getByText("sync.autoConfirm")).toBeTruthy(),
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Edit sync.autoConfirm" }),
+		);
+		fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+
+		await waitFor(() =>
+			expect(postedBody(fetchMock, "/api/config/unset")).toEqual({
+				key: "sync.autoConfirm",
+				cwd: "/repo/one",
+				scope: "global",
+			}),
+		);
+	});
+
+	it("offers no clear control for a row already using the schema default", async () => {
+		stubUnsetApi([
+			{
+				key: "commit.push",
+				type: "boolean",
+				value: undefined,
+				defaultValue: true,
+				source: "default",
+				node: node("commit.push"),
+			},
+		]);
+		renderView();
+
+		await waitFor(() => expect(screen.getByText("commit.push")).toBeTruthy());
+		fireEvent.click(screen.getByRole("button", { name: "Edit commit.push" }));
+
+		expect(screen.getByRole("button", { name: "Save" })).toBeTruthy();
+		expect(screen.queryByRole("button", { name: "Clear" })).toBeNull();
+	});
+
+	it("shows a rejected clear in the snackbar and keeps the editor open", async () => {
+		stubUnsetApi(
+			[
+				{
+					key: "roam.clientId",
+					type: "string",
+					value: "id",
+					source: "project",
+					node: node("roam.clientId"),
+				},
+			],
+			undefined,
+			{
+				ok: false,
+				status: 400,
+				body: { error: "roam: clientSecret requires clientId" },
+			},
+		);
+		renderView();
+
+		await waitFor(() => expect(screen.getByText("roam.clientId")).toBeTruthy());
+		fireEvent.click(screen.getByRole("button", { name: "Edit roam.clientId" }));
+		fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+
+		await waitFor(() =>
+			expect(
+				screen.getByText("roam: clientSecret requires clientId"),
+			).toBeTruthy(),
+		);
+		expect(screen.getByRole("button", { name: "Clear" })).toBeTruthy();
 	});
 
 	it("keeps a leaf the schema does not describe read-only", async () => {

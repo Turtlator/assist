@@ -1,23 +1,23 @@
 import type { IncomingMessage } from "node:http";
 import { readJsonBody } from "./readJsonBody";
 
-type SetConfigBody = {
+type ConfigWriteBody = {
 	key?: unknown;
 	value?: unknown;
 	cwd?: unknown;
 	scope?: unknown;
 };
 
-type ParsedSetConfigRequest =
+type ParsedConfigWriteRequest =
 	| { ok: true; key: string; value: unknown; cwd: string; global: boolean }
 	| { ok: false; error: string };
 
-export async function parseSetConfigRequest(
+export async function parseConfigWriteRequest(
 	req: IncomingMessage,
-): Promise<ParsedSetConfigRequest> {
-	let body: SetConfigBody;
+): Promise<ParsedConfigWriteRequest> {
+	let body: ConfigWriteBody;
 	try {
-		body = (await readJsonBody(req)) as SetConfigBody;
+		body = (await readJsonBody(req)) as ConfigWriteBody;
 	} catch {
 		return { ok: false, error: "Invalid JSON body" };
 	}

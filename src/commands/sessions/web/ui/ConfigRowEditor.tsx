@@ -1,8 +1,7 @@
-import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import type { ConfigEntry } from "../../../config/readConfigEntries";
+import { ConfigEditorActions } from "./ConfigEditorActions";
 import { ConfigNodeEditor } from "./ConfigNodeEditor";
-import { ConfigScopeToggle } from "./ConfigScopeToggle";
 import { useConfigRowEditor } from "./useConfigRowEditor";
 
 type Props = {
@@ -20,8 +19,17 @@ export function ConfigRowEditor({
 	onError,
 	onCancel,
 }: Props) {
-	const { value, setValue, scope, setScope, scopeLocked, saving, save } =
-		useConfigRowEditor({ entry, cwd, onSaved, onError });
+	const {
+		value,
+		setValue,
+		scope,
+		setScope,
+		scopeLocked,
+		saving,
+		save,
+		clear,
+		canClear,
+	} = useConfigRowEditor({ entry, cwd, onSaved, onError });
 
 	return (
 		<Stack spacing={1} sx={{ alignItems: "flex-start" }}>
@@ -34,29 +42,17 @@ export function ConfigRowEditor({
 					onChange={setValue}
 				/>
 			)}
-			<Stack
-				spacing={1}
-				direction="row"
-				sx={{ alignItems: "center", flexWrap: "wrap" }}
-			>
-				<ConfigScopeToggle
-					scope={scope}
-					disabled={saving}
-					lockedToGlobal={scopeLocked}
-					onChange={setScope}
-				/>
-				<Button
-					size="small"
-					variant="contained"
-					disabled={saving}
-					onClick={() => void save()}
-				>
-					Save
-				</Button>
-				<Button size="small" disabled={saving} onClick={onCancel}>
-					Cancel
-				</Button>
-			</Stack>
+			<ConfigEditorActions
+				entryKey={entry.key}
+				scope={scope}
+				scopeLocked={scopeLocked}
+				saving={saving}
+				canClear={canClear}
+				onScopeChange={setScope}
+				onSave={() => void save()}
+				onClear={() => void clear()}
+				onCancel={onCancel}
+			/>
 		</Stack>
 	);
 }

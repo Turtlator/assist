@@ -179,6 +179,7 @@ Backlog item ids are written and displayed in an `a`-prefixed form (e.g. item 55
 - `assist run link <path> --prefix <prefix>` - Link run configurations from another project's assist.yml
 - `assist run remove <name>` - Remove a run configuration from assist.yml and delete its Claude command file
 - `assist config set <key> <value>` - Set a config value (e.g. commit.push true). Add `--global` to write to `~/.assist.yml`, or `-g --repo` to write into `~/.assist.yml` under the current repo's identity (a per-repo override that lands nothing in the repo working tree). `--repo` requires `-g` — it scopes the global write rather than replacing it. `-g --repo <name>` targets a named repo instead of the current one, matching an existing `repos` key by full origin, `org/repo`, or bare repo name
+- `assist config unset <key>` - Remove a config value from the repo `assist.yml`, so the key falls back to the global value or the schema default. Add `-g`/`--global` to remove it from `~/.assist.yml` instead. Removing the last leaf of an object prunes the now-empty parent, and the result is validated before saving, so an unset the schema rejects fails without writing. A key that is not set in the targeted layer is reported and nothing is written. `--repo` is not supported
 - `assist config get <key>` - Get a config value
 - `assist config list` - List all config values
   - `prs.slack` - The Slack channel (e.g. `#example`) that `/prs-slack` posts pull requests to via the Slack MCP connector (optional; can be omitted when only `prs.required` is set)

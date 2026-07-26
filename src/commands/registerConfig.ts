@@ -2,6 +2,7 @@ import type { Command } from "commander";
 import { configList } from "./config";
 import { configGet } from "./config/configGet";
 import { configSet } from "./config/configSet";
+import { configUnset } from "./config/configUnset";
 
 export function registerConfig(program: Command): void {
 	const configCommand = program
@@ -17,6 +18,12 @@ export function registerConfig(program: Command): void {
 			"Requires -g: scope the global write to a repo's identity (defaults to the current repo)",
 		)
 		.action((key, value, options) => configSet(key, value, options));
+
+	configCommand
+		.command("unset <key>")
+		.description("Remove a config value (e.g. commit.push)")
+		.option("-g, --global", "Remove from global ~/.assist.yml")
+		.action((key, options) => configUnset(key, options));
 
 	configCommand
 		.command("get <key>")

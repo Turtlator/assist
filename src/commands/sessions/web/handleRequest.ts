@@ -24,6 +24,7 @@ import { prStatus } from "./prStatus";
 import { restartWeb } from "./restartWeb";
 import { sessionLayout } from "./sessionLayout";
 import { setConfig } from "./setConfig";
+import { unsetConfig } from "./unsetConfig";
 import { uploadPrImage } from "./uploadPrImage";
 import { createCssHandler } from "./createCssHandler";
 
@@ -62,6 +63,7 @@ const routes: Record<string, Handler> = {
 	"GET /api/backups/list": getBackups,
 	"GET /api/config": getConfig,
 	"POST /api/config/set": setConfig,
+	"POST /api/config/unset": unsetConfig,
 	"GET /api/review/synthesis": getReviewSynthesis,
 };
 

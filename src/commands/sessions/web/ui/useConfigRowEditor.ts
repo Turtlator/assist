@@ -3,6 +3,7 @@ import type { ConfigEntry } from "../../../config/readConfigEntries";
 import { effectiveConfigValue } from "./effectiveConfigValue";
 import { normalizeConfigValue } from "./normalizeConfigValue";
 import { type ConfigScope, saveConfigValue } from "./saveConfigValue";
+import { unsetConfigValue } from "./unsetConfigValue";
 
 type Options = {
 	entry: ConfigEntry;
@@ -36,5 +37,23 @@ export function useConfigRowEditor({ entry, cwd, onSaved, onError }: Options) {
 		else onSaved();
 	}
 
-	return { value, setValue, scope, setScope, scopeLocked, saving, save };
+	async function clear(): Promise<void> {
+		setSaving(true);
+		const { error } = await unsetConfigValue({ key: entry.key, cwd, scope });
+		setSaving(false);
+		if (error) onError(error);
+		else onSaved();
+	}
+
+	return {
+		value,
+		setValue,
+		scope,
+		setScope,
+		scopeLocked,
+		saving,
+		save,
+		clear,
+		canClear: entry.source === "project" || entry.source === "global",
+	};
 }
