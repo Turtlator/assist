@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { ConfigEntry } from "../../../config/readConfigEntries";
+import { joinConfigListInput, splitConfigListInput } from "./ConfigListInput";
 import { effectiveConfigValue } from "./effectiveConfigValue";
 import { type ConfigScope, saveConfigValue } from "./saveConfigValue";
 
@@ -13,8 +14,17 @@ type Options = {
 function initialValue(entry: ConfigEntry): string | boolean {
 	const value = effectiveConfigValue(entry);
 	if (entry.type === "boolean") return value === true;
+	if (entry.type === "array") return joinConfigListInput(value);
 	if (value === undefined || value === null) return "";
 	return String(value);
+}
+
+function requestValue(
+	entry: ConfigEntry,
+	value: string | boolean,
+): string | boolean | string[] {
+	if (entry.type !== "array") return value;
+	return splitConfigListInput(typeof value === "string" ? value : "");
 }
 
 export function useConfigRowEditor({ entry, cwd, onSaved, onError }: Options) {
@@ -29,7 +39,7 @@ export function useConfigRowEditor({ entry, cwd, onSaved, onError }: Options) {
 		setSaving(true);
 		const { error } = await saveConfigValue({
 			key: entry.key,
-			value,
+			value: requestValue(entry, value),
 			cwd,
 			scope,
 		});

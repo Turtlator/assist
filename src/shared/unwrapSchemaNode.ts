@@ -14,6 +14,8 @@ export type SchemaNode = {
 		shape?: Record<string, SchemaNode>;
 		defaultValue?: unknown;
 		entries?: Record<string, unknown>;
+		options?: SchemaNode[];
+		element?: SchemaNode;
 	};
 };
 

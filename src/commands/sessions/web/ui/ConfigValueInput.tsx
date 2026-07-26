@@ -1,7 +1,8 @@
-import MenuItem from "@mui/material/MenuItem";
-import Switch from "@mui/material/Switch";
-import TextField from "@mui/material/TextField";
 import type { ConfigEntry } from "../../../config/readConfigEntries";
+import { ConfigBooleanInput } from "./ConfigBooleanInput";
+import { ConfigEnumInput } from "./ConfigEnumInput";
+import { ConfigListInput } from "./ConfigListInput";
+import { ConfigTextInput } from "./ConfigTextInput";
 
 type Props = {
 	entry: ConfigEntry;
@@ -11,45 +12,51 @@ type Props = {
 };
 
 export function ConfigValueInput({ entry, value, disabled, onChange }: Props) {
+	const text = typeof value === "string" ? value : "";
+
 	if (entry.type === "boolean") {
 		return (
-			<Switch
-				size="small"
+			<ConfigBooleanInput
+				label={entry.key}
 				checked={value === true}
 				disabled={disabled}
-				slotProps={{ input: { "aria-label": `${entry.key} value` } }}
-				onChange={(event) => onChange(event.target.checked)}
+				onChange={onChange}
+			/>
+		);
+	}
+	if (entry.type === "array") {
+		return (
+			<ConfigListInput
+				label={entry.key}
+				value={text}
+				disabled={disabled}
+				onChange={onChange}
 			/>
 		);
 	}
 	if (entry.type === "enum") {
 		return (
-			<TextField
-				select
-				size="small"
+			<ConfigEnumInput
 				label={entry.key}
-				value={typeof value === "string" ? value : ""}
+				options={entry.enumValues ?? []}
+				value={text}
 				disabled={disabled}
-				onChange={(event) => onChange(event.target.value)}
-				sx={{ minWidth: 180 }}
-			>
-				{(entry.enumValues ?? []).map((option) => (
-					<MenuItem key={option} value={option}>
-						{option}
-					</MenuItem>
-				))}
-			</TextField>
+				onChange={onChange}
+			/>
 		);
 	}
 	return (
-		<TextField
-			size="small"
+		<ConfigTextInput
 			label={entry.key}
-			type={entry.type === "number" ? "number" : "text"}
-			value={typeof value === "string" ? value : ""}
+			value={text}
+			numeric={entry.type === "number"}
+			helperText={
+				entry.type === "union"
+					? (entry.unionTypes ?? []).join(" or ")
+					: undefined
+			}
 			disabled={disabled}
-			onChange={(event) => onChange(event.target.value)}
-			sx={{ minWidth: 220 }}
+			onChange={onChange}
 		/>
 	);
 }

@@ -8,6 +8,11 @@ import { ConfigValue } from "./ConfigValue";
 
 const COMPLEX_TYPES = new Set(["array", "record", "other"]);
 
+function isReadOnly(entry: ConfigEntry): boolean {
+	if (entry.type === "array") return entry.itemType === undefined;
+	return COMPLEX_TYPES.has(entry.type);
+}
+
 type Props = {
 	entry: ConfigEntry;
 	cwd: string;
@@ -17,7 +22,7 @@ type Props = {
 
 export function ConfigRow({ entry, cwd, onSaved, onError }: Props) {
 	const [editing, setEditing] = useState(false);
-	const readOnly = COMPLEX_TYPES.has(entry.type);
+	const readOnly = isReadOnly(entry);
 
 	return (
 		<TableRow>

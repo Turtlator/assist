@@ -46,13 +46,58 @@ describe("describeConfigLeaves", () => {
 
 		expect(leaves.map((entry) => [entry.key, entry.type])).toEqual([
 			["count", "number"],
-			["either", "other"],
+			["either", "union"],
 			["flag", "boolean"],
 			["list", "array"],
 			["map", "record"],
 			["mode", "enum"],
 			["text", "string"],
 		]);
+	});
+
+	it("reports the members of a scalar union in declaration order", () => {
+		const schema = z.strictObject({
+			install: z.union([z.boolean(), z.string()]).default(true),
+			port: z.union([z.number(), z.string()]).optional(),
+		});
+		const leaves = describeConfigLeaves(schema);
+
+		expect(leaf(leaves, "install")).toMatchObject({
+			type: "union",
+			unionTypes: ["boolean", "string"],
+			defaultValue: true,
+		});
+		expect(leaf(leaves, "port").unionTypes).toEqual(["number", "string"]);
+	});
+
+	it("reports the item type of an array of scalars", () => {
+		const schema = z.strictObject({
+			names: z.array(z.string()).default([]),
+			ports: z.array(z.number()),
+			objects: z.array(z.strictObject({ name: z.string() })),
+			unions: z.array(z.union([z.string(), z.strictObject({ a: z.string() })])),
+		});
+		const leaves = describeConfigLeaves(schema);
+
+		expect(leaf(leaves, "names")).toMatchObject({
+			type: "array",
+			itemType: "string",
+		});
+		expect(leaf(leaves, "ports").itemType).toBe("number");
+		expect(leaf(leaves, "objects").itemType).toBeUndefined();
+		expect(leaf(leaves, "unions").itemType).toBeUndefined();
+	});
+
+	it("treats a union containing a non-scalar member as read-only other", () => {
+		const schema = z.strictObject({
+			mixed: z.union([z.string(), z.array(z.string())]),
+			objecty: z.union([z.boolean(), z.strictObject({ name: z.string() })]),
+		});
+		const leaves = describeConfigLeaves(schema);
+
+		expect(leaf(leaves, "mixed").type).toBe("other");
+		expect(leaf(leaves, "mixed").unionTypes).toBeUndefined();
+		expect(leaf(leaves, "objecty").type).toBe("other");
 	});
 
 	it("reports enum members and schema defaults", () => {
@@ -97,6 +142,16 @@ describe("describeConfigLeaves", () => {
 			enumValues: ["claude", "codex", "pi"],
 			defaultValue: "claude",
 		});
-		expect(leaf(leaves, "worktree.install").type).toBe("other");
+		expect(leaf(leaves, "worktree.copy")).toMatchObject({
+			type: "array",
+			itemType: "string",
+		});
+		expect(leaf(leaves, "sql.connections").itemType).toBeUndefined();
+		expect(leaf(leaves, "run").itemType).toBeUndefined();
+		expect(leaf(leaves, "worktree.install")).toMatchObject({
+			type: "union",
+			unionTypes: ["boolean", "string"],
+			defaultValue: true,
+		});
 	});
 });

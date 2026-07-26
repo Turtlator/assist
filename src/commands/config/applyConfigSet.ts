@@ -10,13 +10,15 @@ import { validateConfig } from "./validateConfig";
 
 export type ConfigScalar = string | number | boolean;
 
+export type ConfigWritableValue = ConfigScalar | ConfigScalar[];
+
 type ConfigSetResult =
 	| { ok: true; target: "global" | "project" }
 	| { ok: false; errors: string[] };
 
 export function applyConfigSet(
 	key: string,
-	coerced: ConfigScalar,
+	coerced: ConfigWritableValue,
 	global: boolean,
 	cwd: string = process.cwd(),
 ): ConfigSetResult {

@@ -1,34 +1,21 @@
 import type { z } from "zod";
+import { scalarArrayItemType } from "./scalarArrayItemType";
+import {
+	type ConfigLeafType,
+	type ConfigScalarLeafType,
+	leafTypeOf,
+	scalarUnionMembers,
+} from "./scalarUnionMembers";
 import { type SchemaNode, unwrapSchemaNode } from "./unwrapSchemaNode";
-
-type ConfigLeafType =
-	| "string"
-	| "number"
-	| "boolean"
-	| "enum"
-	| "array"
-	| "record"
-	| "other";
-
-const LEAF_TYPES: Record<string, ConfigLeafType> = {
-	string: "string",
-	number: "number",
-	boolean: "boolean",
-	enum: "enum",
-	array: "array",
-	record: "record",
-};
 
 export type ConfigLeaf = {
 	key: string;
 	type: ConfigLeafType;
 	enumValues?: string[];
+	unionTypes?: ConfigScalarLeafType[];
+	itemType?: ConfigScalarLeafType;
 	defaultValue?: unknown;
 };
-
-function leafType(node: SchemaNode): ConfigLeafType {
-	return LEAF_TYPES[node.def?.type ?? ""] ?? "other";
-}
 
 function enumValues(node: SchemaNode): string[] | undefined {
 	const entries = node.def?.entries;
@@ -43,9 +30,13 @@ function toLeaf(
 	node: SchemaNode,
 	defaultValue: unknown,
 ): ConfigLeaf {
-	const type = leafType(node);
+	const unionTypes = scalarUnionMembers(node);
+	const type = unionTypes ? "union" : leafTypeOf(node);
 	const leaf: ConfigLeaf = { key, type };
 	if (type === "enum") leaf.enumValues = enumValues(node);
+	if (unionTypes) leaf.unionTypes = unionTypes;
+	const itemType = scalarArrayItemType(node);
+	if (itemType) leaf.itemType = itemType;
 	if (defaultValue !== undefined) leaf.defaultValue = defaultValue;
 	return leaf;
 }

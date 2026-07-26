@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ConfigEntry } from "../../../config/readConfigEntries";
 
 type ConfigEntriesState = {
@@ -25,18 +25,23 @@ async function fetchEntries(cwd: string): Promise<ConfigEntry[]> {
 export function useConfigEntries(cwd: string): UseConfigEntries {
 	const [state, setState] = useState<ConfigEntriesState>(LOADING);
 	const [reloadCount, setReloadCount] = useState(0);
+	const loadedCwd = useRef<string | null>(null);
 	const reload = useCallback(() => setReloadCount((count) => count + 1), []);
 
 	useEffect(() => {
 		if (!cwd) {
+			loadedCwd.current = null;
 			setState({ entries: [], loading: false, error: "No repo selected." });
 			return;
 		}
 		let cancelled = false;
-		setState(LOADING);
+		const isRefetchOfSameRepo = loadedCwd.current === cwd;
+		if (!isRefetchOfSameRepo) setState(LOADING);
 		fetchEntries(cwd)
 			.then((entries) => {
-				if (!cancelled) setState({ entries, loading: false, error: null });
+				if (cancelled) return;
+				loadedCwd.current = cwd;
+				setState({ entries, loading: false, error: null });
 			})
 			.catch((error: unknown) => {
 				if (cancelled) return;

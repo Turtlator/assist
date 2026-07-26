@@ -139,6 +139,96 @@ describe("setConfig", () => {
 		);
 	});
 
+	it("writes the boolean member of a scalar union", async () => {
+		const [status] = await post({
+			key: "worktree.install",
+			value: "false",
+			cwd: paths.repo,
+			scope: "project",
+		});
+
+		expect(status).toBe(200);
+		expect(readYaml(paths.repoConfig)).toEqual({
+			commit: { push: false },
+			worktree: { install: false },
+		});
+	});
+
+	it("writes the string member of a scalar union", async () => {
+		const [status] = await post({
+			key: "worktree.install",
+			value: "pnpm install --frozen-lockfile",
+			cwd: paths.repo,
+			scope: "project",
+		});
+
+		expect(status).toBe(200);
+		expect(readYaml(paths.repoConfig)).toEqual({
+			commit: { push: false },
+			worktree: { install: "pnpm install --frozen-lockfile" },
+		});
+	});
+
+	it("writes a list of strings to an array-of-scalars key", async () => {
+		const [status] = await post({
+			key: "worktree.copy",
+			value: [".env", ".claude/settings.local.json"],
+			cwd: paths.repo,
+			scope: "project",
+		});
+
+		expect(status).toBe(200);
+		expect(readYaml(paths.repoConfig)).toEqual({
+			commit: { push: false },
+			worktree: { copy: [".env", ".claude/settings.local.json"] },
+		});
+	});
+
+	it("writes an empty list to an array-of-scalars key", async () => {
+		const [status] = await post({
+			key: "worktree.copy",
+			value: [],
+			cwd: paths.repo,
+			scope: "project",
+		});
+
+		expect(status).toBe(200);
+		expect(readYaml(paths.repoConfig)).toEqual({
+			commit: { push: false },
+			worktree: { copy: [] },
+		});
+	});
+
+	it("rejects a non-list value for an array-of-scalars key", async () => {
+		const [status, payload] = await post({
+			key: "worktree.copy",
+			value: ".env",
+			cwd: paths.repo,
+			scope: "project",
+		});
+
+		expect(status).toBe(400);
+		expect(payload.error).toContain("expected a list of string values");
+		expect(readFileSync(paths.repoConfig, "utf8")).toBe(
+			"commit:\n  push: false\n",
+		);
+	});
+
+	it("rejects a list whose entries are the wrong type", async () => {
+		const [status, payload] = await post({
+			key: "worktree.copy",
+			value: [".env", 7],
+			cwd: paths.repo,
+			scope: "project",
+		});
+
+		expect(status).toBe(400);
+		expect(payload.error).toContain("expected a string");
+		expect(readFileSync(paths.repoConfig, "utf8")).toBe(
+			"commit:\n  push: false\n",
+		);
+	});
+
 	it("rejects a complex leaf as read-only", async () => {
 		const [status, payload] = await post({
 			key: "sql.connections",

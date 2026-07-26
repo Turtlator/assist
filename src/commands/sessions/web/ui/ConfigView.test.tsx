@@ -289,6 +289,100 @@ describe("ConfigView", () => {
 		expect(screen.getByRole("option", { name: "warn" })).toBeTruthy();
 	});
 
+	it("edits a scalar union as text and lists the accepted types", async () => {
+		const fetchMock = stubApi([
+			{
+				key: "worktree.install",
+				type: "union",
+				unionTypes: ["boolean", "string"],
+				value: undefined,
+				defaultValue: true,
+				source: "default",
+			},
+		]);
+		renderView("/repo/one");
+
+		await waitFor(() =>
+			expect(screen.getByText("worktree.install")).toBeTruthy(),
+		);
+		expect(screen.queryByText("union · read-only")).toBeNull();
+		fireEvent.click(
+			screen.getByRole("button", { name: "Edit worktree.install" }),
+		);
+		expect(screen.getByText("boolean or string")).toBeTruthy();
+		expect(screen.getByLabelText("worktree.install")).toHaveProperty(
+			"value",
+			"true",
+		);
+		fireEvent.change(screen.getByLabelText("worktree.install"), {
+			target: { value: "pnpm install" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() =>
+			expect(lastSetBody(fetchMock)).toEqual({
+				key: "worktree.install",
+				value: "pnpm install",
+				cwd: "/repo/one",
+				scope: "project",
+			}),
+		);
+	});
+
+	it("edits an array of scalars as one entry per line", async () => {
+		const fetchMock = stubApi([
+			{
+				key: "worktree.copy",
+				type: "array",
+				itemType: "string",
+				value: [".env"],
+				source: "project",
+			},
+		]);
+		renderView("/repo/one");
+
+		await waitFor(() => expect(screen.getByText("worktree.copy")).toBeTruthy());
+		expect(screen.queryByText("array · read-only")).toBeNull();
+		fireEvent.click(screen.getByRole("button", { name: "Edit worktree.copy" }));
+		expect(screen.getByLabelText("worktree.copy")).toHaveProperty(
+			"value",
+			".env",
+		);
+		fireEvent.change(screen.getByLabelText("worktree.copy"), {
+			target: { value: ".env\n settings.local.json \n\n" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() =>
+			expect(lastSetBody(fetchMock)).toEqual({
+				key: "worktree.copy",
+				value: [".env", "settings.local.json"],
+				cwd: "/repo/one",
+				scope: "project",
+			}),
+		);
+	});
+
+	it("keeps an array of objects read-only", async () => {
+		stubApi([
+			{
+				key: "sql.connections",
+				type: "array",
+				value: [{ name: "local" }],
+				source: "project",
+			},
+		]);
+		renderView();
+
+		await waitFor(() =>
+			expect(screen.getByText("sql.connections")).toBeTruthy(),
+		);
+		expect(screen.getByText("array · read-only")).toBeTruthy();
+		expect(
+			screen.queryByRole("button", { name: "Edit sql.connections" }),
+		).toBeNull();
+	});
+
 	it("does not offer editing for complex leaves", async () => {
 		stubApi([
 			{ key: "sql.connections", type: "array", value: [], source: "default" },

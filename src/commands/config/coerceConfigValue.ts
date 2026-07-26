@@ -1,12 +1,20 @@
 import { describeConfigLeaves } from "../../shared/describeConfigLeaves";
+import type { ConfigScalarLeafType } from "../../shared/scalarUnionMembers";
 import { assistConfigSchema } from "../../shared/types";
-import type { ConfigScalar } from "./applyConfigSet";
+import type { ConfigScalar, ConfigWritableValue } from "./applyConfigSet";
+import { coerceConfigScalar } from "./coerceConfigScalar";
 
 type CoerceConfigValueResult =
-	| { ok: true; value: ConfigScalar }
+	| { ok: true; value: ConfigWritableValue }
 	| { ok: false; error: string };
 
-const EDITABLE_TYPES = new Set(["string", "number", "boolean", "enum"]);
+const EDITABLE_TYPES = new Set([
+	"string",
+	"number",
+	"boolean",
+	"enum",
+	"union",
+]);
 
 export function coerceConfigValue(
 	key: string,
@@ -16,36 +24,46 @@ export function coerceConfigValue(
 		(candidate) => candidate.key === key,
 	);
 	if (!leaf) return { ok: false, error: `Unknown config key "${key}"` };
+	if (leaf.itemType) return coerceScalarList(key, raw, leaf.itemType);
 	if (!EDITABLE_TYPES.has(leaf.type)) {
 		return {
 			ok: false,
 			error: `"${key}" is a ${leaf.type} value and is read-only here`,
 		};
 	}
-	if (leaf.type === "boolean") return coerceBoolean(key, raw);
-	if (leaf.type === "number") return coerceNumber(key, raw);
-	return coerceString(key, raw);
+	if (leaf.type === "union")
+		return coerceUnion(key, raw, leaf.unionTypes ?? []);
+	return coerceConfigScalar(key, raw, leaf.type as ConfigScalarLeafType);
 }
 
-function coerceBoolean(key: string, raw: unknown): CoerceConfigValueResult {
-	if (typeof raw === "boolean") return { ok: true, value: raw };
-	if (raw === "true") return { ok: true, value: true };
-	if (raw === "false") return { ok: true, value: false };
-	return { ok: false, error: `${key}: expected a boolean` };
-}
-
-function coerceNumber(key: string, raw: unknown): CoerceConfigValueResult {
-	if (typeof raw === "number" && Number.isFinite(raw)) {
-		return { ok: true, value: raw };
+function coerceScalarList(
+	key: string,
+	raw: unknown,
+	itemType: ConfigScalarLeafType,
+): CoerceConfigValueResult {
+	if (!Array.isArray(raw)) {
+		return {
+			ok: false,
+			error: `${key}: expected a list of ${itemType} values`,
+		};
 	}
-	if (typeof raw === "string" && raw.trim() !== "") {
-		const parsed = Number(raw);
-		if (Number.isFinite(parsed)) return { ok: true, value: parsed };
+	const values: ConfigScalar[] = [];
+	for (const item of raw) {
+		const result = coerceConfigScalar(key, item, itemType);
+		if (!result.ok) return result;
+		values.push(result.value);
 	}
-	return { ok: false, error: `${key}: expected a number` };
+	return { ok: true, value: values };
 }
 
-function coerceString(key: string, raw: unknown): CoerceConfigValueResult {
-	if (typeof raw === "string") return { ok: true, value: raw };
-	return { ok: false, error: `${key}: expected a string` };
+function coerceUnion(
+	key: string,
+	raw: unknown,
+	types: ConfigScalarLeafType[],
+): CoerceConfigValueResult {
+	for (const type of types) {
+		const result = coerceConfigScalar(key, raw, type);
+		if (result.ok) return result;
+	}
+	return { ok: false, error: `${key}: expected ${types.join(" or ")}` };
 }
