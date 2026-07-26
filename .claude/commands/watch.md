@@ -10,7 +10,7 @@ Report the current version from `package.json` as a baseline, then stop. Do not 
 
 When it exits, branch on the exit code:
 
-- **0** — the upstream moved and was fast-forwarded. Invoke the `/auto-build` skill, report the built version and the restarts the pull makes necessary, then run `assist watch wait --pull --timeout 60m` in the background again.
+- **0** — the upstream moved and was fast-forwarded. Invoke the `/auto-build` skill, report the built version, the commit table (see below) and the restarts the pull makes necessary, then run `assist watch wait --pull --timeout 60m` in the background again.
 - **2** — the timeout elapsed with no movement. Say so in one line and run `assist watch wait --pull --timeout 60m` in the background again.
 - **3** — the upstream moved but the pull was not a clean fast-forward. Stop watching and report git's reason. Do not force, rebase, or reset anything.
 - **1** — waiting is impossible (no upstream, detached HEAD, not a repo). Stop watching and report the reason.
@@ -23,6 +23,14 @@ When it exits, branch on the exit code:
 ## Reporting each build
 
 State the version that was actually built, not just that the build passed. A passing build says nothing about which source it compiled.
+
+Every time new commits land, show the last 10 commits as a markdown table. Get them with:
+
+```
+git log -10 --pretty=format:'%h%x09%ar%x09%s'
+```
+
+Render one row per commit with columns **SHA**, **When** (the relative time, e.g. `12 minutes ago`) and **Subject**, newest first. Mark the commits the pull just brought in — bold the SHA, or add a trailing `← new` — so it is obvious which rows are new versus already-built history.
 
 When a pull brings in changes, say which processes need restarting before the change is visible:
 
