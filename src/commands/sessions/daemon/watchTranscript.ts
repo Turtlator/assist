@@ -1,7 +1,8 @@
-import { existsSync, watch } from "node:fs";
+import { watch } from "node:fs";
 import { projectDirForCwd } from "../shared/findTranscriptPathSync";
 import type { Session } from "./createSession";
 import { daemonLog } from "./daemonLog";
+import { ensureProjectDirExists } from "./ensureProjectDirExists";
 import { reconcileTranscriptStatus } from "./reconcileTranscriptStatus";
 import { startTranscriptTitleGeneration } from "./startTranscriptTitleGeneration";
 import type { OnStatusChange } from "./types";
@@ -17,7 +18,7 @@ export function watchTranscript(
 	if (session.watchedTranscriptId === session.claudeSessionId) return;
 
 	const dir = projectDirForCwd(session.cwd);
-	if (!existsSync(dir)) return;
+	if (!ensureProjectDirExists(dir, session.id)) return;
 
 	if (session.transcriptWatcher) {
 		session.transcriptWatcher.close();

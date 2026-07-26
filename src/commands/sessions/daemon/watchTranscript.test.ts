@@ -1,12 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { existsSync, watch } from "node:fs";
+import { watch } from "node:fs";
 import type { Session } from "./createSession";
+import { ensureProjectDirExists } from "./ensureProjectDirExists";
 import { startTranscriptTitleGeneration } from "./startTranscriptTitleGeneration";
 import { watchTranscript } from "./watchTranscript";
 
 vi.mock("node:fs", () => ({
-	existsSync: vi.fn(() => true),
 	watch: vi.fn(),
+}));
+
+vi.mock("./ensureProjectDirExists", () => ({
+	ensureProjectDirExists: vi.fn(() => true),
 }));
 
 vi.mock("../shared/findTranscriptPathSync", () => ({
@@ -24,7 +28,9 @@ vi.mock("./startTranscriptTitleGeneration", () => ({
 vi.mock("./daemonLog", () => ({ daemonLog: vi.fn() }));
 
 const watchMock = watch as unknown as ReturnType<typeof vi.fn>;
-const existsMock = existsSync as unknown as ReturnType<typeof vi.fn>;
+const ensureDirMock = ensureProjectDirExists as unknown as ReturnType<
+	typeof vi.fn
+>;
 const titleMock = startTranscriptTitleGeneration as unknown as ReturnType<
 	typeof vi.fn
 >;
@@ -42,8 +48,31 @@ function session(overrides: Partial<Session> = {}): Session {
 describe("watchTranscript", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		existsMock.mockReturnValue(true);
+		ensureDirMock.mockReturnValue(true);
 		watchMock.mockImplementation(() => ({ close: vi.fn() }));
+	});
+
+	it("creates the project dir so a fresh worktree still binds", () => {
+		const s = session({ cwd: "/home/me/fresh-worktree" });
+
+		watchTranscript(s, vi.fn(), vi.fn());
+
+		expect(ensureDirMock).toHaveBeenCalledWith(
+			"/projects/home/me/fresh-worktree",
+			"3",
+		);
+		expect(watchMock).toHaveBeenCalledTimes(1);
+		expect(s.watchedTranscriptId).toBe("phase-1");
+	});
+
+	it("skips binding when the project dir cannot be created", () => {
+		ensureDirMock.mockReturnValue(false);
+		const s = session();
+
+		watchTranscript(s, vi.fn(), vi.fn());
+
+		expect(watchMock).not.toHaveBeenCalled();
+		expect(s.watchedTranscriptId).toBeUndefined();
 	});
 
 	it("binds a watcher for the session's current transcript", () => {
