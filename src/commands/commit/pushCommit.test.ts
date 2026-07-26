@@ -36,23 +36,39 @@ describe("pushCommit", () => {
 				"git config --get branch.feature-x.merge": "refs/heads/feature-x\n",
 			});
 
-			pushCommit();
+			pushCommit(true);
 
 			expect(pushed()).toEqual(["git push"]);
 		});
 	});
 
-	describe("when the upstream branch name differs from the local branch", () => {
-		it("should push HEAD at the upstream branch explicitly", () => {
+	describe("when the upstream branch name differs and trunk-based work is on", () => {
+		it("should push HEAD at the tracked mainline explicitly", () => {
 			gitState({
 				"git symbolic-ref --short HEAD": "assist-2\n",
 				"git config --get branch.assist-2.remote": "origin\n",
 				"git config --get branch.assist-2.merge": "refs/heads/main\n",
 			});
 
-			pushCommit();
+			pushCommit(true);
 
 			expect(pushed()).toEqual(["git push origin HEAD:main"]);
+		});
+	});
+
+	describe("when the upstream branch name differs and trunk-based work is off", () => {
+		it("should push the branch to its own remote branch rather than the mainline", () => {
+			gitState({
+				"git symbolic-ref --short HEAD": "feature-x\n",
+				"git config --get branch.feature-x.remote": "origin\n",
+				"git config --get branch.feature-x.merge": "refs/heads/main\n",
+			});
+
+			pushCommit(false);
+
+			expect(pushed()).toEqual([
+				"git push --set-upstream origin HEAD:feature-x",
+			]);
 		});
 	});
 
@@ -60,7 +76,7 @@ describe("pushCommit", () => {
 		it("should push plainly so git reports its own guidance", () => {
 			gitState({ "git symbolic-ref --short HEAD": "feature-x\n" });
 
-			pushCommit();
+			pushCommit(false);
 
 			expect(pushed()).toEqual(["git push"]);
 		});
@@ -74,7 +90,7 @@ describe("pushCommit", () => {
 				return "";
 			});
 
-			pushCommit();
+			pushCommit(true);
 
 			expect(pushed()).toEqual(["git push"]);
 		});

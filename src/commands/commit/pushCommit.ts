@@ -3,15 +3,17 @@ import { shellQuote } from "../../shared/shellQuote";
 
 const HEADS_PREFIX = "refs/heads/";
 
-export function pushCommit(): void {
-	const target = renamedUpstream();
+type PushTarget = { remote: string; branch: string; setUpstream: boolean };
+
+export function pushCommit(trunkMode: boolean): void {
+	const target = pushTargetForRenamedUpstream(trunkMode);
 	const command = target
-		? `git push ${shellQuote(target.remote)} HEAD:${shellQuote(target.branch)}`
+		? `git push ${target.setUpstream ? "--set-upstream " : ""}${shellQuote(target.remote)} HEAD:${shellQuote(target.branch)}`
 		: "git push";
 	execSync(command, { stdio: "inherit" });
 }
 
-function renamedUpstream(): { remote: string; branch: string } | null {
+function pushTargetForRenamedUpstream(trunkMode: boolean): PushTarget | null {
 	const branch = gitOrNull("git symbolic-ref --short HEAD");
 	if (!branch) return null;
 	const remote = gitOrNull(
@@ -24,7 +26,18 @@ function renamedUpstream(): { remote: string; branch: string } | null {
 	const upstream = merge.startsWith(HEADS_PREFIX)
 		? merge.slice(HEADS_PREFIX.length)
 		: merge;
-	return upstream === branch ? null : { remote, branch: upstream };
+	if (upstream === branch) return null;
+	return trunkMode
+		? landOnTrackedMainline(remote, upstream)
+		: raiseOwnRemoteBranch(remote, branch);
+}
+
+function landOnTrackedMainline(remote: string, upstream: string): PushTarget {
+	return { remote, branch: upstream, setUpstream: false };
+}
+
+function raiseOwnRemoteBranch(remote: string, branch: string): PushTarget {
+	return { remote, branch, setUpstream: true };
 }
 
 function gitOrNull(command: string): string | null {

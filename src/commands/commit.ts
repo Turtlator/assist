@@ -7,6 +7,7 @@ import { warnIfUnexpectedBranch } from "../shared/warnIfUnexpectedBranch";
 import { abortOnConflicts } from "./commit/abortOnConflicts";
 import { collectCommitRefs } from "./commit/collectCommitRefs";
 import { pushCommit } from "./commit/pushCommit";
+import { shouldPull } from "./commit/shouldPull";
 import { commitStaged, stageAndCommit } from "./commit/stageAndCommit";
 import { validateMessage } from "./commit/validateMessage";
 
@@ -17,7 +18,7 @@ async function execCommit(
 ): Promise<void> {
 	try {
 		warnIfUnexpectedBranch(config);
-		const pulled = Boolean(config.commit?.pull);
+		const pulled = shouldPull(config);
 		if (pulled) {
 			execSync("git pull --autostash", { stdio: "inherit" });
 		}
@@ -26,7 +27,7 @@ async function execCommit(
 			files.length > 0 ? stageAndCommit(files, message) : commitStaged(message);
 		console.log(`Committed: ${sha}`);
 		if (config.commit?.push) {
-			pushCommit();
+			pushCommit(config.worktree?.trunk === true);
 			console.log("Pushed to remote");
 		}
 		await recordCommitActivity(message);

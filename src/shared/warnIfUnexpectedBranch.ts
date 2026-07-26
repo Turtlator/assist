@@ -1,6 +1,7 @@
 import { execSync } from "node:child_process";
 import chalk from "chalk";
 import type { AssistConfig } from "./types";
+import { upstreamBranch } from "./upstreamBranch";
 
 export function warnIfUnexpectedBranch(config: AssistConfig): void {
 	const expected = config.commit?.expectedBranch;
@@ -29,19 +30,6 @@ function currentBranch(): string | null {
 		return execSync("git rev-parse --abbrev-ref HEAD", {
 			encoding: "utf8",
 		}).trim();
-	} catch {
-		return null;
-	}
-}
-
-function upstreamBranch(): string | null {
-	try {
-		const upstream = execSync(
-			"git rev-parse --abbrev-ref --symbolic-full-name @{upstream}",
-			{ encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] },
-		).trim();
-		const slash = upstream.indexOf("/");
-		return slash === -1 ? upstream || null : upstream.slice(slash + 1) || null;
 	} catch {
 		return null;
 	}

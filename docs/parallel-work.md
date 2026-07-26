@@ -92,7 +92,11 @@ Two per-repo settings, both **default off**:
   its single working copy; there is no `<repo>-N` isolation.
 - **Trunk-based on/off** — off by default. Off means work lands on a branch: a workspace
   starts from the remote default with no mainline tracking and the session raises its own
-  branch and PR. On means it lands straight on the mainline.
+  branch and PR. On means it lands straight on the mainline. The switch also settles what
+  a commit does on a branch whose upstream is a differently-named remote branch: on, that
+  tracking is deliberate and the commit is pushed there; off, it is git's own doing when a
+  branch was cut from the mainline, so the commit is pushed to the branch's own remote
+  branch and never onto the mainline.
 
 One further per-repo switch, also **default off**: whether draft-type work gets its own
 workspace. Off is the behaviour in 1 — drafting, bug filing and refining stay in the
