@@ -1,3 +1,10 @@
+## [0.479.2](https://github.com/staff0rd/assist/compare/v0.479.1...v0.479.2) (2026-07-26)
+
+
+### Bug Fixes
+
+* require two ok polls before reload ([7b77410](https://github.com/staff0rd/assist/commit/7b774101e436a715c63fbc641502b7d05d134e85))
+
 ## [0.479.1](https://github.com/staff0rd/assist/compare/v0.479.0...v0.479.1) (2026-07-26)
 
 
