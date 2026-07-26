@@ -229,7 +229,110 @@ describe("setConfig", () => {
 		);
 	});
 
-	it("rejects a complex leaf as read-only", async () => {
+	it("writes an array of objects", async () => {
+		const connections = [
+			{
+				name: "local",
+				server: "localhost",
+				port: 1433,
+				user: "sa",
+				password: "secret",
+				database: "app",
+			},
+		];
+		const [status] = await post({
+			key: "sql.connections",
+			value: connections,
+			cwd: paths.repo,
+			scope: "project",
+		});
+
+		expect(status).toBe(200);
+		expect(readYaml(paths.repoConfig)).toEqual({
+			commit: { push: false },
+			sql: { connections },
+		});
+	});
+
+	it("writes a record of lists", async () => {
+		const [status] = await post({
+			key: "cliReadVerbs",
+			value: { docker: ["ps", "logs"] },
+			cwd: paths.repo,
+			scope: "project",
+		});
+
+		expect(status).toBe(200);
+		expect(readYaml(paths.repoConfig)).toEqual({
+			commit: { push: false },
+			cliReadVerbs: { docker: ["ps", "logs"] },
+		});
+	});
+
+	it("writes a run entry with a nested params array and env record", async () => {
+		const run = [
+			{
+				name: "deploy",
+				command: "sh",
+				params: [{ name: "stage", required: true }],
+				env: { LOG: "debug" },
+			},
+			{ link: "shared.yml", prefix: "shared" },
+		];
+		const [status] = await post({
+			key: "run",
+			value: run,
+			cwd: paths.repo,
+			scope: "project",
+		});
+
+		expect(status).toBe(200);
+		expect(readYaml(paths.repoConfig)).toEqual({
+			commit: { push: false },
+			run,
+		});
+	});
+
+	it("rejects an invalid nested value and leaves the file untouched", async () => {
+		const [status, payload] = await post({
+			key: "sql.connections",
+			value: [
+				{
+					name: "local",
+					server: "localhost",
+					port: "soon",
+					user: "sa",
+					password: "secret",
+					database: "app",
+				},
+			],
+			cwd: paths.repo,
+			scope: "project",
+		});
+
+		expect(status).toBe(400);
+		expect(payload.error).toContain("sql.connections[0].port");
+		expect(readFileSync(paths.repoConfig, "utf8")).toBe(
+			"commit:\n  push: false\n",
+		);
+	});
+
+	it("rejects a nested entry missing a required field", async () => {
+		const [status, payload] = await post({
+			key: "run",
+			value: [{ name: "build" }],
+			cwd: paths.repo,
+			scope: "project",
+		});
+
+		expect(status).toBe(400);
+		expect(payload.error).toContain("run[0]");
+		expect(readFileSync(paths.repoConfig, "utf8")).toBe(
+			"commit:\n  push: false\n",
+		);
+	});
+
+	it("rejects a complex leaf given a scalar", async () => {
 		const [status, payload] = await post({
 			key: "sql.connections",
 			value: "nope",
@@ -238,7 +341,10 @@ describe("setConfig", () => {
 		});
 
 		expect(status).toBe(400);
-		expect(payload.error).toContain("read-only");
+		expect(payload.error).toContain("sql.connections");
+		expect(readFileSync(paths.repoConfig, "utf8")).toBe(
+			"commit:\n  push: false\n",
+		);
 	});
 
 	it("rejects an unknown key", async () => {

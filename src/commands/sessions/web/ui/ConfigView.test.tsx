@@ -7,9 +7,18 @@ import {
 	waitFor,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { describeConfigNode } from "../../../../shared/describeConfigNode";
+import { assistConfigSchema } from "../../../../shared/types";
+import { configEntryNode } from "../../../config/configEntryNode";
 import type { ConfigEntry } from "../../../config/readConfigEntries";
 import { ConfigView } from "./ConfigView";
 import { RepoSelectionContext } from "./useRepoSelectionContext";
+
+const schema = describeConfigNode(assistConfigSchema);
+
+function node(key: string) {
+	return configEntryNode(schema, key);
+}
 
 afterEach(() => {
 	cleanup();
@@ -69,12 +78,19 @@ function renderView(selectedCwd = "/repo") {
 describe("ConfigView", () => {
 	it("requests the config for the selected cwd and lists grouped keys", async () => {
 		const fetchMock = stubEntries([
-			{ key: "commit.pull", type: "boolean", value: true, source: "project" },
+			{
+				key: "commit.pull",
+				type: "boolean",
+				value: true,
+				source: "project",
+				node: node("commit.pull"),
+			},
 			{
 				key: "backup.dir",
 				type: "string",
 				value: "~/.assist/backups",
 				source: "global",
+				node: node("backup.dir"),
 			},
 		]);
 		renderView("/repo/one");
@@ -87,19 +103,21 @@ describe("ConfigView", () => {
 		expect(screen.getByText("commit")).toBeTruthy();
 	});
 
-	it("renders complex leaves as read-only formatted values", async () => {
+	it("renders a complex leaf structurally and an unset leaf as not set", async () => {
 		stubEntries([
 			{
 				key: "sql.connections",
 				type: "array",
 				value: [{ name: "local" }],
 				source: "project",
+				node: node("sql.connections"),
 			},
 			{
 				key: "branch.prefix",
 				type: "string",
 				value: undefined,
 				source: "default",
+				node: node("branch.prefix"),
 			},
 		]);
 		renderView();
@@ -107,9 +125,31 @@ describe("ConfigView", () => {
 		await waitFor(() =>
 			expect(screen.getByText("sql.connections")).toBeTruthy(),
 		);
-		expect(screen.getByText("array · read-only")).toBeTruthy();
-		expect(screen.getByText(/"name": "local"/)).toBeTruthy();
+		expect(screen.queryByText(/"name": "local"/)).toBeNull();
+		expect(screen.getByText("local")).toBeTruthy();
 		expect(screen.getByText("not set")).toBeTruthy();
+	});
+
+	it("renders a complex leaf from its descriptor, keeping source and default", async () => {
+		stubEntries([
+			{
+				key: "voice.wakeWords",
+				type: "array",
+				itemType: "string",
+				value: undefined,
+				defaultValue: ["hey assist"],
+				source: "default",
+				node: node("voice.wakeWords"),
+			},
+		]);
+		renderView();
+
+		await waitFor(() =>
+			expect(screen.getByText("voice.wakeWords")).toBeTruthy(),
+		);
+		expect(screen.getByText("hey assist")).toBeTruthy();
+		expect(screen.getByText("default")).toBeTruthy();
+		expect(screen.queryByText(/\[/)).toBeNull();
 	});
 
 	it("shows the schema default and its source instead of 'not set'", async () => {
@@ -120,6 +160,7 @@ describe("ConfigView", () => {
 				value: undefined,
 				defaultValue: false,
 				source: "default",
+				node: node("worktree.enabled"),
 			},
 		]);
 		renderView();
@@ -141,7 +182,13 @@ describe("ConfigView", () => {
 
 	it("saves a boolean edit to the project config and refetches", async () => {
 		const fetchMock = stubApi([
-			{ key: "commit.push", type: "boolean", value: false, source: "project" },
+			{
+				key: "commit.push",
+				type: "boolean",
+				value: false,
+				source: "project",
+				node: node("commit.push"),
+			},
 		]);
 		renderView("/repo/one");
 
@@ -174,6 +221,7 @@ describe("ConfigView", () => {
 				type: "string",
 				value: "~/.assist/backups",
 				source: "global",
+				node: node("backup.dir"),
 			},
 		]);
 		renderView();
@@ -205,6 +253,7 @@ describe("ConfigView", () => {
 					value: false,
 					source: "global",
 					globalOnly: true,
+					node: node("sync.autoConfirm"),
 				},
 			],
 			{ ok: true, status: 200, body: { target: "global" } },
@@ -246,6 +295,7 @@ describe("ConfigView", () => {
 					type: "boolean",
 					value: false,
 					source: "project",
+					node: node("commit.push"),
 				},
 			],
 			{
@@ -274,6 +324,7 @@ describe("ConfigView", () => {
 				enumValues: ["block", "warn", "off"],
 				value: "block",
 				source: "default",
+				node: node("sessions.windowsVersionCheck"),
 			},
 		]);
 		renderView();
@@ -298,6 +349,7 @@ describe("ConfigView", () => {
 				value: undefined,
 				defaultValue: true,
 				source: "default",
+				node: node("worktree.install"),
 			},
 		]);
 		renderView("/repo/one");
@@ -337,6 +389,7 @@ describe("ConfigView", () => {
 				itemType: "string",
 				value: [".env"],
 				source: "project",
+				node: node("worktree.copy"),
 			},
 		]);
 		renderView("/repo/one");
@@ -363,27 +416,116 @@ describe("ConfigView", () => {
 		);
 	});
 
-	it("keeps an array of objects read-only", async () => {
-		stubApi([
+	it("adds an entry to an array of objects and posts the typed fields", async () => {
+		const fetchMock = stubApi([
 			{
 				key: "sql.connections",
 				type: "array",
-				value: [{ name: "local" }],
-				source: "project",
+				value: [],
+				source: "default",
+				node: node("sql.connections"),
 			},
 		]);
-		renderView();
+		renderView("/repo/one");
 
 		await waitFor(() =>
 			expect(screen.getByText("sql.connections")).toBeTruthy(),
 		);
-		expect(screen.getByText("array · read-only")).toBeTruthy();
-		expect(
-			screen.queryByRole("button", { name: "Edit sql.connections" }),
-		).toBeNull();
+		expect(screen.queryByText("array · read-only")).toBeNull();
+		fireEvent.click(
+			screen.getByRole("button", { name: "Edit sql.connections" }),
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Add sql.connections entry" }),
+		);
+		fireEvent.change(screen.getByLabelText("sql.connections[0].name"), {
+			target: { value: "local" },
+		});
+		fireEvent.change(screen.getByLabelText("sql.connections[0].port"), {
+			target: { value: "1433" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() =>
+			expect(lastSetBody(fetchMock)).toEqual({
+				key: "sql.connections",
+				value: [{ name: "local", port: 1433 }],
+				cwd: "/repo/one",
+				scope: "project",
+			}),
+		);
 	});
 
-	it("does not offer editing for complex leaves", async () => {
+	it("reorders entries in an array of objects", async () => {
+		const fetchMock = stubApi([
+			{
+				key: "run",
+				type: "array",
+				value: [
+					{ name: "build", command: "npm" },
+					{ name: "test", command: "vitest" },
+				],
+				source: "project",
+				node: node("run"),
+			},
+		]);
+		renderView("/repo/one");
+
+		await waitFor(() => expect(screen.getByText("run")).toBeTruthy());
+		fireEvent.click(screen.getByRole("button", { name: "Edit run" }));
+		fireEvent.click(screen.getByRole("button", { name: "Move run[1] up" }));
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() =>
+			expect(lastSetBody(fetchMock)).toEqual({
+				key: "run",
+				value: [
+					{ name: "test", command: "vitest" },
+					{ name: "build", command: "npm" },
+				],
+				cwd: "/repo/one",
+				scope: "project",
+			}),
+		);
+	});
+
+	it("adds a key/value row to a record", async () => {
+		const fetchMock = stubApi([
+			{
+				key: "cliReadVerbs",
+				type: "record",
+				value: { docker: ["ps"] },
+				source: "project",
+				node: node("cliReadVerbs"),
+			},
+		]);
+		renderView("/repo/one");
+
+		await waitFor(() => expect(screen.getByText("cliReadVerbs")).toBeTruthy());
+		expect(screen.queryByText("record · read-only")).toBeNull();
+		fireEvent.click(screen.getByRole("button", { name: "Edit cliReadVerbs" }));
+		fireEvent.click(
+			screen.getByRole("button", { name: "Add cliReadVerbs entry" }),
+		);
+		fireEvent.change(screen.getByLabelText("cliReadVerbs key 2"), {
+			target: { value: "kubectl" },
+		});
+		fireEvent.change(screen.getByLabelText("cliReadVerbs.kubectl"), {
+			target: { value: "get" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() =>
+			expect(lastSetBody(fetchMock)).toEqual({
+				key: "cliReadVerbs",
+				value: { docker: ["ps"], kubectl: ["get"] },
+				cwd: "/repo/one",
+				scope: "project",
+			}),
+		);
+	});
+
+	it("keeps a leaf the schema does not describe read-only", async () => {
 		stubApi([
 			{ key: "sql.connections", type: "array", value: [], source: "default" },
 		]);
@@ -392,6 +534,7 @@ describe("ConfigView", () => {
 		await waitFor(() =>
 			expect(screen.getByText("sql.connections")).toBeTruthy(),
 		);
+		expect(screen.getByText("array · read-only")).toBeTruthy();
 		expect(
 			screen.queryByRole("button", { name: "Edit sql.connections" }),
 		).toBeNull();

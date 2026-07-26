@@ -10,7 +10,10 @@ import { validateConfig } from "./validateConfig";
 
 export type ConfigScalar = string | number | boolean;
 
-export type ConfigWritableValue = ConfigScalar | ConfigScalar[];
+export type ConfigWritableValue =
+	| ConfigScalar
+	| unknown[]
+	| Record<string, unknown>;
 
 type ConfigSetResult =
 	| { ok: true; target: "global" | "project" }

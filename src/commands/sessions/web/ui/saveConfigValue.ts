@@ -2,7 +2,7 @@ export type ConfigScope = "project" | "global";
 
 type SaveConfigValueRequest = {
 	key: string;
-	value: string | number | boolean | string[];
+	value: unknown;
 	cwd: string;
 	scope: ConfigScope;
 };

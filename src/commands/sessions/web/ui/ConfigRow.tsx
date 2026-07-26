@@ -6,11 +6,8 @@ import { ConfigRowEditor } from "./ConfigRowEditor";
 import { ConfigRowTypeCell } from "./ConfigRowTypeCell";
 import { ConfigValue } from "./ConfigValue";
 
-const COMPLEX_TYPES = new Set(["array", "record", "other"]);
-
 function isReadOnly(entry: ConfigEntry): boolean {
-	if (entry.type === "array") return entry.itemType === undefined;
-	return COMPLEX_TYPES.has(entry.type);
+	return !entry.node || entry.node.kind === "other";
 }
 
 type Props = {

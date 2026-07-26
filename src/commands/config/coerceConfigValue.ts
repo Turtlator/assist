@@ -3,6 +3,7 @@ import type { ConfigScalarLeafType } from "../../shared/scalarUnionMembers";
 import { assistConfigSchema } from "../../shared/types";
 import type { ConfigScalar, ConfigWritableValue } from "./applyConfigSet";
 import { coerceConfigScalar } from "./coerceConfigScalar";
+import { coerceStructuredConfigValue } from "./coerceStructuredConfigValue";
 
 type CoerceConfigValueResult =
 	| { ok: true; value: ConfigWritableValue }
@@ -25,12 +26,8 @@ export function coerceConfigValue(
 	);
 	if (!leaf) return { ok: false, error: `Unknown config key "${key}"` };
 	if (leaf.itemType) return coerceScalarList(key, raw, leaf.itemType);
-	if (!EDITABLE_TYPES.has(leaf.type)) {
-		return {
-			ok: false,
-			error: `"${key}" is a ${leaf.type} value and is read-only here`,
-		};
-	}
+	if (!EDITABLE_TYPES.has(leaf.type))
+		return coerceStructuredConfigValue(key, raw);
 	if (leaf.type === "union")
 		return coerceUnion(key, raw, leaf.unionTypes ?? []);
 	return coerceConfigScalar(key, raw, leaf.type as ConfigScalarLeafType);

@@ -16,15 +16,20 @@ export type SchemaNode = {
 		entries?: Record<string, unknown>;
 		options?: SchemaNode[];
 		element?: SchemaNode;
+		valueType?: SchemaNode;
 	};
 };
+
+const OPTIONAL_TYPES = new Set(["optional", "nullish"]);
 
 export function unwrapSchemaNode(node: SchemaNode): {
 	inner: SchemaNode;
 	defaultValue?: unknown;
+	optional: boolean;
 } {
 	let current = node;
 	let defaultValue: unknown;
+	let optional = false;
 	while (
 		current.def &&
 		WRAPPER_TYPES.has(current.def.type ?? "") &&
@@ -33,7 +38,8 @@ export function unwrapSchemaNode(node: SchemaNode): {
 		if (current.def.type === "default" && defaultValue === undefined) {
 			defaultValue = current.def.defaultValue;
 		}
+		if (OPTIONAL_TYPES.has(current.def.type ?? "")) optional = true;
 		current = current.def.innerType;
 	}
-	return { inner: current, defaultValue };
+	return { inner: current, defaultValue, optional };
 }

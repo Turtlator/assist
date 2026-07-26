@@ -1,12 +1,11 @@
 import type { z } from "zod";
-import { scalarArrayItemType } from "./scalarArrayItemType";
-import {
-	type ConfigLeafType,
-	type ConfigScalarLeafType,
-	leafTypeOf,
-	scalarUnionMembers,
+import type { ConfigNode } from "./ConfigNode";
+import { describeConfigNode } from "./describeConfigNode";
+import { formatConfigPath } from "./formatConfigPath";
+import type {
+	ConfigLeafType,
+	ConfigScalarLeafType,
 } from "./scalarUnionMembers";
-import { type SchemaNode, unwrapSchemaNode } from "./unwrapSchemaNode";
 
 export type ConfigLeaf = {
 	key: string;
@@ -17,44 +16,46 @@ export type ConfigLeaf = {
 	defaultValue?: unknown;
 };
 
-function enumValues(node: SchemaNode): string[] | undefined {
-	const entries = node.def?.entries;
-	if (!entries) return undefined;
-	return Object.values(entries).filter(
-		(value): value is string => typeof value === "string",
-	);
+function leafType(node: ConfigNode): ConfigLeafType {
+	switch (node.kind) {
+		case "scalar":
+			return node.type;
+		case "scalarList":
+		case "objectList":
+			return "array";
+		case "record":
+			return "record";
+		case "other":
+			return node.type;
+		default:
+			return "other";
+	}
 }
 
-function toLeaf(
-	key: string,
-	node: SchemaNode,
-	defaultValue: unknown,
-): ConfigLeaf {
-	const unionTypes = scalarUnionMembers(node);
-	const type = unionTypes ? "union" : leafTypeOf(node);
-	const leaf: ConfigLeaf = { key, type };
-	if (type === "enum") leaf.enumValues = enumValues(node);
-	if (unionTypes) leaf.unionTypes = unionTypes;
-	const itemType = scalarArrayItemType(node);
-	if (itemType) leaf.itemType = itemType;
-	if (defaultValue !== undefined) leaf.defaultValue = defaultValue;
+function toLeaf(node: ConfigNode): ConfigLeaf {
+	const leaf: ConfigLeaf = {
+		key: formatConfigPath(node.path),
+		type: leafType(node),
+	};
+	if (node.kind === "scalar") {
+		if (node.enumValues) leaf.enumValues = node.enumValues;
+		if (node.unionTypes) leaf.unionTypes = node.unionTypes;
+	}
+	if (node.kind === "scalarList") leaf.itemType = node.itemType;
+	if (node.defaultValue !== undefined) leaf.defaultValue = node.defaultValue;
 	return leaf;
 }
 
-function collect(node: SchemaNode, prefix: string, out: ConfigLeaf[]): void {
-	const { inner, defaultValue } = unwrapSchemaNode(node);
-	const shape = inner.def?.shape;
-	if (inner.def?.type === "object" && shape) {
-		for (const [key, child] of Object.entries(shape)) {
-			collect(child, prefix ? `${prefix}.${key}` : key, out);
-		}
+function flatten(node: ConfigNode, out: ConfigLeaf[]): void {
+	if (node.kind === "object") {
+		for (const field of node.fields) flatten(field, out);
 		return;
 	}
-	out.push(toLeaf(prefix, inner, defaultValue));
+	out.push(toLeaf(node));
 }
 
 export function describeConfigLeaves(schema: z.ZodTypeAny): ConfigLeaf[] {
 	const out: ConfigLeaf[] = [];
-	collect(schema as unknown as SchemaNode, "", out);
+	flatten(describeConfigNode(schema), out);
 	return out.sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
 }

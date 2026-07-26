@@ -71,6 +71,22 @@ describe("readConfigEntries", () => {
 		expect(entryFor("commit.push").globalOnly).toBe(false);
 	});
 
+	it("carries a descriptor node for every leaf", () => {
+		expect(entryFor("sql.connections").node).toMatchObject({
+			kind: "objectList",
+			item: { kind: "object" },
+		});
+		expect(entryFor("cliReadVerbs").node).toMatchObject({ kind: "record" });
+		expect(entryFor("run").node).toMatchObject({
+			kind: "objectList",
+			item: { kind: "unionOfObjects" },
+		});
+		expect(entryFor("commit.push").node).toMatchObject({
+			kind: "scalar",
+			type: "boolean",
+		});
+	});
+
 	it("reports the schema default for a leaf under an unset optional parent", () => {
 		const entry = entryFor("worktree.enabled");
 
