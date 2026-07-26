@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 export function useSessionViewConfig(): { floatWaiting: boolean } {
-	const [floatWaiting, setFloatWaiting] = useState(false);
+	const [floatWaiting, setFloatWaiting] = useState(true);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -11,7 +11,7 @@ export function useSessionViewConfig(): { floatWaiting: boolean } {
 				const body = await res.json();
 				if (!cancelled) setFloatWaiting(Boolean(body?.floatWaiting));
 			} catch {
-				setFloatWaiting(false);
+				setFloatWaiting(true);
 			}
 		})();
 		return () => {

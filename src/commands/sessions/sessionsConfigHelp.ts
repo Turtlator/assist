@@ -34,8 +34,8 @@ export const sessionsConfigHelp: ConfigHelpEntry[] = [
 	},
 	{
 		key: "sessions.floatWaiting",
-		setter: "assist config set sessions.floatWaiting true -g",
-		note: "float sessions that have been waiting on input for a few seconds above the other unstarred cards in the sidebar (default off)",
+		setter: "assist config set sessions.floatWaiting false -g",
+		note: "set false to stop the sidebar floating sessions that have been waiting on input for a few seconds above the other unstarred cards (default on)",
 	},
 	{
 		key: "worktree.enabled",
