@@ -2,7 +2,7 @@ import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import type { FormEvent, KeyboardEvent, ReactNode } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { PLACEHOLDER } from "./dispatchMode";
 import { handleEnterSubmit } from "./handleEnterSubmit";
 import { promptFormSx } from "./promptFormSx";
@@ -36,9 +36,7 @@ export function FreePromptForm({
 					<TextField
 						value={value}
 						onChange={(e) => onChange(e.target.value)}
-						onKeyDown={(e: KeyboardEvent<HTMLDivElement>) =>
-							handleEnterSubmit(e, value)
-						}
+						onKeyDown={handleEnterSubmit}
 						placeholder={PLACEHOLDER}
 						size="small"
 						autoFocus

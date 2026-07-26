@@ -63,4 +63,14 @@ describe("AddAgentButton", () => {
 
 		expect(launch).not.toHaveBeenCalled();
 	});
+
+	it("does nothing on Enter without a prompt", () => {
+		const launch = vi.fn();
+		renderButton(launch);
+
+		fireEvent.click(screen.getByLabelText("add agent"));
+		fireEvent.keyDown(screen.getByRole("textbox"), { key: "Enter" });
+
+		expect(launch).not.toHaveBeenCalled();
+	});
 });
