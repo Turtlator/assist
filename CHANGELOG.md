@@ -1,3 +1,10 @@
+# [0.464.0](https://github.com/staff0rd/assist/compare/v0.463.0...v0.464.0) (2026-07-26)
+
+
+### Features
+
+* default sessions.topBar on ([3ad1405](https://github.com/staff0rd/assist/commit/3ad1405ca848c3bb4dcb2beea1a4d2e0091d6e12))
+
 # [0.463.0](https://github.com/staff0rd/assist/compare/v0.462.0...v0.463.0) (2026-07-26)
 
 
