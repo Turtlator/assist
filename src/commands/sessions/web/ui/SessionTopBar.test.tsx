@@ -227,6 +227,24 @@ describe("SessionTopBar", () => {
 		).toBeTruthy();
 	});
 
+	it("wraps the story name rather than truncating it", () => {
+		renderTopBar(
+			session({
+				title:
+					"A story name long enough that it would never fit beside the bar's buttons",
+			}),
+		);
+
+		const style = getComputedStyle(
+			screen.getByText(
+				"A story name long enough that it would never fit beside the bar's buttons",
+			),
+		);
+		expect(style.textOverflow).not.toBe("ellipsis");
+		expect(style.whiteSpace).not.toBe("nowrap");
+		expect(style.overflowWrap).toBe("anywhere");
+	});
+
 	it("stacks the ids above the story name above the phase", () => {
 		renderTopBar(
 			session({

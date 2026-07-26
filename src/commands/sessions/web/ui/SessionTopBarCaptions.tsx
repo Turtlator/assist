@@ -11,7 +11,6 @@ const columnSx = {
 	flexDirection: "column",
 	flex: 1,
 	minWidth: 0,
-	overflow: "hidden",
 } as const;
 
 const rowSx = {

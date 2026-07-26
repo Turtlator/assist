@@ -11,21 +11,18 @@ const rowSx = {
 	minWidth: 0,
 } as const;
 
+const titleSx = {
+	color: "text.primary",
+	minWidth: 0,
+	overflowWrap: "anywhere",
+} as const;
+
 export function SessionTopBarTitle({ session }: { session: SessionInfo }) {
 	const itemId = session.activity?.itemId;
 	return (
 		<Box sx={rowSx}>
 			{itemId != null && <BacklogItemChip itemId={itemId} cwd={session.cwd} />}
-			<Typography
-				variant="body1"
-				sx={{
-					color: "text.primary",
-					minWidth: 0,
-					overflow: "hidden",
-					textOverflow: "ellipsis",
-					whiteSpace: "nowrap",
-				}}
-			>
+			<Typography variant="body1" sx={titleSx}>
 				{sessionTitle(session)}
 			</Typography>
 		</Box>
