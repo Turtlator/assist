@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SessionTopBar } from "./SessionTopBar";
 import type { SessionInfo } from "./types";
@@ -53,16 +54,18 @@ function renderTopBar(
 	} = {},
 ) {
 	render(
-		<StarredSessionsProvider sessions={[]} setSessionStarred={() => {}}>
-			<SessionTopBar
-				session={info}
-				onRetry={handlers.onRetry}
-				onRestart={handlers.onRestart}
-				onDismiss={handlers.onDismiss ?? (() => {})}
-				onSetAutoRun={() => {}}
-				onSetAutoAdvance={handlers.onSetAutoAdvance ?? (() => {})}
-			/>
-		</StarredSessionsProvider>,
+		<MemoryRouter>
+			<StarredSessionsProvider sessions={[]} setSessionStarred={() => {}}>
+				<SessionTopBar
+					session={info}
+					onRetry={handlers.onRetry}
+					onRestart={handlers.onRestart}
+					onDismiss={handlers.onDismiss ?? (() => {})}
+					onSetAutoRun={() => {}}
+					onSetAutoAdvance={handlers.onSetAutoAdvance ?? (() => {})}
+				/>
+			</StarredSessionsProvider>
+		</MemoryRouter>,
 	);
 }
 
@@ -157,6 +160,50 @@ describe("SessionTopBar", () => {
 
 		expect(screen.getByText("#7")).toBeTruthy();
 		expect(screen.queryByTitle(/Claude Code conversation/)).toBeNull();
+	});
+
+	it("links the backlog item beside the story name", () => {
+		renderTopBar(
+			session({
+				cwd: "/git/repo",
+				activity: {
+					kind: "backlog",
+					startedAt: 0,
+					itemId: 1943,
+					itemName: "Feature-flag the top bar",
+				},
+			}),
+		);
+
+		const chip = screen.getByRole("link");
+		expect(chip.textContent).toBe("a1943");
+		expect(chip.getAttribute("href")).toBe(
+			"/backlog/items/a1943?cwd=%2Fgit%2Frepo",
+		);
+	});
+
+	it("stacks the ids above the story name above the phase", () => {
+		renderTopBar(
+			session({
+				id: "7",
+				claudeSessionId: "conv-1",
+				subtitle: "Phase 3: label the actions",
+				activity: {
+					kind: "backlog",
+					startedAt: 0,
+					itemName: "Feature-flag the top bar",
+				},
+			}),
+		);
+
+		const idRow = screen.getByText("#7").parentElement;
+		const titleRow = screen.getByText("Feature-flag the top bar").parentElement;
+		const phase = screen.getByText("Phase 3: label the actions");
+
+		expect(screen.getByText("conv-1").parentElement).toBe(idRow);
+		expect(titleRow).not.toBe(idRow);
+		expect(titleRow?.parentElement).toBe(idRow?.parentElement);
+		expect(phase.parentElement).toBe(idRow?.parentElement);
 	});
 });
 
