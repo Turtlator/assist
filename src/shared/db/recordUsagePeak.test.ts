@@ -125,7 +125,57 @@ describe("recordUsagePeak", () => {
 		});
 	});
 
+	describe("when a jittery reading lands a few points below the peak", () => {
+		it("keeps the single segment rather than opening a phantom reset", async () => {
+			await record({
+				seven_day: { used_percentage: 59, resets_at: 1000 },
+			});
+			await record({
+				seven_day: { used_percentage: 57, resets_at: 1000 },
+			});
+
+			expect(await peaks()).toEqual([
+				{
+					window: "seven_day",
+					resetsAt: 1000,
+					segment: 0,
+					usedPercentage: 59,
+					resetDetected: false,
+					createdAt: expect.any(Date),
+				},
+			]);
+		});
+	});
+
 	describe("when usage drops sharply mid-cycle (a quota reset)", () => {
+		it("opens a reset segment as soon as the drop passes the jitter threshold", async () => {
+			await record({
+				five_hour: { used_percentage: 59, resets_at: 1000 },
+			});
+			await record({
+				five_hour: { used_percentage: 55.5, resets_at: 1000 },
+			});
+
+			expect(await peaks()).toEqual([
+				{
+					window: "five_hour",
+					resetsAt: 1000,
+					segment: 0,
+					usedPercentage: 59,
+					resetDetected: true,
+					createdAt: expect.any(Date),
+				},
+				{
+					window: "five_hour",
+					resetsAt: 1000,
+					segment: 1,
+					usedPercentage: 55.5,
+					resetDetected: false,
+					createdAt: expect.any(Date),
+				},
+			]);
+		});
+
 		it("preserves the pre-reset peak and opens a new segment for the post-reset value", async () => {
 			await record({
 				seven_day: { used_percentage: 35, resets_at: 1000 },

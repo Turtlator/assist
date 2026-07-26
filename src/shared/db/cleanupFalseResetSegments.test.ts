@@ -44,8 +44,15 @@ describe("collapseSegments", () => {
 
 	describe("when a later peak is within the jitter threshold of a shallower one", () => {
 		it("merges it rather than treating it as a reset", () => {
-			expect(collapseSegments([80, 79.5])).toEqual([
+			expect(collapseSegments([80, 78])).toEqual([
 				{ segment: 0, usedPercentage: 80, resetDetected: false },
+			]);
+		});
+
+		it("keeps a peak that falls past the threshold as its own reset", () => {
+			expect(collapseSegments([80, 76.5])).toEqual([
+				{ segment: 0, usedPercentage: 80, resetDetected: true },
+				{ segment: 1, usedPercentage: 76.5, resetDetected: false },
 			]);
 		});
 	});

@@ -9,7 +9,7 @@ export type Cycle = { tx: BacklogDatabase; window: Window; resetsAt: number };
 type Segment = typeof usagePeaks.$inferSelect;
 
 // why: usage only climbs within a cycle, so a drop past this margin below the active peak signals a mid-cycle quota reset rather than reporting jitter.
-const RESET_DROP_THRESHOLD = 1;
+const RESET_DROP_THRESHOLD = 3;
 
 const at = ({ window, resetsAt }: Cycle, segment?: number) =>
 	segment === undefined
