@@ -1,3 +1,10 @@
+## [0.460.1](https://github.com/staff0rd/assist/compare/v0.460.0...v0.460.1) (2026-07-26)
+
+
+### Bug Fixes
+
+* stack top bar ids, title and phase ([fe7b373](https://github.com/staff0rd/assist/commit/fe7b373bf312442ef13a3a52548f56fbd101e8b3))
+
 # [0.460.0](https://github.com/staff0rd/assist/compare/v0.459.0...v0.460.0) (2026-07-26)
 
 
