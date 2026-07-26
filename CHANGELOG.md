@@ -1,3 +1,10 @@
+# [0.480.0](https://github.com/staff0rd/assist/compare/v0.479.2...v0.480.0) (2026-07-26)
+
+
+### Features
+
+* name the started item in the launch toast ([7ed929e](https://github.com/staff0rd/assist/commit/7ed929e5f96b09a4f287bb3356509af7a688e130))
+
 ## [0.479.2](https://github.com/staff0rd/assist/compare/v0.479.1...v0.479.2) (2026-07-26)
 
 
