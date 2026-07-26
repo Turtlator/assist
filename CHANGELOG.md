@@ -1,3 +1,10 @@
+# [0.481.0](https://github.com/staff0rd/assist/compare/v0.480.0...v0.481.0) (2026-07-26)
+
+
+### Features
+
+* float repo groups with a waiter ([33c941c](https://github.com/staff0rd/assist/commit/33c941ceda75e6e9f087238e1885cac82ff9d600))
+
 # [0.480.0](https://github.com/staff0rd/assist/compare/v0.479.2...v0.480.0) (2026-07-26)
 
 
