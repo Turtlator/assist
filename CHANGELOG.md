@@ -1,3 +1,10 @@
+## [0.469.2](https://github.com/staff0rd/assist/compare/v0.469.1...v0.469.2) (2026-07-26)
+
+
+### Bug Fixes
+
+* edit one config array entry at a time ([e672cf0](https://github.com/staff0rd/assist/commit/e672cf053a2cceb22887490b2c1ddaa20819d2c5))
+
 ## [0.469.1](https://github.com/staff0rd/assist/compare/v0.469.0...v0.469.1) (2026-07-26)
 
 
