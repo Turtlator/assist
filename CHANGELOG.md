@@ -1,3 +1,15 @@
+# [0.469.0](https://github.com/staff0rd/assist/compare/v0.468.1...v0.469.0) (2026-07-26)
+
+
+### Bug Fixes
+
+* double the card status dot size ([ca99620](https://github.com/staff0rd/assist/commit/ca99620fa43bf520a3154975edfa3ee2774eaf63))
+
+
+### Features
+
+* AI-summarised session card titles ([f6d60ee](https://github.com/staff0rd/assist/commit/f6d60ee55dce020bbe8e7527276688b63c44a660))
+
 ## [0.468.1](https://github.com/staff0rd/assist/compare/v0.468.0...v0.468.1) (2026-07-26)
 
 
