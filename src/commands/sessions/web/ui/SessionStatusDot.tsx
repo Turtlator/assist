@@ -10,8 +10,8 @@ const pulse = keyframes`
 
 const dotSx = {
 	flexShrink: 0,
-	fontSize: "1.05rem",
-	lineHeight: 1,
+	fontSize: "2.1rem",
+	lineHeight: 0.6,
 } as const;
 
 const pulsingDotSx = {

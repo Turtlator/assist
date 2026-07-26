@@ -17,7 +17,7 @@ describe("SessionStatusDot", () => {
 
 		const dot = screen.getByTitle("running");
 		expect(dot.textContent).toBe("●");
-		expect(getComputedStyle(dot).fontSize).toBe("1.05rem");
+		expect(getComputedStyle(dot).fontSize).toBe("2.1rem");
 	});
 
 	it("pulses a waiting session so it stands out with no text", () => {
