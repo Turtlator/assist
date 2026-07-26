@@ -641,6 +641,49 @@ describe("ConfigView", () => {
 		);
 	});
 
+	it("clears an array row without posting an empty list", async () => {
+		const fetchMock = stubUnsetApi(
+			[
+				{
+					key: "worktree.copy",
+					type: "array",
+					itemType: "string",
+					value: [".env"],
+					source: "project",
+					node: node("worktree.copy"),
+				},
+			],
+			[
+				{
+					key: "worktree.copy",
+					type: "array",
+					itemType: "string",
+					value: undefined,
+					source: "default",
+					node: node("worktree.copy"),
+				},
+			],
+		);
+		renderView("/repo/one");
+
+		await waitFor(() => expect(screen.getByText("worktree.copy")).toBeTruthy());
+		fireEvent.click(screen.getByRole("button", { name: "Edit worktree.copy" }));
+		fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+
+		await waitFor(() =>
+			expect(postedBody(fetchMock, "/api/config/unset")).toEqual({
+				key: "worktree.copy",
+				cwd: "/repo/one",
+				scope: "project",
+			}),
+		);
+		expect(
+			fetchMock.mock.calls.some(([url]) => String(url) === "/api/config/set"),
+		).toBe(false);
+		await waitFor(() => expect(screen.getByText("default")).toBeTruthy());
+		expect(screen.queryByText("project")).toBeNull();
+	});
+
 	it("offers no clear control for a row already using the schema default", async () => {
 		stubUnsetApi([
 			{
