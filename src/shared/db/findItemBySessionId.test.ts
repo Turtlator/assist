@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { createTestDb } from "./createTestDb";
 import type { Db } from "./Db";
 import { findItemBySessionId } from "./findItemBySessionId";
@@ -8,7 +8,7 @@ describe("findItemBySessionId", () => {
 	let orm: Db;
 	let close: () => Promise<void>;
 
-	beforeEach(async () => {
+	beforeAll(async () => {
 		({ orm, close } = await createTestDb());
 		await orm.insert(items).values([
 			{ id: 1, origin: "test", name: "One" },
@@ -17,6 +17,10 @@ describe("findItemBySessionId", () => {
 	});
 
 	afterEach(async () => {
+		await orm.delete(phaseUsage);
+	});
+
+	afterAll(async () => {
 		await close();
 	});
 
