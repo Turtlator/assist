@@ -1,8 +1,10 @@
+import { cloneBadgeSessionIds } from "./cloneBadgeSessionIds";
 import { flattenSessionGroups } from "./flattenSessionGroups";
 import type { groupSessionsByRepo } from "./groupSessionsByRepo";
 import { ServingBanners } from "./ServingBanners";
 import { SessionGroupItem } from "./SessionGroupItem";
 import type { SessionListHandlers } from "./types";
+import { CloneBadgeContext } from "./useCloneBadgeContext";
 
 export function SessionGroups({
 	groups,
@@ -32,7 +34,7 @@ export function SessionGroups({
 	};
 	const allSessions = flattenSessionGroups(groups);
 	return (
-		<>
+		<CloneBadgeContext.Provider value={cloneBadgeSessionIds(allSessions)}>
 			<ServingBanners sessions={allSessions} onJump={onSelect} />
 			{groups.map((group) => (
 				<SessionGroupItem
@@ -41,6 +43,6 @@ export function SessionGroups({
 					cardProps={cardProps}
 				/>
 			))}
-		</>
+		</CloneBadgeContext.Provider>
 	);
 }
