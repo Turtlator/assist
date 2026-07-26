@@ -1,3 +1,10 @@
+# [0.472.0](https://github.com/staff0rd/assist/compare/v0.471.0...v0.472.0) (2026-07-26)
+
+
+### Features
+
+* bulk plan changes in one preview ([c6b2404](https://github.com/staff0rd/assist/commit/c6b2404c6f5ea4814bcf7b55aaaeefdb7c538177))
+
 # [0.471.0](https://github.com/staff0rd/assist/compare/v0.470.0...v0.471.0) (2026-07-26)
 
 
