@@ -1,3 +1,10 @@
+## [0.469.5](https://github.com/staff0rd/assist/compare/v0.469.4...v0.469.5) (2026-07-26)
+
+
+### Bug Fixes
+
+* array items edit in place, no row edit ([4654590](https://github.com/staff0rd/assist/commit/4654590252de15dccccea79c649b57cbf4c9ce61))
+
 ## [0.469.4](https://github.com/staff0rd/assist/compare/v0.469.3...v0.469.4) (2026-07-26)
 
 
