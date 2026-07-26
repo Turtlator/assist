@@ -1,3 +1,10 @@
+# [0.459.0](https://github.com/staff0rd/assist/compare/v0.458.1...v0.459.0) (2026-07-26)
+
+
+### Features
+
+* sticky session top bar behind flag ([f865881](https://github.com/staff0rd/assist/commit/f8658818a56963f5dabf64d0b58e22074108874c))
+
 ## [0.458.1](https://github.com/staff0rd/assist/compare/v0.458.0...v0.458.1) (2026-07-26)
 
 
