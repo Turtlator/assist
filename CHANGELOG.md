@@ -1,3 +1,10 @@
+# [0.462.0](https://github.com/staff0rd/assist/compare/v0.461.3...v0.462.0) (2026-07-26)
+
+
+### Features
+
+* edit complex config leaves ([28bf24e](https://github.com/staff0rd/assist/commit/28bf24ec0f508724ad7c22d52cfaf39f83d74bb9))
+
 ## [0.461.3](https://github.com/staff0rd/assist/compare/v0.461.2...v0.461.3) (2026-07-26)
 
 
