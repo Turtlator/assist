@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { sessionPhaseCaption } from "./sessionPhaseCaption";
 import { SessionTopBarIds } from "./SessionTopBarIds";
+import { SessionTopBarStatus } from "./SessionTopBarStatus";
 import { SessionTopBarTitle } from "./SessionTopBarTitle";
 import type { SessionInfo } from "./types";
 
@@ -11,6 +12,13 @@ const columnSx = {
 	flex: 1,
 	minWidth: 0,
 	overflow: "hidden",
+} as const;
+
+const rowSx = {
+	display: "flex",
+	alignItems: "center",
+	gap: 1,
+	minWidth: 0,
 } as const;
 
 const phaseSx = {
@@ -27,7 +35,10 @@ export function SessionTopBarCaptions({ session }: { session: SessionInfo }) {
 
 	return (
 		<Box sx={columnSx}>
-			<SessionTopBarIds session={session} />
+			<Box sx={rowSx}>
+				<SessionTopBarIds session={session} />
+				<SessionTopBarStatus session={session} />
+			</Box>
 			<SessionTopBarTitle session={session} />
 			{caption && <Typography sx={phaseSx}>{caption}</Typography>}
 		</Box>

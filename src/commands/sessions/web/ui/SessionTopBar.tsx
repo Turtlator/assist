@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import { useRef } from "react";
 import { SessionActionButtons } from "./SessionActionButtons";
 import { SessionTopBarCaptions } from "./SessionTopBarCaptions";
-import { SessionTopBarStatus } from "./SessionTopBarStatus";
+import { SessionTopBarElapsed } from "./SessionTopBarElapsed";
 import { SessionTopBarToggles } from "./SessionTopBarToggles";
 import type { SessionInfo } from "./types";
 import { useElementWidth } from "./useElementWidth";
@@ -47,7 +47,7 @@ export function SessionTopBar({
 	return (
 		<Box ref={barRef} sx={barSx}>
 			<SessionTopBarCaptions session={session} />
-			<SessionTopBarStatus session={session} />
+			<SessionTopBarElapsed session={session} />
 			<SessionTopBarToggles
 				session={session}
 				onSetAutoRun={onSetAutoRun}

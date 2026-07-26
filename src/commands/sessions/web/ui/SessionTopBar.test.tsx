@@ -105,11 +105,21 @@ describe("SessionTopBar", () => {
 		expect(screen.queryByText("Phase 2: wire it up")).toBeNull();
 	});
 
-	it("names the session's status beside the elapsed time", () => {
-		renderTopBar(session({ status: "waiting" }));
+	it("puts the status and restored state on the id line", () => {
+		renderTopBar(
+			session({
+				id: "7",
+				status: "waiting",
+				restored: true,
+				claudeSessionId: "conv-1",
+			}),
+		);
 
-		expect(screen.getByText("● waiting")).toBeTruthy();
-		expect(screen.getByText("1m 30s")).toBeTruthy();
+		const idLine = screen.getByText("#7").parentElement;
+		expect(screen.getByText("conv-1").parentElement).toBe(idLine);
+		expect(screen.getByText("● waiting").parentElement).toBe(idLine);
+		expect(screen.getByText("restored").parentElement).toBe(idLine);
+		expect(screen.getByText("1m 30s").parentElement).not.toBe(idLine);
 	});
 
 	it("says not restored when the session could not be resumed", () => {

@@ -1,16 +1,8 @@
-import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { isRepoScoped } from "./isRepoScoped";
 import { repoLabel } from "./repoLabel";
 import { sessionType } from "./sessionType";
 import type { SessionInfo } from "./types";
-
-const rowSx = {
-	display: "flex",
-	alignItems: "center",
-	gap: 1,
-	minWidth: 0,
-} as const;
 
 const idSx = {
 	color: "text.disabled",
@@ -31,7 +23,7 @@ export function SessionTopBarIds({ session }: { session: SessionInfo }) {
 	const repo = isRepoScoped(sessionType(session)) ? repoLabel(session.cwd) : "";
 
 	return (
-		<Box sx={rowSx}>
+		<>
 			{repo && (
 				<Typography
 					sx={{ ...idSx, ...clampSx, color: "text.secondary" }}
@@ -54,6 +46,6 @@ export function SessionTopBarIds({ session }: { session: SessionInfo }) {
 					{claudeSessionId}
 				</Typography>
 			)}
-		</Box>
+		</>
 	);
 }
