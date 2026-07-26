@@ -28,7 +28,7 @@ export function ConfigListValue({ node, value, render: Render }: Props) {
 			</Stack>
 		);
 	return (
-		<Stack spacing={0.75}>
+		<Stack spacing={1}>
 			{value.map((entry, index) => (
 				<ConfigEntryBlock key={`[${index}]`}>
 					<Render node={item} value={entry} />

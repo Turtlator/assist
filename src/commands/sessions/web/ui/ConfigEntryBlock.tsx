@@ -1,18 +1,13 @@
-import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
 import type { ReactNode } from "react";
 
 export function ConfigEntryBlock({ children }: { children: ReactNode }) {
 	return (
-		<Box
-			sx={{
-				flex: 1,
-				minWidth: 0,
-				borderLeft: 2,
-				borderColor: "divider",
-				pl: 1,
-			}}
+		<Paper
+			variant="outlined"
+			sx={{ flex: 1, minWidth: 0, p: 1, bgcolor: "transparent" }}
 		>
 			{children}
-		</Box>
+		</Paper>
 	);
 }
