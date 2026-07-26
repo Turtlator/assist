@@ -1,3 +1,10 @@
+## [0.469.4](https://github.com/staff0rd/assist/compare/v0.469.3...v0.469.4) (2026-07-26)
+
+
+### Bug Fixes
+
+* placeholder title until summary lands ([09ce560](https://github.com/staff0rd/assist/commit/09ce560a32c7855ba2a51a532ce90f76808c6fef))
+
 ## [0.469.3](https://github.com/staff0rd/assist/compare/v0.469.2...v0.469.3) (2026-07-26)
 
 
