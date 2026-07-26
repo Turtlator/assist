@@ -162,7 +162,7 @@ describe("SessionTopBar", () => {
 		expect(screen.queryByTitle(/Claude Code conversation/)).toBeNull();
 	});
 
-	it("links the backlog item beside the story name", () => {
+	it("links the backlog item ahead of the story name", () => {
 		renderTopBar(
 			session({
 				cwd: "/git/repo",
@@ -180,6 +180,11 @@ describe("SessionTopBar", () => {
 		expect(chip.getAttribute("href")).toBe(
 			"/backlog/items/a1943?cwd=%2Fgit%2Frepo",
 		);
+
+		const name = screen.getByText("Feature-flag the top bar");
+		expect(
+			chip.compareDocumentPosition(name) & Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
 	});
 
 	it("stacks the ids above the story name above the phase", () => {

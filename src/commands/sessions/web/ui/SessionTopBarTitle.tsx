@@ -15,6 +15,7 @@ export function SessionTopBarTitle({ session }: { session: SessionInfo }) {
 	const itemId = session.activity?.itemId;
 	return (
 		<Box sx={rowSx}>
+			{itemId != null && <BacklogItemChip itemId={itemId} cwd={session.cwd} />}
 			<Typography
 				variant="body1"
 				sx={{
@@ -27,7 +28,6 @@ export function SessionTopBarTitle({ session }: { session: SessionInfo }) {
 			>
 				{sessionTitle(session)}
 			</Typography>
-			{itemId != null && <BacklogItemChip itemId={itemId} cwd={session.cwd} />}
 		</Box>
 	);
 }
