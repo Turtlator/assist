@@ -7,6 +7,7 @@ import {
 	type PendingLaunch,
 	resolveOldestLaunching,
 } from "./PendingLaunch";
+import { pendingLaunchFromMessage } from "./pendingLaunchFromMessage";
 
 const base = { startedAt: 0 };
 
@@ -74,5 +75,35 @@ describe("dismissLaunch", () => {
 	it("removes the entry with the given id", () => {
 		const list = [launching("a"), launching("b")];
 		expect(dismissLaunch(list, "a").map((l) => l.id)).toEqual(["b"]);
+	});
+});
+
+describe("pendingLaunchFromMessage", () => {
+	it("marks an assist launch with a caller-supplied title as named", () => {
+		expect(
+			pendingLaunchFromMessage({
+				type: "create-assist",
+				assistArgs: ["backlog", "run", "a775"],
+				title: "a775 — Keep the backlog view put",
+			}),
+		).toEqual({
+			cwd: undefined,
+			title: "a775 — Keep the backlog view put",
+			named: true,
+		});
+	});
+
+	it("leaves an untitled assist launch unnamed so its placeholder never reaches a toast", () => {
+		expect(pendingLaunchFromMessage({ type: "create-assist" })).toEqual({
+			cwd: undefined,
+			title: "New session",
+			named: false,
+		});
+	});
+
+	it("leaves a prompted session unnamed", () => {
+		expect(
+			pendingLaunchFromMessage({ type: "create", prompt: "fix the login bug" }),
+		).toEqual({ cwd: undefined, title: "fix the login bug" });
 	});
 });

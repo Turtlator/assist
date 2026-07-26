@@ -1,9 +1,10 @@
 import { type RefObject, useCallback } from "react";
-import { pendingLaunchFromMessage } from "./PendingLaunch";
+import type { NewLaunchInput } from "./PendingLaunch";
+import { pendingLaunchFromMessage } from "./pendingLaunchFromMessage";
 
 export function useSend(
 	wsRef: RefObject<WebSocket | null>,
-	addPendingLaunch: (input: { cwd?: string; title: string }) => void,
+	addPendingLaunch: (input: NewLaunchInput) => void,
 ) {
 	return useCallback(
 		(msg: object) => {

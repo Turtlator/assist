@@ -23,7 +23,7 @@ function renderPlay(launchAssist: () => void, sessions: SessionInfo[] = []) {
 						armUpdateReload: () => {},
 					}}
 				>
-					<PlayAction itemId={775} />
+					<PlayAction itemId={775} itemName="Keep the backlog view put" />
 					<LocationProbe />
 				</SessionLaunchContext.Provider>
 			</LiveSessionsContext.Provider>
@@ -52,6 +52,7 @@ describe("PlayAction", () => {
 		expect(launchAssist).toHaveBeenCalledWith(
 			["backlog", "run", "a775"],
 			undefined,
+			{ title: "a775 — Keep the backlog view put" },
 		);
 		expect(screen.getByTestId("location").textContent).toBe("/backlog");
 	});

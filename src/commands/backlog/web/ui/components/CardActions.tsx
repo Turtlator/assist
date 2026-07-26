@@ -49,7 +49,9 @@ export function CardActions({
 				starred={item.starred}
 				onToggled={onReload}
 			/>
-			{canPlay(item) && <PlayAction itemId={item.id} compact />}
+			{canPlay(item) && (
+				<PlayAction itemId={item.id} itemName={item.name} compact />
+			)}
 		</>
 	);
 }

@@ -8,9 +8,11 @@ import { runInFlightSession } from "./runInFlightSession";
 
 export function PlayAction({
 	itemId,
+	itemName,
 	compact = false,
 }: {
 	itemId: number;
+	itemName: string;
 	compact?: boolean;
 }) {
 	const { launchAssist } = useSessionLaunchContext();
@@ -24,7 +26,9 @@ export function PlayAction({
 		event.stopPropagation();
 		if (disabled) return;
 		setLaunched(true);
-		launchAssist(["backlog", "run", formatItemId(itemId)], cwd);
+		launchAssist(["backlog", "run", formatItemId(itemId)], cwd, {
+			title: `${formatItemId(itemId)} — ${itemName}`,
+		});
 	};
 	return (
 		<PlayButton
