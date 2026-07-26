@@ -1,5 +1,6 @@
 import { sessionTitlePrompt } from "../shared/sessionTitlePrompt";
 import { runSessionTitleGeneration } from "./runSessionTitleGeneration";
+import { singleLineTitle } from "./singleLineTitle";
 import type { Session } from "./types";
 
 export function startSessionTitleGeneration(
@@ -10,5 +11,5 @@ export function startSessionTitleGeneration(
 		return;
 	const prompt = sessionTitlePrompt(session);
 	if (!prompt) return;
-	runSessionTitleGeneration(session, prompt, notify);
+	runSessionTitleGeneration(session, prompt, notify, singleLineTitle(prompt));
 }

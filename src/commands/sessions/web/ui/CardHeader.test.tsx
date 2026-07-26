@@ -26,16 +26,34 @@ function Stars({ children }: { children: ReactNode }) {
 	);
 }
 
-describe("CardHeader prompt", () => {
-	it("clamps the prompt to 5 lines with hidden overflow", () => {
+describe("CardHeader title", () => {
+	it("clamps the title to a single line with an ellipsis", () => {
 		render(
 			<CardHeader session={session} loading={false} onDismiss={() => {}} />,
 			{ wrapper: Stars },
 		);
 
 		const style = getComputedStyle(screen.getByText("my session"));
-		expect(style.getPropertyValue("-webkit-line-clamp")).toBe("5");
+		expect(style.whiteSpace).toBe("nowrap");
+		expect(style.textOverflow).toBe("ellipsis");
 		expect(style.overflow).toBe("hidden");
+	});
+
+	it("keeps a long untruncated title on one line", () => {
+		const wordy: SessionInfo = {
+			...session,
+			name: "the login page redirects to the wrong place every single time",
+		};
+		render(
+			<CardHeader session={wordy} loading={false} onDismiss={() => {}} />,
+			{
+				wrapper: Stars,
+			},
+		);
+
+		const style = getComputedStyle(screen.getByText(wordy.name));
+		expect(style.whiteSpace).toBe("nowrap");
+		expect(style.textOverflow).toBe("ellipsis");
 	});
 });
 

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { daemonLog } from "./daemonLog";
 import { generateSessionTitle } from "./generateSessionTitle";
 import { runSessionTitleGeneration } from "./runSessionTitleGeneration";
 import type { Session } from "./types";
@@ -12,6 +13,7 @@ vi.mock("./generateSessionTitle", () => ({
 const mockGenerate = generateSessionTitle as unknown as ReturnType<
 	typeof vi.fn
 >;
+const mockLog = daemonLog as unknown as ReturnType<typeof vi.fn>;
 
 function makeSession(overrides: Partial<Session> = {}): Session {
 	return {
@@ -66,12 +68,66 @@ describe("runSessionTitleGeneration", () => {
 		mockGenerate.mockResolvedValue(undefined);
 		const session = makeSession();
 
-		runSessionTitleGeneration(session, "the login page redirects", vi.fn());
+		runSessionTitleGeneration(
+			session,
+			"the login page redirects",
+			vi.fn(),
+			"the login page redirects",
+		);
 		await flush();
 		runSessionTitleGeneration(session, "the login page redirects", vi.fn());
 
 		expect(mockGenerate).toHaveBeenCalledOnce();
 		expect(session.generatedTitle).toBe("the login page redirects");
+	});
+
+	it("prefers the generated title over the fallback", async () => {
+		const session = makeSession();
+
+		runSessionTitleGeneration(
+			session,
+			"the login page redirects",
+			vi.fn(),
+			"the login page redirects",
+		);
+		await flush();
+
+		expect(session.generatedTitle).toBe("Fix login redirect");
+	});
+
+	it("takes the supplied fallback when generation yields nothing", async () => {
+		mockGenerate.mockResolvedValue(undefined);
+		const session = makeSession();
+		const notify = vi.fn();
+
+		runSessionTitleGeneration(
+			session,
+			"a long prompt",
+			notify,
+			"a long prompt",
+		);
+		await flush();
+
+		expect(session.generatedTitle).toBe("a long prompt");
+		expect(notify).toHaveBeenCalledOnce();
+		expect(mockLog).toHaveBeenCalledWith(
+			'session 7 title generation failed; falling back to "a long prompt"',
+		);
+	});
+
+	it("keeps the placeholder name when no fallback was supplied", async () => {
+		mockGenerate.mockResolvedValue(undefined);
+		const session = makeSession();
+		const notify = vi.fn();
+
+		runSessionTitleGeneration(session, "what is the capital of NY", notify);
+		await flush();
+
+		expect(session.generatedTitle).toBeUndefined();
+		expect(notify).not.toHaveBeenCalled();
+		expect(mockLog).toHaveBeenCalledWith(
+			"session 7 title generation failed; keeping placeholder title",
+		);
 	});
 
 	it("does not retry after generation rejects", async () => {

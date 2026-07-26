@@ -227,7 +227,7 @@ describe("SessionTopBar", () => {
 		).toBeTruthy();
 	});
 
-	it("wraps the story name rather than truncating it", () => {
+	it("truncates the story name rather than wrapping it", () => {
 		renderTopBar(
 			session({
 				title:
@@ -240,9 +240,9 @@ describe("SessionTopBar", () => {
 				"A story name long enough that it would never fit beside the bar's buttons",
 			),
 		);
-		expect(style.textOverflow).not.toBe("ellipsis");
-		expect(style.whiteSpace).not.toBe("nowrap");
-		expect(style.overflowWrap).toBe("anywhere");
+		expect(style.whiteSpace).toBe("nowrap");
+		expect(style.textOverflow).toBe("ellipsis");
+		expect(style.overflow).toBe("hidden");
 	});
 
 	it("stacks the ids above the story name above the phase", () => {

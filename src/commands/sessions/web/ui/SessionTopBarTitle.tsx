@@ -14,7 +14,9 @@ const rowSx = {
 const titleSx = {
 	color: "text.primary",
 	minWidth: 0,
-	overflowWrap: "anywhere",
+	overflow: "hidden",
+	textOverflow: "ellipsis",
+	whiteSpace: "nowrap",
 } as const;
 
 export function SessionTopBarTitle({ session }: { session: SessionInfo }) {

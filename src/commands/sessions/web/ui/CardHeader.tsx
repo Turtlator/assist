@@ -16,7 +16,9 @@ export function CardHeader({
 	const topBar = useTopBarLayoutContext();
 	const caption = topBar ? undefined : sessionPhaseCaption(session);
 	return (
-		<Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+		<Box
+			sx={{ display: "flex", flexDirection: "column", gap: 0.5, minWidth: 0 }}
+		>
 			<CardHeaderActions
 				session={session}
 				loading={loading}
@@ -28,11 +30,10 @@ export function CardHeader({
 				variant="body2"
 				sx={{
 					color: "text.primary",
-					overflowWrap: "anywhere",
-					display: "-webkit-box",
-					WebkitBoxOrient: "vertical",
-					WebkitLineClamp: 5,
+					minWidth: 0,
 					overflow: "hidden",
+					textOverflow: "ellipsis",
+					whiteSpace: "nowrap",
 				}}
 			>
 				{sessionTitle(session)}

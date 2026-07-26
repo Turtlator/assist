@@ -160,6 +160,21 @@ describe("startTranscriptTitleGeneration", () => {
 		expect(mockExtract).toHaveBeenCalledWith("/projects/repo/abc.jsonl");
 	});
 
+	it("keeps the Session placeholder when generation fails", async () => {
+		mockGenerate.mockResolvedValue(undefined);
+		const session = makeSession();
+		const notify = vi.fn();
+
+		startTranscriptTitleGeneration(session, notify);
+		await flush();
+
+		expect(session.generatedTitle).toBeUndefined();
+		expect(notify).not.toHaveBeenCalled();
+		expect(mockLog).toHaveBeenCalledWith(
+			"session 7 title generation failed; keeping placeholder title",
+		);
+	});
+
 	it("stays retryable while no transcript exists on disk", () => {
 		const session = makeSession({ transcriptPath: undefined });
 		mockFindPath.mockReturnValue(null);
