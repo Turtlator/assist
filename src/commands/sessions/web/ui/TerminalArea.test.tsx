@@ -139,9 +139,12 @@ describe("TerminalArea top bar actions", () => {
 		expect(onSetAutoAdvance).toHaveBeenCalledWith("2", false);
 	});
 
-	it("leaves close and dismiss to the card", () => {
-		renderArea(true, [session({ status: "waiting" })], "1");
+	it("dismisses the active session from the bar", () => {
+		const onDismiss = vi.fn();
+		renderArea(true, [session({ status: "done" })], "1", { onDismiss });
 
-		expect(screen.queryByTitle("Dismiss session 1")).toBeNull();
+		fireEvent.click(screen.getByTitle("Dismiss session 1"));
+
+		expect(onDismiss).toHaveBeenCalledWith("1");
 	});
 });

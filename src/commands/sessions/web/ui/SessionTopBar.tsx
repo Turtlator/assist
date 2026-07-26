@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import { useRef } from "react";
 import { SessionActionButtons } from "./SessionActionButtons";
 import { SessionTopBarCaptions } from "./SessionTopBarCaptions";
+import { SessionTopBarDismiss } from "./SessionTopBarDismiss";
 import { SessionTopBarElapsed } from "./SessionTopBarElapsed";
 import { SessionTopBarToggles } from "./SessionTopBarToggles";
 import type { SessionInfo } from "./types";
@@ -61,6 +62,7 @@ export function SessionTopBar({
 					onDismiss={onDismiss}
 				/>
 			</LabelledActionsContext.Provider>
+			<SessionTopBarDismiss session={session} onDismiss={onDismiss} />
 		</Box>
 	);
 }

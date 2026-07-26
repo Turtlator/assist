@@ -300,8 +300,61 @@ describe("SessionTopBar actions", () => {
 		expect(screen.queryByTitle("Restart session 1")).toBeNull();
 	});
 
-	it("offers no close or dismiss of its own", () => {
+	it("closes a running session with the card's dismiss button", () => {
 		renderTopBar(session({ status: "waiting" }));
+
+		expect(screen.queryByTitle("Dismiss session 1")).not.toBeNull();
+	});
+
+	it("holds the dismiss button at the bar's right edge", () => {
+		renderTopBar(session({ cwd: "/git/repo" }), {
+			onRestart: () => {},
+			onRetry: () => {},
+		});
+
+		const wrapper = screen.getByTitle("Dismiss session 1").parentElement;
+		expect(wrapper?.parentElement?.lastElementChild).toBe(wrapper);
+		expect(getComputedStyle(wrapper as Element).flexShrink).toBe("0");
+	});
+
+	it("keeps the dismiss button when the bar collapses its labels", () => {
+		panelWidth = 400;
+		renderTopBar(session());
+
+		expect(screen.getByTitle("Dismiss session 1")).toBeTruthy();
+	});
+
+	it("dismisses a done session without confirming, like the card", () => {
+		const onDismiss = vi.fn();
+		renderTopBar(session({ status: "done" }), { onDismiss });
+
+		fireEvent.click(screen.getByTitle("Dismiss session 1"));
+
+		expect(onDismiss).toHaveBeenCalled();
+		expect(screen.queryByText("End session")).toBeNull();
+	});
+
+	it("confirms before ending a running session", () => {
+		const onDismiss = vi.fn();
+		renderTopBar(session(), { onDismiss });
+
+		fireEvent.click(screen.getByTitle("Dismiss session 1"));
+
+		expect(onDismiss).not.toHaveBeenCalled();
+
+		fireEvent.click(screen.getByRole("button", { name: "End session" }));
+
+		expect(onDismiss).toHaveBeenCalled();
+	});
+
+	it("offers no dismiss once the session is stopped", () => {
+		renderTopBar(session({ status: "stopped" }));
+
+		expect(screen.queryByTitle("Dismiss session 1")).toBeNull();
+	});
+
+	it("offers no dismiss while the session is closing", () => {
+		renderTopBar(session({ closing: true }));
 
 		expect(screen.queryByTitle("Dismiss session 1")).toBeNull();
 	});
