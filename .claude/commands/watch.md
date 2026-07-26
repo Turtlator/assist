@@ -4,19 +4,23 @@ description: Watch for new commits on the remote and auto-build each time the br
 
 Watch this repo for new upstream commits and build them as they land.
 
-Interval: `$ARGUMENTS` if given (e.g. `5m`), otherwise `2m`.
+Run `assist watch wait --pull --timeout 60m` as a **background task**. It blocks until the current branch's upstream actually moves, so no agent turn runs while the branch is quiet — you are re-invoked when the process exits, not on a clock tick. Takes no arguments; ignore any that were passed.
 
-Set it up by invoking the `loop` skill with the interval followed by this prompt verbatim:
+Report the current version from `package.json` as a baseline, then stop. Do not poll the background task or do anything else while it runs.
 
-> In this repo: run `git fetch --quiet && git status -sb`. If the branch is behind the remote, run `git pull --ff-only`, then invoke the `/auto-build` skill and report the built version from `package.json`. If the pull is not a clean fast-forward, stop and report why instead of forcing, rebasing, or resetting anything. If the branch is up to date, say so in one line and do nothing else.
+When it exits, branch on the exit code:
 
-Then confirm the cadence and the job ID, and report the current version so there is a baseline to compare against.
+- **0** — the upstream moved and was fast-forwarded. Invoke the `/auto-build` skill, report the built version and the restarts the pull makes necessary, then run `assist watch wait --pull --timeout 60m` in the background again.
+- **2** — the timeout elapsed with no movement. Say so in one line and run `assist watch wait --pull --timeout 60m` in the background again.
+- **3** — the upstream moved but the pull was not a clean fast-forward. Stop watching and report git's reason. Do not force, rebase, or reset anything.
+- **1** — waiting is impossible (no upstream, detached HEAD, not a repo). Stop watching and report the reason.
+- **130** — interrupted. Stop watching.
 
-## Why the pull is part of the loop
+## Why the pull is part of the wait
 
-`auto-build` compiles the working tree — it does not fetch or pull. A watch that only fetches will detect new commits and then rebuild the same stale source indefinitely: the build passes, the version in the browser never changes, and the branch silently falls further behind. Detect-and-pull-then-build is the whole point.
+`auto-build` compiles the working tree — it does not fetch or pull. A watch that only detects movement will rebuild the same stale source indefinitely: the build passes, the version in the browser never changes, and the branch silently falls further behind. `--pull` is what makes detect-then-build mean anything.
 
-## Reporting each iteration
+## Reporting each build
 
 State the version that was actually built, not just that the build passed. A passing build says nothing about which source it compiled.
 
