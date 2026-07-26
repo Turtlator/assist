@@ -1,3 +1,10 @@
+## [0.469.3](https://github.com/staff0rd/assist/compare/v0.469.2...v0.469.3) (2026-07-26)
+
+
+### Bug Fixes
+
+* one spinner on a starting card ([4b78b00](https://github.com/staff0rd/assist/commit/4b78b00d96c57dd6c75e0757657595798aa940f9))
+
 ## [0.469.2](https://github.com/staff0rd/assist/compare/v0.469.1...v0.469.2) (2026-07-26)
 
 
