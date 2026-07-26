@@ -1,3 +1,10 @@
+## [0.457.1](https://github.com/staff0rd/assist/compare/v0.457.0...v0.457.1) (2026-07-26)
+
+
+### Bug Fixes
+
+* widen usage reset jitter margin ([1237781](https://github.com/staff0rd/assist/commit/12377814a8186cac12ad4e3e84d7698f448add97))
+
 # [0.457.0](https://github.com/staff0rd/assist/compare/v0.456.1...v0.457.0) (2026-07-26)
 
 
