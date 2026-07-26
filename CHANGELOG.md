@@ -1,3 +1,10 @@
+# [0.457.0](https://github.com/staff0rd/assist/compare/v0.456.1...v0.457.0) (2026-07-26)
+
+
+### Features
+
+* close button on diff/file viewers ([118cd4e](https://github.com/staff0rd/assist/commit/118cd4e0a5cb71949004594d0a0d88fc4557c8a8))
+
 ## [0.456.1](https://github.com/staff0rd/assist/compare/v0.456.0...v0.456.1) (2026-07-26)
 
 
