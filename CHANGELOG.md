@@ -1,3 +1,10 @@
+# [0.458.0](https://github.com/staff0rd/assist/compare/v0.457.1...v0.458.0) (2026-07-26)
+
+
+### Features
+
+* filter usage history by window ([35c5a99](https://github.com/staff0rd/assist/commit/35c5a99635b9a759436cf976348135175cbc5052))
+
 ## [0.457.1](https://github.com/staff0rd/assist/compare/v0.457.0...v0.457.1) (2026-07-26)
 
 
