@@ -3,6 +3,7 @@ import { Sidebar } from "./Sidebar";
 import { sortSessionsByStar } from "./sortSessionsByStar";
 import { sortSessionsByWaiting } from "./sortSessionsByWaiting";
 import type { SidebarTab } from "./types";
+import { useJumpToNextWaiting } from "./useJumpToNextWaiting";
 import type { useSessionSocket } from "./useSessionSocket";
 import { useSessionViewConfig } from "./useSessionViewConfig";
 import { useSidebarNavigation } from "./useSidebarNavigation";
@@ -30,6 +31,14 @@ export function AppSidebar({ socket, tab, onTabChange }: Props) {
 		socket,
 		onTabChange,
 	);
+
+	useJumpToNextWaiting({
+		sessions,
+		activeId: socket.activeId,
+		tab,
+		onSelect: handleSelect,
+		onTabChange,
+	});
 
 	return (
 		<Sidebar

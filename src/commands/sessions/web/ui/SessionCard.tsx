@@ -26,7 +26,11 @@ export function SessionCard({
 	onSetAutoAdvance: (enabled: boolean) => void;
 }) {
 	return (
-		<ButtonBase onClick={onClick} sx={cardSx(active)}>
+		<ButtonBase
+			onClick={onClick}
+			sx={cardSx(active)}
+			data-session-id={session.id}
+		>
 			<CardHeader
 				session={session}
 				loading={loading}

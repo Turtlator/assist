@@ -1,3 +1,4 @@
+import { flattenSessionGroups } from "./flattenSessionGroups";
 import type { groupSessionsByRepo } from "./groupSessionsByRepo";
 import { ServingBanners } from "./ServingBanners";
 import { SessionGroupItem } from "./SessionGroupItem";
@@ -29,9 +30,7 @@ export function SessionGroups({
 		onSetAutoRun,
 		onSetAutoAdvance,
 	};
-	const allSessions = groups.flatMap((group) =>
-		group.kind === "single" ? [group.session] : group.sessions,
-	);
+	const allSessions = flattenSessionGroups(groups);
 	return (
 		<>
 			<ServingBanners sessions={allSessions} onJump={onSelect} />
