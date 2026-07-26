@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { GitStatusCounts } from "../parseGitStatus";
+import type { ItemStatusCounts } from "../gitStatus";
 import { diffQuery } from "./diffQuery";
 
 const POLL_INTERVAL_MS = 5000;
@@ -7,8 +7,8 @@ const POLL_INTERVAL_MS = 5000;
 export function useGitStatusCounts(
 	cwd: string,
 	sessionId?: string,
-): GitStatusCounts | null {
-	const [counts, setCounts] = useState<GitStatusCounts | null>(null);
+): ItemStatusCounts | null {
+	const [counts, setCounts] = useState<ItemStatusCounts | null>(null);
 
 	useEffect(() => {
 		if (!cwd) {

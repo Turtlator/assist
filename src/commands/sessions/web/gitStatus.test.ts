@@ -2,31 +2,34 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { respondJson } from "../../../shared/web";
 import { execGit } from "./execGit";
-import { gitStatus } from "./gitStatus";
-import type { GitStatusCounts } from "./parseGitStatus";
-import { resolveDiffBase } from "./resolveDiffBase";
+import { type ItemStatusCounts, gitStatus } from "./gitStatus";
+import { itemChangeSet } from "./itemChangeSet";
 
 vi.mock("../../../shared/web", () => ({ respondJson: vi.fn() }));
 vi.mock("./execGit", () => ({ execGit: vi.fn() }));
-vi.mock("./resolveDiffBase", () => ({ resolveDiffBase: vi.fn() }));
+vi.mock("./itemChangeSet", () => ({ itemChangeSet: vi.fn() }));
 
 const respondJsonMock = vi.mocked(respondJson);
 const execGitMock = vi.mocked(execGit);
-const resolveDiffBaseMock = vi.mocked(resolveDiffBase);
+const itemChangeSetMock = vi.mocked(itemChangeSet);
 
 function withGit(responder: (args: string[]) => string): void {
 	execGitMock.mockImplementation(async (_cwd, args) => responder(args));
 }
 
+function withChangeSet(groups: { base: string; paths: string[] }[]): void {
+	itemChangeSetMock.mockResolvedValue({ commits: [{ sha: "one" }], groups });
+}
+
 async function request(url = "/api/git-status?cwd=%2Frepo"): Promise<{
 	status: number;
-	counts: GitStatusCounts;
+	counts: ItemStatusCounts;
 }> {
 	await gitStatus({ url } as IncomingMessage, {} as ServerResponse);
 	const [, status, counts] = respondJsonMock.mock.lastCall as [
 		ServerResponse,
 		number,
-		GitStatusCounts,
+		ItemStatusCounts,
 	];
 	return { status, counts };
 }
@@ -34,6 +37,7 @@ async function request(url = "/api/git-status?cwd=%2Frepo"): Promise<{
 describe("gitStatus", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		itemChangeSetMock.mockResolvedValue(undefined);
 	});
 
 	it("rejects a request without a cwd", async () => {
@@ -42,8 +46,7 @@ describe("gitStatus", () => {
 		expect(execGitMock).not.toHaveBeenCalled();
 	});
 
-	it("reads the working tree from git status when the base is HEAD", async () => {
-		resolveDiffBaseMock.mockResolvedValue("HEAD");
+	it("reads the working tree from git status when there is no change set", async () => {
 		withGit(() => "?? added.ts\n M changed.ts\n D gone.ts\n");
 
 		const { status, counts } = await request();
@@ -61,52 +64,42 @@ describe("gitStatus", () => {
 		]);
 	});
 
-	it("diffs against the base when it is not HEAD", async () => {
-		resolveDiffBaseMock.mockResolvedValue("deadbeef");
+	it("counts one --name-status diff per change group", async () => {
+		withChangeSet([
+			{ base: "base-one", paths: ["a.ts", "b.ts"] },
+			{ base: "HEAD", paths: ["z.ts"] },
+		]);
 		withGit((args) => {
-			if (args[0] === "diff") return "A\tcommitted.ts\nM\tedited.ts\n";
-			return "";
+			if (args[1] !== "--name-status") return "";
+			return args[2] === "base-one" ? "A\ta.ts\nM\tb.ts\n" : "D\tz.ts\n";
 		});
 
 		const { status, counts } = await request();
 
 		expect(status).toBe(200);
-		expect(counts).toEqual({
-			new: ["committed.ts"],
-			modified: ["edited.ts"],
-			deleted: [],
-		});
+		expect(counts.new).toEqual(["a.ts"]);
+		expect(counts.modified).toEqual(["b.ts"]);
+		expect(counts.deleted).toEqual(["z.ts"]);
 		expect(execGitMock).toHaveBeenCalledWith("/repo", [
 			"diff",
 			"--name-status",
-			"deadbeef",
+			"base-one",
+			"--",
+			"a.ts",
+			"b.ts",
 		]);
-	});
-
-	it("adds untracked files to the branch counts", async () => {
-		resolveDiffBaseMock.mockResolvedValue("deadbeef");
-		withGit((args) => {
-			if (args[0] === "diff") return "M\ttracked.ts\n";
-			return "untracked-a.ts\nuntracked-b.ts\n";
-		});
-
-		const { counts } = await request();
-
-		expect(counts).toEqual({
-			new: ["untracked-a.ts", "untracked-b.ts"],
-			modified: ["tracked.ts"],
-			deleted: [],
-		});
 		expect(execGitMock).toHaveBeenCalledWith("/repo", [
-			"ls-files",
-			"--others",
-			"--exclude-standard",
+			"diff",
+			"--name-status",
+			"HEAD",
+			"--",
+			"z.ts",
 		]);
 	});
 
-	it("counts a file committed then modified again once", async () => {
-		resolveDiffBaseMock.mockResolvedValue("deadbeef");
-		withGit((args) => (args[0] === "diff" ? "M\ttwice.ts\n" : ""));
+	it("counts a file touched by several of the item's commits once", async () => {
+		withChangeSet([{ base: "base-one", paths: ["twice.ts"] }]);
+		withGit((args) => (args[1] === "--name-status" ? "M\ttwice.ts\n" : ""));
 
 		const { counts } = await request();
 
@@ -114,31 +107,95 @@ describe("gitStatus", () => {
 		expect(counts.new).toEqual([]);
 	});
 
-	it("resolves the base for the requested session", async () => {
-		resolveDiffBaseMock.mockResolvedValue("HEAD");
+	it("adds untracked files to the item counts", async () => {
+		withChangeSet([{ base: "base-one", paths: ["a.ts"] }]);
+		withGit((args) => {
+			if (args[1] === "--name-status") return "M\ta.ts\n";
+			if (args[0] === "ls-files") return "untracked-a.ts\nuntracked-b.ts\n";
+			return "";
+		});
+
+		const { counts } = await request();
+
+		expect(counts.new).toEqual(["untracked-a.ts", "untracked-b.ts"]);
+		expect(execGitMock).toHaveBeenCalledWith("/repo", [
+			"ls-files",
+			"--others",
+			"--exclude-standard",
+		]);
+	});
+
+	it("returns the uncommitted subset alongside the item counts", async () => {
+		withChangeSet([{ base: "base-one", paths: ["a.ts", "b.ts"] }]);
+		withGit((args) => {
+			if (args[1] === "--name-status") return "A\ta.ts\nM\tb.ts\n";
+			if (args[0] === "status") return " M b.ts\n";
+			return "";
+		});
+
+		const { counts } = await request();
+
+		expect(counts.uncommitted).toEqual({
+			new: [],
+			modified: ["b.ts"],
+			deleted: [],
+		});
+		expect(counts.hasCommits).toBe(true);
+	});
+
+	it("reports an empty uncommitted subset when the tree is clean", async () => {
+		withChangeSet([{ base: "base-one", paths: ["a.ts"] }]);
+		withGit((args) => (args[1] === "--name-status" ? "A\ta.ts\n" : ""));
+
+		const { counts } = await request();
+
+		expect(counts.uncommitted).toEqual({ new: [], modified: [], deleted: [] });
+	});
+
+	it("omits the item fields when there is no change set", async () => {
+		withGit(() => " M changed.ts\n");
+
+		const { counts } = await request();
+
+		expect(Object.keys(counts)).toEqual(["new", "modified", "deleted"]);
+	});
+
+	it("builds the change set for the requested session", async () => {
 		withGit(() => "");
 
 		await request("/api/git-status?cwd=%2Frepo&session=sess-1");
 
-		expect(resolveDiffBaseMock).toHaveBeenCalledWith("/repo", "sess-1");
+		expect(itemChangeSetMock).toHaveBeenCalledWith("/repo", "sess-1");
 	});
 
-	it("resolves the base without a session when none is given", async () => {
-		resolveDiffBaseMock.mockResolvedValue("HEAD");
+	it("builds the change set without a session when none is given", async () => {
 		withGit(() => "");
 
 		await request();
 
-		expect(resolveDiffBaseMock).toHaveBeenCalledWith("/repo", undefined);
+		expect(itemChangeSetMock).toHaveBeenCalledWith("/repo", undefined);
 	});
 
 	it("returns empty groups when git fails", async () => {
-		resolveDiffBaseMock.mockResolvedValue("HEAD");
 		execGitMock.mockRejectedValue(new Error("not a repo"));
 
 		const { status, counts } = await request();
 
 		expect(status).toBe(200);
 		expect(counts).toEqual({ new: [], modified: [], deleted: [] });
+	});
+
+	it("falls back to the working tree when the change set lookup fails", async () => {
+		itemChangeSetMock.mockRejectedValue(new Error("db down"));
+		withGit(() => " M changed.ts\n");
+
+		const { status, counts } = await request();
+
+		expect(status).toBe(200);
+		expect(counts).toEqual({
+			new: [],
+			modified: ["changed.ts"],
+			deleted: [],
+		});
 	});
 });

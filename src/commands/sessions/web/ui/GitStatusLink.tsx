@@ -1,22 +1,13 @@
 import Box from "@mui/material/Box";
-import Link from "@mui/material/Link";
-import { Link as RouterLink } from "react-router";
-import { diffQuery } from "./diffQuery";
+import { CountsLink, type StatusGroup } from "./CountsLink";
 import { StopCardActivation } from "./StopCardActivation";
 
-const containerSx = {
+const rowSx = {
 	display: "flex",
 	alignItems: "center",
 	gap: 0.75,
-	fontFamily: "monospace",
+	minWidth: 0,
 } as const;
-
-type StatusGroup = {
-	key: string;
-	prefix: string;
-	color: string;
-	count: number;
-};
 
 export const GROUPS = [
 	{ key: "new", prefix: "+", color: "success.main" },
@@ -24,36 +15,38 @@ export const GROUPS = [
 	{ key: "deleted", prefix: "-", color: "error.main" },
 ] as const;
 
-function GitStatusChips({ groups }: { groups: StatusGroup[] }) {
-	return groups.map((g) => (
-		<Box key={g.key} component="span" sx={{ color: g.color }}>
-			{g.prefix}
-			{g.count}
-		</Box>
-	));
-}
-
 export function GitStatusLink({
 	cwd,
 	sessionId,
 	groups,
+	uncommitted,
 }: {
 	cwd: string;
 	sessionId?: string;
 	groups: StatusGroup[];
+	uncommitted?: StatusGroup[];
 }) {
 	return (
 		<StopCardActivation>
-			<Link
-				component={RouterLink}
-				to={`/diff?${diffQuery(cwd, sessionId)}`}
-				variant="caption"
-				underline="hover"
-				color="inherit"
-				sx={containerSx}
-			>
-				<GitStatusChips groups={groups} />
-			</Link>
+			<Box sx={rowSx}>
+				{groups.length > 0 && (
+					<CountsLink
+						cwd={cwd}
+						sessionId={sessionId}
+						scope="all"
+						groups={groups}
+					/>
+				)}
+				{uncommitted && uncommitted.length > 0 && (
+					<CountsLink
+						cwd={cwd}
+						sessionId={sessionId}
+						scope="uncommitted"
+						groups={uncommitted}
+						bracketed
+					/>
+				)}
+			</Box>
 		</StopCardActivation>
 	);
 }

@@ -3,9 +3,14 @@ import { respondJson } from "../../../shared/web";
 import { execGit } from "./execGit";
 import { getCwdParam } from "./getCwdParam";
 import { getSessionParam } from "./getSessionParam";
+import { type ChangeGroup, itemChangeSet } from "./itemChangeSet";
 import { parseDiffNameStatus } from "./parseDiffNameStatus";
 import { type GitStatusCounts, parseGitStatus } from "./parseGitStatus";
-import { resolveDiffBase } from "./resolveDiffBase";
+
+export type ItemStatusCounts = GitStatusCounts & {
+	uncommitted?: GitStatusCounts;
+	hasCommits?: boolean;
+};
 
 async function untrackedPaths(cwd: string): Promise<string[]> {
 	const list = await execGit(cwd, [
@@ -16,12 +21,16 @@ async function untrackedPaths(cwd: string): Promise<string[]> {
 	return list.split("\n").filter(Boolean);
 }
 
-async function branchCounts(
+async function groupedCounts(
 	cwd: string,
-	base: string,
+	groups: ChangeGroup[],
 ): Promise<GitStatusCounts> {
-	const output = await execGit(cwd, ["diff", "--name-status", base]);
-	const counts = parseDiffNameStatus(output);
+	const outputs = await Promise.all(
+		groups.map((group) =>
+			execGit(cwd, ["diff", "--name-status", group.base, "--", ...group.paths]),
+		),
+	);
+	const counts = parseDiffNameStatus(outputs.join(""));
 	counts.new.push(...(await untrackedPaths(cwd)));
 	return counts;
 }
@@ -42,14 +51,22 @@ export async function gitStatus(
 	const cwd = getCwdParam(req, res);
 	if (!cwd) return;
 	try {
-		const base = await resolveDiffBase(cwd, getSessionParam(req));
-		respondJson(
-			res,
-			200,
-			base === "HEAD"
-				? await workingTreeCounts(cwd)
-				: await branchCounts(cwd, base),
+		const changeSet = await itemChangeSet(cwd, getSessionParam(req)).catch(
+			() => undefined,
 		);
+		if (!changeSet) {
+			respondJson(res, 200, await workingTreeCounts(cwd));
+			return;
+		}
+		const [counts, uncommitted] = await Promise.all([
+			groupedCounts(cwd, changeSet.groups),
+			workingTreeCounts(cwd),
+		]);
+		respondJson(res, 200, {
+			...counts,
+			uncommitted,
+			hasCommits: changeSet.commits.length > 0,
+		});
 	} catch {
 		respondJson(res, 200, { new: [], modified: [], deleted: [] });
 	}

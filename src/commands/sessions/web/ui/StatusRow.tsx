@@ -31,7 +31,11 @@ export function StatusRow({
 			/>
 			<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
 				{cwd && <GitStatusCounts cwd={cwd} sessionId={sessionId} />}
-				<Typography variant="caption" color="text.disabled">
+				<Typography
+					variant="caption"
+					color="text.disabled"
+					sx={{ whiteSpace: "nowrap" }}
+				>
 					{elapsed}
 				</Typography>
 			</Box>
