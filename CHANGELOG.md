@@ -1,3 +1,10 @@
+# [0.477.0](https://github.com/staff0rd/assist/compare/v0.476.0...v0.477.0) (2026-07-26)
+
+
+### Features
+
+* float waiting cards by default ([5ea6550](https://github.com/staff0rd/assist/commit/5ea6550a26a1a126b195b9d4e9c2428104133eed))
+
 # [0.476.0](https://github.com/staff0rd/assist/compare/v0.475.2...v0.476.0) (2026-07-26)
 
 
