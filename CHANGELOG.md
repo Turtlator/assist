@@ -1,3 +1,10 @@
+# [0.474.0](https://github.com/staff0rd/assist/compare/v0.473.0...v0.474.0) (2026-07-26)
+
+
+### Features
+
+* Ctrl+. jumps to next waiting card ([822c8ef](https://github.com/staff0rd/assist/commit/822c8ef265927e85fbf959b3c3a6fbb9b6cf968b))
+
 # [0.473.0](https://github.com/staff0rd/assist/compare/v0.472.0...v0.473.0) (2026-07-26)
 
 
