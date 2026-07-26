@@ -23,11 +23,7 @@ export function ConfigRowTypeCell({ entry, readOnly, canEdit, onEdit }: Props) {
 				sx={{ justifyContent: "flex-end", alignItems: "center" }}
 			>
 				<ConfigSourceChip source={entry.source} />
-				<Chip
-					size="small"
-					variant="outlined"
-					label={readOnly ? `${entry.type} · read-only` : entry.type}
-				/>
+				{readOnly && <Chip size="small" variant="outlined" label="read-only" />}
 				{canEdit && (
 					<Tooltip title={`Edit ${entry.key}`}>
 						<span>

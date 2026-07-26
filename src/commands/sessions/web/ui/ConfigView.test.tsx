@@ -390,7 +390,7 @@ describe("ConfigView", () => {
 		await waitFor(() =>
 			expect(screen.getByText("worktree.install")).toBeTruthy(),
 		);
-		expect(screen.queryByText("union · read-only")).toBeNull();
+		expect(screen.queryByText("read-only")).toBeNull();
 		fireEvent.click(
 			screen.getByRole("button", { name: "Edit worktree.install" }),
 		);
@@ -428,7 +428,7 @@ describe("ConfigView", () => {
 		renderView("/repo/one");
 
 		await waitFor(() => expect(screen.getByText("worktree.copy")).toBeTruthy());
-		expect(screen.queryByText("array · read-only")).toBeNull();
+		expect(screen.queryByText("read-only")).toBeNull();
 		fireEvent.click(screen.getByRole("button", { name: "Edit worktree.copy" }));
 		expect(screen.getByLabelText("worktree.copy")).toHaveProperty(
 			"value",
@@ -464,7 +464,7 @@ describe("ConfigView", () => {
 		await waitFor(() =>
 			expect(screen.getByText("sql.connections")).toBeTruthy(),
 		);
-		expect(screen.queryByText("array · read-only")).toBeNull();
+		expect(screen.queryByText("read-only")).toBeNull();
 		expect(
 			screen.queryByRole("button", { name: "Edit sql.connections" }),
 		).toBeNull();
@@ -535,7 +535,7 @@ describe("ConfigView", () => {
 		renderView("/repo/one");
 
 		await waitFor(() => expect(screen.getByText("cliReadVerbs")).toBeTruthy());
-		expect(screen.queryByText("record · read-only")).toBeNull();
+		expect(screen.queryByText("read-only")).toBeNull();
 		fireEvent.click(screen.getByRole("button", { name: "Edit cliReadVerbs" }));
 		fireEvent.click(
 			screen.getByRole("button", { name: "Add cliReadVerbs entry" }),
@@ -745,7 +745,7 @@ describe("ConfigView", () => {
 		await waitFor(() =>
 			expect(screen.getByText("sql.connections")).toBeTruthy(),
 		);
-		expect(screen.getByText("array · read-only")).toBeTruthy();
+		expect(screen.getByText("read-only")).toBeTruthy();
 		expect(
 			screen.queryByRole("button", { name: "Edit sql.connections" }),
 		).toBeNull();

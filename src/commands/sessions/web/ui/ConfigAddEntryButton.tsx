@@ -12,10 +12,11 @@ export function ConfigAddEntryButton({ label, disabled, onClick }: Props) {
 		<Button
 			size="small"
 			startIcon={<AddIcon fontSize="inherit" />}
+			aria-label={`Add ${label} entry`}
 			disabled={disabled}
 			onClick={onClick}
 		>
-			{`Add ${label} entry`}
+			Add
 		</Button>
 	);
 }
