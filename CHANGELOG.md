@@ -1,3 +1,10 @@
+## [0.482.1](https://github.com/staff0rd/assist/compare/v0.482.0...v0.482.1) (2026-07-26)
+
+
+### Bug Fixes
+
+* recover stranded worktree teardown ([a60e349](https://github.com/staff0rd/assist/commit/a60e3492953dca0fe6557525e88de93aa832f833))
+
 # [0.482.0](https://github.com/staff0rd/assist/compare/v0.481.0...v0.482.0) (2026-07-26)
 
 
