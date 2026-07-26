@@ -1,3 +1,10 @@
+## [0.468.1](https://github.com/staff0rd/assist/compare/v0.468.0...v0.468.1) (2026-07-26)
+
+
+### Bug Fixes
+
+* wrap the top bar title, never truncate ([c56c661](https://github.com/staff0rd/assist/commit/c56c661b7ae79fdc1c85e7b6395b2a087f801a77))
+
 # [0.468.0](https://github.com/staff0rd/assist/compare/v0.467.0...v0.468.0) (2026-07-26)
 
 
