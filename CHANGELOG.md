@@ -1,3 +1,10 @@
+# [0.461.0](https://github.com/staff0rd/assist/compare/v0.460.1...v0.461.0) (2026-07-26)
+
+
+### Features
+
+* card status shares the chips line ([3b29d92](https://github.com/staff0rd/assist/commit/3b29d924356c90021306c212d0a6f7ec5f74f2f6))
+
 ## [0.460.1](https://github.com/staff0rd/assist/compare/v0.460.0...v0.460.1) (2026-07-26)
 
 
