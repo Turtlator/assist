@@ -1,3 +1,10 @@
+# [0.479.0](https://github.com/staff0rd/assist/compare/v0.478.0...v0.479.0) (2026-07-26)
+
+
+### Features
+
+* stay on backlog when build starts ([01b8815](https://github.com/staff0rd/assist/commit/01b881510fd09e01d0c362f636bbebd8676cc0f6))
+
 # [0.478.0](https://github.com/staff0rd/assist/compare/v0.477.0...v0.478.0) (2026-07-26)
 
 
