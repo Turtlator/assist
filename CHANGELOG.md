@@ -1,3 +1,10 @@
+## [0.479.1](https://github.com/staff0rd/assist/compare/v0.479.0...v0.479.1) (2026-07-26)
+
+
+### Bug Fixes
+
+* deep-merge repo config overrides ([16e9427](https://github.com/staff0rd/assist/commit/16e9427740729df9713bd2ca0e90b1965dae6985))
+
 # [0.479.0](https://github.com/staff0rd/assist/compare/v0.478.0...v0.479.0) (2026-07-26)
 
 
