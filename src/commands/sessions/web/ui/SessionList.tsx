@@ -1,12 +1,16 @@
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import { groupSessionsByRepo } from "./groupSessionsByRepo";
+import { NoSessionsMessage } from "./NoSessionsMessage";
 import type { PendingLaunch } from "./PendingLaunch";
 import { PendingLaunchCard } from "./PendingLaunchCard";
 import { SessionGroups } from "./SessionGroups";
 import type { SessionListHandlers } from "./types";
 import type { SessionInfo } from "./useSessionSocket";
 import { useStarredSessions } from "./useStarredSessions";
+
+const unpaddedScrollportSx = { flex: 1, overflow: "auto" } as const;
+
+const paddedContentSx = { p: 1 } as const;
 
 export function SessionList({
 	sessions,
@@ -32,34 +36,30 @@ export function SessionList({
 	const groups = groupSessionsByRepo(sessions, isStarred);
 
 	return (
-		<Box sx={{ flex: 1, overflow: "auto", p: 1 }}>
-			{pendingLaunches.map((launch) => (
-				<PendingLaunchCard
-					key={launch.id}
-					launch={launch}
-					onDismiss={onDismissPending}
+		<Box sx={unpaddedScrollportSx}>
+			<Box sx={paddedContentSx}>
+				{pendingLaunches.map((launch) => (
+					<PendingLaunchCard
+						key={launch.id}
+						launch={launch}
+						onDismiss={onDismissPending}
+					/>
+				))}
+				<SessionGroups
+					groups={groups}
+					activeId={activeId}
+					initialized={initialized}
+					onSelect={onSelect}
+					onRetry={onRetry}
+					onRestart={onRestart}
+					onDismiss={onDismiss}
+					onSetAutoRun={onSetAutoRun}
+					onSetAutoAdvance={onSetAutoAdvance}
 				/>
-			))}
-			<SessionGroups
-				groups={groups}
-				activeId={activeId}
-				initialized={initialized}
-				onSelect={onSelect}
-				onRetry={onRetry}
-				onRestart={onRestart}
-				onDismiss={onDismiss}
-				onSetAutoRun={onSetAutoRun}
-				onSetAutoAdvance={onSetAutoAdvance}
-			/>
-			{sessions.length === 0 && pendingLaunches.length === 0 && (
-				<Typography
-					variant="caption"
-					color="text.disabled"
-					sx={{ display: "block", textAlign: "center", p: 2 }}
-				>
-					No sessions yet
-				</Typography>
-			)}
+				{sessions.length === 0 && pendingLaunches.length === 0 && (
+					<NoSessionsMessage />
+				)}
+			</Box>
 		</Box>
 	);
 }
