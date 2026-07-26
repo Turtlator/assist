@@ -1,3 +1,10 @@
+# [0.470.0](https://github.com/staff0rd/assist/compare/v0.469.5...v0.470.0) (2026-07-26)
+
+
+### Features
+
+* float long-waiting session cards ([f143333](https://github.com/staff0rd/assist/commit/f143333fd1a2690b978316f9eb6f2df38af26bfa))
+
 ## [0.469.5](https://github.com/staff0rd/assist/compare/v0.469.4...v0.469.5) (2026-07-26)
 
 
