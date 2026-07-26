@@ -1,3 +1,10 @@
+# [0.460.0](https://github.com/staff0rd/assist/compare/v0.459.0...v0.460.0) (2026-07-26)
+
+
+### Features
+
+* top bar carries ids and toggles ([b96cdb2](https://github.com/staff0rd/assist/commit/b96cdb2fc1db3792941eccab6afc9912414fe049))
+
 # [0.459.0](https://github.com/staff0rd/assist/compare/v0.458.1...v0.459.0) (2026-07-26)
 
 
