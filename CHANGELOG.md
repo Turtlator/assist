@@ -1,3 +1,10 @@
+# [0.465.0](https://github.com/staff0rd/assist/compare/v0.464.0...v0.465.0) (2026-07-26)
+
+
+### Features
+
+* status name moves to the top bar ([b8ca5b1](https://github.com/staff0rd/assist/commit/b8ca5b1739bc94cbced554702c0ec3ba38d785a9))
+
 # [0.464.0](https://github.com/staff0rd/assist/compare/v0.463.0...v0.464.0) (2026-07-26)
 
 
