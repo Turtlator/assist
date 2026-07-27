@@ -3,6 +3,7 @@ import { dirname } from "node:path";
 import { stringify } from "yaml";
 import { commentsCachePath } from "../commentsCachePath";
 import { deleteCommentsCache } from "../loadCommentsCache";
+import { removeStaleCommentsCaches } from "../removeStaleCommentsCaches";
 import type { PrComment } from "../types";
 
 function writeCommentsCache(
@@ -29,6 +30,7 @@ export function updateCommentsCache(
 	prNumber: number,
 	comments: PrComment[],
 ): void {
+	removeStaleCommentsCaches();
 	if (comments.some((c) => c.type === "line")) {
 		writeCommentsCache(org, repo, prNumber, comments);
 	} else {
