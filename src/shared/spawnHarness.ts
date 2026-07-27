@@ -5,6 +5,7 @@ import type { SpawnResult } from "./spawnInherit";
 import { spawnPi } from "./spawnPi";
 
 type SpawnHarnessOptions = {
+	allowEdits?: boolean;
 	sessionId?: string;
 	resumeSessionId?: string;
 	cwd?: string;
@@ -16,13 +17,16 @@ export function spawnHarness(
 	options: SpawnHarnessOptions = {},
 ): SpawnResult {
 	if (harness === "codex") {
-		return spawnCodex(prompt, { cwd: options.cwd });
+		return spawnCodex(prompt, {
+			cwd: options.cwd,
+			sandbox: options.allowEdits === false ? "read-only" : "workspace-write",
+		});
 	}
 	if (harness === "pi") {
 		return spawnPi(prompt, { cwd: options.cwd });
 	}
 	return spawnClaude(prompt, {
-		allowEdits: true,
+		allowEdits: options.allowEdits ?? true,
 		sessionId: options.sessionId,
 		resumeSessionId: options.resumeSessionId,
 	});

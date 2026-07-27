@@ -1,16 +1,13 @@
-import {
-	type SpawnClaudeOptions,
-	withoutResumeSession,
-} from "../../shared/spawnClaude";
+import { withoutResumeSession } from "../../shared/spawnClaude";
 import { runPhases } from "./runPhases";
 import { type ReviewResult, runReview } from "./runReview";
-import type { BacklogItem, PlanPhase } from "./types";
+import type { BacklogItem, BacklogRunOptions, PlanPhase } from "./types";
 
 export async function runOnce(
 	item: BacklogItem,
 	startPhase: number,
 	plan: PlanPhase[],
-	spawnOptions?: SpawnClaudeOptions,
+	spawnOptions?: BacklogRunOptions,
 ): Promise<ReviewResult | { kind: "fail" } | { kind: "paused" }> {
 	// why: resume only reaches the review when the restart interrupted the review.
 	const reviewOptions =

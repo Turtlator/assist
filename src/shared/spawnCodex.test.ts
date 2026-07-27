@@ -21,19 +21,44 @@ describe("spawnCodex", () => {
 		vi.clearAllMocks();
 	});
 
-	it("launches codex with -C <cwd> and the prompt, defaulting cwd to process.cwd()", () => {
+	it("launches codex workspace-write by default in process.cwd()", () => {
 		spawnCodex("/refine a279");
 
 		const [command, args] = lastCall();
 		expect(command).toBe("codex");
-		expect(args).toEqual(["-C", process.cwd(), "/refine a279"]);
+		expect(args).toEqual([
+			"-C",
+			process.cwd(),
+			"--sandbox",
+			"workspace-write",
+			"/refine a279",
+		]);
 	});
 
 	it("honours an explicit cwd", () => {
 		spawnCodex("/refine a279", { cwd: "/repo/x" });
 
 		const [, args] = lastCall();
-		expect(args).toEqual(["-C", "/repo/x", "/refine a279"]);
+		expect(args).toEqual([
+			"-C",
+			"/repo/x",
+			"--sandbox",
+			"workspace-write",
+			"/refine a279",
+		]);
+	});
+
+	it("launches codex read-only when requested", () => {
+		spawnCodex("/refine a279", { sandbox: "read-only" });
+
+		const [, args] = lastCall();
+		expect(args).toEqual([
+			"-C",
+			process.cwd(),
+			"--sandbox",
+			"read-only",
+			"/refine a279",
+		]);
 	});
 
 	it("strips ASSIST_ACTIVITY_ID and CLAUDE_CODE_CHILD_SESSION from the child env", () => {

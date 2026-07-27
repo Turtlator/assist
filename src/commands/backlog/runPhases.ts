@@ -1,12 +1,9 @@
-import {
-	type SpawnClaudeOptions,
-	withoutResumeSession,
-} from "../../shared/spawnClaude";
+import { withoutResumeSession } from "../../shared/spawnClaude";
 import { appendDaemonLog } from "../sessions/daemon/appendDaemonLog";
 import { consumePause } from "./consumePause";
 import { executePhase } from "./executePhase";
 import { reloadPlan } from "./reloadPlan";
-import type { BacklogItem, PlanPhase } from "./types";
+import type { BacklogItem, BacklogRunOptions, PlanPhase } from "./types";
 
 type PhasesResult =
 	| { kind: "completed" }
@@ -17,7 +14,7 @@ export async function runPhases(
 	item: BacklogItem,
 	startPhase: number,
 	plan: PlanPhase[],
-	spawnOptions?: SpawnClaudeOptions,
+	spawnOptions?: BacklogRunOptions,
 ): Promise<PhasesResult> {
 	let phaseIndex = startPhase;
 	let currentPlan = plan;

@@ -40,14 +40,37 @@ describe("spawnHarness", () => {
 		expect(mockSpawnCodex).not.toHaveBeenCalled();
 	});
 
+	it("preserves read-only Claude launch behavior", () => {
+		spawnHarness("claude", "/refine a279", { allowEdits: false });
+
+		expect(mockSpawnClaude).toHaveBeenCalledWith("/refine a279", {
+			allowEdits: false,
+			sessionId: undefined,
+			resumeSessionId: undefined,
+		});
+	});
+
 	it("launches codex in the given cwd", () => {
 		spawnHarness("codex", "/refine a279", { cwd: "/repo", sessionId: "s-1" });
 
 		expect(mockSpawnCodex).toHaveBeenCalledWith("/refine a279", {
 			cwd: "/repo",
+			sandbox: "workspace-write",
 		});
 		expect(mockSpawnClaude).not.toHaveBeenCalled();
 		expect(mockSpawnPi).not.toHaveBeenCalled();
+	});
+
+	it("maps disabled edits to the Codex read-only sandbox", () => {
+		spawnHarness("codex", "/refine a279", {
+			allowEdits: false,
+			cwd: "/repo",
+		});
+
+		expect(mockSpawnCodex).toHaveBeenCalledWith("/refine a279", {
+			cwd: "/repo",
+			sandbox: "read-only",
+		});
 	});
 
 	it("launches pi in the given cwd", () => {

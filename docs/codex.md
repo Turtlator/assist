@@ -6,6 +6,12 @@ first-class harness (backlog `a667`). Verified against `codex-cli 0.133.0`.
 
 Severity reflects impact on our workflows, not Codex's roadmap.
 
+## Backlog run sandbox
+
+`assist backlog run <id> --harness codex` launches Codex with
+`--sandbox workspace-write` by default. Passing `--no-write` launches it with
+`--sandbox read-only`; an explicit `--write` selects `workspace-write`.
+
 | Gap                                     | Severity   | Impact on us                                                                                                                                                                                                                                                                                                     | Mitigation / workaround                                                                                                                                                                                                                                                                                                                                                     |
 | --------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **No command auto-approval classifier** | High       | Codex has no equivalent to Claude Code's built-in safe-command classifier, so it prompts for approval on commands Claude would auto-run. Without help, every tool call in a tracked Codex session stalls on approval.                                                                                            | `assist codex-hook` (a `PreToolUse`/`PermissionRequest` hook, synced into `~/.codex/config.toml`) auto-approves our read-only allowlist — the same allowlist the Claude `cli-hook` uses. Residual: anything outside the allowlist still prompts.                                                                                                                            |

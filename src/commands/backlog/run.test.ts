@@ -129,6 +129,27 @@ describe("run", () => {
 			expect(mockExecutePhase).toHaveBeenCalledTimes(3);
 		});
 
+		it("uses the selected harness for every authored phase and review", async () => {
+			const item = makeItem();
+			mockPrepareRun.mockReturnValue({
+				item,
+				plan: makePlan(item),
+				startPhase: 0,
+			});
+			mockExecutePhase
+				.mockResolvedValueOnce(advance)
+				.mockResolvedValueOnce(advance)
+				.mockResolvedValueOnce(advance);
+
+			await run("1", { harness: "pi" });
+
+			expect(mockExecutePhase.mock.calls.map((call) => call[3])).toEqual([
+				{ harness: "pi" },
+				{ harness: "pi" },
+				{ harness: "pi" },
+			]);
+		});
+
 		it("should pass the review phase as the last element", async () => {
 			const item = makeItem();
 			mockPrepareRun.mockReturnValue({

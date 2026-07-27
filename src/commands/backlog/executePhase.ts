@@ -1,22 +1,18 @@
-import { randomUUID } from "node:crypto";
 import chalk from "chalk";
 import { CLAUDE_SPAWN_FAILED } from "../../shared/awaitClaude";
-import type { SpawnClaudeOptions } from "../../shared/spawnClaude";
 import { setSessionStatus } from "../sessions/setSessionStatus";
+import { assertCodexResumeSupported } from "./assertCodexResumeSupported";
 import { launchPhaseSession } from "./launchPhaseSession";
-import { persistPhaseSession } from "./persistPhaseSession";
-import { persistPhaseSessionId } from "./persistPhaseSessionId";
 import { recordSignalOwner } from "./recordSignalOwner";
-import { reportPhaseActivity } from "./reportPhaseActivity";
 import { type PhaseOutcome, resolvePhaseResult } from "./resolvePhaseResult";
-import type { BacklogItem, PlanPhase } from "./types";
-import { verifyPhaseResume } from "./verifyPhaseResume";
+import type { BacklogItem, BacklogRunOptions, PlanPhase } from "./types";
+import { preparePhaseSession } from "./preparePhaseSession";
 
 export async function executePhase(
 	item: BacklogItem,
 	phaseIndex: number,
 	phases: PlanPhase[],
-	spawnOptions?: SpawnClaudeOptions,
+	spawnOptions?: BacklogRunOptions,
 	// The auto-appended review phase isn't in the authored `phases` array during
 	// the authored run, so callers pass the review-inclusive total to keep the
 	// count stable (e.g. 1/3, 2/3, then 3/3 for review) rather than jumping.
@@ -30,33 +26,29 @@ export async function executePhase(
 		),
 	);
 
-	/* why: a fresh phase gets a new id we assign so the daemon knows exactly
-	 * which transcript to resume on restart; a resumed phase keeps the
-	 * interrupted conversation's id. Either way it is reported via activity. */
-	const resumeSessionId = spawnOptions?.resumeSessionId;
-	const claudeSessionId = resumeSessionId ?? randomUUID();
+	assertCodexResumeSupported(spawnOptions);
 
 	process.env.ASSIST_SESSION_ID ??= String(process.pid);
 	process.env.ASSIST_BACKLOG_ITEM_ID = String(item.id);
 	recordSignalOwner(item.id);
 
 	const phaseLabel = `phase ${phaseNumber}/${totalPhases}`;
-	if (resumeSessionId) {
-		if (!(await verifyPhaseResume(item.id, resumeSessionId, phaseLabel)))
-			return { kind: "abort" };
-	}
-
-	reportPhaseActivity(item, phaseNumber, totalPhases, phase, claudeSessionId);
-	if (!resumeSessionId) {
-		await persistPhaseSessionId(item.id, phaseIndex, claudeSessionId);
-	}
-	await persistPhaseSession(item.id, phaseIndex, claudeSessionId);
+	const phaseSession = await preparePhaseSession(
+		item,
+		phase,
+		phaseIndex,
+		phaseNumber,
+		totalPhases,
+		phaseLabel,
+		spawnOptions,
+	);
+	if (!phaseSession) return { kind: "abort" };
 	const exitCode = await launchPhaseSession(
 		item,
 		phaseNumber,
 		phase,
 		phaseLabel,
-		claudeSessionId,
+		phaseSession.claudeSessionId,
 		spawnOptions,
 	);
 	/* why: abort the phase loop on a spawn failure rather than surfacing an

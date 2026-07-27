@@ -1,8 +1,5 @@
 import chalk from "chalk";
-import {
-	type SpawnClaudeOptions,
-	withoutResumeSession,
-} from "../../shared/spawnClaude";
+import { withoutResumeSession } from "../../shared/spawnClaude";
 import { acquireLock, foreignLockHolder, releaseLock } from "./acquireLock";
 import { ensureStoryBranch } from "./ensureStoryBranch";
 import { formatItemId, parseItemId } from "./formatItemId";
@@ -11,12 +8,13 @@ import { type PreparedRun, prepareRun } from "./prepareRun";
 import { reportDuplicateRun } from "./reportDuplicateRun";
 import { runOnce } from "./runOnce";
 import { setStatus } from "./shared";
+import type { BacklogRunOptions } from "./types";
 import { clearSignalOwner } from "./recordSignalOwner";
 import { discardStalePause } from "./discardStalePause";
 
 export async function run(
 	id: string,
-	spawnOptions?: SpawnClaudeOptions,
+	spawnOptions?: BacklogRunOptions,
 ): Promise<boolean> {
 	const itemId = parseItemId(id);
 	const holder = foreignLockHolder(itemId);
@@ -34,7 +32,7 @@ export async function run(
 
 async function runLocked(
 	id: string,
-	spawnOptions?: SpawnClaudeOptions,
+	spawnOptions?: BacklogRunOptions,
 ): Promise<boolean> {
 	const prepared = await prepareRun(id, spawnOptions?.resumeSessionId);
 	if (!prepared) return false;
@@ -49,7 +47,7 @@ async function runLocked(
 async function runPrepared(
 	id: string,
 	prepared: PreparedRun,
-	spawnOptions?: SpawnClaudeOptions,
+	spawnOptions?: BacklogRunOptions,
 ): Promise<boolean> {
 	const { item } = prepared;
 	let { plan, startPhase } = prepared;

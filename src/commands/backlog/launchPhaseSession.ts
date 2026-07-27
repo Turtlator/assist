@@ -1,8 +1,7 @@
-import type { SpawnClaudeOptions } from "../../shared/spawnClaude";
 import { buildPhasePrompt } from "./buildPhasePrompt";
 import { launchPhaseClaude } from "./launchPhaseClaude";
 import { resumeNudge } from "./resumeNudge";
-import type { BacklogItem, PlanPhase } from "./types";
+import type { BacklogItem, BacklogRunOptions, PlanPhase } from "./types";
 
 export function launchPhaseSession(
 	item: BacklogItem,
@@ -10,16 +9,19 @@ export function launchPhaseSession(
 	phase: PlanPhase,
 	phaseLabel: string,
 	claudeSessionId: string,
-	spawnOptions?: SpawnClaudeOptions,
+	spawnOptions?: BacklogRunOptions,
 ): Promise<number | null> {
-	const resumeSessionId = spawnOptions?.resumeSessionId;
+	const harness = spawnOptions?.harness;
+	const { harness: _harness, ...phaseOptions } = spawnOptions ?? {};
+	const resumeSessionId = phaseOptions.resumeSessionId;
 	return launchPhaseClaude(
 		resumeSessionId
 			? resumeNudge()
 			: buildPhasePrompt(item, phaseNumber, phase),
 		resumeSessionId
-			? (spawnOptions ?? {})
-			: { ...spawnOptions, sessionId: claudeSessionId },
+			? phaseOptions
+			: { ...phaseOptions, sessionId: claudeSessionId },
 		phaseLabel,
+		harness,
 	);
 }

@@ -1,4 +1,10 @@
 import { z } from "zod";
+import type { HarnessKind } from "../../shared/harnesses";
+import type { SpawnClaudeOptions } from "../../shared/spawnClaude";
+
+export type BacklogRunOptions = SpawnClaudeOptions & {
+	harness?: HarnessKind;
+};
 
 const backlogStatusSchema = z.enum(["todo", "in-progress", "done", "wontdo"]);
 const backlogTypeSchema = z.enum(["story", "bug"]);
