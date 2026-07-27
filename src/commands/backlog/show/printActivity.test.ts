@@ -94,5 +94,22 @@ describe("printActivity", () => {
 
 		const out = output();
 		expect(out).toContain("and 3 more commits");
+		expect(out).toContain("--all-commits");
+		expect(out).not.toContain("commit0");
+	});
+
+	it("prints every commit and no overflow line with allCommits", () => {
+		const commits: GitRef[] = Array.from({ length: 13 }, (_, i) => ({
+			kind: "commit",
+			ref: `commit${i}`,
+			title: `Subject ${i}`,
+		}));
+
+		printActivity(item(commits), { allCommits: true });
+
+		const out = output();
+		expect(out).toContain("commit0 Subject 0");
+		expect(out).toContain("commit12 Subject 12");
+		expect(out).not.toContain("more commits");
 	});
 });

@@ -46,7 +46,10 @@ function printComments(item: BacklogItem): void {
 	console.log();
 }
 
-export async function show(id: string): Promise<void> {
+export async function show(
+	id: string,
+	options: { allCommits?: boolean } = {},
+): Promise<void> {
 	const found = await findOneItem(id);
 	if (!found) process.exit(1);
 
@@ -63,6 +66,6 @@ export async function show(id: string): Promise<void> {
 	printSubtasks(item);
 	await printLinks(orm, item);
 	printPlan(item);
-	printActivity(item);
+	printActivity(item, { allCommits: options.allCommits });
 	printComments(item);
 }

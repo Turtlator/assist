@@ -7,9 +7,9 @@ type ActivityRef = {
 type GroupedActivity<T extends ActivityRef> = {
 	branches: T[];
 	commits: T[];
+	overflowCommits: T[];
 	prs: T[];
 	slacks: T[];
-	hiddenCommits: number;
 };
 
 export function groupActivityRefs<T extends ActivityRef>(
@@ -22,8 +22,8 @@ export function groupActivityRefs<T extends ActivityRef>(
 	return {
 		branches: newestFirst("branch"),
 		commits: commits.slice(0, commitLimit),
+		overflowCommits: commits.slice(commitLimit),
 		prs: newestFirst("pr"),
 		slacks: newestFirst("slack"),
-		hiddenCommits: Math.max(0, commits.length - commitLimit),
 	};
 }

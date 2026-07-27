@@ -1,10 +1,32 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import type { GitRef } from "../types";
 import { ActivitySection } from "./ActivitySection";
 
 afterEach(cleanup);
+
+const commitCreatedAt = "2026-07-08T09:34:00.000Z";
+
+const formattedTimestamp = new Date(commitCreatedAt).toLocaleDateString(
+	undefined,
+	{
+		year: "numeric",
+		month: "short",
+		day: "numeric",
+		hour: "2-digit",
+		minute: "2-digit",
+	},
+);
+
+function manyCommits(): GitRef[] {
+	return Array.from({ length: 13 }, (_, i) => ({
+		kind: "commit",
+		ref: `commit${i}`,
+		url: `https://gh/commit/commit${i}`,
+		createdAt: commitCreatedAt,
+	}));
+}
 
 describe("ActivitySection", () => {
 	it("renders nothing when there are no refs", () => {
@@ -74,16 +96,56 @@ describe("ActivitySection", () => {
 	});
 
 	it("orders refs newest-first and caps commits with an overflow indicator", () => {
-		const commits: GitRef[] = Array.from({ length: 13 }, (_, i) => ({
+		render(<ActivitySection gitRefs={manyCommits()} />);
+
+		expect(screen.getAllByText(/^commit\d+$/)).toHaveLength(10);
+		expect(screen.getByText("commit12")).toBeTruthy();
+		expect(screen.queryByText("commit0")).toBeNull();
+		expect(
+			screen.getByRole("button", { name: "… and 3 more commits" }),
+		).toBeTruthy();
+	});
+
+	it("expands the hidden commits when the overflow control is clicked", () => {
+		render(<ActivitySection gitRefs={manyCommits()} />);
+
+		fireEvent.click(
+			screen.getByRole("button", { name: "… and 3 more commits" }),
+		);
+
+		expect(screen.getAllByText(/^commit\d+$/)).toHaveLength(13);
+		expect(
+			screen.getByRole("link", { name: "commit0" }).getAttribute("href"),
+		).toBe("https://gh/commit/commit0");
+		expect(screen.getAllByText("commit")).toHaveLength(13);
+		expect(screen.getAllByText(formattedTimestamp)).toHaveLength(13);
+		expect(screen.queryByText("… and 3 more commits")).toBeNull();
+	});
+
+	it("collapses back to the capped list", () => {
+		render(<ActivitySection gitRefs={manyCommits()} />);
+
+		fireEvent.click(
+			screen.getByRole("button", { name: "… and 3 more commits" }),
+		);
+		fireEvent.click(screen.getByRole("button", { name: "Show fewer commits" }));
+
+		expect(screen.getAllByText(/^commit\d+$/)).toHaveLength(10);
+		expect(screen.queryByText("commit0")).toBeNull();
+		expect(
+			screen.getByRole("button", { name: "… and 3 more commits" }),
+		).toBeTruthy();
+	});
+
+	it("shows no overflow control when the commits fit under the cap", () => {
+		const commits: GitRef[] = Array.from({ length: 10 }, (_, i) => ({
 			kind: "commit",
 			ref: `commit${i}`,
 		}));
 
 		render(<ActivitySection gitRefs={commits} />);
 
-		expect(screen.getAllByText(/^commit\d+$/)).toHaveLength(10);
-		expect(screen.getByText("commit12")).toBeTruthy();
-		expect(screen.queryByText("commit0")).toBeNull();
-		expect(screen.getByText("… and 3 more commits")).toBeTruthy();
+		expect(screen.queryByRole("button")).toBeNull();
+		expect(screen.queryByText(/more commits/)).toBeNull();
 	});
 });

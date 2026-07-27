@@ -23,7 +23,7 @@ describe("groupActivityRefs", () => {
 		expect(grouped.slacks).toEqual([
 			{ kind: "slack", ref: "https://slack/thread", title: "My PR" },
 		]);
-		expect(grouped.hiddenCommits).toBe(0);
+		expect(grouped.overflowCommits).toEqual([]);
 	});
 
 	it("orders each group newest-first (reversing the oldest-first input)", () => {
@@ -42,14 +42,27 @@ describe("groupActivityRefs", () => {
 		]);
 	});
 
-	it("caps the commit list and reports the overflow count", () => {
+	it("caps the commit list and returns the overflow commits", () => {
 		const refs = Array.from({ length: 13 }, (_, i) => commit(`c${i}`));
 
 		const grouped = groupActivityRefs(refs, 10);
 
 		expect(grouped.commits).toHaveLength(10);
-		expect(grouped.hiddenCommits).toBe(3);
 		expect(grouped.commits[0].ref).toBe("c12");
+		expect(grouped.overflowCommits.map((c) => c.ref)).toEqual([
+			"c2",
+			"c1",
+			"c0",
+		]);
+	});
+
+	it("returns every commit and no overflow when the limit is unbounded", () => {
+		const refs = Array.from({ length: 13 }, (_, i) => commit(`c${i}`));
+
+		const grouped = groupActivityRefs(refs, Number.POSITIVE_INFINITY);
+
+		expect(grouped.commits).toHaveLength(13);
+		expect(grouped.overflowCommits).toEqual([]);
 	});
 
 	it("does not mutate the input array", () => {

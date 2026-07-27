@@ -1,6 +1,6 @@
 import type { Command } from "commander";
 import { configHelp } from "../shared/configHelp";
-import { show as backlogShow, web as backlogWeb } from "./backlog";
+import { web as backlogWeb } from "./backlog";
 import { backlogConfigHelp } from "./backlog/backlogConfigHelp";
 import { registerActivityCommands } from "./backlog/registerActivityCommands";
 import { registerAssociateGithubCommand } from "./backlog/registerAssociateGithubCommand";
@@ -22,14 +22,7 @@ import { registerStatusCommands } from "./backlog/registerStatusCommands";
 import { registerSubtaskCommands } from "./backlog/registerSubtaskCommands";
 import { registerUpdateCommands } from "./backlog/registerUpdateCommands";
 import { setBacklogDir } from "./backlog/shared";
-
-function registerShowCommands(cmd: Command): void {
-	cmd
-		.command("show <id>")
-		.alias("view")
-		.description("Show full detail for a backlog item")
-		.action(backlogShow);
-}
+import { registerShowCommands } from "./backlog/registerShowCommands";
 
 function registerWebCommand(cmd: Command): void {
 	cmd

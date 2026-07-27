@@ -1,9 +1,9 @@
 import { Box, Link, Stack, Typography } from "@mui/material";
+import { useState } from "react";
 import { groupActivityRefs } from "../../../groupActivityRefs";
 import type { GitRef } from "../types";
 import { itemSectionAnchor } from "./itemSectionAnchor";
-import { refLabel } from "./refLabel";
-import { CommitTimestamp } from "./CommitTimestamp";
+import { RefRow } from "./RefRow";
 
 const headingSx = {
 	color: "text.secondary",
@@ -12,43 +12,23 @@ const headingSx = {
 	letterSpacing: "0.08em",
 } as const;
 
-const kindSx = {
+const toggleSx = {
 	color: "text.secondary",
-	mr: 1,
-	fontFamily: "monospace",
+	alignSelf: "flex-start",
+	textAlign: "left",
 } as const;
 
-function RefText({ gitRef }: { gitRef: GitRef }) {
-	const label = refLabel(gitRef);
-	if (!gitRef.url) return <>{label}</>;
-	return (
-		<Link
-			href={gitRef.url}
-			target="_blank"
-			rel="noopener"
-			onClick={(e) => e.stopPropagation()}
-		>
-			{label}
-		</Link>
-	);
-}
-
-function RefRow({ gitRef }: { gitRef: GitRef }) {
-	return (
-		<Typography variant="body2">
-			<Box component="span" sx={kindSx}>
-				{gitRef.kind}
-			</Box>
-			<RefText gitRef={gitRef} />
-			<CommitTimestamp gitRef={gitRef} />
-		</Typography>
-	);
-}
-
 export function ActivitySection({ gitRefs }: { gitRefs: GitRef[] }) {
-	const { branches, commits, prs, slacks, hiddenCommits } =
+	const [expanded, setExpanded] = useState(false);
+	const { branches, commits, overflowCommits, prs, slacks } =
 		groupActivityRefs(gitRefs);
-	const ordered = [...branches, ...commits, ...prs, ...slacks];
+	const ordered = [
+		...branches,
+		...commits,
+		...(expanded ? overflowCommits : []),
+		...prs,
+		...slacks,
+	];
 	if (ordered.length === 0) return null;
 	return (
 		<Box {...itemSectionAnchor("activity")}>
@@ -59,10 +39,22 @@ export function ActivitySection({ gitRefs }: { gitRefs: GitRef[] }) {
 				{ordered.map((r) => (
 					<RefRow key={`${r.kind}:${r.ref}`} gitRef={r} />
 				))}
-				{hiddenCommits > 0 && (
-					<Typography variant="body2" sx={{ color: "text.secondary" }}>
-						… and {hiddenCommits} more commits
-					</Typography>
+				{overflowCommits.length > 0 && (
+					<Link
+						component="button"
+						type="button"
+						variant="body2"
+						underline="hover"
+						sx={toggleSx}
+						onClick={(e) => {
+							e.stopPropagation();
+							setExpanded((prev) => !prev);
+						}}
+					>
+						{expanded
+							? "Show fewer commits"
+							: `… and ${overflowCommits.length} more commits`}
+					</Link>
 				)}
 			</Stack>
 		</Box>
