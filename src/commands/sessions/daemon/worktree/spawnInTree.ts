@@ -9,6 +9,7 @@ import { resumeSession } from "../resumeSession";
 import { type AllocateOptions, allocateTree } from "./allocateTree";
 import { bindNewWorktree, bindResumedWorktree } from "./bindNewWorktree";
 import { boundTreeRoots } from "./boundTreeRoots";
+import { isCommittingArgs } from "./isCommittingArgs";
 import { isPrCheckoutArgs } from "./isPrCheckoutArgs";
 
 export type TreeSpawnContext = {
@@ -60,6 +61,7 @@ export function spawnAssistInTree(
 			createAssistSession(sid, assistArgs, resolvedCwd, meta, holdUntilSeeded),
 		{
 			forCheckout: isPrCheckoutArgs(assistArgs),
+			commits: isCommittingArgs(assistArgs),
 			draftLike: isDraftCommand(assistArgs[0]),
 			inPlace: meta?.inPlace,
 		},

@@ -254,4 +254,97 @@ describe("allocateTree", () => {
 			expect(createMock).not.toHaveBeenCalled();
 		});
 	});
+
+	describe("for a committing session in a trunk-mode repo", () => {
+		beforeEach(() => {
+			configMock.mockReturnValue({
+				enabled: true,
+				trunk: true,
+				includeDrafts: false,
+				install: true,
+				commitBeforeManualChecks: false,
+				copy: [],
+			});
+		});
+
+		it("spills out of a free, clean clone rather than committing on the mainline", () => {
+			expect(allocateTree("/git/repo", new Set(), { commits: true })).toEqual({
+				cwd: "/git/repo-2",
+				kind: "worktree",
+				created: true,
+				clone: "/git/repo",
+			});
+		});
+
+		it("spills a PR checkout even though the clone is durable", () => {
+			expect(
+				allocateTree("/git/repo", new Set(), {
+					commits: true,
+					forCheckout: true,
+				}).kind,
+			).toBe("worktree");
+			expect(durabilityMock).not.toHaveBeenCalled();
+		});
+
+		it("still keeps a plain prompt in the clone", () => {
+			expect(allocateTree("/git/repo", new Set()).kind).toBe("primary");
+			expect(createMock).not.toHaveBeenCalled();
+		});
+
+		it("still keeps a draft-type session in the clone", () => {
+			expect(
+				allocateTree("/git/repo", new Set(), { draftLike: true }).kind,
+			).toBe("primary");
+			expect(createMock).not.toHaveBeenCalled();
+		});
+
+		it("still honours a session pinned to the tree it was launched from", () => {
+			expect(
+				allocateTree("/git/repo", new Set(), { commits: true, inPlace: true }),
+			).toEqual({ cwd: "/git/repo", kind: "primary", created: false });
+			expect(createMock).not.toHaveBeenCalled();
+		});
+
+		it("stays inert when parallel work is off", () => {
+			configMock.mockReturnValue({
+				enabled: false,
+				trunk: true,
+				includeDrafts: false,
+				install: true,
+				commitBeforeManualChecks: false,
+				copy: [],
+			});
+
+			expect(
+				allocateTree("/git/repo/src", new Set(), { commits: true }),
+			).toEqual({ cwd: "/git/repo/src", kind: "primary", created: false });
+			expect(createMock).not.toHaveBeenCalled();
+		});
+	});
+
+	describe("for a committing session in a non-trunk repo", () => {
+		it("reuses a free, clean clone exactly as before", () => {
+			expect(allocateTree("/git/repo", new Set(), { commits: true })).toEqual({
+				cwd: "/git/repo",
+				kind: "primary",
+				created: false,
+				clone: "/git/repo",
+			});
+			expect(createMock).not.toHaveBeenCalled();
+		});
+
+		it("still spills a PR checkout over uncommitted work", () => {
+			durabilityMock.mockReturnValue({
+				durable: false,
+				reason: "uncommitted changes",
+			});
+
+			expect(
+				allocateTree("/git/repo", new Set(), {
+					commits: true,
+					forCheckout: true,
+				}).kind,
+			).toBe("worktree");
+		});
+	});
 });

@@ -16,6 +16,7 @@ export type AllocateOptions = {
 	forCheckout?: boolean;
 	draftLike?: boolean;
 	inPlace?: boolean;
+	commits?: boolean;
 };
 
 export function allocateTree(
@@ -33,7 +34,11 @@ export function allocateTree(
 
 	const clone = mainWorktree(repoRoot) ?? repoRoot;
 	const reuse = { ...options, includeDrafts: cfg.includeDrafts };
-	if (reusesClone(clone, boundTreeRoots, reuse))
+	if (mustLeaveTrunk(cfg.trunk, options))
+		daemonLog(
+			`committing session spilled out of the clone ${clone}: worktree.trunk is on, so a commit here would land on the local mainline`,
+		);
+	else if (reusesClone(clone, boundTreeRoots, reuse))
 		return { cwd: clone, kind: "primary", created: false, clone };
 
 	const path = createWorktree(
@@ -42,6 +47,10 @@ export function allocateTree(
 		boundTreeRoots,
 	);
 	return { cwd: path, kind: "worktree", created: true, clone };
+}
+
+function mustLeaveTrunk(trunk: boolean, options: AllocateOptions): boolean {
+	return trunk === true && options.commits === true;
 }
 
 function keptInPlace(cwd: string): Allocation {
