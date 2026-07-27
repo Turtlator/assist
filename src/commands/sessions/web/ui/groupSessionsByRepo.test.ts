@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { groupSessionsByRepo } from "./groupSessionsByRepo";
+import { hasWaitedPastThreshold } from "./sortSessionsByWaiting";
 import type { SessionInfo } from "./types";
+
+const NOW = 1_000_000;
 
 function session(id: string, cwd?: string): SessionInfo {
 	return {
@@ -11,6 +14,18 @@ function session(id: string, cwd?: string): SessionInfo {
 		startedAt: 0,
 		cwd,
 	};
+}
+
+function waiting(id: string, cwd: string, waitingForMs: number): SessionInfo {
+	return {
+		...session(id, cwd),
+		status: "waiting",
+		waitingSince: NOW - waitingForMs,
+	};
+}
+
+function waitedPast(thresholdMs: number): (session: SessionInfo) => boolean {
+	return (session) => hasWaitedPastThreshold(session, NOW, thresholdMs);
 }
 
 describe("groupSessionsByRepo", () => {
@@ -317,6 +332,62 @@ describe("groupSessionsByRepo", () => {
 				key: "/two",
 				label: "two",
 				sessions: [sessions[2], sessions[3]],
+			},
+		]);
+	});
+
+	it("floats only the group past a longer configured threshold", () => {
+		const sessions = [
+			session("a", "/one"),
+			waiting("b", "/one", 8000),
+			session("c", "/two"),
+			waiting("d", "/two", 12_000),
+		];
+
+		const groups = groupSessionsByRepo(
+			sessions,
+			() => false,
+			waitedPast(10_000),
+		);
+
+		expect(groups).toEqual([
+			{
+				kind: "repo",
+				key: "/two",
+				label: "two",
+				sessions: [sessions[3], sessions[2]],
+			},
+			{
+				kind: "repo",
+				key: "/one",
+				label: "one",
+				sessions: [sessions[0], sessions[1]],
+			},
+		]);
+	});
+
+	it("floats a briefly waiting member on a shorter configured threshold", () => {
+		const sessions = [
+			session("a", "/one"),
+			session("b", "/one"),
+			waiting("c", "/two", 900),
+			session("d", "/two"),
+		];
+
+		const groups = groupSessionsByRepo(sessions, () => false, waitedPast(500));
+
+		expect(groups).toEqual([
+			{
+				kind: "repo",
+				key: "/two",
+				label: "two",
+				sessions: [sessions[2], sessions[3]],
+			},
+			{
+				kind: "repo",
+				key: "/one",
+				label: "one",
+				sessions: [sessions[0], sessions[1]],
 			},
 		]);
 	});

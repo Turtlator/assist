@@ -38,6 +38,11 @@ export const sessionsConfigHelp: ConfigHelpEntry[] = [
 		note: "set false to stop the sidebar floating sessions that have been waiting on input for a few seconds above the other unstarred cards (default on)",
 	},
 	{
+		key: "sessions.floatWaitingAfterMs",
+		setter: "assist config set sessions.floatWaitingAfterMs 15000 -g",
+		note: "how long a session must have been waiting on input before it floats (default: 5000ms)",
+	},
+	{
 		key: "worktree.enabled",
 		setter: "assist config set worktree.enabled true -g --repo",
 		note: "opt in per repo: spill concurrent sessions into adjacent <clone>-N worktrees (default off)",

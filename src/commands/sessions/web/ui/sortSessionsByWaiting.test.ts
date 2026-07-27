@@ -3,6 +3,7 @@ import { sortSessionsByWaiting } from "./sortSessionsByWaiting";
 import type { SessionInfo, SessionStatus } from "./types";
 
 const NOW = 1_000_000;
+const THRESHOLD_MS = 5000;
 
 function session(
 	id: string,
@@ -31,7 +32,12 @@ describe("sortSessionsByWaiting", () => {
 	it("floats a session waiting past the threshold above the other unstarred sessions", () => {
 		const sessions = [session("a"), waiting("b", 6000), session("c")];
 
-		const sorted = sortSessionsByWaiting(sessions, () => false, NOW);
+		const sorted = sortSessionsByWaiting(
+			sessions,
+			() => false,
+			NOW,
+			THRESHOLD_MS,
+		);
 
 		expect(ids(sorted)).toEqual(["b", "a", "c"]);
 	});
@@ -44,6 +50,7 @@ describe("sortSessionsByWaiting", () => {
 			sessions,
 			(s) => starred.has(s.id),
 			NOW,
+			THRESHOLD_MS,
 		);
 
 		expect(ids(sorted)).toEqual(["c", "b", "a"]);
@@ -57,6 +64,7 @@ describe("sortSessionsByWaiting", () => {
 			sessions,
 			(s) => starred.has(s.id),
 			NOW,
+			THRESHOLD_MS,
 		);
 
 		expect(ids(sorted)).toEqual(["b", "c", "a"]);
@@ -70,7 +78,12 @@ describe("sortSessionsByWaiting", () => {
 			waiting("d", 10_000),
 		];
 
-		const sorted = sortSessionsByWaiting(sessions, () => false, NOW);
+		const sorted = sortSessionsByWaiting(
+			sessions,
+			() => false,
+			NOW,
+			THRESHOLD_MS,
+		);
 
 		expect(ids(sorted)).toEqual(["c", "d", "a", "b"]);
 	});
@@ -78,7 +91,12 @@ describe("sortSessionsByWaiting", () => {
 	it("leaves a session waiting less than the threshold in place", () => {
 		const sessions = [session("a"), waiting("b", 4999), session("c")];
 
-		const sorted = sortSessionsByWaiting(sessions, () => false, NOW);
+		const sorted = sortSessionsByWaiting(
+			sessions,
+			() => false,
+			NOW,
+			THRESHOLD_MS,
+		);
 
 		expect(ids(sorted)).toEqual(["a", "b", "c"]);
 	});
@@ -86,7 +104,12 @@ describe("sortSessionsByWaiting", () => {
 	it("floats a session that has waited exactly the threshold", () => {
 		const sessions = [session("a"), waiting("b", 5000)];
 
-		const sorted = sortSessionsByWaiting(sessions, () => false, NOW);
+		const sorted = sortSessionsByWaiting(
+			sessions,
+			() => false,
+			NOW,
+			THRESHOLD_MS,
+		);
 
 		expect(ids(sorted)).toEqual(["b", "a"]);
 	});
@@ -94,7 +117,12 @@ describe("sortSessionsByWaiting", () => {
 	it("ignores a stale waitingSince on a session that is no longer waiting", () => {
 		const sessions = [session("a"), session("b", "running", NOW - 60_000)];
 
-		const sorted = sortSessionsByWaiting(sessions, () => false, NOW);
+		const sorted = sortSessionsByWaiting(
+			sessions,
+			() => false,
+			NOW,
+			THRESHOLD_MS,
+		);
 
 		expect(ids(sorted)).toEqual(["a", "b"]);
 	});
@@ -102,9 +130,38 @@ describe("sortSessionsByWaiting", () => {
 	it("ignores a waiting session with no waitingSince stamp", () => {
 		const sessions = [session("a"), session("b", "waiting")];
 
-		const sorted = sortSessionsByWaiting(sessions, () => false, NOW);
+		const sorted = sortSessionsByWaiting(
+			sessions,
+			() => false,
+			NOW,
+			THRESHOLD_MS,
+		);
 
 		expect(ids(sorted)).toEqual(["a", "b"]);
+	});
+
+	it("floats on a longer configured threshold only once it is passed", () => {
+		const sessions = [session("a"), waiting("b", 12_000), waiting("c", 8000)];
+
+		const sorted = sortSessionsByWaiting(sessions, () => false, NOW, 10_000);
+
+		expect(ids(sorted)).toEqual(["b", "a", "c"]);
+	});
+
+	it("floats a briefly waiting session on a shorter configured threshold", () => {
+		const sessions = [session("a"), waiting("b", 900)];
+
+		const sorted = sortSessionsByWaiting(sessions, () => false, NOW, 500);
+
+		expect(ids(sorted)).toEqual(["b", "a"]);
+	});
+
+	it("floats every waiting session when the threshold is zero", () => {
+		const sessions = [session("a"), waiting("b", 0), waiting("c", 1)];
+
+		const sorted = sortSessionsByWaiting(sessions, () => false, NOW, 0);
+
+		expect(ids(sorted)).toEqual(["c", "b", "a"]);
 	});
 
 	it("matches the star-only order when nothing has waited past the threshold", () => {
@@ -115,6 +172,7 @@ describe("sortSessionsByWaiting", () => {
 			sessions,
 			(s) => starred.has(s.id),
 			NOW,
+			THRESHOLD_MS,
 		);
 
 		expect(ids(sorted)).toEqual(["b", "d", "a", "c"]);

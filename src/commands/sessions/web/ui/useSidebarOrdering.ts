@@ -14,21 +14,22 @@ export function useSidebarOrdering(sessions: SessionInfo[]): {
 	isFloatingWaiter: (session: SessionInfo) => boolean;
 } {
 	const { isStarred } = useStarredSessions();
-	const { floatWaiting } = useSessionViewConfig();
+	const { floatWaiting, floatWaitingAfterMs } = useSessionViewConfig();
 	const now = useWaitingClock(floatWaiting);
 
 	return {
 		sessions: useMemo(
 			() =>
 				floatWaiting
-					? sortSessionsByWaiting(sessions, isStarred, now)
+					? sortSessionsByWaiting(sessions, isStarred, now, floatWaitingAfterMs)
 					: sortSessionsByStar(sessions, isStarred),
-			[sessions, isStarred, floatWaiting, now],
+			[sessions, isStarred, floatWaiting, floatWaitingAfterMs, now],
 		),
 		isFloatingWaiter: useCallback(
 			(session: SessionInfo) =>
-				floatWaiting && hasWaitedPastThreshold(session, now),
-			[floatWaiting, now],
+				floatWaiting &&
+				hasWaitedPastThreshold(session, now, floatWaitingAfterMs),
+			[floatWaiting, floatWaitingAfterMs, now],
 		),
 	};
 }

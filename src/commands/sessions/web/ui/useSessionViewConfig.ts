@@ -1,7 +1,16 @@
 import { useEffect, useState } from "react";
+import { sessionViewDefaults } from "../../shared/sessionViewDefaults";
 
-export function useSessionViewConfig(): { floatWaiting: boolean } {
-	const [floatWaiting, setFloatWaiting] = useState(true);
+export function useSessionViewConfig(): {
+	floatWaiting: boolean;
+	floatWaitingAfterMs: number;
+} {
+	const [floatWaiting, setFloatWaiting] = useState(
+		sessionViewDefaults.floatWaiting,
+	);
+	const [floatWaitingAfterMs, setFloatWaitingAfterMs] = useState(
+		sessionViewDefaults.floatWaitingAfterMs,
+	);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -9,9 +18,16 @@ export function useSessionViewConfig(): { floatWaiting: boolean } {
 			try {
 				const res = await fetch("/api/session-view");
 				const body = await res.json();
-				if (!cancelled) setFloatWaiting(Boolean(body?.floatWaiting));
+				if (cancelled) return;
+				setFloatWaiting(Boolean(body?.floatWaiting));
+				setFloatWaitingAfterMs(
+					typeof body?.floatWaitingAfterMs === "number"
+						? body.floatWaitingAfterMs
+						: sessionViewDefaults.floatWaitingAfterMs,
+				);
 			} catch {
-				setFloatWaiting(true);
+				setFloatWaiting(sessionViewDefaults.floatWaiting);
+				setFloatWaitingAfterMs(sessionViewDefaults.floatWaitingAfterMs);
 			}
 		})();
 		return () => {
@@ -19,5 +35,5 @@ export function useSessionViewConfig(): { floatWaiting: boolean } {
 		};
 	}, []);
 
-	return { floatWaiting };
+	return { floatWaiting, floatWaitingAfterMs };
 }

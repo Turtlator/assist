@@ -189,6 +189,7 @@ const assistConfigShape = {
 			includeCommittedChanges: z.boolean().default(true),
 			topBar: z.boolean().default(true),
 			floatWaiting: z.boolean().default(true),
+			floatWaitingAfterMs: z.number().default(5000),
 		})
 		.optional(),
 	database: z
