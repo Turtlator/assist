@@ -1,3 +1,10 @@
+## [0.483.1](https://github.com/staff0rd/assist/compare/v0.483.0...v0.483.1) (2026-07-27)
+
+
+### Bug Fixes
+
+* hide deleted clones from repo list ([757ad4d](https://github.com/staff0rd/assist/commit/757ad4d9e781330c57ca6fde0738730e48556bcc))
+
 # [0.483.0](https://github.com/staff0rd/assist/compare/v0.482.1...v0.483.0) (2026-07-26)
 
 
