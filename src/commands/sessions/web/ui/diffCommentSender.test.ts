@@ -1,0 +1,45 @@
+import { describe, expect, it, vi } from "vitest";
+import { diffCommentSender } from "./diffCommentSender";
+import type { SessionInfo } from "./types";
+
+const ESC = String.fromCharCode(27);
+
+const sessions = [
+	{
+		id: "daemon-1",
+		claudeSessionId: "claude-1",
+		name: "one",
+		commandType: "claude",
+		startedAt: 0,
+		status: "running",
+	},
+] as SessionInfo[];
+
+const comment = {
+	path: "a.ts",
+	startLine: 3,
+	endLine: 3,
+	quote: "const x = 1",
+	note: "why",
+};
+
+describe("diffCommentSender", () => {
+	it("writes the formatted comment to the daemon id as a bracketed paste", () => {
+		const sendInput = vi.fn();
+
+		diffCommentSender(sessions, "claude-1", sendInput)?.(comment);
+
+		expect(sendInput).toHaveBeenCalledWith(
+			"daemon-1",
+			`${ESC}[200~a.ts:3\r\r\`\`\`\rconst x = 1\r\`\`\`\r\rwhy${ESC}[201~\r`,
+		);
+	});
+
+	it("is unavailable without a session id", () => {
+		expect(diffCommentSender(sessions, undefined, vi.fn())).toBeUndefined();
+	});
+
+	it("is unavailable when no live session matches", () => {
+		expect(diffCommentSender(sessions, "claude-gone", vi.fn())).toBeUndefined();
+	});
+});

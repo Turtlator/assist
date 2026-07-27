@@ -3,15 +3,18 @@ import Typography from "@mui/material/Typography";
 import type { FileData, ViewType } from "react-diff-view";
 import { diffSx } from "./diffSx";
 import { FileDiff, fileKey } from "./FileDiff";
+import type { DiffComment } from "./formatDiffComment";
 
 export function DiffFileList({
 	files,
 	viewType,
 	cwd,
+	onComment,
 }: {
 	files: FileData[];
 	viewType: ViewType;
 	cwd: string;
+	onComment?: (comment: DiffComment) => void;
 }) {
 	if (files.length === 0)
 		return (
@@ -28,6 +31,7 @@ export function DiffFileList({
 					file={file}
 					viewType={viewType}
 					cwd={cwd}
+					onComment={onComment}
 				/>
 			))}
 		</Box>

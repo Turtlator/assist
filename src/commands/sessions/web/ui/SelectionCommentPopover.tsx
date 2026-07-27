@@ -2,12 +2,10 @@ import { Box, Popover } from "@mui/material";
 import { CommentNoteForm } from "./CommentNoteForm";
 import { QuoteBlock } from "./QuoteBlock";
 
-export type PendingComment = {
+export type SelectionAnchor = {
 	quote: string;
 	top: number;
 	left: number;
-	start: number;
-	end: number;
 };
 
 const boxSx = {
@@ -18,12 +16,12 @@ const boxSx = {
 	gap: 1,
 } as const;
 
-export function PrCommentPopover({
+export function SelectionCommentPopover({
 	pending,
 	onAdd,
 	onCancel,
 }: {
-	pending: PendingComment | null;
+	pending: SelectionAnchor | null;
 	onAdd: (note: string) => void;
 	onCancel: () => void;
 }) {

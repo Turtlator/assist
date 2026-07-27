@@ -1,8 +1,9 @@
 import { Divider } from "@mui/material";
 import type { PrPreviewComment } from "../../shared/SessionInfoBase";
+import type { PendingComment } from "./PendingComment";
 import { PrCommentList } from "./PrCommentList";
-import { type PendingComment, PrCommentPopover } from "./PrCommentPopover";
 import { PrPreviewActions } from "./PrPreviewActions";
+import { SelectionCommentPopover } from "./SelectionCommentPopover";
 import type { LocalComment } from "./usePrComments";
 
 export function PrPreviewFooter({
@@ -44,7 +45,11 @@ export function PrPreviewFooter({
 					)
 				}
 			/>
-			<PrCommentPopover pending={pending} onAdd={onAdd} onCancel={onCancel} />
+			<SelectionCommentPopover
+				pending={pending}
+				onAdd={onAdd}
+				onCancel={onCancel}
+			/>
 		</>
 	);
 }

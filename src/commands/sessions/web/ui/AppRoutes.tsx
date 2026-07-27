@@ -1,5 +1,4 @@
 import Container from "@mui/material/Container";
-import { useMemo } from "react";
 import { Navigate, Route, Routes } from "react-router";
 import { BacklogView } from "../../../../commands/backlog/web/ui/BacklogView";
 import { AppLayout } from "./AppLayout";
@@ -8,7 +7,7 @@ import { ConfigView } from "./ConfigView";
 import { DiffView } from "./DiffView";
 import { FileView } from "./FileView";
 import { NewsView } from "./NewsView";
-import { SessionArea } from "./SessionArea";
+import { SessionContent } from "./SessionContent";
 import { UsageHistoryView } from "./UsageHistoryView";
 import type { SessionSocket } from "./useSessionSocket";
 
@@ -17,39 +16,6 @@ function BacklogContent({ socket }: { socket: SessionSocket }) {
 		<Container maxWidth="md" sx={{ py: 3, px: 2 }}>
 			<BacklogView socket={socket} />
 		</Container>
-	);
-}
-
-function SessionContent({ socket }: { socket: SessionSocket }) {
-	const lifecycle = useMemo(
-		() => ({
-			onRetry: socket.retrySession,
-			onRestart: socket.restartSession,
-			onDismiss: socket.dismissSession,
-			onSetAutoRun: socket.setAutoRun,
-			onSetAutoAdvance: socket.setAutoAdvance,
-		}),
-		[
-			socket.retrySession,
-			socket.restartSession,
-			socket.dismissSession,
-			socket.setAutoRun,
-			socket.setAutoAdvance,
-		],
-	);
-	return (
-		<SessionArea
-			lifecycle={lifecycle}
-			sessions={socket.sessions}
-			activeId={socket.activeId}
-			initialized={socket.initialized}
-			onOutput={socket.onOutput}
-			sendInput={socket.sendInput}
-			sendResize={socket.sendResize}
-			viewingTranscriptSessionId={socket.viewingTranscriptSessionId}
-			transcript={socket.transcript}
-			sendPrDecision={socket.sendPrDecision}
-		/>
 	);
 }
 
@@ -63,7 +29,12 @@ export function AppRoutes({ socket }: { socket: SessionSocket }) {
 				<Route path="usage" element={<UsageHistoryView />} />
 				<Route path="backups" element={<BackupsView />} />
 				<Route path="config" element={<ConfigView />} />
-				<Route path="diff" element={<DiffView />} />
+				<Route
+					path="diff"
+					element={
+						<DiffView sessions={socket.sessions} sendInput={socket.sendInput} />
+					}
+				/>
 				<Route path="file" element={<FileView />} />
 				<Route path="*" element={<Navigate to="/sessions" replace />} />
 			</Route>

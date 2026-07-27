@@ -1,5 +1,5 @@
 import { type Caret, caretFromPoint, orderedRange } from "./caretFromPoint";
-import type { PendingComment } from "./PrCommentPopover";
+import type { PendingComment } from "./PendingComment";
 import { rangeToOffsets } from "./rangeToOffsets";
 import { snapRangeToWords } from "./snapRangeToWords";
 
