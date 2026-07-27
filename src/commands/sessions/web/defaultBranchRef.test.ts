@@ -60,10 +60,19 @@ describe("defaultBranchRef", () => {
 		]);
 	});
 
-	it("returns undefined when origin HEAD is not set", async () => {
+	it("falls back to origin/main when origin HEAD is not set", async () => {
 		withGit((args) => (args[0] === "symbolic-ref" ? undefined : ""));
 
-		expect(await defaultBranchRef("/repo")).toBeUndefined();
+		expect(await defaultBranchRef("/repo")).toBe("origin/main");
+	});
+
+	it("falls back to origin/master when only master exists locally", async () => {
+		withGit((args) => {
+			if (args[0] === "symbolic-ref") return undefined;
+			return args[3] === "origin/master^{commit}" ? "" : undefined;
+		});
+
+		expect(await defaultBranchRef("/repo")).toBe("origin/master");
 	});
 
 	it("returns undefined when origin HEAD names an unexpected ref", async () => {
@@ -74,11 +83,16 @@ describe("defaultBranchRef", () => {
 		expect(await defaultBranchRef("/repo")).toBeUndefined();
 	});
 
-	it("returns undefined when the origin ref is missing locally", async () => {
-		withDefaultBranch("main");
+	it("returns undefined when no candidate ref exists locally", async () => {
+		withDefaultBranch("develop");
 		withGit((args) => (args[0] === "rev-parse" ? undefined : ""));
 
 		expect(await defaultBranchRef("/repo")).toBeUndefined();
+		expect(gitArgs()).toEqual([
+			["rev-parse", "--verify", "--quiet", "origin/develop^{commit}"],
+			["rev-parse", "--verify", "--quiet", "origin/main^{commit}"],
+			["rev-parse", "--verify", "--quiet", "origin/master^{commit}"],
+		]);
 	});
 
 	it("resolves the ref without fetching", async () => {

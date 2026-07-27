@@ -4,6 +4,7 @@ import { toGitCwd } from "./toGitCwd";
 
 const ORIGIN_HEAD_REF = "refs/remotes/origin/HEAD";
 const ORIGIN_REF_PREFIX = "refs/remotes/origin/";
+const FALLBACK_BRANCHES = ["main", "master"];
 
 function configuredDefaultBranch(cwd: string): string | undefined {
 	try {
@@ -25,16 +26,30 @@ async function originHeadBranch(cwd: string): Promise<string | undefined> {
 	}
 }
 
+async function candidateBranches(cwd: string): Promise<string[]> {
+	const configured = configuredDefaultBranch(cwd);
+	const originHead = configured ? undefined : await originHeadBranch(cwd);
+	const candidates = [configured, originHead, ...FALLBACK_BRANCHES].filter(
+		(branch): branch is string => Boolean(branch),
+	);
+	return [...new Set(candidates)];
+}
+
+async function refExists(cwd: string, ref: string): Promise<boolean> {
+	try {
+		await execGit(cwd, ["rev-parse", "--verify", "--quiet", `${ref}^{commit}`]);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
 export async function defaultBranchRef(
 	cwd: string,
 ): Promise<string | undefined> {
-	const branch = configuredDefaultBranch(cwd) ?? (await originHeadBranch(cwd));
-	if (!branch) return undefined;
-	const ref = `origin/${branch}`;
-	try {
-		await execGit(cwd, ["rev-parse", "--verify", "--quiet", `${ref}^{commit}`]);
-		return ref;
-	} catch {
-		return undefined;
+	for (const branch of await candidateBranches(cwd)) {
+		const ref = `origin/${branch}`;
+		if (await refExists(cwd, ref)) return ref;
 	}
+	return undefined;
 }
