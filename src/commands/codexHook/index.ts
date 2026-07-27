@@ -30,16 +30,14 @@ function parseInput(raw: string): ParsedInput | undefined {
 }
 
 function preToolUseOutput(decision: HookDecision) {
-	if (decision.permissionDecision === "allow") {
-		return {
-			hookSpecificOutput: {
-				hookEventName: "PreToolUse",
-				permissionDecision: "allow",
-				permissionDecisionReason: decision.permissionDecisionReason,
-			},
-		};
-	}
-	return { decision: "block", reason: decision.permissionDecisionReason };
+	if (decision.permissionDecision === "allow") return undefined;
+	return {
+		hookSpecificOutput: {
+			hookEventName: "PreToolUse",
+			permissionDecision: "deny",
+			permissionDecisionReason: decision.permissionDecisionReason,
+		},
+	};
 }
 
 function permissionRequestOutput(decision: HookDecision) {
@@ -66,5 +64,5 @@ export async function codexHook(): Promise<void> {
 			? permissionRequestOutput(decision)
 			: preToolUseOutput(decision);
 
-	console.log(JSON.stringify(output));
+	if (output) console.log(JSON.stringify(output));
 }

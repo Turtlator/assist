@@ -14,10 +14,10 @@ Severity reflects impact on our workflows, not Codex's roadmap.
 
 ## Hook wire contract (for reference)
 
-Decompiled from the 0.133.0 binary's embedded JSON schema. `assist codex-hook`
-emits these shapes:
+Verified against the current Codex hook contract. `assist codex-hook` emits
+these shapes:
 
-- **PreToolUse** — allow: `{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"…"}}`; block: `{"decision":"block","reason":"…"}`.
+- **PreToolUse** — allow: no output, so Codex continues to its permission flow; deny: `{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"…"}}`.
 - **PermissionRequest** — `{"hookSpecificOutput":{"hookEventName":"PermissionRequest","decision":{"behavior":"allow"|"deny","message":"…"}}}`.
 - Unrecognised command → no output, so Codex falls through to its normal approval flow.
 

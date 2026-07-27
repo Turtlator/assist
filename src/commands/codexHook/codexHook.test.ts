@@ -46,22 +46,14 @@ beforeEach(() => {
 });
 
 describe("codexHook PreToolUse", () => {
-	it("allows an approved read command", async () => {
+	it("emits nothing for an approved read command", async () => {
 		const spy = captureOutput();
 		mockReadStdin.mockResolvedValue(makeInput("assist backlog view a1"));
 		mockIsApprovedRead.mockReturnValue("assist read verb");
 
 		await codexHook();
 
-		expect(spy).toHaveBeenCalledWith(
-			JSON.stringify({
-				hookSpecificOutput: {
-					hookEventName: "PreToolUse",
-					permissionDecision: "allow",
-					permissionDecisionReason: "assist read verb",
-				},
-			}),
-		);
+		expect(spy).not.toHaveBeenCalled();
 		spy.mockRestore();
 	});
 
@@ -76,7 +68,13 @@ describe("codexHook PreToolUse", () => {
 		await codexHook();
 
 		expect(spy).toHaveBeenCalledWith(
-			JSON.stringify({ decision: "block", reason: "Do not use rm -rf" }),
+			JSON.stringify({
+				hookSpecificOutput: {
+					hookEventName: "PreToolUse",
+					permissionDecision: "deny",
+					permissionDecisionReason: "Do not use rm -rf",
+				},
+			}),
 		);
 		spy.mockRestore();
 	});
