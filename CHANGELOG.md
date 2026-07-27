@@ -1,3 +1,10 @@
+## [0.485.1](https://github.com/staff0rd/assist/compare/v0.485.0...v0.485.1) (2026-07-27)
+
+
+### Bug Fixes
+
+* cache PR comments under ~/.assist ([ca44824](https://github.com/staff0rd/assist/commit/ca448241d2e7abc0172c2c48c5389a37fdf89ef8))
+
 # [0.485.0](https://github.com/staff0rd/assist/compare/v0.484.3...v0.485.0) (2026-07-27)
 
 
