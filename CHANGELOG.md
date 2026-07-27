@@ -1,3 +1,10 @@
+# [0.488.0](https://github.com/staff0rd/assist/compare/v0.487.2...v0.488.0) (2026-07-27)
+
+
+### Features
+
+* configurable float-waiting threshold ([cab3a80](https://github.com/staff0rd/assist/commit/cab3a80ba49dc45bd2a958becc6ec638971cfb0b))
+
 ## [0.487.2](https://github.com/staff0rd/assist/compare/v0.487.1...v0.487.2) (2026-07-27)
 
 
