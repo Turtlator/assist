@@ -1,3 +1,10 @@
+## [0.485.4](https://github.com/staff0rd/assist/compare/v0.485.3...v0.485.4) (2026-07-27)
+
+
+### Bug Fixes
+
+* branch scope without origin/HEAD ([0f68133](https://github.com/staff0rd/assist/commit/0f68133dadd599bd065e111a33b1e0492a59b989))
+
 ## [0.485.3](https://github.com/staff0rd/assist/compare/v0.485.2...v0.485.3) (2026-07-27)
 
 
