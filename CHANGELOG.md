@@ -1,3 +1,10 @@
+## [0.488.2](https://github.com/staff0rd/assist/compare/v0.488.1...v0.488.2) (2026-07-27)
+
+
+### Bug Fixes
+
+* refuse pty spawn into missing cwd ([c06c407](https://github.com/staff0rd/assist/commit/c06c4071354a9dac330f68296e49a84ca2dc27a0))
+
 ## [0.488.1](https://github.com/staff0rd/assist/compare/v0.488.0...v0.488.1) (2026-07-27)
 
 
