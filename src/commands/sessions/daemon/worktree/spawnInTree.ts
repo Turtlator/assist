@@ -61,6 +61,7 @@ export function spawnAssistInTree(
 		{
 			forCheckout: isPrCheckoutArgs(assistArgs),
 			draftLike: isDraftCommand(assistArgs[0]),
+			inPlace: meta?.inPlace,
 		},
 	);
 }

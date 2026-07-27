@@ -11,7 +11,7 @@ import { useSessionLaunchContext } from "./useSessionLaunchContext";
 
 export function ReviewButton({ cwd, pr }: { cwd: string; pr: PrSummary }) {
 	const { launchAssist } = useSessionLaunchContext();
-	const meta = prLaunchMeta(pr);
+	const meta = { ...prLaunchMeta(pr), inPlace: true };
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const open = Boolean(anchorEl);
 
@@ -38,7 +38,7 @@ export function ReviewButton({ cwd, pr }: { cwd: string; pr: PrSummary }) {
 						onClick={(e) => {
 							e.stopPropagation();
 							setAnchorEl(null);
-							launchAssist(mode.args, cwd, meta);
+							launchAssist([...mode.args, String(pr.number)], cwd, meta);
 						}}
 					>
 						{mode.label}

@@ -2,7 +2,11 @@ import type { Session } from "./createSession";
 import { spawnPty } from "./spawnPty";
 import { startOrHoldPty } from "./startOrHoldPty";
 
-export type AssistSessionMeta = { title?: string; subtitle?: string };
+export type AssistSessionMeta = {
+	title?: string;
+	subtitle?: string;
+	inPlace?: boolean;
+};
 
 export function createAssistSession(
 	id: string,

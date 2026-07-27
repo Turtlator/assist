@@ -140,6 +140,60 @@ describe("allocateTree", () => {
 		});
 	});
 
+	describe("for a session pinned to the tree it was launched from", () => {
+		it("stays put even when another session already holds that tree", () => {
+			expect(
+				allocateTree("/git/repo", new Set(["/git/repo"]), {
+					forCheckout: true,
+					inPlace: true,
+				}),
+			).toEqual({ cwd: "/git/repo", kind: "primary", created: false });
+			expect(createMock).not.toHaveBeenCalled();
+		});
+
+		it("keeps a worktree cwd rather than normalising it to the clone", () => {
+			expect(
+				allocateTree("/git/repo-2", new Set(["/git/repo-2"]), {
+					inPlace: true,
+				}).cwd,
+			).toBe("/git/repo-2");
+		});
+
+		it("stays put when worktrees are off, as it always did", () => {
+			configMock.mockReturnValue({
+				enabled: false,
+				trunk: false,
+				includeDrafts: false,
+				install: true,
+				commitBeforeManualChecks: false,
+				copy: [],
+			});
+
+			expect(
+				allocateTree("/git/repo", new Set(["/git/repo"]), {
+					forCheckout: true,
+					inPlace: true,
+				}),
+			).toEqual({ cwd: "/git/repo", kind: "primary", created: false });
+			expect(createMock).not.toHaveBeenCalled();
+		});
+
+		it("stays put even when the tree holds uncommitted work", () => {
+			durabilityMock.mockReturnValue({
+				durable: false,
+				reason: "uncommitted changes",
+			});
+
+			expect(
+				allocateTree("/git/repo", new Set(), {
+					forCheckout: true,
+					inPlace: true,
+				}).kind,
+			).toBe("primary");
+			expect(createMock).not.toHaveBeenCalled();
+		});
+	});
+
 	describe("for a PR checkout", () => {
 		it("reuses the clone when it holds nothing in progress", () => {
 			expect(

@@ -47,6 +47,28 @@ describe("dispatchMessage", () => {
 			);
 		});
 
+		it("forwards the in-place flag from a create-assist", () => {
+			const client = { send: vi.fn() };
+			const spawnAssist = vi.fn(() => "s4");
+			const manager = {
+				windowsProxy: { route: () => false },
+				spawnAssist,
+			} as unknown as SessionManager;
+
+			dispatchMessage(client, manager, {
+				type: "create-assist",
+				assistArgs: ["review", "42"],
+				cwd: "/git/repo",
+				inPlace: true,
+			});
+
+			expect(spawnAssist).toHaveBeenCalledWith(["review", "42"], "/git/repo", {
+				title: undefined,
+				subtitle: undefined,
+				inPlace: true,
+			});
+		});
+
 		it("does not flag a resume as new", () => {
 			const client = { send: vi.fn() };
 			const manager = {

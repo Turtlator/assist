@@ -37,6 +37,7 @@ export const messageHandlers: Record<string, Handler> = {
 			{
 				title: d.title as string | undefined,
 				subtitle: d.subtitle as string | undefined,
+				inPlace: d.inPlace === true,
 			},
 		),
 	),

@@ -16,17 +16,15 @@ export function createPiSessionAction(send: SendFn) {
 		send({ type: "create", prompt: prompt || undefined, cwd, harness: "pi" });
 }
 
-export type AssistLaunchMeta = { title?: string; subtitle?: string };
+export type AssistLaunchMeta = {
+	title?: string;
+	subtitle?: string;
+	inPlace?: boolean;
+};
 
 export function createAssistSessionAction(send: SendFn) {
 	return (assistArgs: string[], cwd?: string, meta?: AssistLaunchMeta) =>
-		send({
-			type: "create-assist",
-			assistArgs,
-			cwd,
-			title: meta?.title,
-			subtitle: meta?.subtitle,
-		});
+		send({ type: "create-assist", assistArgs, cwd, ...meta });
 }
 
 export function resumeSessionAction(send: SendFn) {

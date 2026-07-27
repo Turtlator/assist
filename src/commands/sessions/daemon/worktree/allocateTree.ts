@@ -2,8 +2,7 @@ import { findRepoRoot } from "../../../../shared/findRepoRoot";
 import { daemonLog } from "../daemonLog";
 import { createWorktree } from "./createWorktree";
 import { mainWorktree } from "./listWorktreePaths";
-import { planAllocation } from "./planAllocation";
-import { checkDurabilitySync } from "./treeDurability";
+import { reusesClone } from "./reusesClone";
 import { worktreeConfigFor } from "./worktreeConfigFor";
 
 export type Allocation = {
@@ -16,6 +15,7 @@ export type Allocation = {
 export type AllocateOptions = {
 	forCheckout?: boolean;
 	draftLike?: boolean;
+	inPlace?: boolean;
 };
 
 export function allocateTree(
@@ -25,22 +25,15 @@ export function allocateTree(
 ): Allocation {
 	if (!requestedCwd)
 		return { cwd: requestedCwd, kind: "primary", created: false };
+	if (options.inPlace === true) return keptInPlace(requestedCwd);
 	const repoRoot = findRepoRoot(requestedCwd) ?? requestedCwd;
 	const cfg = worktreeConfigFor(repoRoot);
 	if (!cfg.enabled)
 		return { cwd: requestedCwd, kind: "primary", created: false };
 
 	const clone = mainWorktree(repoRoot) ?? repoRoot;
-	if (options.draftLike === true && cfg.includeDrafts !== true) {
-		daemonLog(
-			`draft-type session kept in the clone ${clone}: worktree.includeDrafts is off`,
-		);
-		return { cwd: clone, kind: "primary", created: false, clone };
-	}
-	if (
-		planAllocation(clone, boundTreeRoots) === "primary" &&
-		!wouldDisturbWorkInProgress(clone, options.forCheckout === true)
-	)
+	const reuse = { ...options, includeDrafts: cfg.includeDrafts };
+	if (reusesClone(clone, boundTreeRoots, reuse))
 		return { cwd: clone, kind: "primary", created: false, clone };
 
 	const path = createWorktree(
@@ -51,15 +44,9 @@ export function allocateTree(
 	return { cwd: path, kind: "worktree", created: true, clone };
 }
 
-function wouldDisturbWorkInProgress(
-	clone: string,
-	forCheckout: boolean,
-): boolean {
-	if (!forCheckout) return false;
-	const durability = checkDurabilitySync(clone);
-	if (durability.durable) return false;
+function keptInPlace(cwd: string): Allocation {
 	daemonLog(
-		`tree ${clone} not used for a PR checkout: ${durability.reason} — spilling to a worktree`,
+		`session kept in ${cwd}: launched against work already checked out there`,
 	);
-	return true;
+	return { cwd, kind: "primary", created: false };
 }
