@@ -1,3 +1,10 @@
+## [0.483.6](https://github.com/staff0rd/assist/compare/v0.483.5...v0.483.6) (2026-07-27)
+
+
+### Bug Fixes
+
+* review card actions target the card's PR ([cfc2f3d](https://github.com/staff0rd/assist/commit/cfc2f3d0ee24dd625398308c45708ee6603495a6))
+
 ## [0.483.5](https://github.com/staff0rd/assist/compare/v0.483.4...v0.483.5) (2026-07-27)
 
 
