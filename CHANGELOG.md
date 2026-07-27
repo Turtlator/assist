@@ -1,3 +1,10 @@
+## [0.488.1](https://github.com/staff0rd/assist/compare/v0.488.0...v0.488.1) (2026-07-27)
+
+
+### Bug Fixes
+
+* allow clearing repo config overrides ([e187901](https://github.com/staff0rd/assist/commit/e1879015b84ceee10bff40dcf7f940924775f084))
+
 # [0.488.0](https://github.com/staff0rd/assist/compare/v0.487.2...v0.488.0) (2026-07-27)
 
 
