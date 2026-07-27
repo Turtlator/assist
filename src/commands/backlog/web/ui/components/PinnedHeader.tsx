@@ -54,9 +54,7 @@ export function PinnedHeader({
 				<Stack direction="row" sx={headerSx}>
 					<BackButton to="/backlog" />
 					<Stack direction="row" spacing={1}>
-						{canPlay(item) && (
-							<PlayAction itemId={item.id} itemName={item.name} />
-						)}
+						{canPlay(item) && <PlayAction itemId={item.id} />}
 						<RefineAction itemId={item.id} />
 						<DeleteAction itemId={item.id} onDeleted={onDeleted} />
 					</Stack>
