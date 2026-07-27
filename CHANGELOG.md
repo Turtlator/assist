@@ -1,3 +1,10 @@
+## [0.483.2](https://github.com/staff0rd/assist/compare/v0.483.1...v0.483.2) (2026-07-27)
+
+
+### Bug Fixes
+
+* full-width top bar over preview ([48222ac](https://github.com/staff0rd/assist/commit/48222ac1af9817516e22ce5fd2034568e3dee6ae))
+
 ## [0.483.1](https://github.com/staff0rd/assist/compare/v0.483.0...v0.483.1) (2026-07-27)
 
 
