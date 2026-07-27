@@ -7,7 +7,7 @@ import type { SessionInfo } from "./types";
 const idSx = {
 	color: "text.disabled",
 	fontFamily: "monospace",
-	fontSize: "0.65rem",
+	fontSize: "0.8125rem",
 	whiteSpace: "nowrap",
 	userSelect: "all",
 } as const;

@@ -22,7 +22,7 @@ const rowSx = {
 
 const phaseSx = {
 	color: "text.secondary",
-	fontSize: "0.7rem",
+	fontSize: "0.875rem",
 	minWidth: 0,
 	overflow: "hidden",
 	textOverflow: "ellipsis",

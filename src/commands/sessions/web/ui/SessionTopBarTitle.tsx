@@ -13,6 +13,7 @@ const rowSx = {
 
 const titleSx = {
 	color: "text.primary",
+	fontSize: "1.25rem",
 	minWidth: 0,
 	overflow: "hidden",
 	textOverflow: "ellipsis",
