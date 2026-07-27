@@ -1,3 +1,10 @@
+## [0.484.2](https://github.com/staff0rd/assist/compare/v0.484.1...v0.484.2) (2026-07-27)
+
+
+### Bug Fixes
+
+* keep diff toolbar visible when empty ([3c1a576](https://github.com/staff0rd/assist/commit/3c1a576a72ec55f1e5a224b3400bf40de94641a0))
+
 ## [0.484.1](https://github.com/staff0rd/assist/compare/v0.484.0...v0.484.1) (2026-07-27)
 
 
