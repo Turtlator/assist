@@ -1,3 +1,10 @@
+## [0.483.3](https://github.com/staff0rd/assist/compare/v0.483.2...v0.483.3) (2026-07-27)
+
+
+### Bug Fixes
+
+* drop id prefix from run titles ([ccf22e8](https://github.com/staff0rd/assist/commit/ccf22e877d526c134f451c3394d00e4a68210631))
+
 ## [0.483.2](https://github.com/staff0rd/assist/compare/v0.483.1...v0.483.2) (2026-07-27)
 
 
