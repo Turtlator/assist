@@ -2,9 +2,11 @@ import { useState } from "react";
 import { parseDiff, type ViewType } from "react-diff-view";
 import { diffCommentSender } from "./diffCommentSender";
 import { DiffFileList } from "./DiffFileList";
+import { diffEmptyMessage } from "./diffEmptyMessage";
 import { DiffToolbar } from "./DiffToolbar";
 import { type DiffChangeType, filterDiffFiles } from "./filterDiffFiles";
 import { PageShell } from "./PageShell";
+import { PageSpinner } from "./PageSpinner";
 import type { SessionInfo } from "./types";
 import { useDiff } from "./useDiff";
 import { useDiffScopes } from "./useDiffScopes";
@@ -28,12 +30,7 @@ export function DiffView({
 	const onComment = diffCommentSender(sessions, sessionId, sendInput);
 
 	return (
-		<PageShell
-			loading={loading}
-			isEmpty={files.length === 0}
-			emptyMessage={error ? "Failed to load diff." : "No working-tree changes."}
-			maxWidth={false}
-		>
+		<PageShell maxWidth={false}>
 			<DiffToolbar
 				viewType={viewType}
 				onChange={setViewType}
@@ -45,12 +42,17 @@ export function DiffView({
 				scopeCommits={scopeCommits}
 				onScopeChange={setScope}
 			/>
-			<DiffFileList
-				files={filterDiffFiles(files, { query: search, changeType })}
-				viewType={viewType}
-				cwd={cwd}
-				onComment={onComment}
-			/>
+			{loading ? (
+				<PageSpinner />
+			) : (
+				<DiffFileList
+					files={filterDiffFiles(files, { query: search, changeType })}
+					viewType={viewType}
+					cwd={cwd}
+					onComment={onComment}
+					emptyMessage={diffEmptyMessage(error, files.length)}
+				/>
+			)}
 		</PageShell>
 	);
 }

@@ -10,16 +10,18 @@ export function DiffFileList({
 	viewType,
 	cwd,
 	onComment,
+	emptyMessage,
 }: {
 	files: FileData[];
 	viewType: ViewType;
 	cwd: string;
 	onComment?: (comment: DiffComment) => void;
+	emptyMessage: string;
 }) {
 	if (files.length === 0)
 		return (
 			<Typography color="text.secondary" align="center" sx={{ py: 6 }}>
-				No files match your filter.
+				{emptyMessage}
 			</Typography>
 		);
 

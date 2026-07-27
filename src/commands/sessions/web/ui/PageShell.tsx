@@ -1,36 +1,29 @@
-import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
 import Container from "@mui/material/Container";
 import type { Breakpoint } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
+import { PageSpinner } from "./PageSpinner";
 
 type PageShellProps = {
-	loading: boolean;
+	loading?: boolean;
 	title?: string;
-	isEmpty: boolean;
-	emptyMessage: string;
+	isEmpty?: boolean;
+	emptyMessage?: string;
 	children: ReactNode;
 	maxWidth?: Breakpoint | false;
 };
 
 export const PageShell = (props: PageShellProps) => {
 	const {
-		loading,
+		loading = false,
 		title,
-		isEmpty,
+		isEmpty = false,
 		emptyMessage,
 		children,
 		maxWidth = "md",
 	} = props;
 
-	if (loading) {
-		return (
-			<Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-				<CircularProgress />
-			</Box>
-		);
-	}
+	if (loading) return <PageSpinner />;
 
 	return (
 		<Container maxWidth={maxWidth} sx={{ py: 3, px: 2 }}>
