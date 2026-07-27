@@ -1,3 +1,10 @@
+## [0.487.2](https://github.com/staff0rd/assist/compare/v0.487.1...v0.487.2) (2026-07-27)
+
+
+### Bug Fixes
+
+* trunk mode spills committing spawns ([a019daf](https://github.com/staff0rd/assist/commit/a019daf73f0c321e2d932b5b10e5a0bc108dce8f))
+
 ## [0.487.1](https://github.com/staff0rd/assist/compare/v0.487.0...v0.487.1) (2026-07-27)
 
 
