@@ -1,3 +1,10 @@
+## [0.483.7](https://github.com/staff0rd/assist/compare/v0.483.6...v0.483.7) (2026-07-27)
+
+
+### Bug Fixes
+
+* reveal Activity commits past the cap ([6db2ae3](https://github.com/staff0rd/assist/commit/6db2ae308a32d4f88ccd191601f631c3237c512a))
+
 ## [0.483.6](https://github.com/staff0rd/assist/compare/v0.483.5...v0.483.6) (2026-07-27)
 
 
