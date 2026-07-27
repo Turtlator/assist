@@ -24,8 +24,8 @@ export const sessionsConfigHelp: ConfigHelpEntry[] = [
 	},
 	{
 		key: "sessions.includeCommittedChanges",
-		setter: "assist config set sessions.includeCommittedChanges true -g",
-		note: "session card counts and /diff span the whole session (its first commit's parent, else merge-base with the default branch) instead of just uncommitted work (default off)",
+		setter: "assist config set sessions.includeCommittedChanges false -g",
+		note: "default on: session card counts, /diff and the diff scope picker span the commits recorded against the session's backlog item as well as uncommitted work, so they survive the agent committing. Set false to show only uncommitted changes",
 	},
 	{
 		key: "sessions.topBar",

@@ -3,10 +3,10 @@ import { toGitCwd } from "./toGitCwd";
 
 export function includesCommittedChanges(cwd: string): boolean {
 	try {
-		return Boolean(
-			loadConfigFrom(toGitCwd(cwd)).sessions?.includeCommittedChanges,
+		return (
+			loadConfigFrom(toGitCwd(cwd)).sessions?.includeCommittedChanges ?? true
 		);
 	} catch {
-		return false;
+		return true;
 	}
 }

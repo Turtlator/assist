@@ -20,9 +20,10 @@ type Repo = Record<string, { parent?: string; paths: string[] }>;
 let sessions = 0;
 const nextSession = () => `sess-${++sessions}`;
 
-function config(includeCommittedChanges: boolean): void {
+function config(includeCommittedChanges?: boolean): void {
 	loadConfigFromMock.mockReturnValue({
-		sessions: { includeCommittedChanges },
+		sessions:
+			includeCommittedChanges === undefined ? {} : { includeCommittedChanges },
 	} as unknown as ReturnType<typeof loadConfigFrom>);
 }
 
@@ -62,12 +63,26 @@ describe("itemChangeSet", () => {
 		expect(execGitMock).not.toHaveBeenCalled();
 	});
 
-	it("diffs the working tree alone when the config cannot be loaded", async () => {
+	it("includes committed changes when the flag is unset", async () => {
+		config();
+		commits("one");
+		withRepo({ one: { parent: "base-one", paths: ["a.ts"] } });
+
+		const changeSet = await itemChangeSet("/repo", nextSession());
+
+		expect(changeSet?.groups).toEqual([{ base: "base-one", paths: ["a.ts"] }]);
+	});
+
+	it("includes committed changes when the config cannot be loaded", async () => {
 		loadConfigFromMock.mockImplementation(() => {
 			throw new Error("bad yaml");
 		});
+		commits("one");
+		withRepo({ one: { parent: "base-one", paths: ["a.ts"] } });
 
-		expect(await itemChangeSet("/repo", nextSession())).toBeUndefined();
+		const changeSet = await itemChangeSet("/repo", nextSession());
+
+		expect(changeSet?.groups).toEqual([{ base: "base-one", paths: ["a.ts"] }]);
 	});
 
 	it("diffs the working tree alone without a session", async () => {

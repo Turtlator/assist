@@ -10,9 +10,10 @@ vi.mock("./toGitCwd", () => ({ toGitCwd: (cwd: string) => cwd }));
 const loadConfigFromMock = vi.mocked(loadConfigFrom);
 const itemCommitsMock = vi.mocked(itemCommits);
 
-function config(includeCommittedChanges: boolean): void {
+function config(includeCommittedChanges?: boolean): void {
 	loadConfigFromMock.mockReturnValue({
-		sessions: { includeCommittedChanges },
+		sessions:
+			includeCommittedChanges === undefined ? {} : { includeCommittedChanges },
 	} as unknown as ReturnType<typeof loadConfigFrom>);
 }
 
@@ -37,13 +38,20 @@ describe("itemScopeCommits", () => {
 		expect(itemCommitsMock).not.toHaveBeenCalled();
 	});
 
-	it("lists nothing when the config cannot be loaded", async () => {
+	it("lists the item's commits when the flag is unset", async () => {
+		config();
+		itemCommitsMock.mockResolvedValue([{ sha: "one" }]);
+
+		expect(await itemScopeCommits("/repo", "sess-1")).toEqual([{ sha: "one" }]);
+	});
+
+	it("lists the item's commits when the config cannot be loaded", async () => {
 		loadConfigFromMock.mockImplementation(() => {
 			throw new Error("bad yaml");
 		});
+		itemCommitsMock.mockResolvedValue([{ sha: "one" }]);
 
-		expect(await itemScopeCommits("/repo", "sess-1")).toEqual([]);
-		expect(itemCommitsMock).not.toHaveBeenCalled();
+		expect(await itemScopeCommits("/repo", "sess-1")).toEqual([{ sha: "one" }]);
 	});
 
 	it("lists nothing without a session", async () => {

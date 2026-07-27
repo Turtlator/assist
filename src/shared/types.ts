@@ -186,7 +186,7 @@ const assistConfigShape = {
 			// why: TCP port the native Windows daemon listens on for the WSL bridge; defaults to 51764
 			windowsDaemonPort: z.number().optional(),
 			windowsVersionCheck: z.enum(["block", "warn", "off"]).default("block"),
-			includeCommittedChanges: z.boolean().default(false),
+			includeCommittedChanges: z.boolean().default(true),
 			topBar: z.boolean().default(true),
 			floatWaiting: z.boolean().default(true),
 		})
