@@ -1,6 +1,7 @@
 import chalk from "chalk";
-import { applyConfigSet } from "./applyConfigSet";
+import { applyConfigSet, type ConfigWritableValue } from "./applyConfigSet";
 import { applyRepoConfigSet } from "./applyRepoConfigSet";
+import { coerceCliConfigValue } from "./coerceCliConfigValue";
 import { exitWithConfigErrors } from "./exitWithConfigErrors";
 import { resolveRepoTarget } from "./resolveRepoTarget";
 
@@ -27,7 +28,9 @@ export function configSet(
 		process.exit(1);
 	}
 
-	const coerced = coerceValue(resolved.value);
+	const coercion = coerceCliConfigValue(resolved.key, resolved.value);
+	if (!coercion.ok) exitWithConfigErrors([coercion.error]);
+	const coerced = coercion.value;
 	const target = resolved.useRepo
 		? `repo: ${applyRepoOrExit(resolved.key, coerced, resolved.repoName)}`
 		: applyOrExit(resolved.key, coerced, options.global ?? false);
@@ -38,7 +41,7 @@ export function configSet(
 
 function applyOrExit(
 	key: string,
-	coerced: string | boolean,
+	coerced: ConfigWritableValue,
 	global: boolean,
 ): string {
 	const result = applyConfigSet(key, coerced, global);
@@ -48,16 +51,10 @@ function applyOrExit(
 
 function applyRepoOrExit(
 	key: string,
-	coerced: string | boolean,
+	coerced: ConfigWritableValue,
 	repoName: string | undefined,
 ): string {
 	const result = applyRepoConfigSet(key, coerced, repoName);
 	if (!result.ok) exitWithConfigErrors(result.errors);
 	return result.label;
-}
-
-function coerceValue(value: string): string | boolean {
-	if (value === "true") return true;
-	if (value === "false") return false;
-	return value;
 }

@@ -262,6 +262,75 @@ describe("configSet", () => {
 		});
 	});
 
+	describe("typed values", () => {
+		it("should write an array-of-scalars key from comma-separated input", () => {
+			configSet("worktree.copy", ".env,.claude/settings.local.json", {
+				global: true,
+			});
+
+			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({
+				worktree: { copy: [".env", ".claude/settings.local.json"] },
+			});
+		});
+
+		it("should trim whitespace around list items", () => {
+			configSet("voice.wakeWords", "hey claude, ok claude", { global: true });
+
+			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({
+				voice: { wakeWords: ["hey claude", "ok claude"] },
+			});
+		});
+
+		it("should write an array key under -g --repo", () => {
+			configSet("worktree.copy", ".env,.env.local", {
+				global: true,
+				repo: true,
+			});
+
+			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({
+				repos: { assist: { worktree: { copy: [".env", ".env.local"] } } },
+			});
+		});
+
+		it("should write a number key as a number", () => {
+			configSet("sessions.windowsDaemonPort", "51764", { global: true });
+
+			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({
+				sessions: { windowsDaemonPort: 51764 },
+			});
+		});
+
+		it("should keep string keys as strings", () => {
+			configSet("branch.prefix", "sw", { global: true });
+
+			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({
+				branch: { prefix: "sw" },
+			});
+		});
+
+		it("should keep enum keys as strings", () => {
+			configSet("sessions.windowsVersionCheck", "warn", { global: true });
+
+			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({
+				sessions: { windowsVersionCheck: "warn" },
+			});
+		});
+
+		it("should write nothing when a value cannot be coerced", () => {
+			const mockExit = vi.spyOn(process, "exit").mockImplementation((() => {
+				throw new Error("exit");
+			}) as never);
+
+			expect(() =>
+				configSet("sessions.windowsDaemonPort", "abc", { global: true }),
+			).toThrow("exit");
+
+			expect(mockExit).toHaveBeenCalledWith(1);
+			expect(mockSaveGlobalConfig).not.toHaveBeenCalled();
+			mockExit.mockRestore();
+		});
+	});
+
 	describe("validation", () => {
 		it("should reject invalid keys", () => {
 			const mockExit = vi
