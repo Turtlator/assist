@@ -1,11 +1,11 @@
 import Box from "@mui/material/Box";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import Typography from "@mui/material/Typography";
 import type { ViewType } from "react-diff-view";
 import { CloseViewButton } from "./CloseViewButton";
 import { DiffChangeTypeFilter } from "./DiffChangeTypeFilter";
 import { DiffFileSearchInput } from "./DiffFileSearchInput";
 import { DiffScopePicker } from "./DiffScopePicker";
+import { DiffViewTypeToggle } from "./DiffViewTypeToggle";
 import type { DiffChangeType } from "./filterDiffFiles";
 import type { DiffScopeState } from "./useDiffScopeState";
 
@@ -33,6 +33,7 @@ export function DiffToolbar({
 	onChangeTypeChange,
 	scope,
 	onScopeChange,
+	commentHint,
 }: {
 	viewType: ViewType;
 	onChange: (viewType: ViewType) => void;
@@ -42,25 +43,24 @@ export function DiffToolbar({
 	onChangeTypeChange: (changeType: DiffChangeType) => void;
 	scope: DiffScopeState;
 	onScopeChange: (scope: string) => void;
+	commentHint?: string;
 }) {
 	return (
 		<Box sx={toolbarSx}>
-			<ToggleButtonGroup
-				size="small"
-				exclusive
-				value={viewType}
-				onChange={(_, value) => value && onChange(value)}
-			>
-				<ToggleButton value="unified">Unified</ToggleButton>
-				<ToggleButton value="split">Split</ToggleButton>
-			</ToggleButtonGroup>
+			<DiffViewTypeToggle viewType={viewType} onChange={onChange} />
 			<DiffScopePicker {...scope} onChange={onScopeChange} />
 			<DiffChangeTypeFilter
 				changeType={changeType}
 				onChange={onChangeTypeChange}
 			/>
 			<DiffFileSearchInput search={search} onChange={onSearchChange} />
-			<CloseViewButton sx={{ ml: "auto" }} />
+			<Box sx={{ ml: "auto" }} />
+			{commentHint ? (
+				<Typography variant="caption" color="text.secondary" noWrap>
+					{commentHint}
+				</Typography>
+			) : null}
+			<CloseViewButton />
 		</Box>
 	);
 }

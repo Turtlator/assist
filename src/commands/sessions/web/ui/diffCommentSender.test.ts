@@ -4,16 +4,14 @@ import type { SessionInfo } from "./types";
 
 const ESC = String.fromCharCode(27);
 
-const sessions = [
-	{
-		id: "daemon-1",
-		claudeSessionId: "claude-1",
-		name: "one",
-		commandType: "claude",
-		startedAt: 0,
-		status: "running",
-	},
-] as SessionInfo[];
+const session = {
+	id: "daemon-1",
+	claudeSessionId: "claude-1",
+	name: "one",
+	commandType: "claude",
+	startedAt: 0,
+	status: "running",
+} as SessionInfo;
 
 const comment = {
 	path: "a.ts",
@@ -30,7 +28,7 @@ describe("diffCommentSender", () => {
 	it("writes the formatted comment to the daemon id as a bracketed paste", () => {
 		const sendInput = vi.fn();
 
-		diffCommentSender(sessions, "claude-1", sendInput)?.(comment);
+		diffCommentSender(session, sendInput, vi.fn())(comment);
 
 		expect(sendInput).toHaveBeenCalledWith(
 			"daemon-1",
@@ -41,7 +39,7 @@ describe("diffCommentSender", () => {
 	it("submits separately from the paste, which the tui would otherwise swallow", () => {
 		const sendInput = vi.fn();
 
-		diffCommentSender(sessions, "claude-1", sendInput)?.(comment);
+		diffCommentSender(session, sendInput, vi.fn())(comment);
 
 		expect(sendInput).toHaveBeenCalledTimes(1);
 		vi.runAllTimers();
@@ -49,11 +47,11 @@ describe("diffCommentSender", () => {
 		expect(sendInput).toHaveBeenLastCalledWith("daemon-1", "\r");
 	});
 
-	it("is unavailable without a session id", () => {
-		expect(diffCommentSender(sessions, undefined, vi.fn())).toBeUndefined();
-	});
+	it("reports the send so it can be confirmed", () => {
+		const onSent = vi.fn();
 
-	it("is unavailable when no live session matches", () => {
-		expect(diffCommentSender(sessions, "claude-gone", vi.fn())).toBeUndefined();
+		diffCommentSender(session, vi.fn(), onSent)(comment);
+
+		expect(onSent).toHaveBeenCalledTimes(1);
 	});
 });

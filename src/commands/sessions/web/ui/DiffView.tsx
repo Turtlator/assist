@@ -1,14 +1,15 @@
-import { useState } from "react";
-import { parseDiff, type ViewType } from "react-diff-view";
-import { diffCommentSender } from "./diffCommentSender";
+import { parseDiff } from "react-diff-view";
+import { DiffCommentSnackbar } from "./DiffCommentSnackbar";
 import { DiffFileList } from "./DiffFileList";
 import { diffEmptyMessage } from "./diffEmptyMessage";
 import { DiffToolbar } from "./DiffToolbar";
-import { type DiffChangeType, filterDiffFiles } from "./filterDiffFiles";
+import { filterDiffFiles } from "./filterDiffFiles";
 import { PageShell } from "./PageShell";
 import { PageSpinner } from "./PageSpinner";
 import type { SessionInfo } from "./types";
 import { useDiff } from "./useDiff";
+import { useDiffComments } from "./useDiffComments";
+import { useDiffFilters } from "./useDiffFilters";
 import { useDiffScopeState } from "./useDiffScopeState";
 import { useDiffTarget } from "./useDiffTarget";
 
@@ -22,36 +23,38 @@ export function DiffView({
 	const { cwd, sessionId, scope, setScope } = useDiffTarget();
 	const scopeState = useDiffScopeState(cwd, sessionId, scope);
 	const { diff, loading, error } = useDiff(cwd, sessionId, scopeState.scope);
-	const [viewType, setViewType] = useState<ViewType>("split");
-	const [search, setSearch] = useState("");
-	const [changeType, setChangeType] = useState<DiffChangeType>("all");
+	const filters = useDiffFilters();
+	const { onComment, unavailable, sentTo, clearSent } = useDiffComments(
+		sessions,
+		sessionId,
+		sendInput,
+	);
 
 	const files = error || !diff ? [] : parseDiff(diff);
-	const onComment = diffCommentSender(sessions, sessionId, sendInput);
 
 	return (
 		<PageShell maxWidth={false}>
 			<DiffToolbar
-				viewType={viewType}
-				onChange={setViewType}
-				search={search}
-				onSearchChange={setSearch}
-				changeType={changeType}
-				onChangeTypeChange={setChangeType}
+				{...filters}
 				scope={scopeState}
 				onScopeChange={setScope}
+				commentHint={unavailable}
 			/>
 			{loading ? (
 				<PageSpinner />
 			) : (
 				<DiffFileList
-					files={filterDiffFiles(files, { query: search, changeType })}
-					viewType={viewType}
+					files={filterDiffFiles(files, {
+						query: filters.search,
+						changeType: filters.changeType,
+					})}
+					viewType={filters.viewType}
 					cwd={cwd}
 					onComment={onComment}
 					emptyMessage={diffEmptyMessage(error, files.length)}
 				/>
 			)}
+			<DiffCommentSnackbar sessionName={sentTo} onClose={clearSent} />
 		</PageShell>
 	);
 }

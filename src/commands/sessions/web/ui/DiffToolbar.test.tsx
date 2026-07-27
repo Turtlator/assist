@@ -23,11 +23,13 @@ function renderToolbar({
 	scopeCommits = [],
 	scopeBranchBase = null,
 	onScopeChange = vi.fn(),
+	commentHint,
 }: {
 	scope?: string;
 	scopeCommits?: CommitRef[];
 	scopeBranchBase?: string | null;
 	onScopeChange?: (scope: string) => void;
+	commentHint?: string;
 } = {}) {
 	render(
 		<MemoryRouter initialEntries={["/sessions", "/diff"]} initialIndex={1}>
@@ -44,6 +46,7 @@ function renderToolbar({
 					branchBase: scopeBranchBase,
 				}}
 				onScopeChange={onScopeChange}
+				commentHint={commentHint}
 			/>
 			<LocationProbe />
 		</MemoryRouter>,
@@ -148,6 +151,18 @@ describe("DiffToolbar", () => {
 		expect(screen.getByRole("combobox", { name: "Scope" }).textContent).toBe(
 			"All",
 		);
+	});
+
+	it("explains why commenting is unavailable", () => {
+		renderToolbar({ commentHint: "no live session" });
+
+		expect(screen.getByText("no live session")).toBeTruthy();
+	});
+
+	it("shows no hint when commenting is available", () => {
+		renderToolbar();
+
+		expect(screen.queryByText(/session/)).toBeNull();
 	});
 
 	it("reports the chosen scope", () => {
