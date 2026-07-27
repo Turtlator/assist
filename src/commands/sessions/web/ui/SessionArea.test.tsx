@@ -1,8 +1,11 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { PrPreview } from "../../shared/SessionInfoBase";
 import { SessionArea } from "./SessionArea";
-import type { SessionInfo } from "./types";
+import type { SessionInfo, SessionListHandlers } from "./types";
+import { StarredSessionsProvider } from "./useStarredSessions";
+import { TopBarLayoutContext } from "./useTopBarLayoutContext";
 
 // The real terminal pane wires up xterm, which cannot run in jsdom; stub it so
 // the test can focus on the loading overlay behaviour.
@@ -10,6 +13,10 @@ vi.mock("./TerminalPane", () => ({
 	TerminalPane: ({ sessionId }: { sessionId: string }) => (
 		<div data-testid={`pane-${sessionId}`} />
 	),
+}));
+
+vi.mock("./PrPreviewPane", () => ({
+	PrPreviewPane: () => <div data-testid="preview-pane" />,
 }));
 
 afterEach(() => {
@@ -149,5 +156,196 @@ describe("SessionArea transcript view", () => {
 		);
 		expect(screen.queryByText("No transcript available")).toBeNull();
 		expect(screen.queryByTestId("pane-1")).toBeNull();
+	});
+});
+
+function barSession(overrides: Partial<SessionInfo> = {}): SessionInfo {
+	return {
+		id: "1",
+		name: "my session",
+		commandType: "claude",
+		status: "running",
+		startedAt: 0,
+		runningMs: 5_000,
+		runningSince: null,
+		subtitle: "first subtitle",
+		...overrides,
+	};
+}
+
+const pendingPreview: PrPreview = {
+	requestId: "req-1",
+	title: "a preview",
+	body: "body",
+	prNumber: null,
+};
+
+function renderWithTopBar(
+	topBar: boolean,
+	list: SessionInfo[],
+	activeId: string,
+	{
+		lifecycle = {},
+		viewingTranscriptSessionId = null,
+	}: {
+		lifecycle?: Partial<SessionListHandlers>;
+		viewingTranscriptSessionId?: string | null;
+	} = {},
+) {
+	render(
+		<TopBarLayoutContext.Provider value={topBar}>
+			<StarredSessionsProvider sessions={[]} setSessionStarred={() => {}}>
+				<SessionArea
+					sessions={list}
+					activeId={activeId}
+					initialized={new Set(list.map((s) => s.id))}
+					onOutput={() => () => {}}
+					sendInput={vi.fn()}
+					sendResize={vi.fn()}
+					viewingTranscriptSessionId={viewingTranscriptSessionId}
+					transcript={null}
+					sendPrDecision={vi.fn()}
+					lifecycle={{
+						onRetry: vi.fn(),
+						onRestart: vi.fn(),
+						onDismiss: vi.fn(),
+						onSetAutoRun: vi.fn(),
+						onSetAutoAdvance: vi.fn(),
+						...lifecycle,
+					}}
+				/>
+			</StarredSessionsProvider>
+		</TopBarLayoutContext.Provider>,
+	);
+}
+
+function nearestAncestorOfTerminalAndPreview(): HTMLElement {
+	const terminal = screen.getByTestId("pane-1");
+	let node = screen.getByTestId("preview-pane").parentElement;
+	while (node && !node.contains(terminal)) node = node.parentElement;
+	if (node === null) throw new Error("terminal and preview share no ancestor");
+	return node;
+}
+
+describe("SessionArea top bar", () => {
+	it("shows the active session's phase and elapsed when the flag is on", () => {
+		renderWithTopBar(true, [barSession()], "1");
+
+		expect(screen.getByText("first subtitle")).toBeTruthy();
+		expect(screen.getByText("5s")).toBeTruthy();
+	});
+
+	it("renders no top bar when the flag is off", () => {
+		renderWithTopBar(false, [barSession()], "1");
+
+		expect(screen.queryByText("first subtitle")).toBeNull();
+		expect(screen.queryByText("5s")).toBeNull();
+	});
+
+	it("renders no top bar when no session is active", () => {
+		renderWithTopBar(true, [barSession()], "other");
+
+		expect(screen.queryByText("first subtitle")).toBeNull();
+	});
+
+	it("renders no top bar in the transcript view", () => {
+		renderWithTopBar(true, [barSession()], "1", {
+			viewingTranscriptSessionId: "abc",
+		});
+
+		expect(screen.queryByText("first subtitle")).toBeNull();
+		expect(screen.queryByTitle("Restart session 1")).toBeNull();
+	});
+
+	it("follows the active session when it changes", () => {
+		const list = [
+			barSession(),
+			barSession({ id: "2", subtitle: "second subtitle", runningMs: 65_000 }),
+		];
+		renderWithTopBar(true, list, "2");
+
+		expect(screen.getByText("second subtitle")).toBeTruthy();
+		expect(screen.getByText("1m 5s")).toBeTruthy();
+		expect(screen.queryByText("first subtitle")).toBeNull();
+	});
+
+	it("sits above the split rather than inside it when a preview is open", () => {
+		renderWithTopBar(
+			true,
+			[barSession({ pendingPrPreview: pendingPreview })],
+			"1",
+		);
+
+		const split = nearestAncestorOfTerminalAndPreview();
+		const caption = screen.getByText("first subtitle");
+
+		expect(split.contains(caption)).toBe(false);
+		expect(
+			caption.compareDocumentPosition(split) & Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+	});
+});
+
+describe("SessionArea top bar actions", () => {
+	it("restarts the active session", () => {
+		const onRestart = vi.fn();
+		renderWithTopBar(true, [barSession(), barSession({ id: "2" })], "2", {
+			lifecycle: { onRestart },
+		});
+
+		fireEvent.click(screen.getByTitle("Restart session 2"));
+		fireEvent.click(screen.getByRole("button", { name: "Restart" }));
+
+		expect(onRestart).toHaveBeenCalledWith("2");
+	});
+
+	it("retries the active session", () => {
+		const onRetry = vi.fn();
+		renderWithTopBar(true, [barSession({ commandType: "run" })], "1", {
+			lifecycle: { onRetry },
+		});
+
+		fireEvent.click(screen.getByTitle("Retry session 1"));
+
+		expect(onRetry).toHaveBeenCalledWith("1");
+	});
+
+	it("offers no retry on a session that cannot be retried", () => {
+		renderWithTopBar(true, [barSession()], "1");
+
+		expect(screen.queryByTitle("Retry session 1")).toBeNull();
+	});
+
+	it("keeps the actions out of the session area when the flag is off", () => {
+		renderWithTopBar(false, [barSession()], "1");
+
+		expect(screen.queryByTitle("Restart session 1")).toBeNull();
+	});
+
+	it("advances the active session's continue switch", () => {
+		const onSetAutoAdvance = vi.fn();
+		const backlog = (id: string) =>
+			barSession({
+				id,
+				activity: { kind: "backlog", startedAt: 0, phase: 1, totalPhases: 3 },
+			});
+		renderWithTopBar(true, [backlog("1"), backlog("2")], "2", {
+			lifecycle: { onSetAutoAdvance },
+		});
+
+		fireEvent.click(screen.getByRole("switch"));
+
+		expect(onSetAutoAdvance).toHaveBeenCalledWith("2", false);
+	});
+
+	it("dismisses the active session from the bar", () => {
+		const onDismiss = vi.fn();
+		renderWithTopBar(true, [barSession({ status: "done" })], "1", {
+			lifecycle: { onDismiss },
+		});
+
+		fireEvent.click(screen.getByTitle("Dismiss session 1"));
+
+		expect(onDismiss).toHaveBeenCalledWith("1");
 	});
 });

@@ -1,8 +1,6 @@
 import { isSessionStarting } from "./isSessionStarting";
 import { TerminalPanes } from "./TerminalPanes";
-import { TerminalWithTopBar } from "./TerminalWithTopBar";
-import type { SessionInfo, SessionListHandlers } from "./types";
-import { useTopBarLayoutContext } from "./useTopBarLayoutContext";
+import type { SessionInfo } from "./types";
 
 type OutputSubscriber = (
 	sessionId: string,
@@ -16,7 +14,6 @@ export type TerminalAreaProps = {
 	onOutput: OutputSubscriber;
 	sendInput: (sessionId: string, data: string) => void;
 	sendResize: (sessionId: string, cols: number, rows: number) => void;
-	lifecycle: SessionListHandlers;
 };
 
 export function TerminalArea({
@@ -26,16 +23,14 @@ export function TerminalArea({
 	onOutput,
 	sendInput,
 	sendResize,
-	lifecycle,
 }: TerminalAreaProps) {
 	// why: a new session's terminal is empty until its process emits output, so the previously active pane would otherwise show through
 	const activeSession = sessions.find((s) => s.id === activeId);
 	const activeLoading =
 		activeSession !== undefined &&
 		isSessionStarting(activeSession, initialized);
-	const topBar = useTopBarLayoutContext();
 
-	const panes = (
+	return (
 		<TerminalPanes
 			sessions={sessions}
 			activeId={activeId}
@@ -43,16 +38,6 @@ export function TerminalArea({
 			onOutput={onOutput}
 			sendInput={sendInput}
 			sendResize={sendResize}
-		/>
-	);
-
-	if (!topBar || activeSession === undefined) return panes;
-
-	return (
-		<TerminalWithTopBar
-			session={activeSession}
-			lifecycle={lifecycle}
-			panes={panes}
 		/>
 	);
 }

@@ -1,28 +1,35 @@
-import type { PrPreviewComment } from "../../shared/SessionInfoBase";
-import { PrPreviewSplit } from "./PrPreviewSplit";
+import Box from "@mui/material/Box";
+import { ActiveSessionTopBar } from "./ActiveSessionTopBar";
+import {
+	type SendPrDecision,
+	SessionPreviewSplit,
+} from "./SessionPreviewSplit";
 import { TerminalArea, type TerminalAreaProps } from "./TerminalArea";
 import { TranscriptArea } from "./TranscriptArea";
-import type { Transcript } from "./types";
+import type { SessionListHandlers, Transcript } from "./types";
+import { useTopBarLayoutContext } from "./useTopBarLayoutContext";
 
-type SendPrDecision = (
-	sessionId: string,
-	requestId: string,
-	decision: "approve" | "reject",
-	reason?: string,
-	comments?: PrPreviewComment[],
-	screenshots?: string[],
-) => void;
+const areaSx = {
+	flex: 1,
+	minHeight: 0,
+	display: "flex",
+	flexDirection: "column",
+} as const;
 
 export function SessionArea({
 	viewingTranscriptSessionId,
 	transcript,
 	sendPrDecision,
+	lifecycle,
 	...terminal
 }: TerminalAreaProps & {
 	viewingTranscriptSessionId: string | null;
 	transcript: Transcript | null;
 	sendPrDecision: SendPrDecision;
+	lifecycle: SessionListHandlers;
 }) {
+	const topBar = useTopBarLayoutContext();
+
 	if (viewingTranscriptSessionId !== null)
 		return (
 			<TranscriptArea
@@ -34,25 +41,18 @@ export function SessionArea({
 	const activeSession = terminal.sessions.find(
 		(s) => s.id === terminal.activeId,
 	);
-	const preview = activeSession?.pendingPrPreview ?? null;
 
 	return (
-		<PrPreviewSplit
-			preview={preview}
-			cwd={activeSession?.cwd}
-			onDecision={(requestId, decision, comments, screenshots) => {
-				if (activeSession)
-					sendPrDecision(
-						activeSession.id,
-						requestId,
-						decision,
-						undefined,
-						comments,
-						screenshots,
-					);
-			}}
-		>
-			<TerminalArea {...terminal} />
-		</PrPreviewSplit>
+		<Box sx={areaSx}>
+			{topBar && activeSession !== undefined && (
+				<ActiveSessionTopBar session={activeSession} lifecycle={lifecycle} />
+			)}
+			<SessionPreviewSplit
+				session={activeSession}
+				sendPrDecision={sendPrDecision}
+			>
+				<TerminalArea {...terminal} />
+			</SessionPreviewSplit>
+		</Box>
 	);
 }
