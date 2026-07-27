@@ -1,3 +1,10 @@
+## [0.483.4](https://github.com/staff0rd/assist/compare/v0.483.3...v0.483.4) (2026-07-27)
+
+
+### Bug Fixes
+
+* scale up top bar left column text ([7306ca7](https://github.com/staff0rd/assist/commit/7306ca7eefd27421f1b726391914e2d76119b065))
+
 ## [0.483.3](https://github.com/staff0rd/assist/compare/v0.483.2...v0.483.3) (2026-07-27)
 
 
