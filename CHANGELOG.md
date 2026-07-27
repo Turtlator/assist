@@ -1,3 +1,10 @@
+## [0.484.1](https://github.com/staff0rd/assist/compare/v0.484.0...v0.484.1) (2026-07-27)
+
+
+### Bug Fixes
+
+* config set writes array/number keys ([9609dff](https://github.com/staff0rd/assist/commit/9609dffd8c0ab1d947cabc6dc5a772ac0714115d))
+
 # [0.484.0](https://github.com/staff0rd/assist/compare/v0.483.9...v0.484.0) (2026-07-27)
 
 
