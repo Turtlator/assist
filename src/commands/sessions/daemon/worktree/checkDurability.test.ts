@@ -71,17 +71,40 @@ describe("checkDurability", () => {
 		expect(await checkDurability("/git/repo-2")).toEqual({ durable: true });
 	});
 
-	it("holds a clean tree whose commits are ahead of its upstream", async () => {
+	it("holds a clean tree whose commits are ahead of its upstream and on no remote", async () => {
 		gitReplies({
 			status: { ok: true, out: "" },
 			"rev-parse": { ok: true, out: "origin/main" },
 			"rev-list": { ok: true, out: "2" },
+			branch: { ok: true, out: "" },
 		});
 
 		expect(await checkDurability("/git/repo-2")).toEqual({
 			durable: false,
 			reason: "unpushed commits",
 		});
+	});
+
+	it("is durable when a remote branch has HEAD even though the upstream is a different branch", async () => {
+		gitReplies({
+			status: { ok: true, out: "" },
+			"rev-parse": { ok: true, out: "origin/main" },
+			"rev-list": { ok: true, out: "1" },
+			branch: { ok: true, out: "  origin/staff0rd/fix-ci-audit-advisories" },
+		});
+
+		expect(await checkDurability("/git/repo-2")).toEqual({ durable: true });
+	});
+
+	it("falls back to the remote-contains probe when the ahead count is unreadable", async () => {
+		gitReplies({
+			status: { ok: true, out: "" },
+			"rev-parse": { ok: true, out: "origin/main" },
+			"rev-list": { ok: false },
+			branch: { ok: true, out: "  origin/feature" },
+		});
+
+		expect(await checkDurability("/git/repo-2")).toEqual({ durable: true });
 	});
 
 	it("is durable on an untracked worktree branch whose HEAD is on a remote", async () => {
@@ -119,6 +142,17 @@ describe("checkDurabilitySync", () => {
 			status: { ok: true, out: "" },
 			"rev-parse": { ok: true, out: "origin/main" },
 			"rev-list": { ok: true, out: "0" },
+		});
+
+		expect(checkDurabilitySync("/git/repo-2")).toEqual({ durable: true });
+	});
+
+	it("is durable when a remote branch has HEAD even though the upstream is a different branch", () => {
+		gitReplies({
+			status: { ok: true, out: "" },
+			"rev-parse": { ok: true, out: "origin/main" },
+			"rev-list": { ok: true, out: "1" },
+			branch: { ok: true, out: "  origin/staff0rd/fix-ci-audit-advisories" },
 		});
 
 		expect(checkDurabilitySync("/git/repo-2")).toEqual({ durable: true });

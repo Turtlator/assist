@@ -19,21 +19,23 @@ function* durabilityProbes(): Generator<string[], Durability, GitResult> {
 	const status = yield ["status", "--porcelain"];
 	if (!status.ok)
 		return { durable: false, reason: `tree state unreadable: ${status.error}` };
+	const dirty = status.out !== "";
 	const upstream = yield [
 		"rev-parse",
 		"--abbrev-ref",
 		"--symbolic-full-name",
 		"@{upstream}",
 	];
-	let localOnlyCommits: boolean;
 	if (upstream.ok && upstream.out) {
 		const ahead = yield ["rev-list", "--count", "@{upstream}..HEAD"];
-		localOnlyCommits = !ahead.ok || Number(ahead.out) > 0;
-	} else {
-		const remoteBranches = yield ["branch", "-r", "--contains", "HEAD"];
-		localOnlyCommits = !remoteBranches.ok || remoteBranches.out === "";
+		if (ahead.ok && Number(ahead.out) === 0)
+			return treeDurability({ dirty, localOnlyCommits: false });
 	}
-	return treeDurability({ dirty: status.out !== "", localOnlyCommits });
+	const remoteBranches = yield ["branch", "-r", "--contains", "HEAD"];
+	return treeDurability({
+		dirty,
+		localOnlyCommits: !remoteBranches.ok || remoteBranches.out === "",
+	});
 }
 
 export async function checkDurability(cwd: string): Promise<Durability> {
