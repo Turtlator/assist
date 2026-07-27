@@ -1,3 +1,10 @@
+## [0.483.9](https://github.com/staff0rd/assist/compare/v0.483.8...v0.483.9) (2026-07-27)
+
+
+### Bug Fixes
+
+* card counts survive committing ([2f65bdf](https://github.com/staff0rd/assist/commit/2f65bdf18989797dc4affbf22365af159a121fd7))
+
 ## [0.483.8](https://github.com/staff0rd/assist/compare/v0.483.7...v0.483.8) (2026-07-27)
 
 
