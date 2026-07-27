@@ -4,14 +4,20 @@ vi.mock("node-pty", () => ({
 	spawn: vi.fn(() => ({})),
 }));
 
+vi.mock("node:fs", () => ({ existsSync: vi.fn(() => true) }));
+
+vi.mock("./daemonLog", () => ({ daemonLog: vi.fn() }));
+
 vi.mock("./ensureSpawnHelperExecutable", () => ({
 	ensureSpawnHelperExecutable: vi.fn(),
 }));
 
+import { existsSync } from "node:fs";
 import * as pty from "node-pty";
-import { spawnPty } from "./spawnPty";
+import { MissingCwdError, spawnPty } from "./spawnPty";
 
 const spawnMock = pty.spawn as unknown as ReturnType<typeof vi.fn>;
+const existsMock = existsSync as unknown as ReturnType<typeof vi.fn>;
 
 function spawnedEnv(): Record<string, string | undefined> {
 	const opts = spawnMock.mock.lastCall?.[2] as
@@ -23,6 +29,27 @@ function spawnedEnv(): Record<string, string | undefined> {
 describe("spawnPty", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		existsMock.mockReturnValue(true);
+	});
+
+	it("refuses to spawn into a working directory that no longer exists", () => {
+		existsMock.mockReturnValue(false);
+
+		expect(() => spawnPty(["claude"], "/git/repo-2", "7")).toThrow(
+			MissingCwdError,
+		);
+		expect(() => spawnPty(["claude"], "/git/repo-2", "7")).toThrow(
+			"working directory no longer exists: /git/repo-2",
+		);
+		expect(spawnMock).not.toHaveBeenCalled();
+	});
+
+	it("still spawns when no working directory is given", () => {
+		existsMock.mockReturnValue(false);
+
+		spawnPty(["assist", "run", "build"]);
+
+		expect(spawnMock).toHaveBeenCalled();
 	});
 
 	it("strips CLAUDE_CODE_CHILD_SESSION so spawned claude sessions stay resumable", () => {

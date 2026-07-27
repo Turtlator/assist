@@ -14,6 +14,7 @@ import {
 	type SpawnSession,
 } from "./resurfaceOrphanedWorktree";
 import { checkDurability } from "./treeDurability";
+import { logVanishedTree } from "./logVanishedTree";
 
 export function reconcileWorktreesOnRestore(
 	sessions: Map<string, Session>,
@@ -32,14 +33,15 @@ async function recoverOrphanedWorktrees(
 	const accounted = accountedTrees(sessions);
 	const vanished = new Map<string, { path: string; branch: string }[]>();
 	for (const { path, clone } of readWorktreeRegistry()) {
-		if (accounted.has(path)) continue;
 		if (!existsSync(path)) {
+			logVanishedTree(sessions, path);
 			vanished.set(clone, [
 				...(vanished.get(clone) ?? []),
 				{ path, branch: basename(path) },
 			]);
 			continue;
 		}
+		if (accounted.has(path)) continue;
 		await recoverOrphan(sessions, spawnWith, { path, clone }, notify);
 	}
 	for (const [clone, paths] of vanished)

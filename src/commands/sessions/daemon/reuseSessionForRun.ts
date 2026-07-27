@@ -1,6 +1,7 @@
 import { broadcast, type SessionClient } from "./broadcast";
 import type { Session } from "./createSession";
 import { daemonLog } from "./daemonLog";
+import { refuseSpawn } from "./refuseSpawn";
 import { resetCardForRun } from "./resetCardForRun";
 import { spawnPty } from "./spawnPty";
 import { startOrHoldPty } from "./startOrHoldPty";
@@ -24,13 +25,24 @@ export function reuseSessionForRun(
 	resetCardForRun(session, assistArgs);
 	const alloc = planReuseTree(session, tree);
 	if (alloc) session.cwd = alloc.cwd;
-	Object.assign(
-		session,
-		startOrHoldPty(
-			() => spawnPty(["assist", ...assistArgs], session.cwd, session.id),
-			alloc !== undefined,
-		),
-	);
+	try {
+		Object.assign(
+			session,
+			startOrHoldPty(
+				() => spawnPty(["assist", ...assistArgs], session.cwd, session.id),
+				alloc !== undefined,
+			),
+		);
+	} catch (error) {
+		refuseSpawn(
+			session,
+			error,
+			clients,
+			onStatusChange,
+			`reused for backlog run ${itemId}`,
+		);
+		return;
+	}
 	broadcast(clients, { type: "clear", sessionId: session.id });
 	if (alloc)
 		bindNewWorktree(

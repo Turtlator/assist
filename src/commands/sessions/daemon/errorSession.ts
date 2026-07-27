@@ -11,6 +11,7 @@ export function errorSession(
 ): Session {
 	return {
 		...restoreBase(id, persisted),
+		scrollback: `\r\n\x1b[31m${error}\x1b[0m\r\n`,
 		status: "error",
 		startedAt: persisted.startedAt,
 		runningMs: persisted.runningMs ?? 0,

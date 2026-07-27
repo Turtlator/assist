@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Session } from "../createSession";
+import { daemonLog } from "../daemonLog";
 import { loadPersistedSessions } from "../loadPersistedSessions";
 import { readWorktreeRegistry } from "./readWorktreeRegistry";
 import { reapWorktree } from "./reapWorktree";
@@ -49,6 +50,7 @@ const durabilityMock = checkDurability as unknown as ReturnType<typeof vi.fn>;
 const persistedMock = loadPersistedSessions as unknown as ReturnType<
 	typeof vi.fn
 >;
+const logMock = daemonLog as unknown as ReturnType<typeof vi.fn>;
 
 function reconcile(sessions: Map<string, Session>) {
 	const spawnWith = (create: (id: string) => Session) => {
@@ -141,6 +143,45 @@ describe("reconcileWorktreesOnRestore", () => {
 		await reconcile(new Map());
 
 		expect(durabilityMock).not.toHaveBeenCalled();
+		expect(reclaimMock).toHaveBeenCalledWith("/git/repo", [
+			{ path: "/git/repo-2", branch: "repo-2" },
+		]);
+	});
+
+	it("reclaims a vanished worktree a restored session still claims", async () => {
+		existsMock.mockImplementation((path: string) => path !== "/git/repo-2");
+		const held: Session = {
+			id: "1",
+			name: "s",
+			commandType: "claude",
+			status: "error",
+			startedAt: 1,
+			runningMs: 0,
+			runningSince: null,
+			waitingSince: null,
+			pty: null,
+			scrollback: "",
+			cwd: "/git/repo-2",
+		};
+
+		await reconcile(new Map([["1", held]]));
+
+		expect(reclaimMock).toHaveBeenCalledWith("/git/repo", [
+			{ path: "/git/repo-2", branch: "repo-2" },
+		]);
+		expect(logMock).toHaveBeenCalledWith(
+			expect.stringContaining(
+				'session 1 ("s") claims worktree /git/repo-2, which is gone from disk',
+			),
+		);
+	});
+
+	it("reclaims a vanished worktree a persisted session still claims", async () => {
+		existsMock.mockImplementation((path: string) => path !== "/git/repo-2");
+		persistedMock.mockReturnValue([{ cwd: "/git/repo-2" }]);
+
+		await reconcile(new Map());
+
 		expect(reclaimMock).toHaveBeenCalledWith("/git/repo", [
 			{ path: "/git/repo-2", branch: "repo-2" },
 		]);

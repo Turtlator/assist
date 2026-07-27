@@ -1,7 +1,7 @@
 import { findRepoRoot } from "../../../../shared/findRepoRoot";
 import type { Session } from "../createSession";
 import { daemonLog } from "../daemonLog";
-import { checkDurabilitySync } from "./treeDurability";
+import { checkDurabilitySync, type Durability } from "./treeDurability";
 import { worktreeConfigFor } from "./worktreeConfigFor";
 
 export function boundTreeRoots(
@@ -27,10 +27,14 @@ function holdsTree(session: Session, root: string): boolean {
 	if (session.status !== "done" && session.status !== "error") return true;
 	if (!worktreeConfigFor(root).enabled) return true;
 	const durability = checkDurabilitySync(root);
-	daemonLog(
-		durability.durable
-			? `tree ${root} free for allocation: session ${session.id} finished and its work is landed`
-			: `tree ${root} still held by finished session ${session.id}: ${durability.reason}`,
-	);
+	daemonLog(`tree ${root} ${releaseReason(durability, session)}`);
 	return !durability.durable;
+}
+
+function releaseReason(durability: Durability, session: Session): string {
+	if (!durability.durable)
+		return `still held by finished session ${session.id}: ${durability.reason}`;
+	if (durability.gone)
+		return `free for allocation: session ${session.id}'s directory is gone from disk — nothing to land, not landed work`;
+	return `free for allocation: session ${session.id} finished and its work is landed`;
 }

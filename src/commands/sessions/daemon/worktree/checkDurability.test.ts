@@ -34,10 +34,13 @@ describe("checkDurability", () => {
 		existsMock.mockReturnValue(true);
 	});
 
-	it("treats a tree that no longer exists as durable, holding nothing on a phantom", async () => {
+	it("marks a tree that no longer exists as gone, not as landed work", async () => {
 		existsMock.mockReturnValue(false);
 
-		expect(await checkDurability("/git/repo-3")).toEqual({ durable: true });
+		expect(await checkDurability("/git/repo-3")).toEqual({
+			durable: true,
+			gone: true,
+		});
 		expect(gitMock).not.toHaveBeenCalled();
 	});
 
@@ -178,10 +181,13 @@ describe("checkDurabilitySync", () => {
 		);
 	});
 
-	it("treats a tree that no longer exists as durable", () => {
+	it("marks a tree that no longer exists as gone, not as landed work", () => {
 		existsMock.mockReturnValue(false);
 
-		expect(checkDurabilitySync("/git/repo-3")).toEqual({ durable: true });
+		expect(checkDurabilitySync("/git/repo-3")).toEqual({
+			durable: true,
+			gone: true,
+		});
 		expect(gitSyncMock).not.toHaveBeenCalled();
 	});
 });

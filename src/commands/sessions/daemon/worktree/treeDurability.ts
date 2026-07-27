@@ -6,7 +6,11 @@ type TreeState = {
 	localOnlyCommits: boolean;
 };
 
-type Durability = { durable: true } | { durable: false; reason: string };
+export type Durability =
+	| { durable: true; gone?: boolean }
+	| { durable: false; reason: string };
+
+const treeIsGone: Durability = { durable: true, gone: true };
 
 export function treeDurability(state: TreeState): Durability {
 	if (state.dirty) return { durable: false, reason: "uncommitted changes" };
@@ -39,7 +43,7 @@ function* durabilityProbes(): Generator<string[], Durability, GitResult> {
 }
 
 export async function checkDurability(cwd: string): Promise<Durability> {
-	if (!existsSync(cwd)) return { durable: true };
+	if (!existsSync(cwd)) return treeIsGone;
 	const probes = durabilityProbes();
 	let step = probes.next();
 	while (!step.done) step = probes.next(await gitResult(cwd, step.value));
@@ -47,7 +51,7 @@ export async function checkDurability(cwd: string): Promise<Durability> {
 }
 
 export function checkDurabilitySync(cwd: string): Durability {
-	if (!existsSync(cwd)) return { durable: true };
+	if (!existsSync(cwd)) return treeIsGone;
 	const probes = durabilityProbes();
 	let step = probes.next();
 	while (!step.done) step = probes.next(gitSyncResult(cwd, step.value));

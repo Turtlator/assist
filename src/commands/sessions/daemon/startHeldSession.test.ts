@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { SessionClient } from "./broadcast";
+import { MissingCwdError } from "./spawnPty";
 import { startHeldSession } from "./startHeldSession";
 import type { Session } from "./types";
 
@@ -96,6 +97,40 @@ describe("startHeldSession", () => {
 		);
 
 		expect(pty?.resize).toHaveBeenCalledWith(200, 50);
+	});
+
+	it("surfaces a tree that vanished during seeding on the card instead of throwing out of the install callback", () => {
+		const session = heldSession({
+			pendingStart: () => {
+				throw new MissingCwdError("/git/repo-2");
+			},
+		});
+		const notify = vi.fn();
+		const sent: string[] = [];
+		const clients = new Set<SessionClient>([
+			{ send: (data: string) => sent.push(data) },
+		]);
+
+		expect(() =>
+			startHeldSession(
+				session,
+				new Map([[session.id, session]]),
+				clients,
+				(s, status) => {
+					s.status = status;
+				},
+				notify,
+			),
+		).not.toThrow();
+
+		expect(session.status).toBe("error");
+		expect(session.pty).toBeNull();
+		expect(session.pendingStart).toBeUndefined();
+		expect(session.error).toBe(
+			"working directory no longer exists: /git/repo-2",
+		);
+		expect(session.scrollback).toContain("/git/repo-2");
+		expect(notify).toHaveBeenCalled();
 	});
 
 	it("is inert for a session that was never held", () => {

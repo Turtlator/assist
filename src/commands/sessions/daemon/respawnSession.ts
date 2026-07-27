@@ -3,6 +3,7 @@ import type { Session } from "./createSession";
 import { setStatus } from "./setStatus";
 import type { OnStatusChange } from "./types";
 import { wirePtyEvents } from "./wirePtyEvents";
+import { refuseSpawn } from "./refuseSpawn";
 
 export function respawnSession(
 	session: Session,
@@ -22,7 +23,12 @@ export function respawnSession(
 	session.runningSince = null;
 	setStatus(session, status);
 	session.restored = undefined;
-	session.pty = respawn();
+	try {
+		session.pty = respawn();
+	} catch (error) {
+		refuseSpawn(session, error, clients, onStatusChange);
+		return;
+	}
 	if (session.cols && session.rows)
 		try {
 			session.pty?.resize(session.cols, session.rows);

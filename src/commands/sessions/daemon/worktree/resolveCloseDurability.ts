@@ -21,6 +21,10 @@ export async function resolveCloseDurability(
 		holdStopped(session, tree, durability.reason, finalize, notify);
 		return;
 	}
+	if (durability.gone)
+		daemonLog(
+			`session ${session.id} closing: worktree ${tree.path} is gone from disk — released with nothing to land, not landed work`,
+		);
 	if (tree.removable) await reapWorktree(tree.path);
 	session.worktree = undefined;
 	session.undurable = undefined;
