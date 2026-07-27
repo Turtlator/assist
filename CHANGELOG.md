@@ -1,3 +1,10 @@
+# [0.484.0](https://github.com/staff0rd/assist/compare/v0.483.9...v0.484.0) (2026-07-27)
+
+
+### Features
+
+* comment on a diff selection ([5448047](https://github.com/staff0rd/assist/commit/5448047cbeb4e294f630a3182384451f835a74e4))
+
 ## [0.483.9](https://github.com/staff0rd/assist/compare/v0.483.8...v0.483.9) (2026-07-27)
 
 
