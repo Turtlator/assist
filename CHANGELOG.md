@@ -1,3 +1,10 @@
+# [0.486.0](https://github.com/staff0rd/assist/compare/v0.485.4...v0.486.0) (2026-07-27)
+
+
+### Features
+
+* confirm and gate diff comments ([9d69212](https://github.com/staff0rd/assist/commit/9d692126f8c2b2a244415f21619bed302d581276))
+
 ## [0.485.4](https://github.com/staff0rd/assist/compare/v0.485.3...v0.485.4) (2026-07-27)
 
 
