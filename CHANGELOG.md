@@ -1,3 +1,10 @@
+## [0.485.2](https://github.com/staff0rd/assist/compare/v0.485.1...v0.485.2) (2026-07-27)
+
+
+### Bug Fixes
+
+* story branch survives worktree runs ([dd9e33a](https://github.com/staff0rd/assist/commit/dd9e33a76217a67c509e76718aa3834a05814120))
+
 ## [0.485.1](https://github.com/staff0rd/assist/compare/v0.485.0...v0.485.1) (2026-07-27)
 
 
