@@ -13,9 +13,9 @@ export function usePreviewSelection() {
 			setPending(null);
 			setDragRects([]);
 		},
-		onMove: (anchor, focus, wrapper) =>
+		onMove: (anchor, focus, { wrapper }) =>
 			setDragRects(overlayRects(snappedRange(anchor, focus), wrapper)),
-		onEnd: (anchor, focus, content) => {
+		onEnd: (anchor, focus, { content }) => {
 			setDragRects(null);
 			setPending(finishSelection(content, anchor, focus));
 		},

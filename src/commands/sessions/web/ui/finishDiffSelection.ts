@@ -1,4 +1,4 @@
-import type { Caret } from "./caretFromPoint";
+import { type Caret, type OverlayRect, overlayRects } from "./caretFromPoint";
 import { changeKeyLine } from "./changeKeyLine";
 import { snappedRange } from "./finishSelection";
 import type { SelectionAnchor } from "./SelectionCommentPopover";
@@ -6,6 +6,7 @@ import type { SelectionAnchor } from "./SelectionCommentPopover";
 export type DiffSelection = SelectionAnchor & {
 	startLine: number;
 	endLine: number;
+	rects: OverlayRect[];
 };
 
 function lineOf(node: Node): number | null {
@@ -18,6 +19,7 @@ function lineOf(node: Node): number | null {
 export function finishDiffSelection(
 	anchor: Caret,
 	focus: Caret,
+	wrapper: HTMLElement,
 ): DiffSelection | null {
 	const range = snappedRange(anchor, focus);
 	const quote = range.toString().trim();
@@ -26,5 +28,12 @@ export function finishDiffSelection(
 	const endLine = lineOf(range.endContainer) ?? startLine;
 	if (startLine === null || endLine === null) return null;
 	const rect = range.getBoundingClientRect();
-	return { quote, startLine, endLine, top: rect.bottom, left: rect.left };
+	return {
+		quote,
+		startLine,
+		endLine,
+		top: rect.bottom,
+		left: rect.left,
+		rects: overlayRects(range, wrapper),
+	};
 }

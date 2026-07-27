@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { diffCommentSender } from "./diffCommentSender";
 import type { SessionInfo } from "./types";
 
@@ -23,6 +23,9 @@ const comment = {
 	note: "why",
 };
 
+beforeEach(() => vi.useFakeTimers());
+afterEach(() => vi.useRealTimers());
+
 describe("diffCommentSender", () => {
 	it("writes the formatted comment to the daemon id as a bracketed paste", () => {
 		const sendInput = vi.fn();
@@ -31,8 +34,19 @@ describe("diffCommentSender", () => {
 
 		expect(sendInput).toHaveBeenCalledWith(
 			"daemon-1",
-			`${ESC}[200~a.ts:3\r\r\`\`\`\rconst x = 1\r\`\`\`\r\rwhy${ESC}[201~\r`,
+			`${ESC}[200~a.ts:3\r\r\`\`\`\rconst x = 1\r\`\`\`\r\rwhy${ESC}[201~`,
 		);
+	});
+
+	it("submits separately from the paste, which the tui would otherwise swallow", () => {
+		const sendInput = vi.fn();
+
+		diffCommentSender(sessions, "claude-1", sendInput)?.(comment);
+
+		expect(sendInput).toHaveBeenCalledTimes(1);
+		vi.runAllTimers();
+		expect(sendInput).toHaveBeenCalledTimes(2);
+		expect(sendInput).toHaveBeenLastCalledWith("daemon-1", "\r");
 	});
 
 	it("is unavailable without a session id", () => {
