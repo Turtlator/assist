@@ -1,3 +1,10 @@
+## [0.485.3](https://github.com/staff0rd/assist/compare/v0.485.2...v0.485.3) (2026-07-27)
+
+
+### Bug Fixes
+
+* attribute diff comment lines correctly ([52d92ce](https://github.com/staff0rd/assist/commit/52d92cef713c43727c16c688ff929e9137bd7f97))
+
 ## [0.485.2](https://github.com/staff0rd/assist/compare/v0.485.1...v0.485.2) (2026-07-27)
 
 
