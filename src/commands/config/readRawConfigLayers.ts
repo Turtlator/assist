@@ -1,6 +1,6 @@
 import {
-	getConfigPathFrom,
 	getGlobalConfigPath,
+	projectConfigPathFrom,
 } from "../../shared/loadConfigFrom";
 import { loadRawYaml } from "../../shared/loadRawYaml";
 import {
@@ -20,14 +20,14 @@ export function readRawConfigLayers(cwd: string): RawConfigLayers {
 	const global = loadRawYaml(getGlobalConfigPath());
 	if (!global.repos)
 		return {
-			project: loadRawYaml(getConfigPathFrom(cwd)),
+			project: loadRawYaml(projectConfigPathFrom(cwd)),
 			global,
 			repoOverride: {},
 		};
 
 	const origin = getCurrentOrigin(cwd);
 	return {
-		project: loadRawYaml(getConfigPathFrom(cwd)),
+		project: loadRawYaml(projectConfigPathFrom(cwd)),
 		global,
 		repoOverride: resolveRepoOverride(global, origin),
 		repoKey: matchRepoConfigKey(global, origin),

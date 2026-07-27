@@ -4,9 +4,9 @@ import { stringify as stringifyYaml } from "yaml";
 import {
 	findConfigUp,
 	getConfigDirFrom,
-	getConfigPathFrom,
 	getGlobalConfigPath,
 	loadConfigFrom,
+	projectConfigPathFrom,
 } from "./loadConfigFrom";
 import { loadRawYaml } from "./loadRawYaml";
 import type { AssistConfig, TranscriptConfig } from "./types";
@@ -27,7 +27,7 @@ export function loadConfig(): AssistConfig {
 export function loadProjectConfig(
 	cwd: string = process.cwd(),
 ): Record<string, unknown> {
-	return loadRawYaml(getConfigPathFrom(cwd));
+	return loadRawYaml(projectConfigPathFrom(cwd));
 }
 
 export function loadGlobalConfigRaw(): Record<string, unknown> {
@@ -42,7 +42,7 @@ export function saveConfig(
 	config: Record<string, unknown>,
 	cwd: string = process.cwd(),
 ): void {
-	const configPath = getConfigPathFrom(cwd);
+	const configPath = projectConfigPathFrom(cwd);
 	writeFileSync(configPath, stringifyYaml(config, { lineWidth: 0 }));
 }
 
