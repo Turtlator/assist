@@ -1,3 +1,10 @@
+## [0.484.3](https://github.com/staff0rd/assist/compare/v0.484.2...v0.484.3) (2026-07-27)
+
+
+### Bug Fixes
+
+* submit diff comment and show selection ([163f496](https://github.com/staff0rd/assist/commit/163f4963055c8c252aadd8f94a630bcf7360ed1b))
+
 ## [0.484.2](https://github.com/staff0rd/assist/compare/v0.484.1...v0.484.2) (2026-07-27)
 
 
