@@ -1,3 +1,10 @@
+## [0.483.5](https://github.com/staff0rd/assist/compare/v0.483.4...v0.483.5) (2026-07-27)
+
+
+### Bug Fixes
+
+* keep terminal subscribed on dismiss ([9e72d7b](https://github.com/staff0rd/assist/commit/9e72d7b71ece44de855cba1903f97cf0d5367e74))
+
 ## [0.483.4](https://github.com/staff0rd/assist/compare/v0.483.3...v0.483.4) (2026-07-27)
 
 
