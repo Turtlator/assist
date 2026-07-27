@@ -183,7 +183,7 @@ Backlog item ids are written and displayed in an `a`-prefixed form (e.g. item 55
 - `assist config get <key>` - Get a config value
 - `assist config list` - List all config values
 - `assist config set <key> <value>` - Set a config value. `--global` writes to `~/.assist.yml`; `-g --repo [name]` writes a per-repo override there
-- `assist config unset <key>` - Remove a config value so the key falls back to the global value or schema default (`-g` targets `~/.assist.yml`)
+- `assist config unset <key>` - Remove a config value so the key falls back to the global value or schema default (`-g` targets `~/.assist.yml`; `-g --repo [name]` removes it from a per-repo override there)
 
 ### Verify and lint
 

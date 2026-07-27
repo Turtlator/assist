@@ -1,10 +1,8 @@
-import { loadGlobalConfigRaw, saveGlobalConfig } from "../../shared/loadConfig";
-import { resolveNamedRepoWriteLabel } from "../../shared/resolveNamedRepoWriteLabel";
-import { resolveRepoWriteLabel } from "../../shared/resolveRepoOverride";
+import { saveGlobalConfig } from "../../shared/loadConfig";
 import { repoConfigSchema } from "../../shared/types";
-import { getCurrentOrigin } from "../backlog/getCurrentOrigin";
 import type { ConfigWritableValue } from "./applyConfigSet";
 import { isGlobalOnlyConfigKey } from "./isGlobalOnlyConfigKey";
+import { resolveRepoConfigBlock } from "./resolveRepoConfigBlock";
 import { setNestedValue } from "./setNestedValue";
 import { validateConfig } from "./validateConfig";
 
@@ -26,21 +24,14 @@ export function applyRepoConfigSet(
 			],
 		};
 	}
-	const globalRaw = loadGlobalConfigRaw();
-	const label =
-		repoName === undefined
-			? resolveRepoWriteLabel(globalRaw, getCurrentOrigin(cwd))
-			: resolveNamedRepoWriteLabel(globalRaw, repoName);
-	const repos = isPlainObject(globalRaw.repos) ? { ...globalRaw.repos } : {};
-	const existingBlock = isPlainObject(repos[label]) ? repos[label] : {};
-	const updatedBlock = setNestedValue(existingBlock, key, coerced);
+	const { globalRaw, repos, label, block } = resolveRepoConfigBlock(
+		repoName,
+		cwd,
+	);
+	const updatedBlock = setNestedValue(block, key, coerced);
 	const validation = validateConfig(updatedBlock, key, repoConfigSchema);
 	if (!validation.ok) return validation;
 	repos[label] = updatedBlock;
 	saveGlobalConfig({ ...globalRaw, repos });
 	return { ok: true, target: "repo", label };
-}
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-	return value !== null && typeof value === "object" && !Array.isArray(value);
 }

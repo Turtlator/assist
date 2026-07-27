@@ -194,10 +194,10 @@ describe("unsetConfig", () => {
 		expect(badScope).toBe(400);
 	});
 
-	it("rejects clearing a repos override and leaves the file untouched", async () => {
+	it("removes only the key from the repos block", async () => {
 		writeFileSync(
 			paths.globalConfig,
-			"repos:\n  repo:\n    commit:\n      push: true\n",
+			"commit:\n  pull: false\nrepos:\n  repo:\n    commit:\n      push: true\n      pull: true\n",
 		);
 
 		const [status, payload] = await post({
@@ -206,8 +206,93 @@ describe("unsetConfig", () => {
 			scope: "repo",
 		});
 
+		expect(status).toBe(200);
+		expect(payload).toEqual({
+			target: "repo",
+			repoKey: "repo",
+			removed: true,
+		});
+		expect(readYaml(paths.globalConfig)).toEqual({
+			commit: { pull: false },
+			repos: { repo: { commit: { pull: true } } },
+		});
+		expect(readYaml(paths.repoConfig)).toEqual({
+			commit: { push: false, pull: true },
+		});
+	});
+
+	it("prunes a repos block left empty by the removal", async () => {
+		writeFileSync(
+			paths.globalConfig,
+			"commit:\n  pull: false\nrepos:\n  repo:\n    commit:\n      push: true\n  other:\n    commit:\n      push: false\n",
+		);
+
+		const [status] = await post({
+			key: "commit.push",
+			cwd: paths.repo,
+			scope: "repo",
+		});
+
+		expect(status).toBe(200);
+		expect(readYaml(paths.globalConfig)).toEqual({
+			commit: { pull: false },
+			repos: { other: { commit: { push: false } } },
+		});
+	});
+
+	it("drops the repos map when its last block is pruned", async () => {
+		writeFileSync(
+			paths.globalConfig,
+			"repos:\n  repo:\n    commit:\n      push: true\n",
+		);
+
+		const [status] = await post({
+			key: "commit.push",
+			cwd: paths.repo,
+			scope: "repo",
+		});
+
+		expect(status).toBe(200);
+		expect(readYaml(paths.globalConfig)).toEqual({});
+	});
+
+	it("reports a key absent from the repos block without writing", async () => {
+		writeFileSync(
+			paths.globalConfig,
+			"repos:\n  repo:\n    commit:\n      push: true\n",
+		);
+
+		const [status, payload] = await post({
+			key: "worktree.enabled",
+			cwd: paths.repo,
+			scope: "repo",
+		});
+
+		expect(status).toBe(200);
+		expect(payload).toEqual({
+			target: "repo",
+			repoKey: "repo",
+			removed: false,
+		});
+		expect(readFileSync(paths.globalConfig, "utf8")).toBe(
+			"repos:\n  repo:\n    commit:\n      push: true\n",
+		);
+	});
+
+	it("rejects a repo unset of a global-only key", async () => {
+		writeFileSync(
+			paths.globalConfig,
+			"repos:\n  repo:\n    commit:\n      push: true\n",
+		);
+
+		const [status, payload] = await post({
+			key: "sync.autoConfirm",
+			cwd: paths.repo,
+			scope: "repo",
+		});
+
 		expect(status).toBe(400);
-		expect(payload.error).toContain("repos");
+		expect(payload.error).toContain("global-only");
 		expect(readFileSync(paths.globalConfig, "utf8")).toBe(
 			"repos:\n  repo:\n    commit:\n      push: true\n",
 		);

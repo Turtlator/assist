@@ -35,7 +35,7 @@ export function useConfigRowEditor({ entry, cwd, onSaved, onError }: Options) {
 		saving,
 		save: () => save(value),
 		clear,
-		canClear: scope !== "repo" && entry.source !== "default",
+		canClear: entry.source !== "default",
 		dirty: JSON.stringify(value) !== JSON.stringify(saved),
 		reset: () => setValue(saved),
 	};

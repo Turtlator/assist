@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { applyConfigUnset } from "../../config/applyConfigUnset";
 import { isKnownConfigKey } from "../../config/isKnownConfigKey";
+import { applyScopedConfigUnset } from "./applyScopedConfigUnset";
 import { handleConfigWrite } from "./handleConfigWrite";
 
 export function unsetConfig(
@@ -10,24 +10,7 @@ export function unsetConfig(
 	return handleConfigWrite(req, res, (request) => {
 		if (!isKnownConfigKey(request.key))
 			return { ok: false, errors: [`Unknown config key "${request.key}"`] };
-		if (request.scope === "repo")
-			return {
-				ok: false,
-				errors: [
-					"Clearing a repos override is not supported — remove the key from repos: in ~/.assist.yml",
-				],
-			};
 
-		const result = applyConfigUnset(
-			request.key,
-			request.scope === "global",
-			request.cwd,
-		);
-		return result.ok
-			? {
-					ok: true,
-					payload: { target: result.target, removed: result.removed },
-				}
-			: result;
+		return applyScopedConfigUnset(request.key, request.cwd, request.scope);
 	});
 }

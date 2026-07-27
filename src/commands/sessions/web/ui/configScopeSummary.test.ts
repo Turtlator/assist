@@ -45,7 +45,28 @@ describe("configScopeSummary", () => {
 	it("names the repos entry a repo-scoped save writes to", () => {
 		expect(
 			configScopeSummary(entry(["global"], { repoKey: "assist" }), "repo"),
-		).toBe("Set in global. Saving writes to repos.assist in ~/.assist.yml.");
+		).toBe(
+			"Set in global. Saving writes to repos.assist in ~/.assist.yml. Nothing to clear in repos.assist.",
+		);
+	});
+
+	it("says a repo-scoped clear reverts to the schema default", () => {
+		expect(
+			configScopeSummary(entry(["repo"], { repoKey: "assist" }), "repo"),
+		).toBe(
+			"Set in repos.assist. Saving writes to repos.assist in ~/.assist.yml. Clear reverts it to the schema default.",
+		);
+	});
+
+	it("names the layer a repo-scoped clear falls back to", () => {
+		expect(
+			configScopeSummary(
+				entry(["repo", "global"], { repoKey: "assist" }),
+				"repo",
+			),
+		).toBe(
+			"Set in repos.assist and global. Saving writes to repos.assist in ~/.assist.yml. Clear falls back to global.",
+		);
 	});
 
 	it("describes the repos entry a repo-scoped save creates", () => {

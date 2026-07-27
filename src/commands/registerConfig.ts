@@ -20,9 +20,13 @@ export function registerConfig(program: Command): void {
 		.action((key, value, options) => configSet(key, value, options));
 
 	configCommand
-		.command("unset <key>")
+		.command("unset [key]")
 		.description("Remove a config value (e.g. commit.push)")
 		.option("-g, --global", "Remove from global ~/.assist.yml")
+		.option(
+			"-r, --repo [name]",
+			"Requires -g: remove the key from a repo's identity block (defaults to the current repo)",
+		)
 		.action((key, options) => configUnset(key, options));
 
 	configCommand

@@ -24,17 +24,16 @@ export function configScopeSummary(
 	const label = (source: ConfigSource) => sourceLabel(source, entry.repoKey);
 	const unset = "Not set in project or global — showing the schema default.";
 
-	if (scope === "repo") {
-		const target = `Saving writes to ${configScopeFiles(entry.repoKey).repo}.`;
-		return sources.length === 0
-			? `${unset} ${target}`
-			: `Set in ${joinLabels(sources.map(label))}. ${target}`;
-	}
+	const target =
+		scope === "repo"
+			? ` Saving writes to ${configScopeFiles(entry.repoKey).repo}.`
+			: "";
 
-	if (sources.length === 0) return unset;
+	if (sources.length === 0) return `${unset}${target}`;
 
-	const where = `Set in ${joinLabels(sources.map(label))}.`;
-	if (!sources.includes(scope)) return `${where} Nothing to clear in ${scope}.`;
+	const where = `Set in ${joinLabels(sources.map(label))}.${target}`;
+	if (!sources.includes(scope))
+		return `${where} Nothing to clear in ${label(scope)}.`;
 
 	const remaining = sources.filter((source) => source !== scope);
 	if (remaining.length === 0)

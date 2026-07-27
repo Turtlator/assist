@@ -6,6 +6,8 @@ const mockLoadGlobalConfigRaw = vi.fn<() => Record<string, unknown>>();
 const mockSaveConfig = vi.fn();
 const mockSaveGlobalConfig = vi.fn();
 
+const mockGetCurrentOrigin = vi.fn<() => string>();
+
 vi.mock("../../shared/loadConfig", () => ({
 	loadConfig: () => ({}),
 	loadProjectConfig: () => mockLoadProjectConfig(),
@@ -14,11 +16,16 @@ vi.mock("../../shared/loadConfig", () => ({
 	saveGlobalConfig: (c: unknown) => mockSaveGlobalConfig(c),
 }));
 
+vi.mock("../backlog/getCurrentOrigin", () => ({
+	getCurrentOrigin: () => mockGetCurrentOrigin(),
+}));
+
 describe("configUnset", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockLoadProjectConfig.mockReturnValue({});
 		mockLoadGlobalConfigRaw.mockReturnValue({});
+		mockGetCurrentOrigin.mockReturnValue("github.com/org/assist");
 	});
 
 	describe("without --global", () => {
@@ -66,6 +73,117 @@ describe("configUnset", () => {
 				commit: { push: true },
 			});
 			expect(mockSaveConfig).not.toHaveBeenCalled();
+		});
+	});
+
+	describe("with -g --repo", () => {
+		it("should remove only the key from the current repo's block", () => {
+			mockLoadGlobalConfigRaw.mockReturnValue({
+				commit: { push: false },
+				repos: { assist: { commit: { push: true, pull: true } } },
+			});
+
+			configUnset("commit.push", { repo: true, global: true });
+
+			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({
+				commit: { push: false },
+				repos: { assist: { commit: { pull: true } } },
+			});
+			expect(mockSaveConfig).not.toHaveBeenCalled();
+		});
+
+		it("should prune a block left empty and drop an empty repos map", () => {
+			mockLoadGlobalConfigRaw.mockReturnValue({
+				repos: { assist: { commit: { push: true } } },
+			});
+
+			configUnset("commit.push", { repo: true, global: true });
+
+			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({});
+		});
+
+		it("should keep sibling repo blocks when one is pruned", () => {
+			mockLoadGlobalConfigRaw.mockReturnValue({
+				repos: {
+					assist: { commit: { push: true } },
+					other: { commit: { push: false } },
+				},
+			});
+
+			configUnset("commit.push", { repo: true, global: true });
+
+			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({
+				repos: { other: { commit: { push: false } } },
+			});
+		});
+
+		it("should target a named repo block", () => {
+			mockLoadGlobalConfigRaw.mockReturnValue({
+				repos: {
+					assist: { commit: { push: true } },
+					other: { commit: { push: false, pull: true } },
+				},
+			});
+
+			configUnset("commit.push", { repo: "other", global: true });
+
+			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({
+				repos: {
+					assist: { commit: { push: true } },
+					other: { commit: { pull: true } },
+				},
+			});
+		});
+
+		it("should accept the key as the --repo argument", () => {
+			mockLoadGlobalConfigRaw.mockReturnValue({
+				repos: { assist: { commit: { push: true, pull: true } } },
+			});
+
+			configUnset(undefined, { repo: "commit.push", global: true });
+
+			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({
+				repos: { assist: { commit: { pull: true } } },
+			});
+		});
+
+		it("should report nothing to clear without writing", () => {
+			mockLoadGlobalConfigRaw.mockReturnValue({
+				repos: { assist: { commit: { push: true } } },
+			});
+			const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+			configUnset("worktree.enabled", { repo: true, global: true });
+
+			expect(mockSaveGlobalConfig).not.toHaveBeenCalled();
+			expect(log.mock.calls[0][0]).toContain("not set in repos.assist");
+			log.mockRestore();
+		});
+
+		it("should reject --repo without --global", () => {
+			const mockExit = vi
+				.spyOn(process, "exit")
+				.mockImplementation(() => undefined as never);
+			vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+			configUnset("commit.push", { repo: true });
+
+			expect(mockExit).toHaveBeenCalledWith(1);
+			expect(mockSaveGlobalConfig).not.toHaveBeenCalled();
+			mockExit.mockRestore();
+		});
+
+		it("should reject a global-only key", () => {
+			const mockExit = vi
+				.spyOn(process, "exit")
+				.mockImplementation(() => undefined as never);
+			vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+			configUnset("sync.autoConfirm", { repo: true, global: true });
+
+			expect(mockExit).toHaveBeenCalledWith(1);
+			expect(mockSaveGlobalConfig).not.toHaveBeenCalled();
+			mockExit.mockRestore();
 		});
 	});
 

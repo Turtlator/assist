@@ -1,22 +1,57 @@
 import chalk from "chalk";
 import { applyConfigUnset } from "./applyConfigUnset";
+import { applyRepoConfigUnset } from "./applyRepoConfigUnset";
 import { exitWithConfigErrors } from "./exitWithConfigErrors";
+import { resolveRepoUnsetTarget } from "./resolveRepoUnsetTarget";
 
 type ConfigUnsetOptions = {
 	global?: boolean;
+	repo?: boolean | string;
 };
 
+type UnsetTarget =
+	| { target: "global" | "project" }
+	| { target: "repo"; label: string };
+
 export function configUnset(
-	key: string,
+	key: string | undefined,
 	options: ConfigUnsetOptions = {},
 ): void {
-	const result = applyConfigUnset(key, options.global ?? false);
+	if (options.repo !== undefined && !options.global) {
+		console.error(
+			chalk.red(
+				"--repo removes from the global config; add -g (e.g. -g --repo)",
+			),
+		);
+		process.exit(1);
+	}
+
+	const resolved = resolveRepoUnsetTarget(key, options.repo);
+	if (resolved.key === undefined) {
+		console.error(chalk.red("Missing required argument 'key'"));
+		process.exit(1);
+		return;
+	}
+
+	const result = resolved.useRepo
+		? applyRepoConfigUnset(resolved.key, resolved.repoName)
+		: applyConfigUnset(resolved.key, options.global ?? false);
 	if (!result.ok) exitWithConfigErrors(result.errors);
 	if (!result.removed) {
 		console.log(
-			chalk.yellow(`${key} is not set in the ${result.target} config`),
+			chalk.yellow(`${resolved.key} is not set in ${whereLabel(result)}`),
 		);
 		return;
 	}
-	console.log(chalk.green(`Unset ${key} (${result.target})`));
+	console.log(chalk.green(`Unset ${resolved.key} (${targetLabel(result)})`));
+}
+
+function whereLabel(result: UnsetTarget): string {
+	return result.target === "repo"
+		? `repos.${result.label}`
+		: `the ${result.target} config`;
+}
+
+function targetLabel(result: UnsetTarget): string {
+	return result.target === "repo" ? `repo: ${result.label}` : result.target;
 }
