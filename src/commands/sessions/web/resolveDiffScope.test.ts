@@ -1,15 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { branchDiffBase } from "./branchDiffBase";
 import { itemScopeCommits } from "./itemScopeCommits";
 import { resolveDiffScope } from "./resolveDiffScope";
 
 vi.mock("./itemScopeCommits", () => ({ itemScopeCommits: vi.fn() }));
+vi.mock("./branchDiffBase", () => ({ branchDiffBase: vi.fn() }));
 
 const itemScopeCommitsMock = vi.mocked(itemScopeCommits);
+const branchDiffBaseMock = vi.mocked(branchDiffBase);
 
 describe("resolveDiffScope", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		itemScopeCommitsMock.mockResolvedValue([{ sha: "one" }, { sha: "two" }]);
+		branchDiffBaseMock.mockResolvedValue("base-sha");
 	});
 
 	it("defaults to the whole item when no scope is given", async () => {
@@ -31,6 +35,21 @@ describe("resolveDiffScope", () => {
 			kind: "uncommitted",
 		});
 		expect(itemScopeCommitsMock).not.toHaveBeenCalled();
+	});
+
+	it("resolves the branch scope to its merge base", async () => {
+		expect(await resolveDiffScope("/repo", "sess-1", "branch")).toEqual({
+			kind: "branch",
+			base: "base-sha",
+		});
+		expect(branchDiffBaseMock).toHaveBeenCalledWith("/repo");
+		expect(itemScopeCommitsMock).not.toHaveBeenCalled();
+	});
+
+	it("rejects the branch scope when no base resolves", async () => {
+		branchDiffBaseMock.mockResolvedValue(undefined);
+
+		expect(await resolveDiffScope("/repo", "sess-1", "branch")).toBeUndefined();
 	});
 
 	it("accepts a sha the item recorded", async () => {

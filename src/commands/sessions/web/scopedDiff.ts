@@ -11,11 +11,9 @@ export async function scopedDiff(
 	scope: DiffScope,
 ): Promise<string> {
 	if (scope.kind === "commit") return commitDiff(cwd, scope.sha);
-	const tracked =
-		scope.kind === "uncommitted"
-			? await workingTreeDiff(cwd)
-			: await trackedDiff(cwd, session);
-	return tracked + (await untrackedDiff(cwd));
+	return (
+		(await trackedScopeDiff(cwd, session, scope)) + (await untrackedDiff(cwd))
+	);
 }
 
 async function untrackedFileDiff(cwd: string, path: string): Promise<string> {
@@ -52,8 +50,22 @@ async function groupedDiff(
 	return diffs.join("");
 }
 
+async function baseDiff(cwd: string, base: string): Promise<string> {
+	return execGit(cwd, ["diff", base], { maxBuffer: MAX_DIFF_BYTES });
+}
+
 async function workingTreeDiff(cwd: string): Promise<string> {
-	return execGit(cwd, ["diff", "HEAD"], { maxBuffer: MAX_DIFF_BYTES });
+	return baseDiff(cwd, "HEAD");
+}
+
+async function trackedScopeDiff(
+	cwd: string,
+	session: string | undefined,
+	scope: Exclude<DiffScope, { kind: "commit" }>,
+): Promise<string> {
+	if (scope.kind === "branch") return baseDiff(cwd, scope.base);
+	if (scope.kind === "uncommitted") return workingTreeDiff(cwd);
+	return trackedDiff(cwd, session);
 }
 
 async function trackedDiff(cwd: string, session?: string): Promise<string> {

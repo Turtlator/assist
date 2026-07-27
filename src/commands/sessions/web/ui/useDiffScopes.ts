@@ -2,12 +2,20 @@ import { useEffect, useState } from "react";
 import type { CommitRef } from "../../../../shared/db/listCommitRefs";
 import { diffQuery } from "./diffQuery";
 
-export function useDiffScopes(cwd: string, sessionId?: string): CommitRef[] {
-	const [commits, setCommits] = useState<CommitRef[]>([]);
+type DiffScopes = {
+	commits: CommitRef[];
+	branchBase: string | null;
+	loaded: boolean;
+};
+
+const EMPTY: DiffScopes = { commits: [], branchBase: null, loaded: false };
+
+export function useDiffScopes(cwd: string, sessionId?: string): DiffScopes {
+	const [scopes, setScopes] = useState<DiffScopes>(EMPTY);
 
 	useEffect(() => {
-		if (!cwd || !sessionId) {
-			setCommits([]);
+		if (!cwd) {
+			setScopes(EMPTY);
 			return;
 		}
 		let cancelled = false;
@@ -17,9 +25,14 @@ export function useDiffScopes(cwd: string, sessionId?: string): CommitRef[] {
 					`/api/diff-scopes?${diffQuery(cwd, sessionId)}`,
 				);
 				const body = await res.json();
-				if (!cancelled) setCommits(body?.commits ?? []);
+				if (!cancelled)
+					setScopes({
+						commits: body?.commits ?? [],
+						branchBase: body?.branchBase ?? null,
+						loaded: true,
+					});
 			} catch {
-				if (!cancelled) setCommits([]);
+				if (!cancelled) setScopes({ ...EMPTY, loaded: true });
 			}
 		};
 		load();
@@ -28,5 +41,5 @@ export function useDiffScopes(cwd: string, sessionId?: string): CommitRef[] {
 		};
 	}, [cwd, sessionId]);
 
-	return commits;
+	return scopes;
 }

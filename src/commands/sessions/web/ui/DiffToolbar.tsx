@@ -2,12 +2,12 @@ import Box from "@mui/material/Box";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import type { ViewType } from "react-diff-view";
-import type { CommitRef } from "../../../../shared/db/listCommitRefs";
 import { CloseViewButton } from "./CloseViewButton";
 import { DiffChangeTypeFilter } from "./DiffChangeTypeFilter";
 import { DiffFileSearchInput } from "./DiffFileSearchInput";
 import { DiffScopePicker } from "./DiffScopePicker";
 import type { DiffChangeType } from "./filterDiffFiles";
+import type { DiffScopeState } from "./useDiffScopeState";
 
 export const DIFF_TOOLBAR_HEIGHT = 40;
 
@@ -32,7 +32,6 @@ export function DiffToolbar({
 	changeType,
 	onChangeTypeChange,
 	scope,
-	scopeCommits,
 	onScopeChange,
 }: {
 	viewType: ViewType;
@@ -41,8 +40,7 @@ export function DiffToolbar({
 	onSearchChange: (search: string) => void;
 	changeType: DiffChangeType;
 	onChangeTypeChange: (changeType: DiffChangeType) => void;
-	scope: string;
-	scopeCommits: CommitRef[];
+	scope: DiffScopeState;
 	onScopeChange: (scope: string) => void;
 }) {
 	return (
@@ -56,11 +54,7 @@ export function DiffToolbar({
 				<ToggleButton value="unified">Unified</ToggleButton>
 				<ToggleButton value="split">Split</ToggleButton>
 			</ToggleButtonGroup>
-			<DiffScopePicker
-				scope={scope}
-				commits={scopeCommits}
-				onChange={onScopeChange}
-			/>
+			<DiffScopePicker {...scope} onChange={onScopeChange} />
 			<DiffChangeTypeFilter
 				changeType={changeType}
 				onChange={onChangeTypeChange}

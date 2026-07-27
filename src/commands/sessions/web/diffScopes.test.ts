@@ -1,11 +1,14 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { defaultBranchRef } from "./defaultBranchRef";
 import { diffScopes } from "./diffScopes";
 import { itemScopeCommits } from "./itemScopeCommits";
 
 vi.mock("./itemScopeCommits", () => ({ itemScopeCommits: vi.fn() }));
+vi.mock("./defaultBranchRef", () => ({ defaultBranchRef: vi.fn() }));
 
 const itemScopeCommitsMock = vi.mocked(itemScopeCommits);
+const defaultBranchRefMock = vi.mocked(defaultBranchRef);
 
 async function request(
 	url = "/api/diff-scopes?cwd=%2Frepo&session=sess-1",
@@ -28,6 +31,7 @@ describe("diffScopes", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		itemScopeCommitsMock.mockResolvedValue([]);
+		defaultBranchRefMock.mockResolvedValue(undefined);
 	});
 
 	it("rejects a request without a cwd", async () => {
@@ -51,6 +55,7 @@ describe("diffScopes", () => {
 				{ sha: "one", title: "feat: one", url: "https://host/one" },
 				{ sha: "two", title: "fix: two" },
 			],
+			branchBase: null,
 		});
 		expect(itemScopeCommitsMock).toHaveBeenCalledWith("/repo", "sess-1");
 	});
@@ -67,6 +72,24 @@ describe("diffScopes", () => {
 		const { status, body } = await request();
 
 		expect(status).toBe(200);
-		expect(body).toEqual({ commits: [] });
+		expect(body).toEqual({ commits: [], branchBase: null });
+	});
+
+	it("returns the resolved default branch ref as the branch base", async () => {
+		defaultBranchRefMock.mockResolvedValue("origin/main");
+
+		const { body } = await request();
+
+		expect(body).toEqual({ commits: [], branchBase: "origin/main" });
+		expect(defaultBranchRefMock).toHaveBeenCalledWith("/repo");
+	});
+
+	it("returns a null branch base when the lookup throws", async () => {
+		defaultBranchRefMock.mockRejectedValue(new Error("not a repository"));
+
+		const { status, body } = await request();
+
+		expect(status).toBe(200);
+		expect(body).toEqual({ commits: [], branchBase: null });
 	});
 });

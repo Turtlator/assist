@@ -9,7 +9,7 @@ import { PageShell } from "./PageShell";
 import { PageSpinner } from "./PageSpinner";
 import type { SessionInfo } from "./types";
 import { useDiff } from "./useDiff";
-import { useDiffScopes } from "./useDiffScopes";
+import { useDiffScopeState } from "./useDiffScopeState";
 import { useDiffTarget } from "./useDiffTarget";
 
 export function DiffView({
@@ -20,8 +20,8 @@ export function DiffView({
 	sendInput: (sessionId: string, data: string) => void;
 }) {
 	const { cwd, sessionId, scope, setScope } = useDiffTarget();
-	const { diff, loading, error } = useDiff(cwd, sessionId, scope);
-	const scopeCommits = useDiffScopes(cwd, sessionId);
+	const scopeState = useDiffScopeState(cwd, sessionId, scope);
+	const { diff, loading, error } = useDiff(cwd, sessionId, scopeState.scope);
 	const [viewType, setViewType] = useState<ViewType>("split");
 	const [search, setSearch] = useState("");
 	const [changeType, setChangeType] = useState<DiffChangeType>("all");
@@ -38,8 +38,7 @@ export function DiffView({
 				onSearchChange={setSearch}
 				changeType={changeType}
 				onChangeTypeChange={setChangeType}
-				scope={scope}
-				scopeCommits={scopeCommits}
+				scope={scopeState}
 				onScopeChange={setScope}
 			/>
 			{loading ? (

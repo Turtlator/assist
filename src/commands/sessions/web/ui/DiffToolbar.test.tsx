@@ -21,10 +21,12 @@ function LocationProbe() {
 function renderToolbar({
 	scope = "all",
 	scopeCommits = [],
+	scopeBranchBase = null,
 	onScopeChange = vi.fn(),
 }: {
 	scope?: string;
 	scopeCommits?: CommitRef[];
+	scopeBranchBase?: string | null;
 	onScopeChange?: (scope: string) => void;
 } = {}) {
 	render(
@@ -36,8 +38,11 @@ function renderToolbar({
 				onSearchChange={vi.fn()}
 				changeType="all"
 				onChangeTypeChange={vi.fn()}
-				scope={scope}
-				scopeCommits={scopeCommits}
+				scope={{
+					scope,
+					commits: scopeCommits,
+					branchBase: scopeBranchBase,
+				}}
 				onScopeChange={onScopeChange}
 			/>
 			<LocationProbe />
@@ -67,13 +72,32 @@ describe("DiffToolbar", () => {
 		);
 	});
 
-	it("hides the scope picker when the item has no recorded commits", () => {
+	it("shows the scope picker when the item has no recorded commits", () => {
 		renderToolbar();
 
-		expect(screen.queryByRole("combobox", { name: "Scope" })).toBeNull();
+		const options = within(openScopePicker()).getAllByRole("option");
+
+		expect(options.map((option) => option.textContent)).toEqual([
+			"All",
+			"Uncommitted",
+		]);
 	});
 
-	it("lists All, Uncommitted and one entry per commit", () => {
+	it("lists All, Uncommitted, Branch and one entry per commit", () => {
+		renderToolbar({ scopeCommits: commits, scopeBranchBase: "origin/main" });
+
+		const options = within(openScopePicker()).getAllByRole("option");
+
+		expect(options.map((option) => option.textContent)).toEqual([
+			"All",
+			"Uncommitted",
+			"Branch (origin/main)",
+			"feat: the first commit",
+			"ccccccc",
+		]);
+	});
+
+	it("omits the Branch option when no branch base resolves", () => {
 		renderToolbar({ scopeCommits: commits });
 
 		const options = within(openScopePicker()).getAllByRole("option");
@@ -84,6 +108,22 @@ describe("DiffToolbar", () => {
 			"feat: the first commit",
 			"ccccccc",
 		]);
+	});
+
+	it("shows the selected branch scope by its base ref", () => {
+		renderToolbar({ scope: "branch", scopeBranchBase: "origin/main" });
+
+		expect(screen.getByRole("combobox", { name: "Scope" }).textContent).toBe(
+			"Branch (origin/main)",
+		);
+	});
+
+	it("falls back to All when branch is selected without a branch base", () => {
+		renderToolbar({ scope: "branch" });
+
+		expect(screen.getByRole("combobox", { name: "Scope" }).textContent).toBe(
+			"All",
+		);
 	});
 
 	it("defaults to All", () => {
