@@ -1,3 +1,10 @@
+## [0.487.1](https://github.com/staff0rd/assist/compare/v0.487.0...v0.487.1) (2026-07-27)
+
+
+### Bug Fixes
+
+* remove stale pr comment caches ([da21894](https://github.com/staff0rd/assist/commit/da21894ff662660b4a96ac9f9e5512a29b6a468a))
+
 # [0.487.0](https://github.com/staff0rd/assist/compare/v0.486.1...v0.487.0) (2026-07-27)
 
 
