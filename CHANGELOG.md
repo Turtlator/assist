@@ -1,3 +1,10 @@
+# [0.487.0](https://github.com/staff0rd/assist/compare/v0.486.1...v0.487.0) (2026-07-27)
+
+
+### Features
+
+* add harness-aware backlog runs ([a0f2ae0](https://github.com/staff0rd/assist/commit/a0f2ae08b040701650e19a00ef9d537e7b9309f8))
+
 ## [0.486.1](https://github.com/staff0rd/assist/compare/v0.486.0...v0.486.1) (2026-07-27)
 
 
