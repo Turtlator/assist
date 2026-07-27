@@ -1,8 +1,5 @@
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
-import { stringify } from "yaml";
+import { commentsCachePath } from "../commentsCachePath";
 import { fetchThreadIds } from "../fetchThreadIds";
-import { deleteCommentsCache } from "../loadCommentsCache";
 import {
 	getCurrentPrNumber,
 	getRepoInfo,
@@ -12,24 +9,9 @@ import {
 import type { PrComment } from "../types";
 import { fetchLineComments, fetchReviewComments } from "./fetchReviewComments";
 import type { ListCommentsResult } from "./printComments";
+import { updateCommentsCache } from "./updateCommentsCache";
 
 export { printComments } from "./printComments";
-
-function writeCommentsCache(prNumber: number, comments: PrComment[]): void {
-	const assistDir = join(process.cwd(), ".assist");
-	if (!existsSync(assistDir)) {
-		mkdirSync(assistDir, { recursive: true });
-	}
-
-	const cacheData = {
-		prNumber,
-		fetchedAt: new Date().toISOString(),
-		comments,
-	};
-
-	const cachePath = join(assistDir, `pr-${prNumber}-comments.yaml`);
-	writeFileSync(cachePath, stringify(cacheData));
-}
 
 function handleKnownErrors(error: unknown): PrComment[] | null {
 	if (isGhNotInstalled(error)) {
@@ -44,14 +26,6 @@ function handleKnownErrors(error: unknown): PrComment[] | null {
 	return null;
 }
 
-function updateCache(prNumber: number, comments: PrComment[]): void {
-	if (comments.some((c) => c.type === "line")) {
-		writeCommentsCache(prNumber, comments);
-	} else {
-		deleteCommentsCache(prNumber);
-	}
-}
-
 export async function listComments(): Promise<ListCommentsResult> {
 	try {
 		const prNumber = getCurrentPrNumber();
@@ -61,10 +35,10 @@ export async function listComments(): Promise<ListCommentsResult> {
 			...fetchReviewComments(org, repo, prNumber),
 			...fetchLineComments(org, repo, prNumber, threadInfo),
 		];
-		updateCache(prNumber, allComments);
+		updateCommentsCache(org, repo, prNumber, allComments);
 		const hasLineComments = allComments.some((c) => c.type === "line");
 		const cachePath = hasLineComments
-			? join(process.cwd(), ".assist", `pr-${prNumber}-comments.yaml`)
+			? commentsCachePath(org, repo, prNumber)
 			: null;
 		return { comments: allComments, cachePath };
 	} catch (error) {

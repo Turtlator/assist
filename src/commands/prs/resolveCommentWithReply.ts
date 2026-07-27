@@ -22,8 +22,8 @@ function resolveThread(threadId: string): void {
 	}
 }
 
-function requireCache(prNumber: number) {
-	const cache = loadCommentsCache(prNumber);
+function requireCache(org: string, repo: string, prNumber: number) {
+	const cache = loadCommentsCache(org, repo, prNumber);
 	if (!cache) {
 		console.error(
 			`Error: No cached comments found for PR #${prNumber}. Run "assist prs list-comments" first.`,
@@ -56,13 +56,15 @@ function requireLineComment(
 
 function cleanupCacheIfDone(
 	cache: NonNullable<ReturnType<typeof loadCommentsCache>>,
+	org: string,
+	repo: string,
 	prNumber: number,
 	commentId: number,
 ): void {
 	const hasRemaining = cache.comments.some(
 		(c) => c.type === "line" && c.id !== commentId,
 	);
-	if (!hasRemaining) deleteCommentsCache(prNumber);
+	if (!hasRemaining) deleteCommentsCache(org, repo, prNumber);
 }
 
 export function resolveCommentWithReply(
@@ -71,7 +73,7 @@ export function resolveCommentWithReply(
 ): void {
 	const prNumber = getCurrentPrNumber();
 	const { org, repo } = getRepoInfo();
-	const cache = requireCache(prNumber);
+	const cache = requireCache(org, repo, prNumber);
 	const comment = requireLineComment(cache, commentId);
 
 	replyToComment(org, repo, prNumber, commentId, message);
@@ -80,5 +82,5 @@ export function resolveCommentWithReply(
 	resolveThread(comment.threadId);
 	console.log("Thread resolved successfully.");
 
-	cleanupCacheIfDone(cache, prNumber, commentId);
+	cleanupCacheIfDone(cache, org, repo, prNumber, commentId);
 }

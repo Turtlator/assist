@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, unlinkSync } from "node:fs";
-import { join } from "node:path";
 import { parse } from "yaml";
+import { commentsCachePath } from "./commentsCachePath";
 import type { PrComment } from "./types";
 
 type CacheData = {
@@ -9,12 +9,12 @@ type CacheData = {
 	comments: PrComment[];
 };
 
-function getCachePath(prNumber: number): string {
-	return join(process.cwd(), ".assist", `pr-${prNumber}-comments.yaml`);
-}
-
-export function loadCommentsCache(prNumber: number): CacheData | null {
-	const cachePath = getCachePath(prNumber);
+export function loadCommentsCache(
+	org: string,
+	repo: string,
+	prNumber: number,
+): CacheData | null {
+	const cachePath = commentsCachePath(org, repo, prNumber);
 	if (!existsSync(cachePath)) {
 		return null;
 	}
@@ -22,8 +22,12 @@ export function loadCommentsCache(prNumber: number): CacheData | null {
 	return parse(content) as CacheData;
 }
 
-export function deleteCommentsCache(prNumber: number): void {
-	const cachePath = getCachePath(prNumber);
+export function deleteCommentsCache(
+	org: string,
+	repo: string,
+	prNumber: number,
+): void {
+	const cachePath = commentsCachePath(org, repo, prNumber);
 	if (existsSync(cachePath)) {
 		unlinkSync(cachePath);
 		console.log("No more unresolved line comments. Cache dropped.");
