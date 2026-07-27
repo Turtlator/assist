@@ -40,7 +40,7 @@ export function useSessionActions(
 
 	return {
 		...actions,
-		...useLifecycleActions(send, buffers, handlers),
+		...useLifecycleActions(send, buffers),
 		onOutput,
 	};
 }

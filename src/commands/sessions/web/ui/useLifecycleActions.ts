@@ -7,12 +7,10 @@ import {
 } from "./createSessionAction";
 
 type SendFn = (msg: object) => void;
-type OutputHandler = (data: string) => void;
 
 export function useLifecycleActions(
 	send: SendFn,
 	buffers: RefObject<Map<string, string>>,
-	handlers: RefObject<Map<string, OutputHandler>>,
 ) {
 	const retrySession = useCallback(
 		(id: string, replace?: boolean) => {
@@ -30,16 +28,16 @@ export function useLifecycleActions(
 
 	const dismissSession = useCallback(
 		(id: string) => {
-			dismissSessionAction(send, buffers.current, handlers.current)(id);
+			dismissSessionAction(send, buffers.current)(id);
 		},
-		[send, buffers, handlers],
+		[send, buffers],
 	);
 
 	const discardSession = useCallback(
 		(id: string) => {
-			discardSessionAction(send, buffers.current, handlers.current)(id);
+			discardSessionAction(send, buffers.current)(id);
 		},
-		[send, buffers, handlers],
+		[send, buffers],
 	);
 
 	return { retrySession, restartSession, dismissSession, discardSession };
