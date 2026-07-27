@@ -1,3 +1,10 @@
+## [0.486.1](https://github.com/staff0rd/assist/compare/v0.486.0...v0.486.1) (2026-07-27)
+
+
+### Bug Fixes
+
+* use supported Codex hook schema ([c2e9110](https://github.com/staff0rd/assist/commit/c2e9110ce84cdcd7df1ddc317e82ece0452e3beb))
+
 # [0.486.0](https://github.com/staff0rd/assist/compare/v0.485.4...v0.486.0) (2026-07-27)
 
 
