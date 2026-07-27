@@ -44,6 +44,7 @@ export type HistoricalSession = {
 	cwd: string;
 	timestamp: string;
 	repoGroup?: RepoGroup;
+	cwdMissing?: boolean;
 	origin?: SessionOrigin;
 	sessionType?: SessionType;
 	itemId?: number;

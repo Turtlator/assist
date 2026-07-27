@@ -8,6 +8,7 @@ export function uniqueRepos(
 	const seen = new Set<string>();
 	const ordered: string[] = [];
 	for (const s of history) {
+		if (s.cwdMissing) continue;
 		const key = repoGroupKey(s);
 		const cwd = repoGroupCwd(s);
 		if (!key || !cwd || seen.has(key)) continue;

@@ -93,6 +93,35 @@ describe("uniqueRepos", () => {
 		expect(uniqueRepos("/git/assist-2", history)).toEqual(["/git/assist"]);
 	});
 
+	it("omits an ungrouped session whose clone no longer exists on disk", () => {
+		const history = [
+			{
+				...session("/git/planner-assistant"),
+				repoGroup: {
+					origin: "host/org/planner-assistant",
+					clone: "/git/planner-assistant",
+				},
+			},
+			{ ...session("/git/planner-assistant-2"), cwdMissing: true },
+			{ ...session("/git/planner-assistant-3"), cwdMissing: true },
+		];
+
+		expect(uniqueRepos("", history)).toEqual(["/git/planner-assistant"]);
+	});
+
+	it("omits a grouped session whose clone no longer exists on disk", () => {
+		const history = [
+			{
+				...session("/git/assist-wt"),
+				repoGroup: { origin: "host/org/assist", clone: "/git/assist" },
+				cwdMissing: true,
+			},
+			session("/git/other"),
+		];
+
+		expect(uniqueRepos("", history)).toEqual(["/git/other"]);
+	});
+
 	it("keeps a windows checkout separate from its wsl counterpart", () => {
 		const history = [
 			{
