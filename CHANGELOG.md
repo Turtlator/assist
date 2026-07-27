@@ -1,3 +1,10 @@
+## [0.483.8](https://github.com/staff0rd/assist/compare/v0.483.7...v0.483.8) (2026-07-27)
+
+
+### Bug Fixes
+
+* durability checks pushed remote HEAD ([7ec857d](https://github.com/staff0rd/assist/commit/7ec857d9a5fa0be54d7d2e4d6391dfb78bf21c96))
+
 ## [0.483.7](https://github.com/staff0rd/assist/compare/v0.483.6...v0.483.7) (2026-07-27)
 
 
