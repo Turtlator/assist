@@ -1,3 +1,10 @@
+# [0.485.0](https://github.com/staff0rd/assist/compare/v0.484.3...v0.485.0) (2026-07-27)
+
+
+### Features
+
+* diff scope for the current branch ([c175af3](https://github.com/staff0rd/assist/commit/c175af3927b722c1245c2d90b13ed9c34ee9662e))
+
 ## [0.484.3](https://github.com/staff0rd/assist/compare/v0.484.2...v0.484.3) (2026-07-27)
 
 
