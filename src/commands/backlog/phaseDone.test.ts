@@ -121,6 +121,34 @@ describe("phaseDone", () => {
 		cleanup();
 	});
 
+	describe("when the phase argument is not a number", () => {
+		it.each(["Fix", "", "1.5", "0", "-1", "1x"])(
+			"should reject %j without touching the database",
+			async (phase) => {
+				await phaseDone("a1", phase, "Done");
+
+				expect(mockGetReady).not.toHaveBeenCalled();
+				expect(mockAppendComment).not.toHaveBeenCalled();
+				expect(mockSetCurrentPhase).not.toHaveBeenCalled();
+				expect(existsSync(signalPath())).toBe(false);
+				expect(process.exitCode).toBe(1);
+				cleanup();
+			},
+		);
+
+		it("should explain that a phase number is expected", async () => {
+			const log = vi.spyOn(console, "log").mockImplementation(() => {});
+
+			await phaseDone("a1", "Fix", "Done");
+
+			const output = log.mock.calls.map((call) => call.join(" ")).join("\n");
+			expect(output).toContain("Fix");
+			expect(output).toContain("phase number");
+			log.mockRestore();
+			cleanup();
+		});
+	});
+
 	describe("when item is already done", () => {
 		it("should not advance currentPhase", async () => {
 			mockLoadItem.mockResolvedValue(makeItem({ status: "done" }));

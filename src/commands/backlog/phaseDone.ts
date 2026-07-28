@@ -3,6 +3,7 @@ import { appendComment } from "./appendComment";
 import { checkSubtasksComplete } from "./checkSubtasksComplete";
 import { formatItemId, parseItemId } from "./formatItemId";
 import { loadItem } from "./loadItem";
+import { parsePhaseNumber } from "./parsePhaseNumber";
 import { resolvePlan } from "./resolvePlan";
 import { getReady, setCurrentPhase } from "./shared";
 import { writeSignal } from "./writeSignal";
@@ -12,7 +13,9 @@ export async function phaseDone(
 	phase: string,
 	summary: string,
 ): Promise<void> {
-	const phaseNumber = Number.parseInt(phase, 10);
+	const phaseNumber = parsePhaseNumber(phase);
+	if (phaseNumber === undefined) return;
+
 	const phaseIndex = phaseNumber - 1;
 	const itemId = parseItemId(id);
 	const label = formatItemId(itemId);
