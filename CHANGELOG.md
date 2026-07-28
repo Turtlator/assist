@@ -1,3 +1,10 @@
+# [0.502.0](https://github.com/staff0rd/assist/compare/v0.501.1...v0.502.0) (2026-07-28)
+
+
+### Features
+
+* show config notes on /config ([38c9755](https://github.com/staff0rd/assist/commit/38c9755ad657ecfe1d3341df0ca34065995e652c))
+
 ## [0.501.1](https://github.com/staff0rd/assist/compare/v0.501.0...v0.501.1) (2026-07-28)
 
 
