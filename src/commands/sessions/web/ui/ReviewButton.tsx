@@ -5,15 +5,20 @@ import MenuItem from "@mui/material/MenuItem";
 import { useState } from "react";
 import type { PrSummary } from "../prList";
 import { ActionButton } from "./ActionButton";
-import { prLaunchMeta } from "./prLaunchMeta";
 import { reviewButtonModes } from "./reviewButtonModes";
-import { useSessionLaunchContext } from "./useSessionLaunchContext";
+import { ReviewChainToggles } from "./ReviewChainToggles";
+import { useReviewLaunch } from "./useReviewLaunch";
 
 export function ReviewButton({ cwd, pr }: { cwd: string; pr: PrSummary }) {
-	const { launchAssist } = useSessionLaunchContext();
-	const meta = { ...prLaunchMeta(pr), inPlace: true };
+	const { chain, setChain, resetChain, launchMode, launchAddressComments } =
+		useReviewLaunch(cwd, pr);
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-	const open = Boolean(anchorEl);
+
+	const pick = (e: { stopPropagation: () => void }, run: () => void) => {
+		e.stopPropagation();
+		setAnchorEl(null);
+		run();
+	};
 
 	return (
 		<>
@@ -23,35 +28,28 @@ export function ReviewButton({ cwd, pr }: { cwd: string; pr: PrSummary }) {
 				icon={<RateReviewOutlinedIcon sx={{ fontSize: 14 }} />}
 				onClick={(e) => {
 					e.stopPropagation();
+					resetChain();
 					setAnchorEl(e.currentTarget);
 				}}
 			/>
 			<Menu
 				anchorEl={anchorEl}
-				open={open}
+				open={Boolean(anchorEl)}
 				onClose={() => setAnchorEl(null)}
 				onClick={(e) => e.stopPropagation()}
 			>
 				{reviewButtonModes.map((mode) => (
 					<MenuItem
 						key={mode.label}
-						onClick={(e) => {
-							e.stopPropagation();
-							setAnchorEl(null);
-							launchAssist([...mode.args, String(pr.number)], cwd, meta);
-						}}
+						onClick={(e) => pick(e, () => launchMode(mode.args))}
 					>
 						{mode.label}
 					</MenuItem>
 				))}
 				<Divider />
-				<MenuItem
-					onClick={(e) => {
-						e.stopPropagation();
-						setAnchorEl(null);
-						launchAssist(["review-pr-comments", String(pr.number)], cwd, meta);
-					}}
-				>
+				<ReviewChainToggles value={chain} onChange={setChain} />
+				<Divider />
+				<MenuItem onClick={(e) => pick(e, launchAddressComments)}>
 					Address Comments
 				</MenuItem>
 			</Menu>

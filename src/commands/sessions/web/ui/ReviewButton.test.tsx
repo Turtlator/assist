@@ -29,6 +29,10 @@ function renderButton(launchAssist: () => void) {
 	fireEvent.click(screen.getByRole("button", { name: "Review PR" }));
 }
 
+function checkbox(label: string): HTMLInputElement {
+	return screen.getByLabelText(label) as HTMLInputElement;
+}
+
 afterEach(cleanup);
 
 describe("ReviewButton", () => {
@@ -47,6 +51,42 @@ describe("ReviewButton", () => {
 			);
 		},
 	);
+
+	it("defaults both chain toggles off", () => {
+		renderButton(vi.fn());
+
+		expect(checkbox("Address comments after").checked).toBe(false);
+		expect(checkbox("Announce to Slack after").checked).toBe(false);
+	});
+
+	it.each(reviewButtonModes)(
+		"appends the enabled chain flags to $label",
+		({ label, args }) => {
+			const launchAssist = vi.fn();
+			renderButton(launchAssist);
+
+			fireEvent.click(checkbox("Address comments after"));
+			fireEvent.click(checkbox("Announce to Slack after"));
+			fireEvent.click(screen.getByText(label));
+
+			expect(launchAssist).toHaveBeenCalledWith(
+				[...args, "42", "--address-comments", "--announce"],
+				"/git/repo",
+				expect.objectContaining({ inPlace: true }),
+			);
+		},
+	);
+
+	it("resets the chain toggles to off when the menu is reopened", () => {
+		const launchAssist = vi.fn();
+		renderButton(launchAssist);
+
+		fireEvent.click(checkbox("Announce to Slack after"));
+		fireEvent.click(screen.getByText("Review"));
+		fireEvent.click(screen.getByRole("button", { name: "Review PR" }));
+
+		expect(checkbox("Announce to Slack after").checked).toBe(false);
+	});
 
 	it("launches Address Comments against the PR shown on the card", () => {
 		const launchAssist = vi.fn();
