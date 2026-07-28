@@ -38,6 +38,8 @@ vi.mock("./spawnPty", () => ({
 	})),
 }));
 vi.mock("../../backlog/acquireLock", () => ({ releaseLock: vi.fn() }));
+const maxLive = vi.fn(() => 24);
+vi.mock("./maxLiveSessions", () => ({ maxLiveSessions: () => maxLive() }));
 
 const releaseLockMock = releaseLock as unknown as ReturnType<typeof vi.fn>;
 
@@ -89,6 +91,7 @@ function fakeSession(overrides: Partial<Session> = {}): Session {
 describe("SessionManager", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		maxLive.mockReturnValue(24);
 	});
 
 	describe("restore", () => {
@@ -158,6 +161,7 @@ describe("SessionManager", () => {
 		});
 
 		it("restores a full-capacity persisted set without dropping any", () => {
+			maxLive.mockReturnValue(12);
 			loadPersistedMock.mockReturnValue(
 				Array.from({ length: 12 }, (_, i) => ({
 					id: String(i),
@@ -184,6 +188,7 @@ describe("SessionManager", () => {
 		});
 
 		it("defers persisted sessions past the cap to stopped cards", () => {
+			maxLive.mockReturnValue(12);
 			loadPersistedMock.mockReturnValue(
 				Array.from({ length: 14 }, (_, i) => ({
 					id: String(i),
@@ -212,7 +217,7 @@ describe("SessionManager", () => {
 			]);
 			expect(daemonLogMock).toHaveBeenCalledWith(
 				expect.stringContaining(
-					'restore capped at 12: id=12 name="s12" cwd=/repo/tree deferred to stopped card',
+					'restore capped at 12 (sessions.maxLive): id=12 name="s12" cwd=/repo/tree deferred to stopped card',
 				),
 			);
 		});
@@ -254,19 +259,32 @@ describe("SessionManager", () => {
 			expect([...sessions.values()].map((s) => s.name)).toEqual(["new"]);
 		});
 
-		it("refuses to spawn past the absolute live-session ceiling", () => {
+		it("refuses to spawn past the configured live-session ceiling", () => {
+			maxLive.mockReturnValue(3);
 			createSessionMock.mockImplementation((id: string) =>
 				fakeSession({ id, name: id }),
 			);
 			const manager = new SessionManager();
 
-			for (let i = 0; i < 12; i++) manager.spawn();
+			for (let i = 0; i < 3; i++) manager.spawn();
 
-			expect(() => manager.spawn()).toThrow(/ceiling/);
+			expect(() => manager.spawn()).toThrow(/sessions\.maxLive/);
 			expect(daemonLogMock).toHaveBeenCalledWith(
-				expect.stringContaining("at ceiling of 12 live sessions"),
+				expect.stringContaining("at ceiling of 3 live sessions"),
 			);
-			expect(manager.listSessions()).toHaveLength(12);
+			expect(manager.listSessions()).toHaveLength(3);
+		});
+
+		it("allows 24 live sessions by default", () => {
+			createSessionMock.mockImplementation((id: string) =>
+				fakeSession({ id, name: id }),
+			);
+			const manager = new SessionManager();
+
+			for (let i = 0; i < 24; i++) manager.spawn();
+
+			expect(manager.listSessions()).toHaveLength(24);
+			expect(() => manager.spawn()).toThrow(/ceiling of 24/);
 		});
 	});
 

@@ -16,22 +16,25 @@ export function restoreAll(
 	sessions: Map<string, Session>,
 ): string[] {
 	const persisted = loadPersistedSessions();
-	const names = persisted.slice(0, sessionLimits.maxRestore).map((entry) => {
+	const cap = sessionLimits.maxRestore();
+	const names = persisted.slice(0, cap).map((entry) => {
 		restoreOne(entry, spawner, sessions);
 		return entry.name;
 	});
-	for (const over of persisted.slice(sessionLimits.maxRestore))
-		deferOne(over, spawner.recoveryCard);
+	for (const over of persisted.slice(cap))
+		deferOne(over, spawner.recoveryCard, cap);
 	return names;
 }
 
-function deferOne(persisted: PersistedSession, spawnRecoveryCard: Spawn): void {
+function deferOne(
+	persisted: PersistedSession,
+	spawnRecoveryCard: Spawn,
+	cap: number,
+): void {
 	try {
-		const id = spawnRecoveryCard((sid) =>
-			deferredSession(sid, persisted, sessionLimits.maxRestore),
-		);
+		const id = spawnRecoveryCard((sid) => deferredSession(sid, persisted, cap));
 		daemonLog(
-			`restore capped at ${sessionLimits.maxRestore}: ${describePersistedSession(persisted)} deferred to stopped card ${id}`,
+			`restore capped at ${cap} (sessions.maxLive): ${describePersistedSession(persisted)} deferred to stopped card ${id}`,
 		);
 	} catch (error) {
 		logDroppedSession(persisted, error);

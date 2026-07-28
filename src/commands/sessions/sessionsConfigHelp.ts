@@ -43,6 +43,11 @@ export const sessionsConfigHelp: ConfigHelpEntry[] = [
 		note: "how long a session must have been waiting on input before it floats (default: 5000ms)",
 	},
 	{
+		key: "sessions.maxLive",
+		setter: "assist config set sessions.maxLive 24 -g",
+		note: "ceiling on concurrent live sessions one daemon holds; spawning past it is refused, and restore respawns at most this many persisted sessions (default: 24)",
+	},
+	{
 		key: "worktree.enabled",
 		setter: "assist config set worktree.enabled true -g --repo",
 		note: "opt in per repo: spill concurrent sessions into adjacent <clone>-N worktrees (default off)",
