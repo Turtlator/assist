@@ -36,6 +36,15 @@ describe("ConfigKeyCell", () => {
 		expect(screen.getByText("directory dumps are written to")).toBeTruthy();
 	});
 
+	it("dims the note so it reads as secondary to the key", () => {
+		renderCell({ note: "directory dumps are written to" });
+
+		const note = screen.getByText("directory dumps are written to");
+		const key = screen.getByText("backup.dir");
+
+		expect(getComputedStyle(note).color).not.toBe(getComputedStyle(key).color);
+	});
+
 	it("renders only the key when no note is documented", () => {
 		renderCell({ setter: "assist config set backup.dir ~/x" });
 
