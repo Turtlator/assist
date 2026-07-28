@@ -1,3 +1,10 @@
+## [0.501.1](https://github.com/staff0rd/assist/compare/v0.501.0...v0.501.1) (2026-07-28)
+
+
+### Bug Fixes
+
+* hide Windows consoles on git spawns ([32049be](https://github.com/staff0rd/assist/commit/32049be9aeae0708362743b223f070c3228daf26))
+
 # [0.501.0](https://github.com/staff0rd/assist/compare/v0.500.1...v0.501.0) (2026-07-28)
 
 
