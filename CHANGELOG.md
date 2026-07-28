@@ -1,3 +1,10 @@
+## [0.491.1](https://github.com/staff0rd/assist/compare/v0.491.0...v0.491.1) (2026-07-28)
+
+
+### Bug Fixes
+
+* keep diff comment draft on refresh ([3c69cd3](https://github.com/staff0rd/assist/commit/3c69cd37dc38fc3fcf0fd8c6fd8bc0b7d9897e09))
+
 # [0.491.0](https://github.com/staff0rd/assist/compare/v0.490.3...v0.491.0) (2026-07-28)
 
 
