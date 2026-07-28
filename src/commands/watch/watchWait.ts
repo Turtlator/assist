@@ -1,20 +1,20 @@
+import { buildWatchReport } from "./buildWatchReport";
 import { describeOutcome } from "./describeOutcome";
 import { describePull } from "./describePull";
 import type { OutcomeReport } from "./OutcomeReport";
-import { parseDuration } from "./parseDuration";
+import { parseWatchDurations } from "./parseWatchDurations";
 import { pullFastForward } from "./pullFastForward";
+import { reportBuildOrExit } from "./reportBuildOrExit";
 import { waitForUpstream } from "./waitForUpstream";
 
-type WatchWaitOptions = { interval: string; timeout: string; pull?: boolean };
+type WatchWaitOptions = {
+	interval: string;
+	timeout: string;
+	pull?: boolean;
+	build?: boolean | string;
+};
 
-function parseOrExit(value: string): number {
-	try {
-		return parseDuration(value);
-	} catch (error) {
-		console.error(error instanceof Error ? error.message : String(error));
-		return process.exit(1);
-	}
-}
+const DEFAULT_BUILD_ENTRY = "auto-build";
 
 function report({ exitCode, message }: OutcomeReport): void {
 	if (exitCode === 0) console.log(message);
@@ -22,8 +22,10 @@ function report({ exitCode, message }: OutcomeReport): void {
 }
 
 export async function watchWait(options: WatchWaitOptions): Promise<void> {
-	const intervalMs = parseOrExit(options.interval);
-	const timeoutMs = parseOrExit(options.timeout);
+	const { intervalMs, timeoutMs } = parseWatchDurations(
+		options.interval,
+		options.timeout,
+	);
 
 	const outcome = await waitForUpstream({
 		intervalMs,
@@ -35,11 +37,23 @@ export async function watchWait(options: WatchWaitOptions): Promise<void> {
 	const waitReport = describeOutcome(outcome);
 	report(waitReport);
 
-	if (outcome.kind === "moved" && options.pull) {
-		const pullReport = describePull(pullFastForward());
-		report(pullReport);
-		process.exit(pullReport.exitCode);
+	if (outcome.kind !== "moved" || !options.pull)
+		return process.exit(waitReport.exitCode);
+
+	const pullResult = pullFastForward();
+	const pullReport = describePull(pullResult);
+	report(pullReport);
+
+	if (pullResult.kind !== "fast-forwarded")
+		return process.exit(pullReport.exitCode);
+
+	console.log(`\n${buildWatchReport(outcome.from)}`);
+
+	if (options.build) {
+		await reportBuildOrExit(
+			typeof options.build === "string" ? options.build : DEFAULT_BUILD_ENTRY,
+		);
 	}
 
-	process.exit(waitReport.exitCode);
+	process.exit(0);
 }

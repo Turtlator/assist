@@ -135,6 +135,27 @@ describe("waitForUpstream", () => {
 		});
 	});
 
+	it("never times out when no timeout is given", async () => {
+		let settled = false;
+		const pending = waitForUpstream({
+			intervalMs: 30_000,
+			timeoutMs: undefined,
+			timeout: "none",
+		}).then((outcome) => {
+			settled = true;
+			return outcome;
+		});
+
+		await vi.advanceTimersByTimeAsync(24 * 60 * 60_000);
+		expect(settled).toBe(false);
+
+		git.upstreamSha = "eee5555";
+		git.behind = 1;
+		await vi.advanceTimersByTimeAsync(30_000);
+
+		await expect(pending).resolves.toMatchObject({ kind: "moved", count: 1 });
+	});
+
 	it("resolves interrupted on SIGINT and stops fetching", async () => {
 		const before = process.listenerCount("SIGINT");
 		const pending = wait();

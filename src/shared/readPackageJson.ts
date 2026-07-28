@@ -3,6 +3,7 @@ import * as path from "node:path";
 import chalk from "chalk";
 
 export type PackageJson = {
+	version?: string;
 	scripts?: Record<string, string>;
 	dependencies?: Record<string, string>;
 	devDependencies?: Record<string, string>;
