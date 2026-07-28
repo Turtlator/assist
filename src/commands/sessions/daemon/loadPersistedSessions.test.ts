@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { loadJson, saveJson } from "../../../shared/loadJson";
 import type { Session } from "./createSession";
+import { daemonLog } from "./daemonLog";
 import {
 	loadPersistedSessions,
 	type PersistedSession,
@@ -13,8 +14,10 @@ vi.mock("../../../shared/loadJson", () => ({
 	loadJson: vi.fn(),
 	saveJson: vi.fn(),
 }));
+vi.mock("./daemonLog", () => ({ daemonLog: vi.fn() }));
 
 const loadJsonMock = loadJson as unknown as ReturnType<typeof vi.fn>;
+const daemonLogMock = daemonLog as unknown as ReturnType<typeof vi.fn>;
 const saveJsonMock = saveJson as unknown as ReturnType<typeof vi.fn>;
 
 const validEntry: PersistedSession = {
@@ -67,6 +70,21 @@ describe("loadPersistedSessions", () => {
 		]);
 		expect(loadPersistedSessions()).toEqual([validEntry]);
 	});
+
+	it("logs each entry it drops as unreadable", () => {
+		loadJsonMock.mockReturnValue([
+			validEntry,
+			{ id: "7", name: "half written", cwd: "/repo/tree-7" },
+		]);
+
+		loadPersistedSessions();
+
+		expect(daemonLogMock).toHaveBeenCalledWith(
+			expect.stringContaining(
+				'unreadable persisted session dropped — id=7 name="half written" cwd=/repo/tree-7',
+			),
+		);
+	});
 });
 
 describe("savePersistedSessions", () => {
@@ -98,6 +116,7 @@ describe("persistLiveSessions", () => {
 
 		expect(saveJsonMock).toHaveBeenCalledWith("sessions.json", [
 			{
+				id: "1",
 				name: "live",
 				commandType: "claude",
 				status: "running",

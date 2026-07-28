@@ -1,6 +1,7 @@
 import { loadJson, saveJson } from "../../../shared/loadJson";
 import type { Session } from "./createSession";
 import { daemonLog } from "./daemonLog";
+import { describePersistedSession } from "./describePersistedSession";
 import {
 	type PersistedSession,
 	persistedSessionSchema,
@@ -14,10 +15,27 @@ const SESSIONS_FILE = "sessions.json";
 export function loadPersistedSessions(): PersistedSession[] {
 	const data = loadJson<unknown[]>(SESSIONS_FILE);
 	if (!Array.isArray(data)) return [];
-	return data.flatMap((entry) => {
+	const rejected: string[] = [];
+	const loaded = data.flatMap((entry) => {
 		const parsed = persistedSessionSchema.safeParse(entry);
-		return parsed.success ? [parsed.data] : [];
+		if (parsed.success) return [parsed.data];
+		rejected.push(
+			`${describePersistedSession(entry)}: ${parsed.error.issues.map((i) => `${i.path.join(".")} ${i.message}`).join("; ")}`,
+		);
+		return [];
 	});
+	logRejected(rejected);
+	return loaded;
+}
+
+let lastRejectedSignature = "";
+
+function logRejected(rejected: string[]): void {
+	const signature = rejected.join("|");
+	if (signature === lastRejectedSignature) return;
+	lastRejectedSignature = signature;
+	for (const entry of rejected)
+		daemonLog(`unreadable persisted session dropped — ${entry}`);
 }
 
 export function savePersistedSessions(sessions: PersistedSession[]): void {

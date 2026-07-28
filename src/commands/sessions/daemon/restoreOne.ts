@@ -1,7 +1,10 @@
 import type { Session } from "./createSession";
 import { daemonLog } from "./daemonLog";
+import { describePersistedSession } from "./describePersistedSession";
 import { errorSession } from "./errorSession";
 import type { PersistedSession } from "./loadPersistedSessions";
+import { logDroppedSession } from "./logDroppedSession";
+import type { SessionSpawner } from "./makeSessionSpawner";
 import { restoreSession } from "./restoreSession";
 
 export type Spawn = (create: (id: string) => Session) => string;
@@ -10,18 +13,27 @@ export type Spawn = (create: (id: string) => Session) => string;
  * session that resumes into an error state or whose spawn throws (#396). */
 export function restoreOne(
 	persisted: PersistedSession,
-	spawn: Spawn,
+	spawner: SessionSpawner,
 	sessions: Map<string, Session>,
 ): void {
 	try {
-		const id = spawn((sid) => restoreSession(sid, persisted));
+		const id = spawner.spawn((sid) => restoreSession(sid, persisted));
 		logUnresumable(persisted.name, id, sessions.get(id));
 	} catch (error) {
-		const reason = logRestoreError(persisted.name, error);
-		// why: the error card also spawns, which refuses past the ceiling; swallow so one capped entry can't abort the batch
-		try {
-			spawn((id) => errorSession(id, persisted, reason));
-		} catch {}
+		const reason = logRestoreError(persisted, error);
+		spawnErrorCard(persisted, spawner, reason);
+	}
+}
+
+function spawnErrorCard(
+	persisted: PersistedSession,
+	spawner: SessionSpawner,
+	reason: string,
+): void {
+	try {
+		spawner.recoveryCard((id) => errorSession(id, persisted, reason));
+	} catch (cardError) {
+		logDroppedSession(persisted, cardError);
 	}
 }
 
@@ -36,8 +48,10 @@ function logUnresumable(
 		);
 }
 
-function logRestoreError(name: string, error: unknown): string {
+function logRestoreError(persisted: PersistedSession, error: unknown): string {
 	const reason = error instanceof Error ? error.message : String(error);
-	daemonLog(`failed to restore session "${name}": ${reason}`);
+	daemonLog(
+		`failed to restore session ${describePersistedSession(persisted)}: ${reason}`,
+	);
 	return reason;
 }

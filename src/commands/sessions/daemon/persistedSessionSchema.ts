@@ -2,6 +2,7 @@ import { z } from "zod";
 import { activitySchema } from "../../../shared/emitActivity";
 
 export const persistedSessionSchema = z.object({
+	id: z.string().optional(),
 	name: z.string(),
 	title: z.string().optional(),
 	generatedTitle: z.string().optional(),

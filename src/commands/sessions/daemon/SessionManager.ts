@@ -16,7 +16,7 @@ import { drainSessions } from "./drainSessions";
 import { flushPhaseActiveMs } from "./flushPhaseActiveMs";
 import { greetClient } from "./greetClient";
 import { PrPreviewCoordinator } from "./PrPreviewCoordinator";
-import { registerSpawnedSession } from "./registerSpawnedSession";
+import { makeSessionSpawner } from "./makeSessionSpawner";
 import { applySetStatus } from "./applySetStatus";
 import { applyUsageRecord } from "./applyUsageRecord";
 import { makeStatusChangeHandler } from "./makeStatusChangeHandler";
@@ -30,7 +30,6 @@ import type { ServerRunMeta } from "./serverRunMeta";
 import { runRetry } from "./runRetry";
 import { liveServerRun, stopServerSession } from "./liveServerRun";
 import { reuseSessionForRun } from "./reuseSessionForRun";
-import { sessionLimits } from "./sessionLimits";
 import { shutdownSessions } from "./shutdownSessions";
 import { toSessionInfo } from "./toSessionInfo";
 import { treeSpawnContext } from "./treeSpawnContext";
@@ -88,19 +87,20 @@ export class SessionManager {
 	}
 
 	restore(): string[] {
-		return restoreAllSessions(this.spawnWith, this.sessions, this.notify);
+		return restoreAllSessions(this.spawner, this.sessions, this.notify);
 	}
 
 	drain = (): number => drainSessions(this.sessions, this.notify);
 
-	private readonly spawnWith = (create: (id: string) => Session): string =>
-		registerSpawnedSession(
-			create(sessionLimits.nextId(this.sessions.size, this.idCounter)),
-			this.sessions,
-			this.clients,
-			this.onStatusChange,
-			this.notify,
-		);
+	private readonly spawner = makeSessionSpawner(
+		this.sessions,
+		this.clients,
+		this.idCounter,
+		() => this.onStatusChange,
+		() => this.notify(),
+	);
+
+	private readonly spawnWith = this.spawner.spawn;
 
 	private treeCtx(): TreeSpawnContext {
 		return treeSpawnContext(

@@ -3,6 +3,7 @@ import type { PersistedSession } from "./persistedSessionSchema";
 
 export function toPersistedSession(session: Session): PersistedSession {
 	return {
+		id: session.id,
 		name: session.name,
 		title: session.title,
 		generatedTitle: session.generatedTitle,

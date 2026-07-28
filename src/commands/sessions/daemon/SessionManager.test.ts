@@ -157,24 +157,63 @@ describe("SessionManager", () => {
 			);
 		});
 
-		it("caps the batch and logs the skipped remainder", () => {
-			const persisted = Array.from({ length: 13 }, (_, i) => ({
-				name: `s${i}`,
-				commandType: "claude" as const,
-				cwd: "/repo",
-				startedAt: 1,
-			}));
-			loadPersistedMock.mockReturnValue(persisted);
-			restoreSessionMock.mockImplementation((id: string) =>
-				fakeSession({ id, name: `s${id}`, restored: true }),
+		it("restores a full-capacity persisted set without dropping any", () => {
+			loadPersistedMock.mockReturnValue(
+				Array.from({ length: 12 }, (_, i) => ({
+					id: String(i),
+					name: `s${i}`,
+					commandType: "claude" as const,
+					cwd: "/repo",
+					startedAt: 1,
+				})),
+			);
+			restoreSessionMock.mockImplementation((id: string, p: { name: string }) =>
+				fakeSession({ id, name: p.name, restored: true }),
 			);
 
-			const restored = new SessionManager().restore();
+			const manager = new SessionManager();
+			const restored = manager.restore();
 
-			expect(restored).toHaveLength(10);
-			expect(restoreSessionMock).toHaveBeenCalledTimes(10);
+			expect(restored).toHaveLength(12);
+			expect(manager.listSessions().map((s) => s.name)).toEqual(
+				Array.from({ length: 12 }, (_, i) => `s${i}`),
+			);
+			expect(daemonLogMock).not.toHaveBeenCalledWith(
+				expect.stringContaining("restore capped"),
+			);
+		});
+
+		it("defers persisted sessions past the cap to stopped cards", () => {
+			loadPersistedMock.mockReturnValue(
+				Array.from({ length: 14 }, (_, i) => ({
+					id: String(i),
+					name: `s${i}`,
+					commandType: "assist" as const,
+					assistArgs: ["backlog", "run", `a${i}`],
+					cwd: "/repo/tree",
+					startedAt: 1,
+				})),
+			);
+			restoreSessionMock.mockImplementation((id: string, p: { name: string }) =>
+				fakeSession({ id, name: p.name, restored: true }),
+			);
+
+			const manager = new SessionManager();
+			const restored = manager.restore();
+
+			expect(restored).toHaveLength(12);
+			const listed = manager.listSessions();
+			expect(listed.map((s) => s.name)).toEqual(
+				Array.from({ length: 14 }, (_, i) => `s${i}`),
+			);
+			expect(listed.slice(12).map((s) => s.status)).toEqual([
+				"stopped",
+				"stopped",
+			]);
 			expect(daemonLogMock).toHaveBeenCalledWith(
-				expect.stringContaining("skipping 3 persisted session(s)"),
+				expect.stringContaining(
+					'restore capped at 12: id=12 name="s12" cwd=/repo/tree deferred to stopped card',
+				),
 			);
 		});
 
