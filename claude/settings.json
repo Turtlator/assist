@@ -94,6 +94,9 @@
 			"SlashCommand(/subtask)",
 			"Bash(git ls-files:*)",
 			"Bash(gh pr checks:*)",
+			"Bash(ls ~/.assist/pr-comments:*)",
+			"Read(~/.assist/pr-comments/**)",
+			"Glob(~/.assist/pr-comments/**)",
 			"WebFetch(domain:staffordwilliams.com)"
 		],
 		"deny": ["Bash(npm run:*)", "Read(~/.assist/restricted/**)"]
