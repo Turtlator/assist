@@ -1,3 +1,10 @@
+# [0.494.0](https://github.com/staff0rd/assist/compare/v0.493.0...v0.494.0) (2026-07-28)
+
+
+### Features
+
+* mask config secrets in CLI and web ([ea01a98](https://github.com/staff0rd/assist/commit/ea01a9896d16f173c2f3f2656466625aa3ee31da))
+
 # [0.493.0](https://github.com/staff0rd/assist/compare/v0.492.0...v0.493.0) (2026-07-28)
 
 
