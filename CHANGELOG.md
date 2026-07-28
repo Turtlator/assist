@@ -1,3 +1,10 @@
+# [0.493.0](https://github.com/staff0rd/assist/compare/v0.492.0...v0.493.0) (2026-07-28)
+
+
+### Features
+
+* configurable live-session ceiling ([0e85715](https://github.com/staff0rd/assist/commit/0e85715521e09bbbb6b99e83282ecc9900769a3d))
+
 # [0.492.0](https://github.com/staff0rd/assist/compare/v0.491.1...v0.492.0) (2026-07-28)
 
 
