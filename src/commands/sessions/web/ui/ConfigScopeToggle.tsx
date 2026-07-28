@@ -1,7 +1,11 @@
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import { configScopeFiles } from "./configScopeFiles";
+import { configScopeLabels } from "./configScopeLabels";
+import { configScopeToggleTitle } from "./configScopeToggleTitle";
 import type { ConfigScope } from "./saveConfigValue";
+import { ScopeDot } from "./ScopeDot";
+
+const SCOPES: ConfigScope[] = ["project", "repo", "global"];
 
 type Props = {
 	scope: ConfigScope;
@@ -20,15 +24,6 @@ export function ConfigScopeToggle({
 	repoKey,
 	onChange,
 }: Props) {
-	const files = configScopeFiles(repoKey);
-	const title = (candidate: ConfigScope): string => {
-		if (lockedToGlobal && candidate !== "global") return "Global-only key";
-		const presence = scopesWithValue.includes(candidate)
-			? "Set in"
-			: "Not set in";
-		return `${presence} ${files[candidate]}`;
-	};
-
 	return (
 		<ToggleButtonGroup
 			size="small"
@@ -39,23 +34,22 @@ export function ConfigScopeToggle({
 				if (next) onChange(next);
 			}}
 		>
-			<ToggleButton
-				value="project"
-				disabled={lockedToGlobal}
-				title={title("project")}
-			>
-				Project
-			</ToggleButton>
-			<ToggleButton
-				value="repo"
-				disabled={lockedToGlobal}
-				title={title("repo")}
-			>
-				This repo
-			</ToggleButton>
-			<ToggleButton value="global" title={title("global")}>
-				Global
-			</ToggleButton>
+			{SCOPES.map((candidate) => (
+				<ToggleButton
+					key={candidate}
+					value={candidate}
+					disabled={lockedToGlobal && candidate !== "global"}
+					title={configScopeToggleTitle({
+						scope: candidate,
+						scopesWithValue,
+						repoKey,
+						lockedToGlobal,
+					})}
+				>
+					<ScopeDot scope={candidate} scopesWithValue={scopesWithValue} />
+					{configScopeLabels[candidate]}
+				</ToggleButton>
+			))}
 		</ToggleButtonGroup>
 	);
 }

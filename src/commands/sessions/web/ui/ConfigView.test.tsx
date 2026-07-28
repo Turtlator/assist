@@ -307,10 +307,8 @@ describe("ConfigView", () => {
 		fireEvent.click(screen.getByLabelText("worktree.enabled value"));
 
 		expect(
-			screen.getByText(
-				"Not set in project or global — showing the schema default. Saving writes to repos.assist in ~/.assist.yml.",
-			),
-		).toBeTruthy();
+			screen.getByTestId("scope-dot-repo").getAttribute("data-state"),
+		).toBe("unset");
 		expect(screen.queryByRole("button", { name: "Clear" })).toBeNull();
 
 		fireEvent.click(screen.getByRole("button", { name: "Save" }));
@@ -789,7 +787,7 @@ describe("ConfigView", () => {
 		expect(screen.getByRole("button", { name: "Clear" })).toBeTruthy();
 	});
 
-	it("says which scopes hold a value before Clear is pressed", async () => {
+	it("marks which scopes hold a value before Clear is pressed", async () => {
 		stubApi([
 			{
 				key: "worktree.trunk",
@@ -810,21 +808,28 @@ describe("ConfigView", () => {
 		);
 
 		expect(
-			screen.getByText(
-				"Set in project and global. Clear falls back to global.",
-			),
-		).toBeTruthy();
+			screen.getByTestId("scope-dot-project").getAttribute("data-state"),
+		).toBe("effective");
+		expect(
+			screen.getByTestId("scope-dot-repo").getAttribute("data-state"),
+		).toBe("unset");
+		expect(
+			screen.getByTestId("scope-dot-global").getAttribute("data-state"),
+		).toBe("overridden");
+		expect(
+			screen.getByRole("button", { name: "Global" }).getAttribute("title"),
+		).toBe("Set in ~/.assist.yml — overridden by Project");
 		expect(
 			screen.getByRole("button", { name: "Clear" }).getAttribute("title"),
-		).toBe("Remove worktree.trunk from the project config");
+		).toBe(
+			"Remove worktree.trunk from this repo's assist.yml — falls back to Global",
+		);
 
 		fireEvent.click(screen.getByRole("button", { name: "Global" }));
 
 		expect(
-			screen.getByText(
-				"Set in project and global. Clear falls back to project.",
-			),
-		).toBeTruthy();
+			screen.getByRole("button", { name: "Clear" }).getAttribute("title"),
+		).toBe("Remove worktree.trunk from ~/.assist.yml — falls back to Project");
 	});
 
 	it("warns that Clear does nothing in a scope with no value", async () => {
@@ -848,12 +853,15 @@ describe("ConfigView", () => {
 		);
 
 		expect(
-			screen.getByText("Set in global. Nothing to clear in project."),
-		).toBeTruthy();
+			screen.getByTestId("scope-dot-project").getAttribute("data-state"),
+		).toBe("unset");
+		expect(
+			screen.getByTestId("scope-dot-global").getAttribute("data-state"),
+		).toBe("effective");
 		expect(
 			screen.getByRole("button", { name: "Clear" }).getAttribute("title"),
 		).toBe(
-			"worktree.trunk is not set in the project config — nothing to clear",
+			"worktree.trunk is not set in this repo's assist.yml — nothing to clear",
 		);
 		expect(
 			screen.getByRole("button", { name: "Project" }).getAttribute("title"),
