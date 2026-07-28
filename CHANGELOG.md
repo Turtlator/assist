@@ -1,3 +1,10 @@
+## [0.489.1](https://github.com/staff0rd/assist/compare/v0.489.0...v0.489.1) (2026-07-28)
+
+
+### Bug Fixes
+
+* fetch once before the first watch check ([4868a66](https://github.com/staff0rd/assist/commit/4868a663b91a81e33ac67fb8abf845f9630ecce9))
+
 # [0.489.0](https://github.com/staff0rd/assist/compare/v0.488.5...v0.489.0) (2026-07-28)
 
 
