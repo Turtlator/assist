@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { ConfigEntry } from "../../../config/readConfigEntries";
+import { configScopesWithValue } from "./configScopesWithValue";
 import { effectiveConfigValue } from "./effectiveConfigValue";
 import type { ConfigScope } from "./saveConfigValue";
 import { useConfigRowWrites } from "./useConfigRowWrites";
@@ -35,7 +36,7 @@ export function useConfigRowEditor({ entry, cwd, onSaved, onError }: Options) {
 		saving,
 		save: () => save(value),
 		clear,
-		canClear: entry.source !== "default",
+		canClear: configScopesWithValue(entry).includes(scope),
 		dirty: JSON.stringify(value) !== JSON.stringify(saved),
 		reset: () => setValue(saved),
 	};

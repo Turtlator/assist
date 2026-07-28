@@ -13,12 +13,6 @@ const entry = (sources: ConfigSource[]): ConfigEntry =>
 	}) as ConfigEntry;
 
 describe("configClearTitle", () => {
-	it("says there is nothing to clear in a scope without a value", () => {
-		expect(configClearTitle(entry(["global"]), "repo")).toBe(
-			"commit.push is not set in repos.assist in ~/.assist.yml — nothing to clear",
-		);
-	});
-
 	it("names the layer a clear falls back to", () => {
 		expect(configClearTitle(entry(["repo", "global"]), "repo")).toBe(
 			"Remove commit.push from repos.assist in ~/.assist.yml — falls back to Global",

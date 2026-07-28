@@ -832,7 +832,7 @@ describe("ConfigView", () => {
 		).toBe("Remove worktree.trunk from ~/.assist.yml — falls back to Project");
 	});
 
-	it("warns that Clear does nothing in a scope with no value", async () => {
+	it("offers Clear only in the scopes that hold a value", async () => {
 		stubApi([
 			{
 				key: "worktree.trunk",
@@ -859,23 +859,28 @@ describe("ConfigView", () => {
 			screen.getByTestId("scope-dot-global").getAttribute("data-state"),
 		).toBe("effective");
 		expect(
-			screen.getByRole("button", { name: "Clear" }).getAttribute("title"),
-		).toBe(
-			"worktree.trunk is not set in this repo's assist.yml — nothing to clear",
-		);
-		expect(
 			screen.getByRole("button", { name: "Project" }).getAttribute("title"),
 		).toBe("Not set in this repo's assist.yml");
+		expect(screen.queryByRole("button", { name: "Clear" })).toBeNull();
+
+		fireEvent.click(screen.getByRole("button", { name: "Global" }));
+
+		expect(
+			screen.getByRole("button", { name: "Clear" }).getAttribute("title"),
+		).toBe(
+			"Remove worktree.trunk from ~/.assist.yml — reverts to the schema default",
+		);
 	});
 
-	it("reports that nothing was removed when the key is unset in the scope", async () => {
+	it("reports that nothing was removed when the value vanished under it", async () => {
 		stubUnsetApi(
 			[
 				{
 					key: "worktree.trunk",
 					type: "boolean",
 					value: true,
-					source: "global",
+					source: "project",
+					sources: ["project"],
 					node: node("worktree.trunk"),
 				},
 			],
@@ -895,45 +900,58 @@ describe("ConfigView", () => {
 		await waitFor(() =>
 			expect(
 				screen.getByText(
-					"worktree.trunk is not set in the project config — nothing was removed. It comes from the global config.",
+					"worktree.trunk is no longer set in this repo's assist.yml — nothing was removed.",
 				),
 			).toBeTruthy(),
 		);
 		expect(screen.getByRole("button", { name: "Clear" })).toBeTruthy();
 	});
 
-	it("names the repos override pinning a value that cannot be cleared", async () => {
-		stubUnsetApi(
+	it("clears a repos override from the This repo scope", async () => {
+		const fetchMock = stubUnsetApi(
 			[
 				{
 					key: "worktree.enabled",
 					type: "boolean",
 					value: true,
 					source: "repo",
+					sources: ["repo"],
 					repoKey: "assist",
 					node: node("worktree.enabled"),
 				},
 			],
 			undefined,
-			{ ok: true, status: 200, body: { target: "project", removed: false } },
+			{
+				ok: true,
+				status: 200,
+				body: { target: "repo", repoKey: "assist", removed: true },
+			},
 		);
 		renderView();
 
 		await waitFor(() =>
 			expect(screen.getByText("worktree.enabled")).toBeTruthy(),
 		);
-		expect(screen.getByText("repo")).toBeTruthy();
 		fireEvent.click(
 			screen.getByRole("button", { name: "Edit worktree.enabled" }),
 		);
+		expect(screen.queryByRole("button", { name: "Clear" })).toBeNull();
+
+		fireEvent.click(screen.getByRole("button", { name: "This repo" }));
+		expect(
+			screen.getByRole("button", { name: "Clear" }).getAttribute("title"),
+		).toBe(
+			"Remove worktree.enabled from repos.assist in ~/.assist.yml — reverts to the schema default",
+		);
+
 		fireEvent.click(screen.getByRole("button", { name: "Clear" }));
 
 		await waitFor(() =>
-			expect(
-				screen.getByText(
-					"worktree.enabled is not set in the project config — nothing was removed. Its value is pinned by repos.assist in ~/.assist.yml.",
-				),
-			).toBeTruthy(),
+			expect(postedBody(fetchMock, "/api/config/unset")).toEqual({
+				key: "worktree.enabled",
+				cwd: "/repo",
+				scope: "repo",
+			}),
 		);
 	});
 
