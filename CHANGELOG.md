@@ -1,3 +1,10 @@
+# [0.498.0](https://github.com/staff0rd/assist/compare/v0.497.0...v0.498.0) (2026-07-28)
+
+
+### Features
+
+* review launch chain toggles ([0e8961a](https://github.com/staff0rd/assist/commit/0e8961a2a84527dfa72edbf5e9667ab6cff66b6f))
+
 # [0.497.0](https://github.com/staff0rd/assist/compare/v0.496.2...v0.497.0) (2026-07-28)
 
 
