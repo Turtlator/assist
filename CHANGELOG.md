@@ -1,3 +1,11 @@
+# [0.491.0](https://github.com/staff0rd/assist/compare/v0.490.3...v0.491.0) (2026-07-28)
+
+
+### Features
+
+* gate agent drafts through propose ([8b0f42e](https://github.com/staff0rd/assist/commit/8b0f42ec6063db950a14849d89fe2cca3e4ca62d))
+* review --address-comments chains ([9d36b5c](https://github.com/staff0rd/assist/commit/9d36b5c4de3b92cd39983d64d5f3a490a3ecc7b8))
+
 ## [0.490.3](https://github.com/staff0rd/assist/compare/v0.490.2...v0.490.3) (2026-07-28)
 
 
