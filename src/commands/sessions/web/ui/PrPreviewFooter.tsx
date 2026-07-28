@@ -14,6 +14,8 @@ export function PrPreviewFooter({
 	onRemove,
 	onCancel,
 	onDecision,
+	reviewAfter,
+	onReviewAfterChange,
 }: {
 	comments: LocalComment[];
 	commentColors: string[];
@@ -25,6 +27,8 @@ export function PrPreviewFooter({
 		decision: "approve" | "reject",
 		comments: PrPreviewComment[],
 	) => void;
+	reviewAfter?: boolean;
+	onReviewAfterChange: (reviewAfter: boolean) => void;
 }) {
 	return (
 		<>
@@ -36,6 +40,8 @@ export function PrPreviewFooter({
 			<Divider />
 			<PrPreviewActions
 				commentCount={comments.length}
+				reviewAfter={reviewAfter}
+				onReviewAfterChange={onReviewAfterChange}
 				onApprove={() => onDecision("approve", [])}
 				onReject={() => onDecision("reject", [])}
 				onRequestChanges={() =>

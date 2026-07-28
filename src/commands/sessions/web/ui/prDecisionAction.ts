@@ -1,4 +1,4 @@
-import type { PrPreviewComment } from "../../shared/SessionInfoBase";
+import type { PrDecisionDetails } from "./PrDecisionDetails";
 
 type SendFn = (msg: object) => void;
 
@@ -7,17 +7,13 @@ export function prDecisionAction(send: SendFn) {
 		sessionId: string,
 		requestId: string,
 		decision: "approve" | "reject",
-		reason?: string,
-		comments?: PrPreviewComment[],
-		screenshots?: string[],
+		details: PrDecisionDetails,
 	) =>
 		send({
 			type: "pr-decision",
 			sessionId,
 			requestId,
 			decision,
-			reason,
-			comments,
-			screenshots,
+			...details,
 		});
 }

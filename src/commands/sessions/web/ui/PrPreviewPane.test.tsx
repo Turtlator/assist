@@ -110,11 +110,11 @@ describe("PrPreviewPane inline comments", () => {
 			screen.getByRole("button", { name: /Request changes \(1\)/ }),
 		);
 
-		expect(onDecision).toHaveBeenCalledWith(
-			"reject",
-			[{ quote: "Adds x", note: "say what x is" }],
-			[],
-		);
+		expect(onDecision).toHaveBeenCalledWith("reject", {
+			comments: [{ quote: "Adds x", note: "say what x is" }],
+			screenshots: [],
+			reviewAfter: false,
+		});
 	});
 
 	it("gives each highlighted span a distinct colour", () => {
@@ -159,10 +159,50 @@ describe("PrPreviewPane inline comments", () => {
 		render(<PrPreviewPane preview={preview} onDecision={onDecision} />);
 
 		fireEvent.click(screen.getByRole("button", { name: "Approve" }));
-		expect(onDecision).toHaveBeenCalledWith("approve", [], []);
+		expect(onDecision).toHaveBeenCalledWith("approve", {
+			comments: [],
+			screenshots: [],
+			reviewAfter: true,
+		});
 
 		fireEvent.click(screen.getByRole("button", { name: "Reject" }));
-		expect(onDecision).toHaveBeenCalledWith("reject", [], []);
+		expect(onDecision).toHaveBeenCalledWith("reject", {
+			comments: [],
+			screenshots: [],
+			reviewAfter: false,
+		});
+	});
+
+	describe("Review + Post after raising", () => {
+		const checkbox = () =>
+			screen.getByLabelText("Review + Post after raising") as HTMLInputElement;
+
+		it("is checked by default and approves with the chain on", () => {
+			const onDecision = vi.fn();
+			render(<PrPreviewPane preview={preview} onDecision={onDecision} />);
+
+			expect(checkbox().checked).toBe(true);
+
+			fireEvent.click(screen.getByRole("button", { name: "Approve" }));
+			expect(onDecision).toHaveBeenCalledWith(
+				"approve",
+				expect.objectContaining({ reviewAfter: true }),
+			);
+		});
+
+		it("approves without the chain once unchecked", () => {
+			const onDecision = vi.fn();
+			render(<PrPreviewPane preview={preview} onDecision={onDecision} />);
+
+			fireEvent.click(checkbox());
+			expect(checkbox().checked).toBe(false);
+
+			fireEvent.click(screen.getByRole("button", { name: "Approve" }));
+			expect(onDecision).toHaveBeenCalledWith(
+				"approve",
+				expect.objectContaining({ reviewAfter: false }),
+			);
+		});
 	});
 
 	it("restores persisted comments after a remount (page refresh)", () => {
@@ -308,14 +348,18 @@ describe("PrPreviewPane inline comments", () => {
 		await screen.findByAltText("screenshot");
 
 		fireEvent.click(screen.getByRole("button", { name: "Reject" }));
-		expect(onDecision).toHaveBeenLastCalledWith("reject", [], []);
+		expect(onDecision).toHaveBeenLastCalledWith("reject", {
+			comments: [],
+			screenshots: [],
+			reviewAfter: false,
+		});
 
 		fireEvent.click(screen.getByRole("button", { name: "Approve" }));
-		expect(onDecision).toHaveBeenLastCalledWith(
-			"approve",
-			[],
-			["![shot](https://x/y.png)"],
-		);
+		expect(onDecision).toHaveBeenLastCalledWith("approve", {
+			comments: [],
+			screenshots: ["![shot](https://x/y.png)"],
+			reviewAfter: true,
+		});
 	});
 
 	describe("backlog item previews", () => {
@@ -374,11 +418,17 @@ describe("PrPreviewPane inline comments", () => {
 			fireEvent.click(
 				screen.getByRole("button", { name: /Request changes \(1\)/ }),
 			);
-			expect(onDecision).toHaveBeenCalledWith(
-				"reject",
-				[{ quote: "stays shut", note: "which pane?" }],
-				[],
-			);
+			expect(onDecision).toHaveBeenCalledWith("reject", {
+				comments: [{ quote: "stays shut", note: "which pane?" }],
+				screenshots: [],
+				reviewAfter: false,
+			});
+		});
+
+		it("offers no Review + Post checkbox", () => {
+			render(<PrPreviewPane preview={item} onDecision={vi.fn()} />);
+
+			expect(screen.queryByLabelText("Review + Post after raising")).toBeNull();
 		});
 	});
 

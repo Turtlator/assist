@@ -24,7 +24,7 @@ export function decidePrPreview(
 		? d.screenshots.length
 		: 0;
 	daemonLog(
-		`pr-decision received: id=${id} requestId=${requestId} decision=${d.decision} comments=${commentCount} screenshots=${screenshotCount}`,
+		`pr-decision received: id=${id} requestId=${requestId} decision=${d.decision} comments=${commentCount} screenshots=${screenshotCount} reviewAfter=${d.reviewAfter === true}`,
 	);
 	const waiter = waiters.get(id);
 	if (waiter)
@@ -35,6 +35,7 @@ export function decidePrPreview(
 			reason: d.reason,
 			comments: d.comments,
 			screenshots: d.screenshots,
+			reviewAfter: d.reviewAfter,
 		});
 	waiters.delete(id);
 	session.pendingPrPreview = undefined;

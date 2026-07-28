@@ -1,42 +1,34 @@
 import { useMemo } from "react";
-import type { PrPreviewComment } from "../../shared/SessionInfoBase";
-import { clearPersistedComments } from "./PersistedComment";
+import type { PrDecisionDetails } from "./PrDecisionDetails";
 import { previewHighlights } from "./previewHighlights";
 import { usePaneScreenshots } from "./usePaneScreenshots";
 import { usePrComments } from "./usePrComments";
+import { usePrDecision } from "./usePrDecision";
 import { usePreviewSelection } from "./usePreviewSelection";
 
 type OnDecision = (
 	decision: "approve" | "reject",
-	comments: PrPreviewComment[],
-	screenshots: string[],
+	details: PrDecisionDetails,
 ) => void;
 
 export function usePrPane(
 	requestId: string,
 	cwd: string | undefined,
 	onDecision: OnDecision,
-	screenshotsEnabled: boolean,
+	isPr: boolean,
 ) {
 	const { wrapperRef, contentRef, pending, dragRects, onMouseDown, clear } =
 		usePreviewSelection();
 	const { comments, add, remove } = usePrComments(requestId);
-	const shots = usePaneScreenshots(cwd, screenshotsEnabled);
+	const shots = usePaneScreenshots(cwd, isPr);
+	const decision = usePrDecision(requestId, onDecision, isPr, () =>
+		shots.screenshots.map((s) => s.markdown),
+	);
 
 	const { commentColors, dragColor, ranges } = useMemo(
 		() => previewHighlights(comments, pending),
 		[comments, pending],
 	);
-
-	const onDecide = (
-		decision: "approve" | "reject",
-		cmts: PrPreviewComment[],
-	) => {
-		const markdown =
-			decision === "approve" ? shots.screenshots.map((s) => s.markdown) : [];
-		clearPersistedComments(requestId);
-		onDecision(decision, cmts, markdown);
-	};
 
 	const onAdd = (note: string) => {
 		if (pending)
@@ -62,7 +54,9 @@ export function usePrPane(
 		dragColor,
 		onAdd,
 		onCancel: clear,
-		onDecide,
+		onDecide: decision.onDecide,
+		reviewAfter: decision.reviewAfter,
+		setReviewAfter: decision.setReviewAfter,
 		...shots,
 	};
 }

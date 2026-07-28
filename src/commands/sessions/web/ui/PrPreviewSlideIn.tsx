@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import type { TransitionEvent } from "react";
-import type { PrPreview, PrPreviewComment } from "../../shared/SessionInfoBase";
+import type { PrPreview } from "../../shared/SessionInfoBase";
+import type { PrDecisionDetails } from "./PrDecisionDetails";
 import { PrPreviewPane } from "./PrPreviewPane";
 
 export const SPLIT_MS = 280;
@@ -20,8 +21,7 @@ export function PrPreviewSlideIn({
 	onDecision: (
 		requestId: string,
 		decision: "approve" | "reject",
-		comments: PrPreviewComment[],
-		screenshots: string[],
+		details: PrDecisionDetails,
 	) => void;
 }) {
 	const handleTransitionEnd = (e: TransitionEvent<HTMLDivElement>) => {
@@ -50,8 +50,8 @@ export function PrPreviewSlideIn({
 					key={rendered.requestId}
 					preview={rendered}
 					cwd={cwd}
-					onDecision={(decision, comments, screenshots) =>
-						onDecision(rendered.requestId, decision, comments, screenshots)
+					onDecision={(decision, details) =>
+						onDecision(rendered.requestId, decision, details)
 					}
 				/>
 			)}

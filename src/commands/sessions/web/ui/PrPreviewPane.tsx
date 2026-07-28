@@ -1,5 +1,6 @@
 import { Box, Divider } from "@mui/material";
-import type { PrPreview, PrPreviewComment } from "../../shared/SessionInfoBase";
+import type { PrPreview } from "../../shared/SessionInfoBase";
+import type { PrDecisionDetails } from "./PrDecisionDetails";
 import { PrPreviewContent } from "./PrPreviewContent";
 import { PrPreviewFooter } from "./PrPreviewFooter";
 import { PrPreviewHeader } from "./PrPreviewHeader";
@@ -25,22 +26,17 @@ export function PrPreviewPane({
 	cwd?: string;
 	onDecision: (
 		decision: "approve" | "reject",
-		comments: PrPreviewComment[],
-		screenshots: string[],
+		details: PrDecisionDetails,
 	) => void;
 }) {
-	const screenshots = preview.kind !== "backlog-item";
-	const pane = usePrPane(preview.requestId, cwd, onDecision, screenshots);
+	const isPr = preview.kind !== "backlog-item";
+	const pane = usePrPane(preview.requestId, cwd, onDecision, isPr);
 
 	return (
 		<Box sx={paneSx} onDrop={pane.onDrop} onDragOver={pane.onDragOver}>
 			<PrPreviewHeader preview={preview} />
 			<Divider />
-			<PrPreviewContent
-				body={preview.body}
-				pane={pane}
-				screenshots={screenshots}
-			/>
+			<PrPreviewContent body={preview.body} pane={pane} screenshots={isPr} />
 			<PrPreviewFooter
 				comments={pane.comments}
 				commentColors={pane.commentColors}
@@ -49,6 +45,8 @@ export function PrPreviewPane({
 				onDecision={pane.onDecide}
 				onAdd={pane.onAdd}
 				onCancel={pane.onCancel}
+				reviewAfter={isPr ? pane.reviewAfter : undefined}
+				onReviewAfterChange={pane.setReviewAfter}
 			/>
 		</Box>
 	);

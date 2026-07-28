@@ -5,6 +5,7 @@ export type PreviewDecision = {
 	reason?: string;
 	comments?: PrPreviewComment[];
 	screenshots?: string[];
+	reviewAfter?: boolean;
 };
 
 type Incoming =
@@ -18,6 +19,7 @@ type IncomingMessage = {
 	reason?: string;
 	comments?: PrPreviewComment[];
 	screenshots?: string[];
+	reviewAfter?: boolean;
 	message?: string;
 };
 
@@ -40,6 +42,7 @@ export function parsePreviewDecision(
 				screenshots: Array.isArray(msg.screenshots)
 					? msg.screenshots
 					: undefined,
+				reviewAfter: msg.reviewAfter === true,
 			},
 		};
 	} catch {

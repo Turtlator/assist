@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { PrPreviewComment } from "../../shared/SessionInfoBase";
+import type { PrDecisionDetails } from "./PrDecisionDetails";
 import { PrPreviewSplit } from "./PrPreviewSplit";
 import type { SessionInfo } from "./types";
 
@@ -7,9 +7,7 @@ export type SendPrDecision = (
 	sessionId: string,
 	requestId: string,
 	decision: "approve" | "reject",
-	reason?: string,
-	comments?: PrPreviewComment[],
-	screenshots?: string[],
+	details: PrDecisionDetails,
 ) => void;
 
 export function SessionPreviewSplit({
@@ -25,16 +23,8 @@ export function SessionPreviewSplit({
 		<PrPreviewSplit
 			preview={session?.pendingPrPreview ?? null}
 			cwd={session?.cwd}
-			onDecision={(requestId, decision, comments, screenshots) => {
-				if (session)
-					sendPrDecision(
-						session.id,
-						requestId,
-						decision,
-						undefined,
-						comments,
-						screenshots,
-					);
+			onDecision={(requestId, decision, details) => {
+				if (session) sendPrDecision(session.id, requestId, decision, details);
 			}}
 		>
 			{children}

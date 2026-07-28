@@ -1,14 +1,14 @@
 import Box from "@mui/material/Box";
 import type { ReactNode } from "react";
-import type { PrPreview, PrPreviewComment } from "../../shared/SessionInfoBase";
+import type { PrPreview } from "../../shared/SessionInfoBase";
+import type { PrDecisionDetails } from "./PrDecisionDetails";
 import { PrPreviewSlideIn, SPLIT_EASE, SPLIT_MS } from "./PrPreviewSlideIn";
 import { useRetainedPreview } from "./useRetainedPreview";
 
 type OnDecision = (
 	requestId: string,
 	decision: "approve" | "reject",
-	comments: PrPreviewComment[],
-	screenshots: string[],
+	details: PrDecisionDetails,
 ) => void;
 
 export function PrPreviewSplit({

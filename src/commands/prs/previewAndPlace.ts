@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { awaitPreviewApproval } from "../sessions/shared/awaitPreviewApproval";
 import { appendScreenshots } from "./appendScreenshots";
 import type { CreateOptions } from "./buildCreateArgs";
+import { chainReviewAndPost } from "./chainReviewAndPost";
 import { placePr } from "./placePr";
 
 export async function previewAndPlace(args: {
@@ -22,4 +23,6 @@ export async function previewAndPlace(args: {
 	const body = appendScreenshots(args.body, decision.screenshots ?? []);
 
 	await placePr(args.prNumber, args.title, body, args.options);
+
+	if (decision.reviewAfter === true) await chainReviewAndPost(args.prNumber);
 }
