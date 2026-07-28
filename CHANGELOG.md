@@ -1,3 +1,10 @@
+# [0.501.0](https://github.com/staff0rd/assist/compare/v0.500.1...v0.501.0) (2026-07-28)
+
+
+### Features
+
+* show github issues on cards ([a5b5ec0](https://github.com/staff0rd/assist/commit/a5b5ec040a95dcd80990c5051d81aa8d09a1902d))
+
 ## [0.500.1](https://github.com/staff0rd/assist/compare/v0.500.0...v0.500.1) (2026-07-28)
 
 
