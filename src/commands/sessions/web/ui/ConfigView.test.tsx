@@ -13,6 +13,7 @@ import { assistConfigSchema } from "../../../../shared/types";
 import { configEntryNode } from "../../../config/configEntryNode";
 import type { ConfigEntry } from "../../../config/readConfigEntries";
 import { ConfigView } from "./ConfigView";
+import { maskedSecretText } from "./maskedSecretText";
 import { RepoSelectionContext } from "./useRepoSelectionContext";
 
 const schema = describeConfigNode(assistConfigSchema);
@@ -978,7 +979,7 @@ describe("ConfigView", () => {
 		renderView();
 
 		await waitFor(() => expect(screen.getByText("database.url")).toBeTruthy());
-		expect(screen.getByText("set (hidden)")).toBeTruthy();
+		expect(screen.getByText(maskedSecretText)).toBeTruthy();
 		expect(screen.getByText("not set")).toBeTruthy();
 		expect(screen.getByText("global")).toBeTruthy();
 		expect(screen.getByText("default")).toBeTruthy();
@@ -1001,7 +1002,7 @@ describe("ConfigView", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Edit database.url" }));
 		expect(
 			(screen.getByLabelText("database.url") as HTMLInputElement).value,
-		).toBe("");
+		).toBe(maskedSecretText);
 		fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
 		await waitFor(() =>
@@ -1010,6 +1011,38 @@ describe("ConfigView", () => {
 				value: REDACTED_SECRET,
 				cwd: "/repo/one",
 				scope: "project",
+			}),
+		);
+	});
+
+	it("clears the mask on focus and restores it when nothing is typed", async () => {
+		const fetchMock = stubApi([
+			{
+				key: "database.url",
+				type: "string",
+				secret: true,
+				value: REDACTED_SECRET,
+				source: "project",
+				node: node("database.url"),
+			},
+		]);
+		renderView("/repo/one");
+
+		await waitFor(() => expect(screen.getByText("database.url")).toBeTruthy());
+		fireEvent.click(screen.getByRole("button", { name: "Edit database.url" }));
+		const field = screen.getByLabelText("database.url") as HTMLInputElement;
+
+		fireEvent.focus(field);
+		expect(field.value).toBe("");
+
+		fireEvent.blur(field);
+		expect(field.value).toBe(maskedSecretText);
+
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() =>
+			expect(lastSetBody(fetchMock)).toMatchObject({
+				value: REDACTED_SECRET,
 			}),
 		);
 	});
@@ -1074,7 +1107,7 @@ describe("ConfigView", () => {
 		expect(
 			(screen.getByLabelText("sql.connections[0].password") as HTMLInputElement)
 				.value,
-		).toBe("");
+		).toBe(maskedSecretText);
 		fireEvent.change(screen.getByLabelText("sql.connections[0].user"), {
 			target: { value: "admin" },
 		});

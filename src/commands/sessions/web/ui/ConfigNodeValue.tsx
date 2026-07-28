@@ -4,7 +4,7 @@ import { ConfigListValue } from "./ConfigListValue";
 import { ConfigObjectFields } from "./ConfigObjectFields";
 import { ConfigRecordValue } from "./ConfigRecordValue";
 import { ConfigScalarText } from "./ConfigScalarText";
-import { EmptyConfigValue } from "./EmptyConfigValue";
+import { maskedSecretText } from "./maskedSecretText";
 import { pickObjectVariant } from "./pickObjectVariant";
 
 type Props = {
@@ -13,7 +13,7 @@ type Props = {
 };
 
 export function ConfigNodeValue({ node, value }: Props): ReactElement {
-	if (node.secret) return <EmptyConfigValue text="set (hidden)" />;
+	if (node.secret) return <ConfigScalarText value={maskedSecretText} />;
 	switch (node.kind) {
 		case "object":
 			return (

@@ -187,7 +187,7 @@ Backlog item ids are written and displayed in an `a`-prefixed form (e.g. item 55
 - `assist config set <key> <value>` - Set a config value. `--global` writes to `~/.assist.yml`; `-g --repo [name]` writes a per-repo override there
 - `assist config unset <key>` - Remove a config value so the key falls back to the global value or schema default (`-g` targets `~/.assist.yml`; `-g --repo [name]` removes it from a per-repo override there)
 
-The Config tab of the sessions web dashboard never receives secret values: `GET /api/config` replaces each one with a set-or-unset marker, so a configured secret renders as `set (hidden)` and an unset one as `not set`, both keeping their project/global/default chip. Secret fields edit write-only - type a value to replace it, leave the field blank to keep whatever is stored.
+The Config tab of the sessions web dashboard never receives secret values: `GET /api/config` replaces each one with a set-or-unset marker, so a configured secret renders as a mask and an unset one as `not set`, both keeping their project/global/default chip. Secret fields edit write-only - the mask clears on focus, typing a value replaces the stored one, and leaving the field untouched keeps it.
 
 ### Verify and lint
 
