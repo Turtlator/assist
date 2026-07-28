@@ -1,3 +1,10 @@
+# [0.496.0](https://github.com/staff0rd/assist/compare/v0.495.0...v0.496.0) (2026-07-28)
+
+
+### Features
+
+* stack findings under review button ([ac9dadc](https://github.com/staff0rd/assist/commit/ac9dadc285ce7d6d6783cb4e9b2e5313f0d9fb2a))
+
 # [0.495.0](https://github.com/staff0rd/assist/compare/v0.494.1...v0.495.0) (2026-07-28)
 
 
