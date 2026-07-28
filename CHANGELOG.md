@@ -1,3 +1,10 @@
+## [0.502.1](https://github.com/staff0rd/assist/compare/v0.502.0...v0.502.1) (2026-07-28)
+
+
+### Bug Fixes
+
+* dim config key notes on /config ([66281eb](https://github.com/staff0rd/assist/commit/66281ebf15a0f5519a16fb15a5ad9436f4cd88eb))
+
 # [0.502.0](https://github.com/staff0rd/assist/compare/v0.501.1...v0.502.0) (2026-07-28)
 
 
