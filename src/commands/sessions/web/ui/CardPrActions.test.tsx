@@ -73,9 +73,10 @@ describe("CardPrActions review pairing", () => {
 		const findings = await findingsButton();
 
 		expect(findings.parentElement).toBe(review.parentElement);
-		expect(
-			getComputedStyle(review.parentElement as Element).flexDirection,
-		).toBe("column");
+		const style = getComputedStyle(review.parentElement as Element);
+		expect(style.flexDirection).toBe("column");
+		expect(style.borderTopWidth).not.toBe("");
+		expect(style.gap).toBe("");
 	});
 
 	it("keeps the pair inline in the card header row", async () => {

@@ -8,12 +8,22 @@ import { useTopBarLayoutContext } from "./useTopBarLayoutContext";
 import { ViewReviewButton } from "./ViewReviewButton";
 
 const stackedSx = {
-	display: "flex",
+	display: "inline-flex",
 	flexDirection: "column",
 	alignItems: "stretch",
 	flexShrink: 0,
-	gap: 0.25,
+	border: 1,
+	borderColor: "divider",
+	borderRadius: 1,
+	overflow: "hidden",
 	"&:empty": { display: "none" },
+	"& > *": {
+		borderRadius: 0,
+		justifyContent: "flex-start",
+		minHeight: 0,
+		py: 0.125,
+	},
+	"& > * + *": { borderTop: 1, borderColor: "divider" },
 } as const;
 
 const inlineSx = {
