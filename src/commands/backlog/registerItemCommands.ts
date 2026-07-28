@@ -39,6 +39,10 @@ export function registerItemCommands(cmd: Command): void {
 			"--json <file|->",
 			"Path to a JSON payload describing the item, or - to read it from stdin",
 		)
+		.option(
+			"--confirmed",
+			"Create the item after its draft has been reviewed in chat (agent use outside a web session)",
+		)
 		.action(backlogPropose);
 
 	cmd

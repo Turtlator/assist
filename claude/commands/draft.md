@@ -22,18 +22,9 @@ Ask 2-4 targeted questions conversationally to flesh out the idea. Focus on:
 
 Ask one question at a time. Wait for the user's response before asking the next.
 
-## Step 3: Propose the item
+## Step 3: Compose the item
 
-Where the review happens depends on whether this is a web session — check it once:
-
-```
-echo "${ASSIST_SESSION:-0}"
-```
-
-- **`1` (web session):** do NOT print the item in the terminal. Skip straight to Step 5 — `assist backlog propose` slides the whole item, plan included, into the web UI preview pane, where the user approves it, rejects it, or leaves inline comments on specific lines. That pane is the review gate.
-- **anything else:** show the user the item in chat as below, iterate (Step 4), then save.
-
-Either way you compose the same content, so draft it before you call `propose`:
+Compose the item's content, but do not show it to the user yet and do not work out where the review should happen — `propose` decides that in Step 4 and tells you what to do next.
 
 **Name:** (concise title)
 **Type:** story or bug
@@ -90,13 +81,7 @@ Keep phases small (2-4 tasks each). A typical item should have 2-3 phases.
 
 Most phases should NOT have manual checks. Only add `manualChecks` to a phase when the checks are genuinely difficult to automate (e.g. visual appearance, UX flow, hardware interaction). Do not add a final phase just for end-to-end verification — a review phase is auto-appended at runtime.
 
-## Step 4: Iterate
-
-In a web session, skip this step — the preview pane handles it.
-
-Otherwise, ask the user if they want to change anything. Iterate until they confirm.
-
-## Step 5: Save
+## Step 4: Propose the item
 
 Propose the item and capture the id it prints. Use `propose`, not `assist backlog add` plus `add-phase` — `propose` is the reviewed path for an agent-authored item, and it writes the item and every phase on a single approval:
 
@@ -117,14 +102,13 @@ JSON
 
 The payload is strict JSON — an unknown key is an error. `\n` inside the `description` string is a JSON escape and becomes a real newline, which is what the markdown rendering needs. Each phase needs at least one task; omit `manualChecks` for the phases that don't need any (most of them).
 
-In a web session this blocks until the user decides in the preview pane, and the review can take far longer than the default command timeout. Run `propose` **as a background task** so it is never killed mid-review, and do no other work until it returns — the pending preview dies with the process, so a killed `propose` abandons the item.
+Always run `propose` **as a background task**, and do no other work until it returns. In a web session it blocks on the preview pane until the user decides, which can take far longer than the default command timeout, and the pending preview dies with the process — a killed `propose` abandons the item.
 
-When it returns:
+`propose` decides where the item is reviewed and prints what to do next. Follow that instruction; never inspect the environment to work it out yourself:
 
-- **Approved** — the item and all of its phases are created, and the item id is printed.
+- **Created** — the item and all of its phases exist and the id is printed. Continue below.
+- **Draft only** — it printed the rendered item, wrote nothing, and asked you to re-run with `--confirmed`. Show the rendered item in chat, ask the user if they want to change anything, and iterate until they confirm. Then re-run the same command with `--confirmed` appended to create the item and its phases.
 - **Rejected** — the command exits non-zero and prints the reason plus every inline comment with the excerpt it was left on. Do not retry verbatim: address each comment — including ones about the plan — then call `propose` again with the revised payload. Repeat until it is approved.
-
-Outside a web session the rendered item is printed and created straight away.
 
 Note the created item id from the output — you'll pass it to the done signal below.
 

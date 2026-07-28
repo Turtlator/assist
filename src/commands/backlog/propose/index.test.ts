@@ -25,6 +25,7 @@ import { propose } from "./index";
 let orm: Db;
 let close: () => Promise<void>;
 let mockConfig: AssistConfig;
+let claudeCode: boolean;
 
 const mockRequestPreviewDecision = vi.fn();
 
@@ -38,6 +39,10 @@ vi.mock("../shared", () => ({
 
 vi.mock("../ensureRemoteOrigin", () => ({
 	ensureRemoteOrigin: () => true,
+}));
+
+vi.mock("../../../lib/isClaudeCode", () => ({
+	isClaudeCode: () => claudeCode,
 }));
 
 vi.mock("../../../shared/loadConfig", () => ({
@@ -89,6 +94,8 @@ let logSpy: MockInstance<typeof console.log>;
 beforeEach(async () => {
 	({ orm, close } = await createTestDb());
 	mockConfig = {} as AssistConfig;
+	claudeCode = false;
+	process.exitCode = undefined;
 	mockRequestPreviewDecision.mockReset();
 	logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 	delete process.env.ASSIST_SESSION;
@@ -98,6 +105,7 @@ beforeEach(async () => {
 afterEach(async () => {
 	await close();
 	vi.restoreAllMocks();
+	process.exitCode = undefined;
 	delete process.env.ASSIST_SESSION;
 	delete process.env.ASSIST_SESSION_ID;
 });
@@ -117,6 +125,45 @@ describe("propose outside a web session", () => {
 			name: "Preview never opens",
 			type: "bug",
 		});
+	});
+});
+
+describe("propose by an agent outside a web session", () => {
+	beforeEach(() => {
+		claudeCode = true;
+	});
+
+	it("prints the draft with a re-run instruction and writes nothing", async () => {
+		await propose({ json: writePayload(story) });
+
+		const output = logSpy.mock.calls.map((c) => c.join(" ")).join("\n");
+		expect(output).toContain("Preview backlog items");
+		expect(output).toContain("Render the plan");
+		expect(output).toContain("--confirmed");
+		expect(output).not.toContain("Added item");
+		expect(mockRequestPreviewDecision).not.toHaveBeenCalled();
+		expect(process.exitCode).toBeUndefined();
+		expect(await allItems()).toEqual([]);
+	});
+
+	it("creates the item and every phase with --confirmed", async () => {
+		await propose({ json: writePayload(story), confirmed: true });
+
+		const [item] = await allItems();
+		expect(item.name).toBe("Preview backlog items");
+		expect(logSpy.mock.calls.map((c) => c.join(" ")).join("\n")).toContain(
+			"Added item",
+		);
+		expect(
+			await orm
+				.select({ idx: planPhases.idx, name: planPhases.name })
+				.from(planPhases)
+				.where(eq(planPhases.itemId, item.id))
+				.orderBy(asc(planPhases.idx)),
+		).toEqual([
+			{ idx: 0, name: "Render the plan" },
+			{ idx: 1, name: "Insert the phases" },
+		]);
 	});
 });
 
@@ -262,6 +309,20 @@ describe("propose inside a web session", () => {
 		expect(output).toContain("needs repro steps");
 		expect(output).toContain("> File a bug");
 		expect(output).toContain("which bug?");
+		expect(await allItems()).toEqual([]);
+	});
+
+	it("refuses --confirmed so the flag cannot bypass the pane", async () => {
+		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+		claudeCode = true;
+
+		await propose({ json: writePayload(bug), confirmed: true });
+
+		expect(process.exitCode).toBe(1);
+		expect(errorSpy.mock.calls.map((c) => c.join(" ")).join("\n")).toContain(
+			"preview pane is the gate",
+		);
+		expect(mockRequestPreviewDecision).not.toHaveBeenCalled();
 		expect(await allItems()).toEqual([]);
 	});
 });

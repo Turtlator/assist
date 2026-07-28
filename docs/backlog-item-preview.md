@@ -17,7 +17,7 @@ Backlog item creation had no equivalent. `/draft` and `/bug` printed the propose
 2. `assist backlog propose --json <file|->` takes the complete item payload, previews it, and on approval inserts the item and all of its phases.
 3. `assist backlog add` refuses agent invocations (`isClaudeCode()`), pointing at `propose`. Human CLI use is unchanged.
 4. `assist backlog add-phase` stays available for adding a phase to an existing item outside story creation, but an agent-invoked `add-phase` in a web session is itself previewed, so no un-approved phase can be bolted onto a just-approved story.
-5. Outside a web session, `propose` prints the rendered item and creates it, preserving the terminal flow where confirmation happens in chat.
+5. Outside a web session, `propose` preserves the terminal flow where confirmation happens in chat: a human sees the rendered item and it is created in the same call, while an agent gets the rendered draft and an instruction to re-run with `--confirmed`, so nothing is written before the user has seen it.
 6. Rejection exits non-zero, printing the reason and each inline comment with its quoted excerpt, so the agent can revise and re-preview.
 
 ### No images
@@ -80,16 +80,21 @@ Shared plumbing lives in `src/commands/sessions/shared/`, not under `prs/`, beca
 
 ## Enforcement rules
 
-| Invocation                                   | Behaviour                                        |
-| -------------------------------------------- | ------------------------------------------------ |
-| `propose` in a web session                   | Blocks on the pane; writes only on approval      |
-| `propose` outside a web session              | Prints the rendered item, then writes it         |
-| `add` by a human                             | Unchanged, including the interactive prompts     |
-| `add` by an agent (`isClaudeCode()`)         | Errors out, pointing at `propose`                |
-| `add-phase` by an agent in a web session     | Previewed; the phase is written only on approval |
-| `add-phase` by a human, or outside a session | Unchanged                                        |
+| Invocation                                        | Behaviour                                                                                          |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `propose` in a web session                        | Blocks on the pane; writes only on approval                                                        |
+| `propose --confirmed` in a web session            | Errors out naming the pane as the gate; writes nothing                                             |
+| `propose` by an agent outside a web session       | Prints the rendered draft and an instruction to re-run with `--confirmed`; writes nothing, exits 0 |
+| `propose --confirmed` by an agent, no web session | Creates the item and every phase, printing the id                                                  |
+| `propose` by a human outside a web session        | Prints the rendered item, then writes it — no flag required                                        |
+| `add` by a human                                  | Unchanged, including the interactive prompts                                                       |
+| `add` by an agent (`isClaudeCode()`)              | Errors out, pointing at `propose`                                                                  |
+| `add-phase` by an agent in a web session          | Previewed; the phase is written only on approval                                                   |
+| `add-phase` by a human, or outside a session      | Unchanged                                                                                          |
 
 An agent is detected with `isClaudeCode()` — the `CLAUDECODE` environment variable Claude Code sets on every command it runs. A web session is detected the same way `prs raise` detects it: `ASSIST_SESSION === "1"` with an `ASSIST_SESSION_ID`.
+
+`propose` is the single decision point for where the draft gets reviewed, so a skill never has to inspect its own environment: compose the payload, call `propose`, and do what it prints. In a web session that is the pane. Outside one, the first agent call is a draft step — the rendered item goes to the terminal, nothing is written, and the exit code stays 0 — and the second call, with `--confirmed`, creates it. `--confirmed` is refused in a web session so it cannot be used to skip the pane, and it is ignored as a distinction for a human, whose single call still prints and creates.
 
 `add` checks for an agent before anything else — before the git-remote check and before any prompt — and exits non-zero with a message naming `propose`, so nothing is read from the terminal and nothing is written. The whole interactive path, including `--name/--type/--desc/--ac`, is untouched for a human.
 
@@ -100,7 +105,8 @@ An agent is detected with `isClaudeCode()` — the `CLAUDECODE` environment vari
 - Nothing is written to the backlog before an approval. A rejected or abandoned preview leaves no item, no phase and no sub-task behind.
 - An approval writes the item and every phase in the payload — never a subset.
 - No un-approved phase can be bolted onto a just-approved story. A rejected `add-phase` preview leaves the item's existing plan exactly as it was, and never renumbers a phase.
-- There is no agent path to the backlog that skips the gate: `add` refuses agents outright, and `add-phase` previews them.
+- There is no agent path to the backlog that skips the gate: `add` refuses agents outright, `add-phase` previews them, and an agent's `propose` writes only after either a pane approval or an explicit `--confirmed` re-run — never both, since `--confirmed` is refused in a web session.
+- An agent never learns where the review happens by inspecting the environment. `propose` decides and says so in its output.
 - A rejection exits non-zero and prints the reason plus every inline comment with its quoted excerpt, so the agent has enough to revise without asking the user to repeat themselves.
 - The preview renders exactly the markdown that will be stored, so what the reviewer marked up is what gets written.
 - The backlog preview never carries images.

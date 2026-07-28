@@ -1,41 +1,37 @@
-import { randomUUID } from "node:crypto";
 import chalk from "chalk";
-import { renderMarkdownTerminal } from "../../../shared/renderMarkdownTerminal";
-import { awaitPreviewApproval } from "../../sessions/shared/awaitPreviewApproval";
 import { createItemWithDefaults } from "../createItemWithDefaults";
 import { ensureRemoteOrigin } from "../ensureRemoteOrigin";
 import { formatItemId } from "../formatItemId";
-import type { ProposedItem } from "./proposedItemSchema";
 import { readProposedItem } from "./readProposedItem";
-import { renderProposedItem } from "./renderProposedItem";
+import { reviewProposal } from "./reviewProposal";
 
-async function reviewProposal(item: ProposedItem): Promise<void> {
-	const body = renderProposedItem(item);
-	const sessionId = process.env.ASSIST_SESSION_ID;
+type ProposeOptions = {
+	json: string;
+	confirmed?: boolean;
+};
 
-	if (process.env.ASSIST_SESSION === "1" && sessionId) {
-		await awaitPreviewApproval("Backlog item preview", {
-			sessionId,
-			requestId: randomUUID(),
-			title: item.name,
-			body,
-			prNumber: null,
-			kind: "backlog-item",
-			itemType: item.type,
-		});
+export async function propose(options: ProposeOptions): Promise<void> {
+	if (!ensureRemoteOrigin()) return;
+
+	const sessionId =
+		process.env.ASSIST_SESSION === "1"
+			? process.env.ASSIST_SESSION_ID
+			: undefined;
+
+	if (sessionId && options.confirmed) {
+		console.error(
+			chalk.red(
+				"Error: --confirmed cannot be used in a web session. The preview pane is the gate — run 'assist backlog propose --json <file|->' without --confirmed and the item is created on approval.",
+			),
+		);
+		process.exitCode = 1;
 		return;
 	}
 
-	console.log(chalk.bold(item.name));
-	console.log(renderMarkdownTerminal(body));
-}
-
-export async function propose(options: { json: string }): Promise<void> {
-	if (!ensureRemoteOrigin()) return;
-
 	const item = await readProposedItem(options.json);
 
-	await reviewProposal(item);
+	if (!(await reviewProposal(item, sessionId, options.confirmed === true)))
+		return;
 
 	const id = await createItemWithDefaults(item);
 	console.log(chalk.green(`Added item ${formatItemId(id)}: ${item.name}`));

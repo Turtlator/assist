@@ -21,18 +21,9 @@ Before asking the user about existing functionality — how a feature currently 
 
 Skip questions the user has already answered. Stop asking as soon as you have enough to write a clear bug report — don't over-interrogate.
 
-## Step 3: Propose the item
+## Step 3: Compose the bug report
 
-Where the review happens depends on whether this is a web session — check it once:
-
-```
-echo "${ASSIST_SESSION:-0}"
-```
-
-- **`1` (web session):** do NOT print the bug report in the terminal. Skip straight to Step 5 — `assist backlog propose` slides the item into the web UI preview pane, where the user approves it, rejects it, or leaves inline comments on specific lines. That pane is the review gate.
-- **anything else:** show the user the bug report in chat as below, iterate (Step 4), then save.
-
-Either way you compose the same content, so draft it before you call `propose`:
+Compose the bug report's content, but do not show it to the user yet and do not work out where the review should happen — `propose` decides that in Step 4 and tells you what to do next.
 
 **Name:** (concise title)
 **Type:** bug
@@ -62,13 +53,7 @@ The description renders as markdown in both the terminal (`assist backlog show`)
 **Actual:** what happens instead.
 ```
 
-## Step 4: Iterate
-
-In a web session, skip this step — the preview pane handles it.
-
-Otherwise, ask the user if they want to change anything and iterate until they confirm.
-
-## Step 5: Save
+## Step 4: Propose the item
 
 Propose the item and capture the id it prints. Use `propose`, not `assist backlog add` — `propose` is the reviewed path for an agent-authored item:
 
@@ -85,14 +70,13 @@ JSON
 
 The payload is strict JSON — an unknown key is an error. `\n` inside the `description` string is a JSON escape and becomes a real newline, which is what the markdown rendering needs.
 
-In a web session this blocks until the user decides in the preview pane, and the review can take far longer than the default command timeout. Run `propose` **as a background task** so it is never killed mid-review, and do no other work until it returns — the pending preview dies with the process, so a killed `propose` abandons the item.
+Always run `propose` **as a background task**, and do no other work until it returns. In a web session it blocks on the preview pane until the user decides, which can take far longer than the default command timeout, and the pending preview dies with the process — a killed `propose` abandons the item.
 
-When it returns:
+`propose` decides where the bug report is reviewed and prints what to do next. Follow that instruction; never inspect the environment to work it out yourself:
 
-- **Approved** — the item is created and its id is printed.
+- **Created** — the item exists and its id is printed. Continue below.
+- **Draft only** — it printed the rendered bug report, wrote nothing, and asked you to re-run with `--confirmed`. Show the rendered report in chat, ask the user if they want to change anything, and iterate until they confirm. Then re-run the same command with `--confirmed` appended to create the item.
 - **Rejected** — the command exits non-zero and prints the reason plus every inline comment with the excerpt it was left on. Do not retry verbatim: address each comment, then call `propose` again with the revised payload. Repeat until it is approved.
-
-Outside a web session the rendered item is printed and created straight away.
 
 Note the created item id from the output — you'll pass it to the done signal below.
 

@@ -135,7 +135,7 @@ Backlog item ids are written and displayed in an `a`-prefixed form (e.g. item 55
 - `assist backlog list [--status <type>] [-a, --all] [--all-repos] [-v]` - List backlog items with status icons (alias: `ls`; also `assist list` / `assist ls`)
 - `assist backlog add` - Add a new backlog item interactively (human CLI use only; agents must use `propose`)
 - `assist backlog add --name <n> --type <t> --desc <d> --ac <criterion...>` - Add a backlog item from CLI options
-- `assist backlog propose --json <file|->` - Create an agent-authored item from a JSON payload, previewed for approval in a web session. Used by `/draft` and `/bug`. See [docs/backlog-item-preview.md](docs/backlog-item-preview.md)
+- `assist backlog propose --json <file|-> [--confirmed]` - Create an agent-authored item from a JSON payload, previewed for approval in a web session. Outside a web session an agent invocation prints the draft and writes nothing until it is re-run with `--confirmed`; `--confirmed` is rejected in a web session, where the pane is the gate. Used by `/draft` and `/bug`. See [docs/backlog-item-preview.md](docs/backlog-item-preview.md)
 - `assist backlog show <id> [--all-commits]` - Display full detail for a backlog item (alias: `view`). Activity lists the newest 10 commits; `--all-commits` prints every commit
 - `assist backlog plan <id>` - Display the phased plan for a backlog item
 - `assist backlog update-field <id> [--name <n>] [--desc <d>] [--type <t>] [--ac <criterion...>]` - Update fields on a backlog item
