@@ -20,12 +20,12 @@ export function deriveTranscriptStatus(
 	if (ev.stopReason != null && TURN_END_STOP_REASONS.has(ev.stopReason))
 		return "waiting";
 
+	if (opts.permissionActive) return "waiting";
+
 	const resolved = resolvedToolUseIds(events, lastIdx);
 	const pending = ev.toolUses.filter((tool: ToolUse) => !resolved.has(tool.id));
-	if (pending.length === 0) return "running";
 	if (pending.some((tool: ToolUse) => tool.name === ASK_USER_QUESTION))
 		return "waiting";
-	if (opts.permissionActive) return "waiting";
 	return "running";
 }
 

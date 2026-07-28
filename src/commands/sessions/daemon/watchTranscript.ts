@@ -25,6 +25,7 @@ export function watchTranscript(
 		session.transcriptWatcher = undefined;
 	}
 	session.transcriptPath = undefined;
+	session.transcriptFingerprint = undefined;
 
 	const fileName = `${session.claudeSessionId}.jsonl`;
 	let timer: ReturnType<typeof setTimeout> | null = null;

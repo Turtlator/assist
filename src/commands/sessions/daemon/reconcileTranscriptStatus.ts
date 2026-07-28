@@ -1,5 +1,6 @@
 import { deriveTranscriptStatus } from "../shared/deriveTranscriptStatus";
 import { readTranscriptTail } from "../shared/readTranscriptTail";
+import { transcriptTailFingerprint } from "../shared/transcriptTailFingerprint";
 import { findSessionJsonlPath } from "../shared/findSessionJsonlPath";
 import { findTranscriptPathSync } from "../shared/findTranscriptPathSync";
 import type { Session } from "./createSession";
@@ -32,11 +33,15 @@ export async function reconcileTranscriptStatus(
 	if (!filePath) return;
 
 	const entries = await readTranscriptTail(filePath);
+	const fingerprint = transcriptTailFingerprint(entries);
+	if (fingerprint !== null && fingerprint === session.transcriptFingerprint)
+		return;
+	session.transcriptFingerprint = fingerprint ?? undefined;
+
 	const derived = deriveTranscriptStatus(entries, {
 		permissionActive: session.permissionActive,
 	});
 	if (!derived) return;
-	if (derived === "running") session.permissionActive = false;
 	if (derived === session.status) return;
 
 	daemonLog(

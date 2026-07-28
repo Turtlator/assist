@@ -48,6 +48,27 @@ function pendingBash() {
 	];
 }
 
+function resolvedBash(uuid: string) {
+	return [
+		{ type: "user", uuid: "u-prompt", message: { content: "run" } },
+		{
+			type: "assistant",
+			uuid: "u-assistant",
+			message: {
+				stop_reason: "tool_use",
+				content: [{ type: "tool_use", id: "t1", name: "Bash", input: {} }],
+			},
+		},
+		{
+			type: "user",
+			uuid,
+			message: {
+				content: [{ type: "tool_result", tool_use_id: "t1", content: "ok" }],
+			},
+		},
+	];
+}
+
 describe("reconcileTranscriptStatus", () => {
 	beforeEach(() => vi.clearAllMocks());
 
@@ -85,21 +106,51 @@ describe("reconcileTranscriptStatus", () => {
 		expect(onStatusChange).not.toHaveBeenCalled();
 	});
 
-	it("clears the permission flag once the transcript derives running", async () => {
-		readMock.mockResolvedValue([
-			...pendingBash(),
-			{
-				type: "user",
-				message: {
-					content: [{ type: "tool_result", tool_use_id: "t1", content: "ok" }],
-				},
-			},
-		]);
+	it("leaves the permission flag for a set-status running hook to clear", async () => {
+		readMock.mockResolvedValue(resolvedBash("u-result"));
 		const s = session({ status: "waiting", permissionActive: true });
 
 		await reconcileTranscriptStatus(s, vi.fn());
 
-		expect(s.permissionActive).toBe(false);
+		expect(s.permissionActive).toBe(true);
+	});
+
+	it("#a856: keeps a waiting permission prompt waiting when the transcript has not advanced", async () => {
+		readMock.mockResolvedValue(resolvedBash("u-result"));
+		const onStatusChange = vi.fn();
+		const s = session({ status: "waiting", permissionActive: true });
+
+		await reconcileTranscriptStatus(s, onStatusChange);
+		await reconcileTranscriptStatus(s, onStatusChange);
+
+		expect(onStatusChange).not.toHaveBeenCalled();
+		expect(s.status).toBe("waiting");
+	});
+
+	it("skips re-deriving when the conversational tail is unchanged", async () => {
+		readMock.mockResolvedValue(resolvedBash("u-result"));
+		const onStatusChange = vi.fn();
+		const s = session({ status: "waiting" });
+
+		await reconcileTranscriptStatus(s, onStatusChange);
+		onStatusChange.mockClear();
+		s.status = "waiting";
+		await reconcileTranscriptStatus(s, onStatusChange);
+
+		expect(onStatusChange).not.toHaveBeenCalled();
+	});
+
+	it("re-derives once the transcript advances", async () => {
+		readMock.mockResolvedValue(resolvedBash("u-result"));
+		const onStatusChange = vi.fn();
+		const s = session({ status: "waiting", permissionActive: true });
+
+		await reconcileTranscriptStatus(s, onStatusChange);
+		s.permissionActive = false;
+		readMock.mockResolvedValue(resolvedBash("u-result-2"));
+		await reconcileTranscriptStatus(s, onStatusChange);
+
+		expect(onStatusChange).toHaveBeenCalledWith(s, "running");
 	});
 
 	it("never resurrects a finished card", async () => {

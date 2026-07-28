@@ -164,7 +164,7 @@ describe("deriveTranscriptStatus", () => {
 		).toBe("waiting");
 	});
 
-	it("ignores a permission hint once the tool_use has resolved", () => {
+	it("stays waiting on an active permission block even when every tool_use has resolved", () => {
 		expect(
 			deriveTranscriptStatus(
 				[
@@ -173,6 +173,19 @@ describe("deriveTranscriptStatus", () => {
 					toolResult("toolu_1"),
 				],
 				{ permissionActive: true },
+			),
+		).toBe("waiting");
+	});
+
+	it("derives running from a resolved tool_use once the permission block clears", () => {
+		expect(
+			deriveTranscriptStatus(
+				[
+					userPrompt("run it"),
+					assistantToolUse("toolu_1", "Bash"),
+					toolResult("toolu_1"),
+				],
+				{ permissionActive: false },
 			),
 		).toBe("running");
 	});
@@ -267,6 +280,19 @@ describe("deriveTranscriptStatus — prior regression family", () => {
 				userPrompt("continue please"),
 			]),
 		).toBe("running");
+	});
+
+	it("#a856: a permission-blocked tail ending in a resolved tool_use stays waiting", () => {
+		expect(
+			deriveTranscriptStatus(
+				[
+					userPrompt("review the PR"),
+					assistantToolUse("toolu_1", "Bash"),
+					toolResult("toolu_1"),
+				],
+				{ permissionActive: true },
+			),
+		).toBe("waiting");
 	});
 
 	it("#599: a silent mid-turn stall stays running (never flipped by any timeout)", () => {

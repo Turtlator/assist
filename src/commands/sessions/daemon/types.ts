@@ -59,6 +59,7 @@ export type Session = {
 	worktree?: { path: string; clone: string };
 	undurable?: { reason: string; removesTree?: boolean };
 	transcriptPath?: string;
+	transcriptFingerprint?: string;
 	permissionActive?: boolean;
 	autoRun?: boolean;
 	autoAdvance?: boolean;
