@@ -10,6 +10,7 @@ import { objectConfigNode, unionOfObjectsConfigNode } from "./objectConfigNode";
 import { recordConfigNode } from "./recordConfigNode";
 import { scalarConfigNode } from "./scalarConfigNode";
 import { leafTypeOf } from "./scalarUnionMembers";
+import { isSecretSchemaNode } from "./secretConfigValue";
 import { type SchemaNode, unwrapSchemaNode } from "./unwrapSchemaNode";
 
 function opaqueConfigNode(
@@ -21,10 +22,12 @@ function opaqueConfigNode(
 
 function build(node: SchemaNode, path: ConfigPath): ConfigNode {
 	const { inner, defaultValue, optional } = unwrapSchemaNode(node);
+	const secret = isSecretSchemaNode(node) || isSecretSchemaNode(inner);
 	const base: ConfigNodeBase = {
 		path,
 		...(optional ? { optional: true } : {}),
 		...(defaultValue === undefined ? {} : { defaultValue }),
+		...(secret ? { secret: true } : {}),
 	};
 	return (
 		scalarConfigNode(inner, base) ??

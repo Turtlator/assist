@@ -19,6 +19,7 @@ vi.mock("../../../shared/loadConfigFrom", async (importOriginal) => {
 
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { REDACTED_SECRET } from "../../../shared/redactConfigSecrets";
 import { setConfig } from "./setConfig";
 
 const root = join(tmpdir(), "assist-set-config-test");
@@ -34,6 +35,7 @@ mkdirSync(paths.repo, { recursive: true });
 mkdirSync(join(root, "home"), { recursive: true });
 
 afterAll(() => {
+	vi.unstubAllEnvs();
 	rmSync(paths.root, { recursive: true, force: true });
 });
 
@@ -57,6 +59,7 @@ function readYaml(path: string): Record<string, unknown> {
 describe("setConfig", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		vi.stubEnv("HOME", join(root, "home"));
 		writeFileSync(paths.repoConfig, "commit:\n  push: false\n");
 		writeFileSync(paths.globalConfig, "commit:\n  pull: false\n");
 	});
@@ -252,6 +255,80 @@ describe("setConfig", () => {
 			commit: { push: false },
 			sql: { connections },
 		});
+	});
+
+	it("keeps the stored secret when the redaction marker comes back untouched", async () => {
+		const stored = {
+			name: "local",
+			server: "localhost",
+			port: 1433,
+			user: "sa",
+			password: "hunter2",
+			database: "app",
+		};
+		writeFileSync(
+			paths.repoConfig,
+			`sql:\n  connections:\n    - name: local\n      server: localhost\n      port: 1433\n      user: sa\n      password: hunter2\n      database: app\n`,
+		);
+
+		const [status] = await post({
+			key: "sql.connections",
+			value: [{ ...stored, port: 1434, password: REDACTED_SECRET }],
+			cwd: paths.repo,
+			scope: "project",
+		});
+
+		expect(status).toBe(200);
+		expect(readYaml(paths.repoConfig)).toEqual({
+			sql: { connections: [{ ...stored, port: 1434 }] },
+		});
+	});
+
+	it("replaces the stored secret when a new value is supplied", async () => {
+		writeFileSync(paths.repoConfig, "database:\n  url: postgres://old\n");
+
+		const [status] = await post({
+			key: "database.url",
+			value: "postgres://new",
+			cwd: paths.repo,
+			scope: "project",
+		});
+
+		expect(status).toBe(200);
+		expect(readYaml(paths.repoConfig)).toEqual({
+			database: { url: "postgres://new" },
+		});
+	});
+
+	it("keeps the stored secret when a scalar secret row is saved untouched", async () => {
+		writeFileSync(paths.repoConfig, "database:\n  url: postgres://old\n");
+
+		const [status] = await post({
+			key: "database.url",
+			value: REDACTED_SECRET,
+			cwd: paths.repo,
+			scope: "project",
+		});
+
+		expect(status).toBe(200);
+		expect(readYaml(paths.repoConfig)).toEqual({
+			database: { url: "postgres://old" },
+		});
+	});
+
+	it("rejects the marker for a secret that is not stored anywhere", async () => {
+		const [status, payload] = await post({
+			key: "database.url",
+			value: REDACTED_SECRET,
+			cwd: paths.repo,
+			scope: "project",
+		});
+
+		expect(status).toBe(400);
+		expect(payload.error).toContain("database.url");
+		expect(readFileSync(paths.repoConfig, "utf8")).toBe(
+			"commit:\n  push: false\n",
+		);
 	});
 
 	it("writes a record of lists", async () => {

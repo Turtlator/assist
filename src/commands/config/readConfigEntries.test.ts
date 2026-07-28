@@ -2,6 +2,8 @@ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { loadConfigFrom } from "../../shared/loadConfigFrom";
+import { REDACTED_SECRET } from "../../shared/redactConfigSecrets";
 import { readConfigEntries } from "./readConfigEntries";
 
 const root = join(tmpdir(), "assist-read-config-entries-test");
@@ -146,6 +148,49 @@ describe("readConfigEntries", () => {
 
 		expect(entryFor("commit.push").sources).toEqual(["project", "global"]);
 		expect(entryFor("worktree.trunk").sources).toEqual([]);
+	});
+
+	it("withholds a secret scalar's value while keeping its source", () => {
+		writeFileSync(repoConfig, "database:\n  url: postgres://u:p@host/db\n");
+
+		const entry = entryFor("database.url");
+
+		expect(entry.value).toEqual(REDACTED_SECRET);
+		expect(entry.source).toBe("project");
+		expect(JSON.stringify(entry)).not.toContain("postgres");
+	});
+
+	it("leaves an unset secret without a value so it reads as not set", () => {
+		expect(entryFor("database.url").value).toBeUndefined();
+		expect(entryFor("roam.clientSecret").value).toBeUndefined();
+	});
+
+	it("withholds a secret nested in an array of objects and keeps its siblings", () => {
+		writeFileSync(
+			globalConfig,
+			"sql:\n  connections:\n    - name: main\n      server: localhost\n      port: 1433\n      user: sa\n      password: hunter2\n      database: app\n",
+		);
+
+		const entry = entryFor("sql.connections");
+
+		expect(entry.value).toEqual([
+			{
+				name: "main",
+				server: "localhost",
+				port: 1433,
+				user: "sa",
+				password: REDACTED_SECRET,
+				database: "app",
+			},
+		]);
+		expect(entry.source).toBe("global");
+		expect(JSON.stringify(entry)).not.toContain("hunter2");
+	});
+
+	it("keeps returning real secret values from loadConfigFrom", () => {
+		writeFileSync(globalConfig, "database:\n  url: postgres://u:p@host/db\n");
+
+		expect(loadConfigFrom(repo).database?.url).toBe("postgres://u:p@host/db");
 	});
 
 	it("reports the schema default for a leaf under an unset optional parent", () => {

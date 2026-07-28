@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { runConfigSchema, runLinkSchema } from "./runConfigSchema";
+import { secretConfigValue } from "./secretConfigValue";
 
 const transcriptConfigSchema = z.strictObject({
 	vttDir: z.string(),
@@ -75,10 +76,10 @@ const assistConfigShape = {
 		.optional(),
 	roam: z
 		.strictObject({
-			clientId: z.string(),
-			clientSecret: z.string(),
-			accessToken: z.string().optional(),
-			refreshToken: z.string().optional(),
+			clientId: secretConfigValue(z.string()),
+			clientSecret: secretConfigValue(z.string()),
+			accessToken: secretConfigValue(z.string()).optional(),
+			refreshToken: secretConfigValue(z.string()).optional(),
 			tokenExpiresAt: z.number().optional(),
 		})
 		.optional(),
@@ -148,7 +149,7 @@ const assistConfigShape = {
 					z.strictObject({
 						name: z.string(),
 						url: z.string(),
-						apiToken: z.string(),
+						apiToken: secretConfigValue(z.string()),
 					}),
 				)
 				.default([]),
@@ -164,7 +165,7 @@ const assistConfigShape = {
 						server: z.string(),
 						port: z.number(),
 						user: z.string(),
-						password: z.string(),
+						password: secretConfigValue(z.string()),
 						database: z.string(),
 					}),
 				)
@@ -195,7 +196,7 @@ const assistConfigShape = {
 		.optional(),
 	database: z
 		.strictObject({
-			url: z.string().optional(),
+			url: secretConfigValue(z.string()).optional(),
 		})
 		.default({}),
 	mermaid: z

@@ -12,7 +12,7 @@ export function normalizeConfigValue(
 ): unknown {
 	switch (node.kind) {
 		case "scalar":
-			return normalizeScalar(node, value);
+			return node.secret ? value : normalizeScalar(node, value);
 		case "scalarList":
 		case "objectList":
 			return asArray(value).map((item) =>

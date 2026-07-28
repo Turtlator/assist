@@ -10,10 +10,12 @@ import { ConfigObjectListEditor } from "./ConfigObjectListEditor";
 import { ConfigRecordEditor } from "./ConfigRecordEditor";
 import { ConfigScalarEditor } from "./ConfigScalarEditor";
 import { ConfigScalarText } from "./ConfigScalarText";
+import { ConfigSecretInput } from "./ConfigSecretInput";
 import { ConfigVariantEditor } from "./ConfigVariantEditor";
 
 export function ConfigNodeEditor(props: ConfigNodeEditorProps): ReactElement {
 	const { node, label, value, disabled, onChange } = props;
+	if (node.secret) return <ConfigSecretInput {...props} />;
 	switch (node.kind) {
 		case "scalar":
 			return <ConfigScalarEditor {...props} node={node} />;

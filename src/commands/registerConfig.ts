@@ -31,11 +31,12 @@ export function registerConfig(program: Command): void {
 
 	configCommand
 		.command("get <key>")
-		.description("Get a config value")
-		.action(configGet);
+		.description("Get a config value (secrets print as <hidden>)")
+		.option("--reveal", "Print the raw value of a secret, undecorated")
+		.action((key, options) => configGet(key, options));
 
 	configCommand
 		.command("list")
-		.description("List all config values")
+		.description("List all config values (secrets print as <hidden>)")
 		.action(configList);
 }

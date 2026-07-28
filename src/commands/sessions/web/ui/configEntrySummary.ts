@@ -14,7 +14,12 @@ export function configEntrySummary(node: ConfigNode, value: unknown): string {
 	for (const field of fields) {
 		const name = configNodeFieldName(field);
 		const entry = name === undefined ? undefined : record[name];
-		if (field.kind === "scalar" && entry !== undefined && entry !== "")
+		if (
+			field.kind === "scalar" &&
+			!field.secret &&
+			entry !== undefined &&
+			entry !== ""
+		)
 			return String(entry);
 	}
 	return "new entry";

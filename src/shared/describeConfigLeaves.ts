@@ -14,6 +14,7 @@ export type ConfigLeaf = {
 	unionTypes?: ConfigScalarLeafType[];
 	itemType?: ConfigScalarLeafType;
 	defaultValue?: unknown;
+	secret?: true;
 };
 
 function leafType(node: ConfigNode): ConfigLeafType {
@@ -43,6 +44,7 @@ function toLeaf(node: ConfigNode): ConfigLeaf {
 	}
 	if (node.kind === "scalarList") leaf.itemType = node.itemType;
 	if (node.defaultValue !== undefined) leaf.defaultValue = node.defaultValue;
+	if (node.secret) leaf.secret = true;
 	return leaf;
 }
 

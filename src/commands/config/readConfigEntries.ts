@@ -5,6 +5,7 @@ import {
 } from "../../shared/describeConfigLeaves";
 import { describeConfigNode } from "../../shared/describeConfigNode";
 import { loadConfigFrom } from "../../shared/loadConfigFrom";
+import { redactConfigSecrets } from "../../shared/redactConfigSecrets";
 import { assistConfigSchema } from "../../shared/types";
 import { getNestedValue } from "./getNestedValue";
 import { isGlobalOnlyConfigKey } from "./isGlobalOnlyConfigKey";
@@ -33,14 +34,18 @@ export function readConfigEntries(cwd: string): ConfigEntry[] {
 		.map((leaf) => {
 			const sources = resolveConfigSources(leaf.key, layers);
 			const source = sources[0] ?? "default";
+			const node = configEntryNode(schema, leaf.key);
 			return {
 				...leaf,
-				value: getNestedValue(config, leaf.key),
+				...(leaf.defaultValue === undefined
+					? {}
+					: { defaultValue: redactConfigSecrets(leaf.defaultValue, node) }),
+				value: redactConfigSecrets(getNestedValue(config, leaf.key), node),
 				source,
 				sources,
 				...(layers.repoKey ? { repoKey: layers.repoKey } : {}),
 				globalOnly: isGlobalOnlyConfigKey(leaf.key),
-				node: configEntryNode(schema, leaf.key),
+				node,
 			};
 		});
 }

@@ -8,6 +8,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { describeConfigNode } from "../../../../shared/describeConfigNode";
+import { REDACTED_SECRET } from "../../../../shared/redactConfigSecrets";
 import { assistConfigSchema } from "../../../../shared/types";
 import { configEntryNode } from "../../../config/configEntryNode";
 import type { ConfigEntry } from "../../../config/readConfigEntries";
@@ -951,6 +952,149 @@ describe("ConfigView", () => {
 				key: "worktree.enabled",
 				cwd: "/repo",
 				scope: "repo",
+			}),
+		);
+	});
+
+	it("shows a set secret as hidden and an unset one as not set, with sources", async () => {
+		stubApi([
+			{
+				key: "database.url",
+				type: "string",
+				secret: true,
+				value: REDACTED_SECRET,
+				source: "global",
+				node: node("database.url"),
+			},
+			{
+				key: "roam.clientSecret",
+				type: "string",
+				secret: true,
+				value: undefined,
+				source: "default",
+				node: node("roam.clientSecret"),
+			},
+		]);
+		renderView();
+
+		await waitFor(() => expect(screen.getByText("database.url")).toBeTruthy());
+		expect(screen.getByText("set (hidden)")).toBeTruthy();
+		expect(screen.getByText("not set")).toBeTruthy();
+		expect(screen.getByText("global")).toBeTruthy();
+		expect(screen.getByText("default")).toBeTruthy();
+	});
+
+	it("posts the marker back for a secret row saved without typing a value", async () => {
+		const fetchMock = stubApi([
+			{
+				key: "database.url",
+				type: "string",
+				secret: true,
+				value: REDACTED_SECRET,
+				source: "project",
+				node: node("database.url"),
+			},
+		]);
+		renderView("/repo/one");
+
+		await waitFor(() => expect(screen.getByText("database.url")).toBeTruthy());
+		fireEvent.click(screen.getByRole("button", { name: "Edit database.url" }));
+		expect(
+			(screen.getByLabelText("database.url") as HTMLInputElement).value,
+		).toBe("");
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() =>
+			expect(lastSetBody(fetchMock)).toEqual({
+				key: "database.url",
+				value: REDACTED_SECRET,
+				cwd: "/repo/one",
+				scope: "project",
+			}),
+		);
+	});
+
+	it("posts a typed secret in place of the marker", async () => {
+		const fetchMock = stubApi([
+			{
+				key: "database.url",
+				type: "string",
+				secret: true,
+				value: REDACTED_SECRET,
+				source: "project",
+				node: node("database.url"),
+			},
+		]);
+		renderView("/repo/one");
+
+		await waitFor(() => expect(screen.getByText("database.url")).toBeTruthy());
+		fireEvent.click(screen.getByRole("button", { name: "Edit database.url" }));
+		fireEvent.change(screen.getByLabelText("database.url"), {
+			target: { value: "postgres://new" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() =>
+			expect(lastSetBody(fetchMock)).toEqual({
+				key: "database.url",
+				value: "postgres://new",
+				cwd: "/repo/one",
+				scope: "project",
+			}),
+		);
+	});
+
+	it("keeps an untouched nested secret marked while a sibling field is edited", async () => {
+		const fetchMock = stubApi([
+			{
+				key: "sql.connections",
+				type: "array",
+				value: [
+					{
+						name: "local",
+						server: "localhost",
+						port: 1433,
+						user: "sa",
+						password: REDACTED_SECRET,
+						database: "app",
+					},
+				],
+				source: "global",
+				node: node("sql.connections"),
+			},
+		]);
+		renderView("/repo/one");
+
+		await waitFor(() =>
+			expect(screen.getByText("sql.connections")).toBeTruthy(),
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Edit sql.connections[0]" }),
+		);
+		expect(
+			(screen.getByLabelText("sql.connections[0].password") as HTMLInputElement)
+				.value,
+		).toBe("");
+		fireEvent.change(screen.getByLabelText("sql.connections[0].user"), {
+			target: { value: "admin" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() =>
+			expect(lastSetBody(fetchMock)).toEqual({
+				key: "sql.connections",
+				value: [
+					{
+						name: "local",
+						server: "localhost",
+						port: 1433,
+						user: "admin",
+						password: REDACTED_SECRET,
+						database: "app",
+					},
+				],
+				cwd: "/repo/one",
+				scope: "project",
 			}),
 		);
 	});

@@ -9,6 +9,7 @@ export type ConfigNodeBase = {
 	path: ConfigPath;
 	optional?: boolean;
 	defaultValue?: unknown;
+	secret?: true;
 };
 
 export type ConfigScalarNode = ConfigNodeBase & {

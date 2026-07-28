@@ -182,10 +182,12 @@ Backlog item ids are written and displayed in an `a`-prefixed form (e.g. item 55
 - `assist run add` - Add a new run configuration to assist.yml and create a Claude command file
 - `assist run link <path> --prefix <prefix>` - Link run configurations from another project's assist.yml
 - `assist run remove <name>` - Remove a run configuration and delete its Claude command file
-- `assist config get <key>` - Get a config value
-- `assist config list` - List all config values
+- `assist config get <key>` - Get a config value. Secret values (`database.url`, `roam.*` tokens, `sql.connections[].password`, `seq.connections[].apiToken`) print as `<hidden>`; `--reveal` prints the raw value undecorated for command substitution. An unset key still reports `Key "<key>" is not set`
+- `assist config list` - List all config values, with secret values shown as `<hidden>` (no reveal option)
 - `assist config set <key> <value>` - Set a config value. `--global` writes to `~/.assist.yml`; `-g --repo [name]` writes a per-repo override there
 - `assist config unset <key>` - Remove a config value so the key falls back to the global value or schema default (`-g` targets `~/.assist.yml`; `-g --repo [name]` removes it from a per-repo override there)
+
+The Config tab of the sessions web dashboard never receives secret values: `GET /api/config` replaces each one with a set-or-unset marker, so a configured secret renders as `set (hidden)` and an unset one as `not set`, both keeping their project/global/default chip. Secret fields edit write-only - type a value to replace it, leave the field blank to keep whatever is stored.
 
 ### Verify and lint
 
