@@ -75,7 +75,7 @@ describe("CardPrActions review pairing", () => {
 		expect(findings.parentElement).toBe(review.parentElement);
 		const style = getComputedStyle(review.parentElement as Element);
 		expect(style.flexDirection).toBe("column");
-		expect(style.borderTopWidth).not.toBe("");
+		expect(style.borderTopStyle).toBe("none");
 		expect(style.gap).toBe("");
 	});
 
