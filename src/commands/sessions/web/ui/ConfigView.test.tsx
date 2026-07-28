@@ -100,6 +100,34 @@ function stubUnsetApi(
 	return fetchMock;
 }
 
+const filterableEntries: ConfigEntry[] = [
+	{
+		key: "commit.pull",
+		type: "boolean",
+		value: true,
+		source: "project",
+		node: node("commit.pull"),
+	},
+	{
+		key: "commit.push",
+		type: "boolean",
+		value: false,
+		source: "project",
+		node: node("commit.push"),
+	},
+	{
+		key: "backup.dir",
+		type: "string",
+		value: "~/.assist/backups",
+		source: "global",
+		node: node("backup.dir"),
+	},
+];
+
+function keyFilter() {
+	return screen.getByLabelText("Filter config keys");
+}
+
 function renderView(selectedCwd = "/repo") {
 	render(
 		<RepoSelectionContext.Provider
@@ -1130,6 +1158,46 @@ describe("ConfigView", () => {
 				scope: "project",
 			}),
 		);
+	});
+
+	it("narrows the rows to the keys matching the filter", async () => {
+		stubEntries(filterableEntries);
+		renderView();
+
+		await waitFor(() => expect(screen.getByText("backup.dir")).toBeTruthy());
+		fireEvent.change(keyFilter(), { target: { value: "COMMIT" } });
+
+		expect(screen.getByText("commit.pull")).toBeTruthy();
+		expect(screen.getByText("commit.push")).toBeTruthy();
+		expect(screen.queryByText("backup.dir")).toBeNull();
+		expect(screen.queryByText("backup")).toBeNull();
+	});
+
+	it("restores the full list when the filter is cleared", async () => {
+		stubEntries(filterableEntries);
+		renderView();
+
+		await waitFor(() => expect(screen.getByText("backup.dir")).toBeTruthy());
+		fireEvent.change(keyFilter(), { target: { value: "commit" } });
+		expect(screen.queryByText("backup.dir")).toBeNull();
+
+		fireEvent.click(screen.getByRole("button", { name: "Clear key filter" }));
+
+		expect(screen.getByText("backup.dir")).toBeTruthy();
+		expect(screen.getByText("commit.pull")).toBeTruthy();
+		expect(keyFilter()).toHaveProperty("value", "");
+	});
+
+	it("keeps the filter mounted when nothing matches", async () => {
+		stubEntries(filterableEntries);
+		renderView();
+
+		await waitFor(() => expect(screen.getByText("backup.dir")).toBeTruthy());
+		fireEvent.change(keyFilter(), { target: { value: "nosuchkey" } });
+
+		expect(screen.getByText("No keys match “nosuchkey”.")).toBeTruthy();
+		expect(keyFilter()).toBeTruthy();
+		expect(screen.queryByText("commit")).toBeNull();
 	});
 
 	it("keeps a leaf the schema does not describe read-only", async () => {

@@ -1,0 +1,36 @@
+import CloseIcon from "@mui/icons-material/Close";
+import IconButton from "@mui/material/IconButton";
+import TextField from "@mui/material/TextField";
+
+export function ConfigKeySearchInput({
+	search,
+	onChange,
+}: {
+	search: string;
+	onChange: (search: string) => void;
+}) {
+	return (
+		<TextField
+			size="small"
+			value={search}
+			onChange={(e) => onChange(e.target.value)}
+			placeholder="Filter keys..."
+			sx={{ width: 240 }}
+			slotProps={{
+				htmlInput: { "aria-label": "Filter config keys" },
+				input: {
+					sx: { fontSize: 12 },
+					endAdornment: search ? (
+						<IconButton
+							size="small"
+							aria-label="Clear key filter"
+							onClick={() => onChange("")}
+						>
+							<CloseIcon fontSize="inherit" />
+						</IconButton>
+					) : undefined,
+				},
+			}}
+		/>
+	);
+}
