@@ -1,3 +1,10 @@
+## [0.490.1](https://github.com/staff0rd/assist/compare/v0.490.0...v0.490.1) (2026-07-28)
+
+
+### Bug Fixes
+
+* persist session toggles across restart ([6e0457a](https://github.com/staff0rd/assist/commit/6e0457a492864a7f1f497a7b799775f59baf8cd8))
+
 # [0.490.0](https://github.com/staff0rd/assist/compare/v0.489.2...v0.490.0) (2026-07-28)
 
 
