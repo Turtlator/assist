@@ -1,3 +1,10 @@
+# [0.499.0](https://github.com/staff0rd/assist/compare/v0.498.0...v0.499.0) (2026-07-28)
+
+
+### Features
+
+* chain review from PR preview approve ([558a68d](https://github.com/staff0rd/assist/commit/558a68d42f0913fa60c639050bb911a27653bbb8))
+
 # [0.498.0](https://github.com/staff0rd/assist/compare/v0.497.0...v0.498.0) (2026-07-28)
 
 
