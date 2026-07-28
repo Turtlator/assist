@@ -1,3 +1,10 @@
+# [0.490.0](https://github.com/staff0rd/assist/compare/v0.489.2...v0.490.0) (2026-07-28)
+
+
+### Features
+
+* restore scroll position per route ([a175c1a](https://github.com/staff0rd/assist/commit/a175c1a6304b1d5a32f64889c47bc3dc55f739c5))
+
 ## [0.489.2](https://github.com/staff0rd/assist/compare/v0.489.1...v0.489.2) (2026-07-28)
 
 
