@@ -1,3 +1,10 @@
+## [0.496.2](https://github.com/staff0rd/assist/compare/v0.496.1...v0.496.2) (2026-07-28)
+
+
+### Bug Fixes
+
+* keep waiting sessions waiting on reconcile ([3f32f42](https://github.com/staff0rd/assist/commit/3f32f42e6f27c4a99ffe94f9dcff4d64217d24b2))
+
 ## [0.496.1](https://github.com/staff0rd/assist/compare/v0.496.0...v0.496.1) (2026-07-28)
 
 
