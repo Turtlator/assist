@@ -28,6 +28,23 @@ function waitedPast(thresholdMs: number): (session: SessionInfo) => boolean {
 	return (session) => hasWaitedPastThreshold(session, NOW, thresholdMs);
 }
 
+function row(session: SessionInfo, ...children: SessionInfo[]) {
+	return { session, children };
+}
+
+const repoGroup = { origin: "host/org/assist", clone: "/git/assist" };
+
+function inWorktree(id: string, cwd: string): SessionInfo {
+	return { ...session(id, cwd), repoGroup };
+}
+
+function backlogRun(id: string, cwd: string): SessionInfo {
+	return {
+		...inWorktree(id, cwd),
+		activity: { kind: "backlog", startedAt: 0 },
+	};
+}
+
 describe("groupSessionsByRepo", () => {
 	it("groups 2+ sessions sharing a cwd under a repo entry", () => {
 		const sessions = [
@@ -42,7 +59,7 @@ describe("groupSessionsByRepo", () => {
 				kind: "repo",
 				key: "/home/me/git/assist",
 				label: "assist",
-				sessions: [sessions[0], sessions[1]],
+				rows: [row(sessions[0]), row(sessions[1])],
 			},
 		]);
 	});
@@ -70,7 +87,7 @@ describe("groupSessionsByRepo", () => {
 				kind: "repo",
 				key: "/repo",
 				label: "repo",
-				sessions: [sessions[2], sessions[0], sessions[1]],
+				rows: [row(sessions[2]), row(sessions[0]), row(sessions[1])],
 			},
 		]);
 	});
@@ -115,7 +132,7 @@ describe("groupSessionsByRepo", () => {
 				kind: "repo",
 				key: "host/org/assist",
 				label: "assist",
-				sessions: [sessions[0], sessions[1]],
+				rows: [row(sessions[0]), row(sessions[1])],
 			},
 		]);
 	});
@@ -159,7 +176,7 @@ describe("groupSessionsByRepo", () => {
 				kind: "repo",
 				key: "/repo",
 				label: "repo",
-				sessions: [sessions[2], sessions[0], sessions[1]],
+				rows: [row(sessions[2]), row(sessions[0]), row(sessions[1])],
 			},
 		]);
 	});
@@ -184,7 +201,7 @@ describe("groupSessionsByRepo", () => {
 				kind: "repo",
 				key: "/repo",
 				label: "repo",
-				sessions: [sessions[1], sessions[2], sessions[0]],
+				rows: [row(sessions[1]), row(sessions[2]), row(sessions[0])],
 			},
 		]);
 	});
@@ -209,13 +226,13 @@ describe("groupSessionsByRepo", () => {
 				kind: "repo",
 				key: "/two",
 				label: "two",
-				sessions: [sessions[3], sessions[2]],
+				rows: [row(sessions[3]), row(sessions[2])],
 			},
 			{
 				kind: "repo",
 				key: "/one",
 				label: "one",
-				sessions: [sessions[0], sessions[1]],
+				rows: [row(sessions[0]), row(sessions[1])],
 			},
 		]);
 	});
@@ -261,7 +278,7 @@ describe("groupSessionsByRepo", () => {
 				kind: "repo",
 				key: "/one",
 				label: "one",
-				sessions: [sessions[0], sessions[1]],
+				rows: [row(sessions[0]), row(sessions[1])],
 			},
 		]);
 	});
@@ -306,7 +323,7 @@ describe("groupSessionsByRepo", () => {
 			kind: "repo",
 			key: "/one",
 			label: "one",
-			sessions: [sessions[1], sessions[0]],
+			rows: [row(sessions[1]), row(sessions[0])],
 		});
 	});
 
@@ -325,13 +342,13 @@ describe("groupSessionsByRepo", () => {
 				kind: "repo",
 				key: "/one",
 				label: "one",
-				sessions: [sessions[0], sessions[1]],
+				rows: [row(sessions[0]), row(sessions[1])],
 			},
 			{
 				kind: "repo",
 				key: "/two",
 				label: "two",
-				sessions: [sessions[2], sessions[3]],
+				rows: [row(sessions[2]), row(sessions[3])],
 			},
 		]);
 	});
@@ -355,13 +372,13 @@ describe("groupSessionsByRepo", () => {
 				kind: "repo",
 				key: "/two",
 				label: "two",
-				sessions: [sessions[3], sessions[2]],
+				rows: [row(sessions[3]), row(sessions[2])],
 			},
 			{
 				kind: "repo",
 				key: "/one",
 				label: "one",
-				sessions: [sessions[0], sessions[1]],
+				rows: [row(sessions[0]), row(sessions[1])],
 			},
 		]);
 	});
@@ -381,13 +398,13 @@ describe("groupSessionsByRepo", () => {
 				kind: "repo",
 				key: "/two",
 				label: "two",
-				sessions: [sessions[2], sessions[3]],
+				rows: [row(sessions[2]), row(sessions[3])],
 			},
 			{
 				kind: "repo",
 				key: "/one",
 				label: "one",
-				sessions: [sessions[0], sessions[1]],
+				rows: [row(sessions[0]), row(sessions[1])],
 			},
 		]);
 	});
@@ -407,13 +424,73 @@ describe("groupSessionsByRepo", () => {
 				kind: "repo",
 				key: "/home/me/work/assist",
 				label: "assist",
-				sessions: [sessions[0], sessions[1]],
+				rows: [row(sessions[0]), row(sessions[1])],
 			},
 			{
 				kind: "repo",
 				key: "/home/me/play/assist",
 				label: "assist",
-				sessions: [sessions[2], sessions[3]],
+				rows: [row(sessions[2]), row(sessions[3])],
+			},
+		]);
+	});
+
+	it("nests a worktree session under the backlog run sharing its cwd", () => {
+		const sessions = [
+			backlogRun("run", "/git/assist-2"),
+			inWorktree("review", "/git/assist-2"),
+		];
+
+		const groups = groupSessionsByRepo(sessions, () => false);
+
+		expect(groups).toEqual([
+			{
+				kind: "repo",
+				key: "host/org/assist",
+				label: "assist",
+				rows: [row(sessions[0]!, sessions[1]!)],
+			},
+		]);
+	});
+
+	it("floats a whole nested row when only its child is waiting", () => {
+		const sessions = [
+			inWorktree("other", "/git/assist-3"),
+			backlogRun("run", "/git/assist-2"),
+			inWorktree("review", "/git/assist-2"),
+		];
+		const waiting = new Set(["review"]);
+
+		const groups = groupSessionsByRepo(
+			sessions,
+			() => false,
+			(s) => waiting.has(s.id),
+		);
+
+		expect(groups).toEqual([
+			{
+				kind: "repo",
+				key: "host/org/assist",
+				label: "assist",
+				rows: [row(sessions[1]!, sessions[2]!), row(sessions[0]!)],
+			},
+		]);
+	});
+
+	it("leaves a main-clone session un-nested alongside a run in the clone", () => {
+		const sessions = [
+			backlogRun("run", "/git/assist"),
+			inWorktree("review", "/git/assist"),
+		];
+
+		const groups = groupSessionsByRepo(sessions, () => false);
+
+		expect(groups).toEqual([
+			{
+				kind: "repo",
+				key: "host/org/assist",
+				label: "assist",
+				rows: [row(sessions[0]!), row(sessions[1]!)],
 			},
 		]);
 	});
