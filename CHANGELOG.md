@@ -1,3 +1,11 @@
+## [0.489.2](https://github.com/staff0rd/assist/compare/v0.489.1...v0.489.2) (2026-07-28)
+
+
+### Bug Fixes
+
+* show config scope indicators, drop hint ([aee9693](https://github.com/staff0rd/assist/commit/aee9693e6470832bc01348127556a54a77b76bd2))
+* validate phase-done phase argument ([885654d](https://github.com/staff0rd/assist/commit/885654d93f48e0cc25a33fff88d2aed4900cd399))
+
 ## [0.489.1](https://github.com/staff0rd/assist/compare/v0.489.0...v0.489.1) (2026-07-28)
 
 
