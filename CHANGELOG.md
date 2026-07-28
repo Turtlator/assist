@@ -1,3 +1,10 @@
+# [0.489.0](https://github.com/staff0rd/assist/compare/v0.488.5...v0.489.0) (2026-07-28)
+
+
+### Features
+
+* watch report, recovery, build ([b1814d1](https://github.com/staff0rd/assist/commit/b1814d17b553522c9458fdfb2f42e3072cc46f9e))
+
 ## [0.488.5](https://github.com/staff0rd/assist/compare/v0.488.4...v0.488.5) (2026-07-28)
 
 
