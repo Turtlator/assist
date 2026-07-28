@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export type ReviewSynthesisState =
+type ReviewSynthesisState =
 	| { status: "loading" }
 	| { status: "absent" }
 	| { status: "error" }

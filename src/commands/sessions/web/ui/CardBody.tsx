@@ -1,11 +1,9 @@
 import { CardToggles } from "./CardToggles";
 import { displayStatus } from "./displayStatus";
-import { sessionType } from "./sessionType";
 import { StatusRow } from "./StatusRow";
 import type { SessionInfo } from "./types";
 import { useElapsed } from "./useElapsed";
 import { useTopBarLayoutContext } from "./useTopBarLayoutContext";
-import { ViewReviewButton } from "./ViewReviewButton";
 
 export function CardBody({
 	session,
@@ -41,9 +39,6 @@ export function CardBody({
 				onSetAutoRun={onSetAutoRun}
 				onSetAutoAdvance={onSetAutoAdvance}
 			/>
-			{sessionType(session) === "review" && (
-				<ViewReviewButton cwd={session.cwd} />
-			)}
 		</>
 	);
 }

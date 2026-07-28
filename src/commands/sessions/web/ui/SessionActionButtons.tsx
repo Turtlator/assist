@@ -8,6 +8,7 @@ import { RetryButton } from "./RetryButton";
 import { ServerRunControls } from "./ServerRunControls";
 import { SessionStarButton } from "./SessionStarButton";
 import type { SessionInfo } from "./types";
+import { ViewReviewButton } from "./ViewReviewButton";
 
 export function SessionActionButtons({
 	session,
@@ -28,6 +29,7 @@ export function SessionActionButtons({
 			<AddAgentButton session={session} />
 			{session.cwd && <OpenInCodeButton cwd={session.cwd} variant="card" />}
 			<CardPrActions session={session} />
+			<ViewReviewButton session={session} />
 			{onRestart && !stopped && (
 				<RestartButton
 					id={session.id}

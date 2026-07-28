@@ -1,5 +1,11 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SessionTopBar } from "./SessionTopBar";
@@ -28,6 +34,7 @@ beforeEach(() => {
 
 afterEach(() => {
 	cleanup();
+	vi.unstubAllGlobals();
 	Reflect.deleteProperty(globalThis, "ResizeObserver");
 });
 
@@ -357,6 +364,44 @@ describe("SessionTopBar actions", () => {
 		renderTopBar(session({ closing: true }));
 
 		expect(screen.queryByTitle("Dismiss session 1")).toBeNull();
+	});
+});
+
+describe("SessionTopBar review synthesis", () => {
+	function stubSynthesis() {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async (url: string) => ({
+				ok: true,
+				status: 200,
+				json: async () =>
+					url.startsWith("/api/review/synthesis")
+						? { synthesis: "## findings" }
+						: {},
+			})),
+		);
+	}
+
+	it("carries the review button for a review session", async () => {
+		stubSynthesis();
+		renderTopBar(
+			session({
+				commandType: "assist",
+				assistArgs: ["review-pr-comments", "12"],
+				cwd: "/git/repo",
+			}),
+		);
+
+		expect(await screen.findByText("Findings")).toBeTruthy();
+	});
+
+	it("omits the review button for a session that is not a review", async () => {
+		stubSynthesis();
+		renderTopBar(session({ cwd: "/git/repo" }));
+
+		expect(screen.queryByText("Findings")).toBeNull();
+		await waitFor(() => expect(fetch).toHaveBeenCalled());
+		expect(screen.queryByText("Findings")).toBeNull();
 	});
 });
 

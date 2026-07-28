@@ -124,6 +124,15 @@ describe("CardBody git status counts", () => {
 	});
 });
 
+describe("CardBody review button", () => {
+	it("leaves the review button to the session action row", async () => {
+		renderBody(session({ assistArgs: ["review-pr-comments", "12"] }), false);
+
+		expect(await screen.findByText("+1")).toBeTruthy();
+		expect(screen.queryByText("Findings")).toBeNull();
+	});
+});
+
 describe("CardBody top bar layout", () => {
 	function renderWithTopBar(topBar: boolean) {
 		render(

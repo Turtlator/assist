@@ -1,44 +1,38 @@
-import RateReviewOutlinedIcon from "@mui/icons-material/RateReviewOutlined";
-import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
+import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
 import { useState } from "react";
+import { ActionButton } from "./ActionButton";
 import { ReviewSynthesisDialog } from "./ReviewSynthesisDialog";
+import { sessionType } from "./sessionType";
 import { StopCardActivation } from "./StopCardActivation";
+import type { SessionInfo } from "./types";
 import { useReviewSynthesis } from "./useReviewSynthesis";
 
-export function ViewReviewButton({ cwd }: { cwd: string | undefined }) {
-	const state = useReviewSynthesis(cwd, true);
+export function ViewReviewButton({ session }: { session: SessionInfo }) {
+	const review = sessionType(session) === "review";
+	const state = useReviewSynthesis(session.cwd, review);
 	const [open, setOpen] = useState(false);
 
-	if (state.status === "absent") return null;
-
-	const loading = state.status === "loading";
+	if (state.status !== "ready") return null;
 
 	return (
-		<StopCardActivation>
-			<Button
-				size="small"
-				disabled={loading}
-				startIcon={
-					loading ? (
-						<CircularProgress size={14} />
-					) : (
-						<RateReviewOutlinedIcon sx={{ fontSize: 14 }} />
-					)
-				}
-				onClick={() => setOpen(true)}
-				sx={{
-					mt: 0.5,
-					minWidth: 0,
-					textTransform: "none",
-					color: "text.secondary",
+		<>
+			<ActionButton
+				label="Findings"
+				title="View review findings"
+				icon={<FactCheckOutlinedIcon sx={{ fontSize: 14 }} />}
+				onClick={(e) => {
+					e.stopPropagation();
+					setOpen(true);
 				}}
-			>
-				View review
-			</Button>
+			/>
 			{open && (
-				<ReviewSynthesisDialog state={state} onClose={() => setOpen(false)} />
+				<StopCardActivation>
+					<ReviewSynthesisDialog
+						content={state.content}
+						onClose={() => setOpen(false)}
+					/>
+				</StopCardActivation>
 			)}
-		</StopCardActivation>
+		</>
 	);
 }
