@@ -1,3 +1,10 @@
+## [0.502.2](https://github.com/staff0rd/assist/compare/v0.502.1...v0.502.2) (2026-07-28)
+
+
+### Bug Fixes
+
+* hide consoles on execSync git spawns ([dd9a037](https://github.com/staff0rd/assist/commit/dd9a037532384db68398b8e5e7b5067dc57a1d32))
+
 ## [0.502.1](https://github.com/staff0rd/assist/compare/v0.502.0...v0.502.1) (2026-07-28)
 
 
