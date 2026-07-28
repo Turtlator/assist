@@ -1,3 +1,10 @@
+## [0.488.5](https://github.com/staff0rd/assist/compare/v0.488.4...v0.488.5) (2026-07-28)
+
+
+### Bug Fixes
+
+* stop dropping sessions on restore ([bcac607](https://github.com/staff0rd/assist/commit/bcac607c219ee82a0229c9d12d35097f84345e94))
+
 ## [0.488.4](https://github.com/staff0rd/assist/compare/v0.488.3...v0.488.4) (2026-07-28)
 
 
