@@ -1,3 +1,10 @@
+# [0.500.0](https://github.com/staff0rd/assist/compare/v0.499.0...v0.500.0) (2026-07-28)
+
+
+### Features
+
+* filter config keys on /config ([ec0d6f6](https://github.com/staff0rd/assist/commit/ec0d6f632d56434f22ba7c2992e416dbfb715fad))
+
 # [0.499.0](https://github.com/staff0rd/assist/compare/v0.498.0...v0.499.0) (2026-07-28)
 
 
