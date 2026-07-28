@@ -477,6 +477,91 @@ describe("groupSessionsByRepo", () => {
 		]);
 	});
 
+	it("floats a whole repo group whose only waiter is a nested child", () => {
+		const otherGroup = { origin: "host/org/other", clone: "/git/other" };
+		const sessions = [
+			{ ...session("x", "/git/other"), repoGroup: otherGroup },
+			{ ...session("y", "/git/other-2"), repoGroup: otherGroup },
+			backlogRun("run", "/git/assist-2"),
+			inWorktree("review", "/git/assist-2"),
+		];
+		const waiting = new Set(["review"]);
+
+		const groups = groupSessionsByRepo(
+			sessions,
+			() => false,
+			(s) => waiting.has(s.id),
+		);
+
+		expect(groups).toEqual([
+			{
+				kind: "repo",
+				key: "host/org/assist",
+				label: "assist",
+				rows: [row(sessions[2]!, sessions[3]!)],
+			},
+			{
+				kind: "repo",
+				key: "host/org/other",
+				label: "other",
+				rows: [row(sessions[0]!), row(sessions[1]!)],
+			},
+		]);
+	});
+
+	it("keeps children adjacent beneath a starred parent lifted to the front", () => {
+		const sessions = [
+			inWorktree("other", "/git/assist-3"),
+			backlogRun("run", "/git/assist-2"),
+			inWorktree("review", "/git/assist-2"),
+			inWorktree("comments", "/git/assist-2"),
+		];
+		const starred = new Set(["run"]);
+
+		const groups = groupSessionsByRepo(sessions, (s) => starred.has(s.id));
+
+		expect(groups).toEqual([
+			{
+				kind: "repo",
+				key: "host/org/assist",
+				label: "assist",
+				rows: [
+					row(sessions[1]!, sessions[2]!, sessions[3]!),
+					row(sessions[0]!),
+				],
+			},
+		]);
+	});
+
+	it("keeps a starred nested row above a row floated by a waiting child", () => {
+		const sessions = [
+			backlogRun("waitingRun", "/git/assist-2"),
+			inWorktree("waitingReview", "/git/assist-2"),
+			backlogRun("starredRun", "/git/assist-3"),
+			inWorktree("starredReview", "/git/assist-3"),
+		];
+		const starred = new Set(["starredReview"]);
+		const waiting = new Set(["waitingReview"]);
+
+		const groups = groupSessionsByRepo(
+			sessions,
+			(s) => starred.has(s.id),
+			(s) => waiting.has(s.id),
+		);
+
+		expect(groups).toEqual([
+			{
+				kind: "repo",
+				key: "host/org/assist",
+				label: "assist",
+				rows: [
+					row(sessions[2]!, sessions[3]!),
+					row(sessions[0]!, sessions[1]!),
+				],
+			},
+		]);
+	});
+
 	it("leaves a main-clone session un-nested alongside a run in the clone", () => {
 		const sessions = [
 			backlogRun("run", "/git/assist"),
