@@ -1,3 +1,10 @@
+## [0.494.1](https://github.com/staff0rd/assist/compare/v0.494.0...v0.494.1) (2026-07-28)
+
+
+### Bug Fixes
+
+* mask secret config fields on /config ([6483f85](https://github.com/staff0rd/assist/commit/6483f85122b7273bece73f4baf3653bd2167ba7c))
+
 # [0.494.0](https://github.com/staff0rd/assist/compare/v0.493.0...v0.494.0) (2026-07-28)
 
 
