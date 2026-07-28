@@ -1,3 +1,10 @@
+## [0.496.1](https://github.com/staff0rd/assist/compare/v0.496.0...v0.496.1) (2026-07-28)
+
+
+### Bug Fixes
+
+* stop config secrets leaking on write ([de228ce](https://github.com/staff0rd/assist/commit/de228ce62987829af1c221b750b9a36376b23a9c))
+
 # [0.496.0](https://github.com/staff0rd/assist/compare/v0.495.0...v0.496.0) (2026-07-28)
 
 
