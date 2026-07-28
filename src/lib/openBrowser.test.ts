@@ -32,6 +32,7 @@ describe("openBrowser", () => {
 			`xdg-open "http://localhost:3000"`,
 			{
 				stdio: "ignore",
+				windowsHide: true,
 			},
 		);
 		expect(logSpy).not.toHaveBeenCalled();

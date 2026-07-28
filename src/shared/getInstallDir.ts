@@ -14,6 +14,7 @@ export function isGitRepo(dir: string): boolean {
 		const result = execSync("git rev-parse --show-toplevel", {
 			cwd: dir,
 			stdio: "pipe",
+			windowsHide: true,
 		})
 			.toString()
 			.trim();

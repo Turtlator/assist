@@ -5,6 +5,7 @@ export function checkCliAvailable(cli: string): boolean {
 	const opts = {
 		encoding: "utf8" as const,
 		stdio: ["ignore", "pipe", "pipe"] as ["ignore", "pipe", "pipe"],
+		windowsHide: true,
 	};
 	try {
 		execSync(`command -v ${binary}`, opts);

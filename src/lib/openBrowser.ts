@@ -4,7 +4,7 @@ import { detectPlatform } from "./detectPlatform";
 function tryExec(commands: string[]): boolean {
 	for (const cmd of commands) {
 		try {
-			execSync(cmd, { stdio: "ignore" });
+			execSync(cmd, { stdio: "ignore", windowsHide: true });
 			return true;
 		} catch {
 			// try next

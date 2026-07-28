@@ -6,10 +6,8 @@ vi.mock("node:child_process", () => ({
 	execSync: (...args: unknown[]) => mockExecSync(...args),
 }));
 
-import {
-	getPreferredRemoteRepo,
-	parseGitHubUrl,
-} from "./getPreferredRemoteRepo";
+import { getPreferredRemoteRepo } from "./getPreferredRemoteRepo";
+import { parseGitHubUrl } from "./parseGitHubUrl";
 
 type ExecCall = (cmd: string) => string;
 

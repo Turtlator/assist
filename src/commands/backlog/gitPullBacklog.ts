@@ -11,6 +11,7 @@ export function gitPullBacklog(dir: string): void {
 		execSync("git pull --ff-only", {
 			cwd: dir,
 			stdio: ["pipe", "pipe", "pipe"],
+			windowsHide: true,
 		});
 	} catch {
 		console.error(

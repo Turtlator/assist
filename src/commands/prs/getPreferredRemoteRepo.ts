@@ -1,21 +1,12 @@
 import { execSync } from "node:child_process";
-
-const GITHUB_URL_PATTERN =
-	/(?:git@github\.com:|https:\/\/github\.com\/)([^/]+)\/([^/]+?)(?:\.git)?\/?$/;
-
-export function parseGitHubUrl(
-	url: string,
-): { org: string; repo: string } | null {
-	const match = url.match(GITHUB_URL_PATTERN);
-	if (!match) return null;
-	return { org: match[1], repo: match[2] };
-}
+import { parseGitHubUrl } from "./parseGitHubUrl";
 
 function tryGetRemoteUrl(remote: string, cwd?: string): string | null {
 	try {
 		return execSync(`git remote get-url ${remote}`, {
 			encoding: "utf8",
 			stdio: ["pipe", "pipe", "pipe"],
+			windowsHide: true,
 			cwd,
 		}).trim();
 	} catch {
@@ -27,7 +18,12 @@ function getCurrentBranchRemote(cwd?: string): string | null {
 	try {
 		const ref = execSync(
 			"git rev-parse --abbrev-ref --symbolic-full-name @{u}",
-			{ encoding: "utf8", stdio: ["pipe", "pipe", "pipe"], cwd },
+			{
+				encoding: "utf8",
+				stdio: ["pipe", "pipe", "pipe"],
+				windowsHide: true,
+				cwd,
+			},
 		).trim();
 		const [remote] = ref.split("/", 1);
 		return remote || null;
@@ -41,6 +37,7 @@ function listRemotes(cwd?: string): string[] {
 		return execSync("git remote", {
 			encoding: "utf8",
 			stdio: ["pipe", "pipe", "pipe"],
+			windowsHide: true,
 			cwd,
 		})
 			.trim()
