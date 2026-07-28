@@ -73,7 +73,7 @@ describe("waitForUpstream", () => {
 		vi.useRealTimers();
 	});
 
-	it("resolves moved without fetching when the upstream is already ahead", async () => {
+	it("resolves moved on the first check when the upstream is already ahead", async () => {
 		installGit({ upstreamSha: "bbb2222", behind: 2 });
 
 		await expect(wait()).resolves.toEqual({
@@ -83,21 +83,33 @@ describe("waitForUpstream", () => {
 			to: "bbb2222",
 			count: 2,
 		});
-		expect(git.fetches).toBe(0);
+	});
+
+	it("fetches before the first check, so commits only on the remote are seen at startup", async () => {
+		installGit({
+			onFetch: (state) => {
+				state.upstreamSha = "bbb2222";
+				state.behind = 2;
+			},
+		});
+
+		await expect(wait()).resolves.toMatchObject({ kind: "moved", count: 2 });
+		expect(git.fetches).toBe(1);
 	});
 
 	it("fetches on the interval and resolves once the upstream gains commits", async () => {
 		installGit({
 			onFetch: (state) => {
-				if (state.fetches < 2) return;
+				if (state.fetches < 3) return;
 				state.upstreamSha = "ccc3333";
 				state.behind = 3;
 			},
 		});
 
 		const pending = wait();
-		await vi.advanceTimersByTimeAsync(30_000);
 		expect(git.fetches).toBe(1);
+		await vi.advanceTimersByTimeAsync(30_000);
+		expect(git.fetches).toBe(2);
 		await vi.advanceTimersByTimeAsync(30_000);
 
 		await expect(pending).resolves.toEqual({
@@ -112,7 +124,7 @@ describe("waitForUpstream", () => {
 	it("keeps waiting when a fetch fails", async () => {
 		installGit({
 			onFetch: (state) => {
-				if (state.fetches === 1) throw new Error("network unreachable");
+				if (state.fetches <= 2) throw new Error("network unreachable");
 				state.upstreamSha = "ddd4444";
 				state.behind = 1;
 			},
@@ -167,7 +179,7 @@ describe("waitForUpstream", () => {
 		expect(process.listenerCount("SIGINT")).toBe(before);
 
 		await vi.advanceTimersByTimeAsync(120_000);
-		expect(git.fetches).toBe(1);
+		expect(git.fetches).toBe(2);
 	});
 
 	it("reports unavailable outside a git repository", async () => {

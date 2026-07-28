@@ -12,7 +12,11 @@ export function registerWatch(program: Command): void {
 		.description(
 			"Block until the current branch's upstream gains commits, then exit 0 (2 on timeout, 3 when --pull hits genuine divergence, 4 when --build fails, 1 when waiting is impossible, 130 on interrupt)",
 		)
-		.option("--interval <duration>", "How often to fetch (e.g. 30s, 2m)", "30s")
+		.option(
+			"--interval <duration>",
+			"How often to fetch after the fetch at startup (e.g. 30s, 2m)",
+			"30s",
+		)
 		.option(
 			"--timeout <duration>",
 			"Give up and exit 2 after this long (e.g. 60m, 2h), or none to wait indefinitely",

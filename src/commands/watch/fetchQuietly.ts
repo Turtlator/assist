@@ -1,11 +1,16 @@
 import { execFileSync } from "node:child_process";
 
-export function fetchQuietly(cwd: string | undefined, timeoutMs: number): void {
+const MIN_FETCH_TIMEOUT_MS = 60_000;
+
+export function fetchQuietly(
+	cwd: string | undefined,
+	intervalMs: number,
+): void {
 	try {
 		execFileSync("git", ["fetch", "--quiet"], {
 			stdio: ["pipe", "pipe", "pipe"],
 			cwd,
-			timeout: timeoutMs,
+			timeout: Math.max(intervalMs, MIN_FETCH_TIMEOUT_MS),
 		});
 	} catch {}
 }

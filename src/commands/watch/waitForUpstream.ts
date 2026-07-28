@@ -1,3 +1,4 @@
+import { fetchQuietly } from "./fetchQuietly";
 import { pollForMovement } from "./pollForMovement";
 import { readMovement } from "./readMovement";
 import { resolveUpstream } from "./resolveUpstream";
@@ -26,6 +27,7 @@ export function waitForUpstream(options: WaitOptions): Promise<WatchOutcome> {
 
 	onStart?.(upstream);
 
+	fetchQuietly(cwd, intervalMs);
 	const moved = readMovement(cwd);
 	if (moved) return Promise.resolve({ kind: "moved", upstream, ...moved });
 

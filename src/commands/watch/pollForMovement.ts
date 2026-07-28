@@ -10,11 +10,8 @@ type PollOptions = {
 	cwd?: string;
 };
 
-const MIN_FETCH_TIMEOUT_MS = 60_000;
-
 export function pollForMovement(options: PollOptions): Promise<WatchOutcome> {
 	const { upstream, intervalMs, timeoutMs, timeout, cwd } = options;
-	const fetchTimeoutMs = Math.max(intervalMs, MIN_FETCH_TIMEOUT_MS);
 
 	return new Promise<WatchOutcome>((resolve) => {
 		let settled = false;
@@ -31,7 +28,7 @@ export function pollForMovement(options: PollOptions): Promise<WatchOutcome> {
 		const onInterrupt = (): void => finish({ kind: "interrupted" });
 
 		const ticker = setInterval(() => {
-			fetchQuietly(cwd, fetchTimeoutMs);
+			fetchQuietly(cwd, intervalMs);
 			const found = readMovement(cwd);
 			if (found) finish({ kind: "moved", upstream, ...found });
 		}, intervalMs);
