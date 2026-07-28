@@ -1,13 +1,19 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
-import { afterEach, describe, expect, it } from "vitest";
-import { CardChips } from "./CardChips";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import type { BacklogItemSummary } from "../../../backlog/web/ui/types";
 import { cloneBadgeSessionIds } from "./cloneBadgeSessionIds";
 import type { SessionInfo } from "./types";
 import { CloneBadgeContext } from "./useCloneBadgeContext";
 import { InRepoGroupContext } from "./useInRepoGroupContext";
 import { TopBarLayoutContext } from "./useTopBarLayoutContext";
+
+vi.mock("../../../backlog/web/ui/components/useJiraSite", () => ({
+	useJiraSite: () => "acme.atlassian.net",
+}));
+
+import { CardChips } from "./CardChips";
 
 afterEach(cleanup);
 
@@ -103,5 +109,96 @@ describe("CardChips clone badge", () => {
 		renderBadgeCard([ungrouped], ungrouped);
 
 		expect(screen.queryByLabelText(/^Clone — /)).toBeNull();
+	});
+});
+
+function trackerItem(tracker: Partial<BacklogItemSummary>): BacklogItemSummary {
+	return {
+		id: 7,
+		type: "story",
+		name: "Login flow",
+		status: "todo",
+		starred: false,
+		incompleteSubtasks: 0,
+		...tracker,
+	};
+}
+
+async function renderTrackerCard(
+	cwd: string,
+	items: BacklogItemSummary[],
+	itemId = 7,
+) {
+	vi.stubGlobal(
+		"fetch",
+		vi.fn(() => Promise.resolve({ json: () => Promise.resolve(items) })),
+	);
+	const trackerSession: SessionInfo = {
+		...session,
+		cwd,
+		activity: { kind: "backlog", itemId, startedAt: 0 },
+	};
+	await act(async () => {
+		render(
+			<MemoryRouter>
+				<TopBarLayoutContext.Provider value={false}>
+					<InRepoGroupContext.Provider value={false}>
+						<CardChips session={trackerSession} />
+					</InRepoGroupContext.Provider>
+				</TopBarLayoutContext.Provider>
+			</MemoryRouter>,
+		);
+	});
+}
+
+afterEach(() => vi.unstubAllGlobals());
+
+describe("CardChips tracker chip", () => {
+	it("shortens a GitHub issue from the item's own origin", async () => {
+		await renderTrackerCard("/home/me/gh-own", [
+			trackerItem({
+				origin: "github.com/acme/widgets",
+				githubIssue: "acme/widgets#123",
+			}),
+		]);
+
+		const link = await screen.findByRole("link", { name: "#123" });
+		expect(link.getAttribute("href")).toBe(
+			"https://github.com/acme/widgets/issues/123",
+		);
+	});
+
+	it("keeps the full owner/repo#N when the issue is from another repo", async () => {
+		await renderTrackerCard("/home/me/gh-other", [
+			trackerItem({
+				origin: "github.com/acme/widgets",
+				githubIssue: "other/thing#7",
+			}),
+		]);
+
+		const link = await screen.findByRole("link", { name: "other/thing#7" });
+		expect(link.getAttribute("href")).toBe(
+			"https://github.com/other/thing/issues/7",
+		);
+	});
+
+	it("still renders the Jira chip for a Jira-associated item", async () => {
+		await renderTrackerCard("/home/me/jira", [
+			trackerItem({ jiraKey: "BAD-671" }),
+		]);
+
+		const link = await screen.findByRole("link", { name: "BAD-671" });
+		expect(link.getAttribute("href")).toBe(
+			"https://acme.atlassian.net/browse/BAD-671",
+		);
+	});
+
+	it("renders no tracker chip for an item with neither", async () => {
+		await renderTrackerCard("/home/me/none", [trackerItem({})]);
+
+		const external = screen
+			.getAllByRole("link")
+			.filter((link) => link.getAttribute("href")?.startsWith("https://"));
+		expect(external).toEqual([]);
 	});
 });

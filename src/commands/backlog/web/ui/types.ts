@@ -81,6 +81,12 @@ export type BacklogItem = {
 	gitRefs?: GitRef[];
 };
 
+export type ItemTracker = {
+	origin?: string;
+	jiraKey?: string;
+	githubIssue?: string;
+};
+
 /** The trimmed-down shape the list renders; full data loads when an item opens. */
 export type BacklogItemSummary = {
 	id: number;

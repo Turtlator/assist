@@ -15,6 +15,7 @@ vi.mock("../useRepoSummaries", () => ({ useRepoSummaries: () => [] }));
 vi.mock("../../../../sessions/web/ui/LastBackedUp", () => ({
 	LastBackedUp: () => null,
 }));
+vi.mock("./useJiraSite", () => ({ useJiraSite: () => "acme.atlassian.net" }));
 
 import { ItemList } from "./ItemList";
 
@@ -125,5 +126,53 @@ describe("ItemList empty state", () => {
 		renderList([]);
 
 		expect(screen.getByText("No items in the backlog.")).toBeTruthy();
+	});
+});
+
+describe("ItemList tracker links", () => {
+	it("shortens a GitHub issue from the item's own origin", () => {
+		renderList([
+			{
+				...item(1, "story", "Login flow"),
+				origin: "github.com/acme/widgets",
+				githubIssue: "acme/widgets#123",
+			},
+		]);
+
+		const link = screen.getByRole("link", { name: "#123" });
+		expect(link.getAttribute("href")).toBe(
+			"https://github.com/acme/widgets/issues/123",
+		);
+	});
+
+	it("keeps the full owner/repo#N when the issue is from another repo", () => {
+		renderList([
+			{
+				...item(1, "story", "Login flow"),
+				origin: "github.com/acme/widgets",
+				githubIssue: "other/thing#7",
+			},
+		]);
+
+		const link = screen.getByRole("link", { name: "other/thing#7" });
+		expect(link.getAttribute("href")).toBe(
+			"https://github.com/other/thing/issues/7",
+		);
+	});
+
+	it("links a Jira key", () => {
+		renderList([{ ...item(1, "story", "Login flow"), jiraKey: "BAD-671" }]);
+
+		const link = screen.getByRole("link", { name: "BAD-671" });
+		expect(link.getAttribute("href")).toBe(
+			"https://acme.atlassian.net/browse/BAD-671",
+		);
+	});
+
+	it("renders no tracker for an item with neither", () => {
+		renderList([item(1, "story", "Login flow")]);
+
+		expect(screen.getByText("Login flow")).toBeTruthy();
+		expect(screen.queryByRole("link")).toBeNull();
 	});
 });

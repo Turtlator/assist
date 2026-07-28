@@ -1,5 +1,5 @@
 import Chip from "@mui/material/Chip";
-import { JiraKeyLink } from "../../../backlog/web/ui/components/JiraKeyLink";
+import { ItemTrackerLink } from "../../../backlog/web/ui/components/ItemTrackerLink";
 import { ActivityChips } from "./ActivityChips";
 import { CloneBadge } from "./CloneBadge";
 import { HarnessBadge } from "./HarnessBadge";
@@ -11,7 +11,7 @@ import { sessionType } from "./sessionType";
 import type { SessionInfo } from "./types";
 import { useCloneBadgeContext } from "./useCloneBadgeContext";
 import { useInRepoGroupContext } from "./useInRepoGroupContext";
-import { useJiraKeys } from "./useJiraKeys";
+import { useItemTrackers } from "./useItemTrackers";
 import { useTopBarLayoutContext } from "./useTopBarLayoutContext";
 import { WindowsBadge } from "./WindowsBadge";
 
@@ -23,7 +23,7 @@ export function CardChips({ session }: { session: SessionInfo }) {
 	const named = topBar && grouped;
 	const repo =
 		!named && isRepoScoped(sessionType(session)) ? repoLabel(session.cwd) : "";
-	const jiraKeyFor = useJiraKeys(session.cwd);
+	const trackerFor = useItemTrackers(session.cwd);
 	const badgeClone = useCloneBadgeContext().has(session.id);
 	const clone = session.repoGroup?.clone;
 	return (
@@ -34,9 +34,9 @@ export function CardChips({ session }: { session: SessionInfo }) {
 			{badgeClone && clone && <CloneBadge clone={clone} />}
 			{isWindowsCwd(session.cwd) && <WindowsBadge />}
 			<ActivityChips session={session} />
-			<JiraKeyLink
+			<ItemTrackerLink
 				variant="chip"
-				jiraKey={jiraKeyFor(session.activity?.itemId)}
+				tracker={trackerFor(session.activity?.itemId)}
 			/>
 		</>
 	);

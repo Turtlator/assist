@@ -2,6 +2,7 @@ import { ButtonBase, Chip, Typography } from "@mui/material";
 import type { SessionSocket } from "../../../../sessions/web/ui/useSessionSocket";
 import { formatItemId } from "../../../formatItemId";
 import type { BacklogItemSummary } from "../types";
+import { GithubIssueLink } from "./GithubIssueLink";
 import { itemCardStyles } from "./itemCardStyles";
 import { JiraKeyLink } from "./JiraKeyLink";
 import { StatusIcon } from "./StatusIcon";
@@ -23,6 +24,9 @@ function CardSummary({ item }: { item: BacklogItemSummary }) {
 			</Typography>
 			<Typography sx={itemCardStyles.name}>{item.name}</Typography>
 			{item.jiraKey && <JiraKeyLink jiraKey={item.jiraKey} />}
+			{item.githubIssue && (
+				<GithubIssueLink githubIssue={item.githubIssue} origin={item.origin} />
+			)}
 		</>
 	);
 }
