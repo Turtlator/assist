@@ -47,7 +47,7 @@ afterEach(() => {
 
 describe("removeTree against real git", () => {
 	it("removes a clean tree the ordinary way", async () => {
-		expect(await removeTree(clone, tree, false)).toBe(true);
+		expect(await removeTree(clone, tree, false)).toEqual({ removed: true });
 
 		expect(existsSync(tree)).toBe(false);
 		expect(listWorktreePaths(clone)).not.toContain(tree);
@@ -58,7 +58,7 @@ describe("removeTree against real git", () => {
 		writeFileSync(join(tree, "node_modules", "pkg", "index.js"), "//\n");
 		rmSync(join(tree, ".git"));
 
-		expect(await removeTree(clone, tree, false)).toBe(true);
+		expect(await removeTree(clone, tree, false)).toEqual({ removed: true });
 
 		expect(existsSync(tree)).toBe(false);
 		expect(listWorktreePaths(clone)).not.toContain(tree);
@@ -66,10 +66,27 @@ describe("removeTree against real git", () => {
 		expect(listLocalBranches(clone)).not.toContain("repo-2");
 	});
 
+	it("discards a tree git has unregistered but left on disk", async () => {
+		mkdirSync(join(tree, "node_modules", "pkg"), { recursive: true });
+		writeFileSync(join(tree, "node_modules", "pkg", "index.js"), "//\n");
+		rmSync(join(clone, ".git", "worktrees", "repo-2"), {
+			recursive: true,
+			force: true,
+		});
+
+		expect(await removeTree(clone, tree, true)).toEqual({ removed: true });
+
+		expect(existsSync(tree)).toBe(false);
+		expect(listWorktreePaths(clone)).not.toContain(tree);
+	});
+
 	it("leaves a tree in place when an ordinary close hits a git failure that is not fatal to it", async () => {
 		gitSync(clone, ["worktree", "lock", tree]);
 
-		expect(await removeTree(clone, tree, false)).toBe(false);
+		expect(await removeTree(clone, tree, false)).toMatchObject({
+			removed: false,
+			reason: expect.stringContaining("locked"),
+		});
 
 		expect(existsSync(tree)).toBe(true);
 		expect(listWorktreePaths(clone)).toContain(tree);
@@ -78,13 +95,16 @@ describe("removeTree against real git", () => {
 	it("deletes a discarded tree even when git refuses for a reason of its own", async () => {
 		gitSync(clone, ["worktree", "lock", tree]);
 
-		expect(await removeTree(clone, tree, true)).toBe(true);
+		expect(await removeTree(clone, tree, true)).toEqual({ removed: true });
 
 		expect(existsSync(tree)).toBe(false);
 	});
 
 	it("never deletes a path that is a clone in its own right", async () => {
-		expect(await removeTree(clone, clone, true)).toBe(false);
+		expect(await removeTree(clone, clone, true)).toMatchObject({
+			removed: false,
+			reason: expect.stringContaining("clone of its own"),
+		});
 
 		expect(existsSync(clone)).toBe(true);
 	});

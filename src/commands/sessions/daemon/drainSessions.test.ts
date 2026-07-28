@@ -9,7 +9,7 @@ vi.mock("./killPtyTree", () => ({ killPtyTree: vi.fn() }));
 vi.mock("../../../shared/emitActivity", () => ({ removeActivity: vi.fn() }));
 vi.mock("../../backlog/acquireLock", () => ({ releaseLock: vi.fn() }));
 vi.mock("./worktree/reapWorktree", () => ({
-	reapWorktree: vi.fn(() => Promise.resolve(true)),
+	reapWorktree: vi.fn(() => Promise.resolve({ removed: true })),
 }));
 vi.mock("./worktree/resolveCloseDurability", () => ({
 	resolveCloseDurability: vi.fn(() => Promise.resolve()),

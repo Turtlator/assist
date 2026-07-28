@@ -1,9 +1,9 @@
 import type { Session } from "./createSession";
 import { daemonLog } from "./daemonLog";
+import { discardTree } from "./discardTree";
 import { dismissSession } from "./dismissSession";
 import { killPtyTree } from "./killPtyTree";
 import { closeGateApplies } from "./worktree/closeGateApplies";
-import { reapWorktree } from "./worktree/reapWorktree";
 import { resolveCloseDurability } from "./worktree/resolveCloseDurability";
 import { treeUnderClose } from "./worktree/treeUnderClose";
 
@@ -22,21 +22,15 @@ export function dismissSessionGated(
 	const removeCard = () => {
 		if (dismissSession(sessions, id)) notify();
 	};
-	const discardWork = async () => {
-		if (s.worktree) {
-			await reapWorktree(s.worktree.path, true);
-			s.worktree = undefined;
-		}
-		removeCard();
-	};
+	const settle = discard
+		? () => void discardTree(s, removeCard, notify)
+		: () => void resolveCloseDurability(s, removeCard, notify);
 	s.closing = true;
 	daemonLog(
 		`session ${id} closing: ${discard ? "discarding" : "checking durability of"} ${tree.path}`,
 	);
 	if (s.pty) {
-		s.pendingDismiss = discard
-			? () => void discardWork()
-			: () => void resolveCloseDurability(s, removeCard, notify);
+		s.pendingDismiss = settle;
 		daemonLog(
 			`session ${id} ${discard ? "discard" : "dismiss"} requested: killing process tree first`,
 		);
@@ -45,6 +39,5 @@ export function dismissSessionGated(
 		return;
 	}
 	notify();
-	if (discard) void discardWork();
-	else void resolveCloseDurability(s, removeCard, notify);
+	settle();
 }

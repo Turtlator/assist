@@ -8,6 +8,7 @@ import {
 	worktreeAttributionIncludingReaped,
 } from "./readWorktreeRegistry";
 import { reapWorktree } from "./reapWorktree";
+import { stopInstall } from "./stopInstall";
 import { checkDurability } from "./treeDurability";
 
 vi.mock("node:fs", () => ({
@@ -37,6 +38,7 @@ const durabilityMock = checkDurability as unknown as ReturnType<typeof vi.fn>;
 const mainWorktreeMock = mainWorktree as unknown as ReturnType<typeof vi.fn>;
 const attributionMock =
 	worktreeAttributionIncludingReaped as unknown as ReturnType<typeof vi.fn>;
+const stopInstallMock = stopInstall as unknown as ReturnType<typeof vi.fn>;
 
 function gitCalls(): string[][] {
 	return gitMock.mock.calls.map((call) => call[1] as string[]);
@@ -76,7 +78,7 @@ describe("reapWorktree", () => {
 	});
 
 	it("removes a durable tree, deletes its branch and forgets the record", async () => {
-		expect(await reapWorktree("/git/repo-2")).toBe(true);
+		expect(await reapWorktree("/git/repo-2")).toEqual({ removed: true });
 
 		expect(gitCalls()).toContainEqual(["worktree", "remove", "/git/repo-2"]);
 		expect(gitCalls()).toContainEqual(["branch", "-D", "repo-2"]);
@@ -88,7 +90,7 @@ describe("reapWorktree", () => {
 			Promise.resolve(cwd === "/git/repo" ? "main" : "feat/thing"),
 		);
 
-		expect(await reapWorktree("/git/repo-2")).toBe(true);
+		expect(await reapWorktree("/git/repo-2")).toEqual({ removed: true });
 
 		expect(gitCalls()).toContainEqual(["branch", "-D", "repo-2"]);
 		expect(gitCalls()).not.toContainEqual(["branch", "-D", "feat/thing"]);
@@ -100,7 +102,10 @@ describe("reapWorktree", () => {
 			reason: "uncommitted changes",
 		});
 
-		expect(await reapWorktree("/git/repo-2")).toBe(false);
+		expect(await reapWorktree("/git/repo-2")).toEqual({
+			removed: false,
+			reason: "uncommitted changes",
+		});
 
 		expect(gitMock).not.toHaveBeenCalled();
 		expect(forgetMock).not.toHaveBeenCalled();
@@ -113,7 +118,7 @@ describe("reapWorktree", () => {
 				: Promise.resolve(""),
 		);
 
-		expect(await reapWorktree("/git/repo-2")).toBe(true);
+		expect(await reapWorktree("/git/repo-2")).toEqual({ removed: true });
 
 		expect(gitCalls()).toContainEqual([
 			"worktree",
@@ -127,7 +132,10 @@ describe("reapWorktree", () => {
 	it("keeps the record when removal fails outright so the next reconcile retries", async () => {
 		gitMock.mockRejectedValue(new Error("worktree is locked"));
 
-		expect(await reapWorktree("/git/repo-2")).toBe(false);
+		expect(await reapWorktree("/git/repo-2")).toMatchObject({
+			removed: false,
+			reason: expect.stringContaining("worktree is locked"),
+		});
 
 		expect(rmMock).not.toHaveBeenCalled();
 		expect(forgetMock).not.toHaveBeenCalled();
@@ -136,7 +144,7 @@ describe("reapWorktree", () => {
 	it("deletes the directory itself once git has lost the tree, then prunes, deletes the branch and forgets it", async () => {
 		strandedTree();
 
-		expect(await reapWorktree("/git/repo-2")).toBe(true);
+		expect(await reapWorktree("/git/repo-2")).toEqual({ removed: true });
 
 		expect(rmMock).toHaveBeenCalledWith(
 			"/git/repo-2",
@@ -155,7 +163,7 @@ describe("reapWorktree", () => {
 			new Error("fatal: 'repo-2' is not a working tree"),
 		);
 
-		expect(await reapWorktree("/git/repo-2", true)).toBe(true);
+		expect(await reapWorktree("/git/repo-2", true)).toEqual({ removed: true });
 
 		expect(rmMock).toHaveBeenCalled();
 		expect(forgetMock).toHaveBeenCalledWith("/git/repo-2");
@@ -168,7 +176,7 @@ describe("reapWorktree", () => {
 				: Promise.resolve(""),
 		);
 
-		expect(await reapWorktree("/git/repo-2", true)).toBe(true);
+		expect(await reapWorktree("/git/repo-2", true)).toEqual({ removed: true });
 
 		expect(rmMock).toHaveBeenCalled();
 		expect(forgetMock).toHaveBeenCalledWith("/git/repo-2");
@@ -178,7 +186,10 @@ describe("reapWorktree", () => {
 		strandedTree();
 		rmMock.mockRejectedValue(new Error("EBUSY: resource busy or locked"));
 
-		expect(await reapWorktree("/git/repo-2")).toBe(false);
+		expect(await reapWorktree("/git/repo-2")).toMatchObject({
+			removed: false,
+			reason: expect.stringContaining("EBUSY"),
+		});
 
 		expect(forgetMock).not.toHaveBeenCalled();
 	});
@@ -191,17 +202,44 @@ describe("reapWorktree", () => {
 			origin: "git@host:o/r.git",
 		});
 
-		expect(await reapWorktree("/git/repo-2")).toBe(true);
+		expect(await reapWorktree("/git/repo-2")).toEqual({ removed: true });
 
 		expect(gitClones()).toContain("/git/repo");
 		expect(gitClones()).not.toContain("/git/repo-2");
 	});
 
-	it("skips a tree already gone from disk", async () => {
+	it("forgets a tree already gone from disk instead of leaving its record live", async () => {
 		existsMock.mockReturnValue(false);
 
-		expect(await reapWorktree("/git/repo-2")).toBe(false);
+		expect(await reapWorktree("/git/repo-2")).toEqual({ removed: true });
 
 		expect(gitMock).not.toHaveBeenCalled();
+		expect(forgetMock).toHaveBeenCalledWith("/git/repo-2");
+	});
+
+	it("kills a seeding install before git touches the tree", async () => {
+		const order: string[] = [];
+		stopInstallMock.mockImplementation(() => order.push("install killed"));
+		gitMock.mockImplementation((_cwd: string, args: string[]) => {
+			order.push(args.join(" "));
+			return Promise.resolve("");
+		});
+
+		await reapWorktree("/git/repo-2");
+
+		expect(stopInstallMock).toHaveBeenCalledWith("/git/repo-2");
+		expect(order[0]).toBe("install killed");
+	});
+
+	it("reports why a forced discard could not remove the directory", async () => {
+		strandedTree();
+		rmMock.mockRejectedValue(new Error("EPERM: operation not permitted"));
+
+		expect(await reapWorktree("/git/repo-2", true)).toMatchObject({
+			removed: false,
+			reason: expect.stringContaining("EPERM"),
+		});
+
+		expect(forgetMock).not.toHaveBeenCalled();
 	});
 });

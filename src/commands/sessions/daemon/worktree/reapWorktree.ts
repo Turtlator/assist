@@ -8,31 +8,36 @@ import {
 	worktreeAttributionIncludingReaped,
 } from "./readWorktreeRegistry";
 import { removeTree } from "./removeTree";
+import type { TreeRemoval } from "./TreeRemoval";
 import { stopInstall } from "./stopInstall";
 import { checkDurability } from "./treeDurability";
 
 export async function reapWorktree(
 	worktreePath: string,
 	force = false,
-): Promise<boolean> {
+): Promise<TreeRemoval> {
 	if (!existsSync(worktreePath)) {
-		daemonLog(`worktree ${worktreePath} already gone; skipping reap`);
-		return false;
+		forgetWorktree(worktreePath);
+		daemonLog(
+			`worktree ${worktreePath} already gone; its record was forgotten`,
+		);
+		return { removed: true };
 	}
 	if (!force) {
 		const durability = await checkDurability(worktreePath);
 		if (!durability.durable) {
 			daemonLog(`worktree ${worktreePath} not reaped: ${durability.reason}`);
-			return false;
+			return { removed: false, reason: durability.reason };
 		}
 	}
 	stopInstall(worktreePath);
 	const clone = owningClone(worktreePath);
-	if (!(await removeTree(clone, worktreePath, force))) return false;
+	const removal = await removeTree(clone, worktreePath, force);
+	if (!removal.removed) return removal;
 	await deleteWorktreeBranch(clone, basename(worktreePath));
 	forgetWorktree(worktreePath);
 	daemonLog(`worktree ${worktreePath} reaped${force ? " (forced)" : ""}`);
-	return true;
+	return removal;
 }
 
 function owningClone(worktreePath: string): string {

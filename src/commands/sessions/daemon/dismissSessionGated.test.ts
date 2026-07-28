@@ -10,7 +10,7 @@ vi.mock("./daemonLog", () => ({ daemonLog: vi.fn() }));
 vi.mock("./dismissSession", () => ({ dismissSession: vi.fn(() => true) }));
 vi.mock("./killPtyTree", () => ({ killPtyTree: vi.fn() }));
 vi.mock("./worktree/reapWorktree", () => ({
-	reapWorktree: vi.fn(() => Promise.resolve(true)),
+	reapWorktree: vi.fn(() => Promise.resolve({ removed: true })),
 }));
 vi.mock("./worktree/resolveCloseDurability", () => ({
 	resolveCloseDurability: vi.fn(() => Promise.resolve()),
@@ -45,6 +45,7 @@ function session(overrides: Partial<Session> = {}): Session {
 describe("dismissSessionGated", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		reapMock.mockResolvedValue({ removed: true });
 	});
 
 	it("dismisses a non-worktree session immediately", () => {
@@ -117,6 +118,34 @@ describe("dismissSessionGated", () => {
 		expect(resolveMock).not.toHaveBeenCalled();
 		expect(reapMock).toHaveBeenCalledWith("/git/repo-2", true);
 		expect(dismissMock).toHaveBeenCalledWith(sessions, "3");
+	});
+
+	it("keeps the card and surfaces the failure when a discard cannot delete the tree", async () => {
+		reapMock.mockResolvedValue({
+			removed: false,
+			reason: "EBUSY: resource busy or locked",
+		});
+		const s = session({
+			pty: null,
+			status: "stopped",
+			undurable: { reason: "uncommitted changes", removesTree: true },
+			worktree: { path: "/git/repo-2", clone: "/git/repo" },
+		});
+		const sessions = new Map([[s.id, s]]);
+		const notify = vi.fn();
+
+		dismissSessionGated(sessions, s.id, notify, true);
+		await Promise.resolve();
+
+		expect(dismissMock).not.toHaveBeenCalled();
+		expect(s.worktree).toEqual({ path: "/git/repo-2", clone: "/git/repo" });
+		expect(s.closing).toBeUndefined();
+		expect(s.status).toBe("stopped");
+		expect(s.undurable).toEqual({
+			reason: "discard failed: EBUSY: resource busy or locked",
+			removesTree: true,
+		});
+		expect(notify).toHaveBeenCalled();
 	});
 
 	it("holds a live session in the clone's own tree instead of deleting its card", () => {

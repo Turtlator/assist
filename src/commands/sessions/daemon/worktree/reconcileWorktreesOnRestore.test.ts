@@ -21,7 +21,7 @@ vi.mock("../loadPersistedSessions", () => ({
 vi.mock("./bindNewWorktree", () => ({ bindRestoredWorktrees: vi.fn() }));
 vi.mock("./readWorktreeRegistry", () => ({ readWorktreeRegistry: vi.fn() }));
 vi.mock("./reapWorktree", () => ({
-	reapWorktree: vi.fn(() => Promise.resolve(true)),
+	reapWorktree: vi.fn(() => Promise.resolve({ removed: true })),
 }));
 vi.mock("./reclaimVanishedWorktrees", () => ({
 	reclaimVanishedWorktrees: vi.fn(() => Promise.resolve()),

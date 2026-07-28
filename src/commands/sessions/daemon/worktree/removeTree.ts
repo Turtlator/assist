@@ -2,12 +2,13 @@ import { daemonLog } from "../daemonLog";
 import { deleteStrandedTree } from "./deleteStrandedTree";
 import { deleteTreeDirectly } from "./deleteTreeDirectly";
 import { git } from "./git";
+import type { TreeRemoval } from "./TreeRemoval";
 
 export async function removeTree(
 	clone: string,
 	worktreePath: string,
 	force: boolean,
-): Promise<boolean> {
+): Promise<TreeRemoval> {
 	const remove = (forced: boolean) =>
 		git(clone, [
 			"worktree",
@@ -17,7 +18,7 @@ export async function removeTree(
 		]);
 	try {
 		await remove(force);
-		return true;
+		return { removed: true };
 	} catch (error) {
 		daemonLog(`worktree ${worktreePath} removal failed: ${reason(error)}`);
 		if (force)
@@ -34,13 +35,13 @@ async function removeIgnoringLeftovers(
 	clone: string,
 	remove: (forced: boolean) => Promise<string>,
 	worktreePath: string,
-): Promise<boolean> {
+): Promise<TreeRemoval> {
 	try {
 		await remove(true);
 		daemonLog(
 			`worktree ${worktreePath} removed on retry; only ignored files remained, its work is landed`,
 		);
-		return true;
+		return { removed: true };
 	} catch (error) {
 		daemonLog(
 			`worktree ${worktreePath} forced removal failed: ${reason(error)}`,

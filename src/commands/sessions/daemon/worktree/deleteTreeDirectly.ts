@@ -3,17 +3,19 @@ import { rm } from "node:fs/promises";
 import { join } from "node:path";
 import { daemonLog } from "../daemonLog";
 import { git } from "./git";
+import type { TreeRemoval } from "./TreeRemoval";
 
 export async function deleteTreeDirectly(
 	clone: string,
 	worktreePath: string,
 	why: string,
-): Promise<boolean> {
+): Promise<TreeRemoval> {
 	if (holdsAGitDirectoryRatherThanALink(worktreePath)) {
+		const refusal = "it is a clone of its own, not a linked worktree";
 		daemonLog(
-			`worktree ${worktreePath} not deleted directly (${why}): it is a clone of its own, not a linked worktree`,
+			`worktree ${worktreePath} not deleted directly (${why}): ${refusal}`,
 		);
-		return false;
+		return { removed: false, reason: refusal };
 	}
 	daemonLog(`worktree ${worktreePath} deleting its directory directly: ${why}`);
 	try {
@@ -27,11 +29,11 @@ export async function deleteTreeDirectly(
 		daemonLog(
 			`worktree ${worktreePath} directory delete failed, left in place for the next reconcile: ${reason(error)}`,
 		);
-		return false;
+		return { removed: false, reason: reason(error) };
 	}
 	daemonLog(`worktree ${worktreePath} directory deleted directly`);
 	await pruneBookkeeping(clone, worktreePath);
-	return true;
+	return { removed: true };
 }
 
 function holdsAGitDirectoryRatherThanALink(worktreePath: string): boolean {

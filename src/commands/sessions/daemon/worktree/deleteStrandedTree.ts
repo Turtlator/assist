@@ -2,18 +2,19 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { daemonLog } from "../daemonLog";
 import { deleteTreeDirectly } from "./deleteTreeDirectly";
+import type { TreeRemoval } from "./TreeRemoval";
 
 export async function deleteStrandedTree(
 	clone: string,
 	worktreePath: string,
 	cause: unknown,
-): Promise<boolean> {
+): Promise<TreeRemoval> {
 	const stranded = strandedReason(worktreePath, cause);
 	if (!stranded) {
 		daemonLog(
 			`worktree ${worktreePath} left in place for the next reconcile: ${reason(cause)}`,
 		);
-		return false;
+		return { removed: false, reason: reason(cause) };
 	}
 	return await deleteTreeDirectly(
 		clone,
