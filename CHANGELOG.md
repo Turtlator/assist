@@ -1,3 +1,10 @@
+# [0.495.0](https://github.com/staff0rd/assist/compare/v0.494.1...v0.495.0) (2026-07-28)
+
+
+### Features
+
+* review findings in action row ([5897fa4](https://github.com/staff0rd/assist/commit/5897fa4f24ab75839356551e69bcef9f76e3b806))
+
 ## [0.494.1](https://github.com/staff0rd/assist/compare/v0.494.0...v0.494.1) (2026-07-28)
 
 
