@@ -130,6 +130,7 @@ describe("resolveDiffRange", () => {
 			startLine: 14,
 			endLine: 14,
 			quote: "d = 5",
+			changes: [{ key: "N13", content: "const d = 5;" }],
 		});
 	});
 
@@ -155,6 +156,13 @@ describe("resolveDiffRange", () => {
 				"const b = 3;",
 				"const c = 4;",
 			].join("\n"),
+			changes: [
+				{ key: "N10", content: "const a = 1;" },
+				{ key: "D11", content: "const b = 2;" },
+				{ key: "D12", content: "const c = 3;" },
+				{ key: "I11", content: "const b = 3;" },
+				{ key: "I12", content: "const c = 4;" },
+			],
 		});
 	});
 
@@ -167,6 +175,10 @@ describe("resolveDiffRange", () => {
 			startLine: 11,
 			endLine: 12,
 			quote: "const b = 2;\nconst c = 3;",
+			changes: [
+				{ key: "D11", content: "const b = 2;" },
+				{ key: "D12", content: "const c = 3;" },
+			],
 		});
 	});
 
@@ -184,6 +196,12 @@ describe("resolveDiffRange", () => {
 				"const c = 4;",
 				"const e = 6;",
 			].join("\n"),
+			changes: [
+				{ key: "N10", content: "const a = 1;" },
+				{ key: "I11", content: "const b = 3;" },
+				{ key: "I12", content: "const c = 4;" },
+				{ key: "I13", content: "const e = 6;" },
+			],
 		});
 	});
 
@@ -201,6 +219,12 @@ describe("resolveDiffRange", () => {
 				"const c = 3;",
 				"const d = 5;",
 			].join("\n"),
+			changes: [
+				{ key: "N10", content: "const a = 1;" },
+				{ key: "D11", content: "const b = 2;" },
+				{ key: "D12", content: "const c = 3;" },
+				{ key: "N13", content: "const d = 5;" },
+			],
 		});
 	});
 

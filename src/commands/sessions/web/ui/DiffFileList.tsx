@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type { FileData, ViewType } from "react-diff-view";
 import { diffSx } from "./diffSx";
-import { FileDiff, fileKey } from "./FileDiff";
+import { FileDiff, filePath } from "./FileDiff";
 import type { DiffComment } from "./formatDiffComment";
 
 export function DiffFileList({
@@ -29,7 +29,7 @@ export function DiffFileList({
 		<Box sx={diffSx}>
 			{files.map((file) => (
 				<FileDiff
-					key={fileKey(file)}
+					key={filePath(file)}
 					file={file}
 					viewType={viewType}
 					cwd={cwd}

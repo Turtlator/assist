@@ -6,11 +6,13 @@ import {
 import type { DiffChangeIndex } from "./buildChangeIndex";
 import { type DiffRangeEnd, diffRangeEndpoints } from "./diffRangeEndpoints";
 import { type DiffSide, resolveDiffSide } from "./resolveDiffSide";
+import { type SelectedChange, selectedChanges } from "./selectedChanges";
 
 type ResolvedDiffRange = {
 	startLine: number;
 	endLine: number;
 	quote: string;
+	changes: SelectedChange[];
 };
 
 function onSide(side: DiffSide | null): (change: ChangeData) => boolean {
@@ -59,5 +61,6 @@ export function resolveDiffRange(
 		startLine: lineOf(quoted[0]),
 		endLine: lineOf(quoted[quoted.length - 1]),
 		quote,
+		changes: selectedChanges(quoted),
 	};
 }

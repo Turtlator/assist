@@ -8,10 +8,6 @@ import type { DiffComment } from "./formatDiffComment";
 import { isMarkdownPath } from "./isMarkdownPath";
 import { MarkdownPreviewDialog } from "./MarkdownPreviewDialog";
 
-export function fileKey(file: FileData): string {
-	return `${file.oldRevision}-${file.newRevision}-${file.newPath || file.oldPath}`;
-}
-
 export function filePath(file: FileData): string {
 	return file.newPath && file.newPath !== "/dev/null"
 		? file.newPath

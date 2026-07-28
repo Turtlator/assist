@@ -1,4 +1,4 @@
-import { Box, Popover } from "@mui/material";
+import { Box, Popover, Typography } from "@mui/material";
 import { CommentNoteForm } from "./CommentNoteForm";
 import { QuoteBlock } from "./QuoteBlock";
 
@@ -18,13 +18,17 @@ const boxSx = {
 
 export function SelectionCommentPopover({
 	pending,
+	moved,
 	onAdd,
 	onCancel,
 }: {
 	pending: SelectionAnchor | null;
+	moved?: boolean;
 	onAdd: (note: string) => void;
 	onCancel: () => void;
 }) {
+	const draftKey = pending?.quote ?? "";
+
 	return (
 		<Popover
 			open={pending !== null}
@@ -36,8 +40,14 @@ export function SelectionCommentPopover({
 			transformOrigin={{ vertical: "top", horizontal: "left" }}
 		>
 			<Box sx={boxSx}>
-				<QuoteBlock text={pending?.quote ?? ""} />
-				<CommentNoteForm onAdd={onAdd} onCancel={onCancel} />
+				{moved && (
+					<Typography variant="caption" color="warning.main">
+						These lines changed since you selected them — your comment still
+						quotes the text below.
+					</Typography>
+				)}
+				<QuoteBlock text={draftKey} />
+				<CommentNoteForm key={draftKey} onAdd={onAdd} onCancel={onCancel} />
 			</Box>
 		</Popover>
 	);

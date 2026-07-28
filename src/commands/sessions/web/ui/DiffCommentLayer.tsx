@@ -47,7 +47,12 @@ export function DiffCommentLayer({
 		<Box ref={wrapperRef} onMouseDown={onMouseDown} sx={wrapperSx}>
 			<Box ref={contentRef}>{children}</Box>
 			<DragOverlay rects={rects} color={commentColor(0).fill} />
-			<SelectionCommentPopover pending={pending} onAdd={add} onCancel={clear} />
+			<SelectionCommentPopover
+				pending={pending}
+				moved={pending?.moved}
+				onAdd={add}
+				onCancel={clear}
+			/>
 		</Box>
 	);
 }

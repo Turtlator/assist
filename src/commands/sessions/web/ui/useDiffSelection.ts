@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import type { DiffChangeIndex } from "./buildChangeIndex";
 import { type OverlayRect, overlayRects } from "./caretFromPoint";
 import { type DiffSelection, finishDiffSelection } from "./finishDiffSelection";
 import { snappedRange } from "./finishSelection";
+import { relocateDiffSelection } from "./relocateDiffSelection";
 import { useDragSelection } from "./useDragSelection";
 
 export function useDiffSelection(index: DiffChangeIndex) {
@@ -22,6 +23,14 @@ export function useDiffSelection(index: DiffChangeIndex) {
 			setRects(next?.rects ?? null);
 		},
 	});
+
+	useLayoutEffect(() => {
+		if (!pending) return;
+		const next = relocateDiffSelection(pending, index, wrapperRef.current);
+		if (next === pending) return;
+		setPending(next);
+		setRects(next.rects);
+	}, [index, pending, wrapperRef]);
 
 	const clear = () => {
 		setPending(null);
