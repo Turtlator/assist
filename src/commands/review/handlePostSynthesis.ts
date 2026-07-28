@@ -5,6 +5,7 @@ type PostSynthesisOptions = {
 	refine: boolean;
 	prompt: boolean;
 	submit: boolean;
+	addressComments: boolean;
 };
 
 export async function handlePostSynthesis(
@@ -18,5 +19,6 @@ export async function handlePostSynthesis(
 	await postReviewToPr(synthesisPath, {
 		prompt: options.prompt,
 		submit: options.submit,
+		addressComments: options.addressComments,
 	});
 }

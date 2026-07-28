@@ -36,6 +36,10 @@ export function registerReview(program: Command): void {
 			"After synthesis, launch an interactive Claude session running /bug to file all findings as a single backlog item with one phase per finding, instead of posting to the PR",
 		)
 		.option(
+			"--address-comments",
+			"After posting and submitting the review, start an Address Comments session (assist review-pr-comments <n>) for the PR; no-op when nothing was posted or the review was not submitted, and only inside an assist session",
+		)
+		.option(
 			"--verbose",
 			"Disable spinner UI and use per-line log output (per-tool lines, starting/done lines)",
 		)

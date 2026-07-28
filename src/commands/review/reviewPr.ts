@@ -16,6 +16,7 @@ type ReviewPrOptions = {
 	apply?: boolean;
 	backlog?: boolean;
 	verbose?: boolean;
+	addressComments?: boolean;
 };
 
 function logPriorComments(count: number): void {
@@ -64,6 +65,7 @@ async function runPostSynthesis(
 		refine: options.refine ?? false,
 		prompt: options.prompt ?? true,
 		submit: options.submit ?? false,
+		addressComments: options.addressComments ?? false,
 	});
 }
 

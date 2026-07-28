@@ -89,6 +89,28 @@ describe("postAndMaybeSubmit", () => {
 			expect(mockSetSessionStatus).not.toHaveBeenCalled();
 			expect(mockSubmitPendingReview).toHaveBeenCalledWith("md");
 		});
+
+		it("should report what was posted and submitted", async () => {
+			mockPostFindings.mockReturnValue({ posted: 3, failed: 0 });
+
+			const outcome = await postAndMaybeSubmit(findings, "md", {
+				prompt: false,
+				submit: true,
+			});
+
+			expect(outcome).toEqual({ posted: 3, submitted: true });
+		});
+
+		it("should report an unsubmitted review", async () => {
+			mockPostFindings.mockReturnValue({ posted: 3, failed: 0 });
+
+			const outcome = await postAndMaybeSubmit(findings, "md", {
+				prompt: false,
+				submit: false,
+			});
+
+			expect(outcome).toEqual({ posted: 3, submitted: false });
+		});
 	});
 
 	describe("when no comments were posted", () => {
@@ -99,6 +121,17 @@ describe("postAndMaybeSubmit", () => {
 
 			expect(mockSetSessionStatus).not.toHaveBeenCalled();
 			expect(mockPromptConfirm).not.toHaveBeenCalled();
+		});
+
+		it("should report nothing posted or submitted", async () => {
+			mockPostFindings.mockReturnValue({ posted: 0, failed: 0 });
+
+			const outcome = await postAndMaybeSubmit(findings, "md", {
+				prompt: true,
+				submit: false,
+			});
+
+			expect(outcome).toEqual({ posted: 0, submitted: false });
 		});
 	});
 });

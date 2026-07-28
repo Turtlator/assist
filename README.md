@@ -120,6 +120,7 @@ Every command supports `--help` for full detail on its flags and behaviour.
   - `--refine` - Skip posting; walk through `synthesis.md` interactively and edit it in place
   - `--apply` - Skip posting; walk through each finding asking apply/skip. Applied findings are fixed in the working tree
   - `--backlog` - Skip posting; file all findings as a single bug backlog item with one phase per finding
+  - `--address-comments` - After the review posts comments and submits, start an Address Comments session (`assist review-pr-comments <n>`) for the PR. Only fires inside an assist session, and only when at least one comment was posted and the review was submitted
   - `--verbose` - Per-line log output instead of the stacked-spinner UI (automatic in CI)
 - `assist github commits <org> [--since <date>] [--top <n>] [--json]` - Report commit activity across a GitHub organisation: repos ranked by commits, top committers, and a per-repo author breakdown
 - `assist news add [url]` - Add an RSS feed URL (rendered in the sessions web News tab)
