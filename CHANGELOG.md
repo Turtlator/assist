@@ -1,3 +1,10 @@
+# [0.497.0](https://github.com/staff0rd/assist/compare/v0.496.2...v0.497.0) (2026-07-28)
+
+
+### Features
+
+* review --announce chains Slack post ([55cd15d](https://github.com/staff0rd/assist/commit/55cd15d659f11f425e8a603a1e4ae4de2154e6c4))
+
 ## [0.496.2](https://github.com/staff0rd/assist/compare/v0.496.1...v0.496.2) (2026-07-28)
 
 
