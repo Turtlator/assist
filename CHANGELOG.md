@@ -1,3 +1,10 @@
+## [0.488.4](https://github.com/staff0rd/assist/compare/v0.488.3...v0.488.4) (2026-07-28)
+
+
+### Bug Fixes
+
+* trunk mode spills cli pr checkouts ([203aa93](https://github.com/staff0rd/assist/commit/203aa9329eb37ec106204dfd91d278707d25257a))
+
 ## [0.488.3](https://github.com/staff0rd/assist/compare/v0.488.2...v0.488.3) (2026-07-28)
 
 
