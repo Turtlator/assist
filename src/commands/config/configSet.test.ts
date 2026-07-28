@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { SECRET_MASK } from "../../shared/maskConfigSecrets";
 import { UnknownRepoConfigError } from "../../shared/resolveNamedRepoWriteLabel";
 import { AmbiguousRepoConfigError } from "../../shared/resolveRepoOverride";
 import { configSet } from "./configSet";
@@ -327,6 +328,43 @@ describe("configSet", () => {
 
 			expect(mockExit).toHaveBeenCalledWith(1);
 			expect(mockSaveGlobalConfig).not.toHaveBeenCalled();
+			mockExit.mockRestore();
+		});
+	});
+
+	describe("secrets", () => {
+		it("should mask the value in the confirmation it prints", () => {
+			const mockLog = vi
+				.spyOn(console, "log")
+				.mockImplementation(() => undefined);
+
+			configSet("database.url", "postgres://user:hunter2@host/db", {
+				global: true,
+			});
+
+			const printed = mockLog.mock.calls.flat().join("\n");
+			expect(printed).toContain(SECRET_MASK);
+			expect(printed).not.toContain("hunter2");
+			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({
+				database: { url: "postgres://user:hunter2@host/db" },
+			});
+			mockLog.mockRestore();
+		});
+
+		it("should keep the rejected value out of the error it prints", () => {
+			const mockError = vi
+				.spyOn(console, "error")
+				.mockImplementation(() => undefined);
+			const mockExit = vi
+				.spyOn(process, "exit")
+				.mockImplementation(() => undefined as never);
+
+			configSet("roam.clientSecret", "hunter2", { global: true });
+
+			expect(mockExit).toHaveBeenCalledWith(1);
+			expect(mockError.mock.calls.flat().join("\n")).not.toContain("hunter2");
+			expect(mockSaveGlobalConfig).not.toHaveBeenCalled();
+			mockError.mockRestore();
 			mockExit.mockRestore();
 		});
 	});

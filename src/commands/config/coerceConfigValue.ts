@@ -4,6 +4,7 @@ import { assistConfigSchema } from "../../shared/types";
 import type { ConfigScalar, ConfigWritableValue } from "./applyConfigSet";
 import { coerceConfigScalar } from "./coerceConfigScalar";
 import { coerceStructuredConfigValue } from "./coerceStructuredConfigValue";
+import { scrubConfigKeyError } from "./scrubConfigKeyError";
 
 type CoerceConfigValueResult =
 	| { ok: true; value: ConfigWritableValue }
@@ -21,6 +22,12 @@ export function coerceConfigValue(
 	key: string,
 	raw: unknown,
 ): CoerceConfigValueResult {
+	const result = coerceValue(key, raw);
+	if (result.ok) return result;
+	return { ok: false, error: scrubConfigKeyError(result.error, key, raw) };
+}
+
+function coerceValue(key: string, raw: unknown): CoerceConfigValueResult {
 	const leaf = describeConfigLeaves(assistConfigSchema).find(
 		(candidate) => candidate.key === key,
 	);

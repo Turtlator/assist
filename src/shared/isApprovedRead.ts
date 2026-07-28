@@ -3,6 +3,7 @@ import { isGhApiRead } from "./isGhApiRead";
 import { findCliRead, findCliWrite } from "./loadCliReads";
 import { matchesAllow } from "./matchesAllow";
 import { readSettingsPerms } from "./readSettingsPerms";
+import { revealsConfigSecret } from "./revealsConfigSecret";
 
 const READ_RE = /^Read\((.+)\)$/;
 
@@ -17,6 +18,8 @@ export function isApprovedRead(
 	command: string,
 	toolName = "Bash",
 ): string | undefined {
+	if (revealsConfigSecret(command)) return undefined;
+
 	if (SAFE_BUILTINS.has(command)) return `safe shell builtin: ${command}`;
 
 	if (isCdToCwd(command)) return "cd to current directory";

@@ -3,8 +3,11 @@ import { describe, expect, it, vi } from "vitest";
 import { isApprovedRead } from "./isApprovedRead";
 
 vi.mock("./loadCliReads", () => ({
-	findCliRead: (cmd: string) =>
-		cmd.startsWith("gh repo view") ? "gh repo view" : undefined,
+	findCliRead: (cmd: string) => {
+		if (cmd.startsWith("gh repo view")) return "gh repo view";
+		if (cmd.startsWith("assist config get")) return "assist config get";
+		return undefined;
+	},
 	findCliWrite: (cmd: string) =>
 		cmd.startsWith("assist commit") ? "assist commit" : undefined,
 }));
@@ -48,6 +51,22 @@ describe("isApprovedRead", () => {
 			const result = isApprovedRead(command);
 
 			expect(result).toBe("Read-only gh api command");
+		});
+	});
+
+	describe("when the command reveals a config secret", () => {
+		it("should approve a masked config read", () => {
+			const result = isApprovedRead("assist config get roam.clientSecret");
+
+			expect(result).toBe("Read-only CLI command: assist config get");
+		});
+
+		it("should not approve the same read with --reveal", () => {
+			const result = isApprovedRead(
+				"assist config get roam.clientSecret --reveal",
+			);
+
+			expect(result).toBeUndefined();
 		});
 	});
 

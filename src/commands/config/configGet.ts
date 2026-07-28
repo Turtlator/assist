@@ -1,10 +1,7 @@
 import chalk from "chalk";
-import { describeConfigNode } from "../../shared/describeConfigNode";
 import { loadConfig } from "../../shared/loadConfig";
-import { maskConfigSecrets } from "../../shared/maskConfigSecrets";
-import { assistConfigSchema } from "../../shared/types";
-import { configEntryNode } from "./configEntryNode";
 import { getNestedValue } from "./getNestedValue";
+import { maskConfigKeySecrets } from "./maskConfigKeySecrets";
 
 type ConfigGetOptions = { reveal?: boolean };
 
@@ -13,12 +10,9 @@ export function configGet(key: string, options: ConfigGetOptions = {}): void {
 		loadConfig() as Record<string, unknown>,
 		key,
 	);
-	console.log(formatOutput(options.reveal ? value : maskSecretsAt(value, key)));
-}
-
-function maskSecretsAt(value: unknown, key: string): unknown {
-	const node = configEntryNode(describeConfigNode(assistConfigSchema), key);
-	return maskConfigSecrets(value, node);
+	console.log(
+		formatOutput(options.reveal ? value : maskConfigKeySecrets(key, value)),
+	);
 }
 
 function formatOutput(value: unknown): string {

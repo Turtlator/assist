@@ -3,6 +3,7 @@ import { applyConfigSet, type ConfigWritableValue } from "./applyConfigSet";
 import { applyRepoConfigSet } from "./applyRepoConfigSet";
 import { coerceCliConfigValue } from "./coerceCliConfigValue";
 import { exitWithConfigErrors } from "./exitWithConfigErrors";
+import { maskConfigKeySecrets } from "./maskConfigKeySecrets";
 import { resolveRepoTarget } from "./resolveRepoTarget";
 
 type ConfigSetOptions = {
@@ -34,9 +35,8 @@ export function configSet(
 	const target = resolved.useRepo
 		? `repo: ${applyRepoOrExit(resolved.key, coerced, resolved.repoName)}`
 		: applyOrExit(resolved.key, coerced, options.global ?? false);
-	console.log(
-		chalk.green(`Set ${resolved.key} = ${JSON.stringify(coerced)} (${target})`),
-	);
+	const shown = JSON.stringify(maskConfigKeySecrets(resolved.key, coerced));
+	console.log(chalk.green(`Set ${resolved.key} = ${shown} (${target})`));
 }
 
 function applyOrExit(

@@ -316,6 +316,49 @@ describe("setConfig", () => {
 		});
 	});
 
+	it("keeps the submitted secret out of a rejected write's error", async () => {
+		const [status, payload] = await post({
+			key: "sql.connections",
+			value: [
+				{
+					name: "local",
+					server: "localhost",
+					port: "1433",
+					user: "sa",
+					password: "hunter2",
+					database: "app",
+					mode: "readonly",
+				},
+			],
+			cwd: paths.repo,
+			scope: "project",
+		});
+
+		expect(status).toBe(400);
+		expect(payload.error).toContain("sql.connections");
+		expect(JSON.stringify(payload)).not.toContain("hunter2");
+		expect(readFileSync(paths.repoConfig, "utf8")).toBe(
+			"commit:\n  push: false\n",
+		);
+	});
+
+	it("keeps a stored secret out of an unrelated key's rejected write", async () => {
+		writeFileSync(
+			paths.repoConfig,
+			"database:\n  url: postgres://user:hunter2@host/db\n",
+		);
+
+		const [status, payload] = await post({
+			key: "sessions.windowsVersionCheck",
+			value: "sometimes",
+			cwd: paths.repo,
+			scope: "project",
+		});
+
+		expect(status).toBe(400);
+		expect(JSON.stringify(payload)).not.toContain("hunter2");
+	});
+
 	it("rejects the marker for a secret that is not stored anywhere", async () => {
 		const [status, payload] = await post({
 			key: "database.url",
