@@ -3,6 +3,7 @@ import type { Breakpoint } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 import { PageSpinner } from "./PageSpinner";
+import { useReportContentReady } from "./useReportContentReady";
 
 type PageShellProps = {
 	loading?: boolean;
@@ -22,6 +23,8 @@ export const PageShell = (props: PageShellProps) => {
 		children,
 		maxWidth = "md",
 	} = props;
+
+	useReportContentReady(!loading);
 
 	if (loading) return <PageSpinner />;
 

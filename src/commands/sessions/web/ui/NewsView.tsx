@@ -1,12 +1,11 @@
 import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
-import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useEffect, useState } from "react";
 import { NewsItem } from "./NewsItem";
 import { type DateGroup, groupByDate } from "./news/groupByDate";
 import type { FeedItem } from "./news/types";
+import { PageShell } from "./PageShell";
 
 async function fetchNewsItems(): Promise<FeedItem[]> {
 	const res = await fetch("/api/news/items");
@@ -23,26 +22,12 @@ export function NewsView() {
 			.finally(() => setLoading(false));
 	}, []);
 
-	if (loading) {
-		return (
-			<Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-				<CircularProgress />
-			</Box>
-		);
-	}
-
-	if (groups.length === 0) {
-		return (
-			<Container maxWidth="md" sx={{ py: 3, px: 2 }}>
-				<Typography color="text.secondary" align="center" sx={{ py: 6 }}>
-					No news items.
-				</Typography>
-			</Container>
-		);
-	}
-
 	return (
-		<Container maxWidth="md" sx={{ py: 3, px: 2 }}>
+		<PageShell
+			loading={loading}
+			isEmpty={groups.length === 0}
+			emptyMessage="No news items."
+		>
 			{groups.map((group) => (
 				<Box key={group.label} sx={{ mb: 4 }}>
 					<Typography
@@ -59,6 +44,6 @@ export function NewsView() {
 					</Stack>
 				</Box>
 			))}
-		</Container>
+		</PageShell>
 	);
 }

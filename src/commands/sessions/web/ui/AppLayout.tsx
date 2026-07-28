@@ -4,12 +4,15 @@ import { Outlet, useLocation } from "react-router";
 import { AppSidebar } from "./AppSidebar";
 import { ErrorBoundary } from "./ErrorBoundary";
 import type { SidebarTab } from "./types";
+import { useScrollRestoration } from "./useScrollRestoration";
+import { ScrollRestorationContext } from "./useScrollRestorationContext";
 import type { SessionSocket } from "./useSessionSocket";
 import { StarredSessionsProvider } from "./useStarredSessions";
 
 export function AppLayout({ socket }: { socket: SessionSocket }) {
 	const [tab, setTab] = useState<SidebarTab>("active");
 	const { pathname } = useLocation();
+	const { containerRef, restoration } = useScrollRestoration(pathname);
 	const { requestHistory, clearTranscript } = socket;
 
 	const handleTabChange = useCallback(
@@ -31,6 +34,7 @@ export function AppLayout({ socket }: { socket: SessionSocket }) {
 			>
 				<AppSidebar socket={socket} tab={tab} onTabChange={handleTabChange} />
 				<Box
+					ref={containerRef}
 					sx={{
 						flex: 1,
 						minWidth: 0,
@@ -40,9 +44,11 @@ export function AppLayout({ socket }: { socket: SessionSocket }) {
 						overflow: "auto",
 					}}
 				>
-					<ErrorBoundary key={pathname}>
-						<Outlet />
-					</ErrorBoundary>
+					<ScrollRestorationContext.Provider value={restoration}>
+						<ErrorBoundary key={pathname}>
+							<Outlet />
+						</ErrorBoundary>
+					</ScrollRestorationContext.Provider>
 				</Box>
 			</Box>
 		</StarredSessionsProvider>
