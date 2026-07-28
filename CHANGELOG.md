@@ -1,3 +1,10 @@
+## [0.488.3](https://github.com/staff0rd/assist/compare/v0.488.2...v0.488.3) (2026-07-28)
+
+
+### Bug Fixes
+
+* chained backlog runs leave the trunk clone ([1c23215](https://github.com/staff0rd/assist/commit/1c23215c891a07c05319a5ff3ea79973e01effc4))
+
 ## [0.488.2](https://github.com/staff0rd/assist/compare/v0.488.1...v0.488.2) (2026-07-27)
 
 
