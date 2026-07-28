@@ -1,6 +1,7 @@
 import type { Command } from "commander";
 import { configHelp } from "../shared/configHelp";
 import { denyAdd } from "./deny/denyAdd";
+import { denyConfigHelp } from "./deny/denyConfigHelp";
 import { denyList } from "./deny/denyList";
 import { denyRemove } from "./deny/denyRemove";
 
@@ -10,13 +11,7 @@ export function registerDeny(parent: Command): void {
 		.description("Manage command deny rules")
 		.action(denyList);
 
-	configHelp(denyCommand, [
-		{
-			key: "deny",
-			setter: "assist deny add <pattern> <message>",
-			note: "command patterns blocked with a correction message",
-		},
-	]);
+	configHelp(denyCommand, denyConfigHelp);
 
 	denyCommand
 		.command("add")

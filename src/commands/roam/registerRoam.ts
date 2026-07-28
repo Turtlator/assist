@@ -1,6 +1,7 @@
 import type { Command } from "commander";
 import { configHelp } from "../../shared/configHelp";
 import { auth } from "./auth";
+import { roamConfigHelp } from "./roamConfigHelp";
 import { showClaudeCodeIcon } from "./showClaudeCodeIcon";
 import { showCodexIcon } from "./showCodexIcon";
 import { stopClaudeCodeIcon } from "./stopClaudeCodeIcon";
@@ -36,31 +37,5 @@ export function registerRoam(program: Command): void {
 		.description("Signal Codex session stop to Roam local API")
 		.action(stopCodexIcon);
 
-	configHelp(roamCommand, [
-		{
-			key: "roam.clientId",
-			setter: "assist roam auth",
-			note: "OAuth client ID (written by the auth flow)",
-		},
-		{
-			key: "roam.clientSecret",
-			setter: "assist roam auth",
-			note: "OAuth client secret (written by the auth flow)",
-		},
-		{
-			key: "roam.accessToken",
-			setter: "assist roam auth",
-			note: "OAuth access token (managed by the auth flow)",
-		},
-		{
-			key: "roam.refreshToken",
-			setter: "assist roam auth",
-			note: "OAuth refresh token (managed by the auth flow)",
-		},
-		{
-			key: "roam.tokenExpiresAt",
-			setter: "assist roam auth",
-			note: "access-token expiry epoch (managed by the auth flow)",
-		},
-	]);
+	configHelp(roamCommand, roamConfigHelp);
 }

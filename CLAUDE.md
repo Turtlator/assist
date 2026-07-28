@@ -20,7 +20,9 @@ Config is stored in `.claude/assist.yml` or `assist.yml`, validated with Zod. To
 
 Every command that reads config keys must document them in its `--help` via the `configHelp(command, entries)` helper (`src/shared/configHelp.ts`). Each entry names the key, its setter (an `assist config set <key> ...` line for scalar knobs, or a dedicated command like `assist sql auth` for connections/secrets), and a short note. See `src/commands/registerBranch.ts` for the reference example.
 
-The `verify:config-keys` check enforces this: it fails when a leaf key in `assistConfigSchema` is surfaced by no command, or when a declared key is not in the schema. When adding a new config key, surface it with `configHelp` (and remove it from `pendingConfigDocumentation` in `src/commands/verify/pendingConfigDocumentation.ts` if listed there) so the check passes.
+Entries live in a `<area>ConfigHelp.ts` data module next to the command (e.g. `src/commands/branch/branchConfigHelp.ts`), never inline in the `register*.ts` file. Every such module must be spread into `configHelpEntries` in `src/commands/configHelpEntries.ts`, which is what lets the web `/config` page show each key's note and setter without loading the command modules.
+
+The `verify:config-keys` check enforces this: it fails when a leaf key in `assistConfigSchema` is surfaced by no command, when a declared key is not in the schema, or when the keys registered by commands and the keys in `configHelpEntries` disagree. When adding a new config key, surface it with `configHelp` (and remove it from `pendingConfigDocumentation` in `src/commands/verify/pendingConfigDocumentation.ts` if listed there) so the check passes.
 
 ## Sessions daemon log
 

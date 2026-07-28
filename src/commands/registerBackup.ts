@@ -13,6 +13,7 @@ import {
 	scheduleStatus,
 } from "./backup/scheduleBackup";
 import { exportBacklog } from "./backlog/export";
+import { backupConfigHelp } from "./backup/backupConfigHelp";
 
 type BackupOptions = { out?: string };
 
@@ -72,11 +73,5 @@ export function registerBackup(program: Command): void {
 		)
 		.action(scheduleRemove);
 
-	configHelp(backupCommand, [
-		{
-			key: "backup.dir",
-			setter: "assist config set backup.dir ~/.assist/backups",
-			note: "directory dumps are written to (default: ~/.assist/backups)",
-		},
-	]);
+	configHelp(backupCommand, backupConfigHelp);
 }

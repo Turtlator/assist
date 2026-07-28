@@ -2,6 +2,7 @@ import type { Command } from "commander";
 import { configHelp } from "../shared/configHelp";
 import { checkBuildLocksCommand } from "./dotnet/checkBuildLocks";
 import { deps } from "./dotnet/deps";
+import { dotnetConfigHelp } from "./dotnet/dotnetConfigHelp";
 import { scopeHelpText } from "./dotnet/getChangedCsFiles";
 import { inSln } from "./dotnet/inSln";
 import { inspect } from "./dotnet/inspect";
@@ -44,12 +45,5 @@ export function registerDotnet(program: Command): void {
 		.argument("<csproj>", "Path to a .csproj file")
 		.action(inSln);
 
-	configHelp(cmd, [
-		{
-			key: "dotnet.inspect.suppress",
-			setter:
-				"assist config set dotnet.inspect.suppress CSharpWarnings::CS0168",
-			note: "inspection issue-type IDs suppressed by default",
-		},
-	]);
+	configHelp(cmd, dotnetConfigHelp);
 }

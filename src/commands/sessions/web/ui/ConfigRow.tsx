@@ -1,7 +1,7 @@
-import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import { useState } from "react";
 import type { ConfigEntry } from "../../../config/readConfigEntries";
+import { ConfigKeyCell } from "./ConfigKeyCell";
 import { ConfigRowTypeCell } from "./ConfigRowTypeCell";
 import { ConfigRowValueCell } from "./ConfigRowValueCell";
 
@@ -24,11 +24,7 @@ export function ConfigRow({ entry, cwd, onSaved, onError }: Props) {
 
 	return (
 		<TableRow>
-			<TableCell
-				sx={{ fontFamily: "monospace", verticalAlign: "top", width: "35%" }}
-			>
-				{entry.key}
-			</TableCell>
+			<ConfigKeyCell entry={entry} readOnly={readOnly} />
 			<ConfigRowValueCell
 				entry={entry}
 				list={list}

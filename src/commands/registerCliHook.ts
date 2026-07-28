@@ -2,6 +2,7 @@ import type { Command } from "commander";
 import { configHelp } from "../shared/configHelp";
 import { cliHook } from "./cliHook";
 import { cliHookCheck } from "./cliHook/cliHookCheck";
+import { cliHookConfigHelp } from "./cliHook/cliHookConfigHelp";
 import { permitCliReads } from "./permitCliReads";
 import { registerDeny } from "./registerDeny";
 
@@ -13,13 +14,7 @@ export function registerCliHook(program: Command): void {
 			cliHook();
 		});
 
-	configHelp(cmd, [
-		{
-			key: "cliReadVerbs",
-			setter: 'assist config set cliReadVerbs.git "status"',
-			note: "extra per-CLI verbs treated as read-only for auto-approval",
-		},
-	]);
+	configHelp(cmd, cliHookConfigHelp);
 
 	cmd
 		.command("check <command>")

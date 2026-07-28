@@ -1,6 +1,7 @@
 import type { Command } from "commander";
 import { configHelp } from "../shared/configHelp";
 import { type MermaidExportOptions, mermaidExport } from "./mermaid";
+import { mermaidConfigHelp } from "./mermaid/mermaidConfigHelp";
 
 export function registerMermaid(program: Command): void {
 	const cmd = program
@@ -22,11 +23,5 @@ export function registerMermaid(program: Command): void {
 			mermaidExport(file, options),
 		);
 
-	configHelp(cmd, [
-		{
-			key: "mermaid.krokiUrl",
-			setter: "assist config set mermaid.krokiUrl https://kroki.io",
-			note: "Kroki server used to render diagrams (default: https://kroki.io)",
-		},
-	]);
+	configHelp(cmd, mermaidConfigHelp);
 }

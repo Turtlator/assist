@@ -157,7 +157,7 @@ describe("readConfigEntries", () => {
 
 		expect(entry.value).toEqual(REDACTED_SECRET);
 		expect(entry.source).toBe("project");
-		expect(JSON.stringify(entry)).not.toContain("postgres");
+		expect(JSON.stringify(entry)).not.toContain("u:p@host/db");
 	});
 
 	it("leaves an unset secret without a value so it reads as not set", () => {
@@ -191,6 +191,14 @@ describe("readConfigEntries", () => {
 		writeFileSync(globalConfig, "database:\n  url: postgres://u:p@host/db\n");
 
 		expect(loadConfigFrom(repo).database?.url).toBe("postgres://u:p@host/db");
+	});
+
+	it("carries the configHelp note and setter for documented keys", () => {
+		expect(entryFor("backup.dir")).toMatchObject({
+			note: "directory dumps are written to (default: ~/.assist/backups)",
+			setter: "assist config set backup.dir ~/.assist/backups",
+		});
+		expect(entryFor("sql.connections").setter).toBe("assist sql auth add");
 	});
 
 	it("reports the schema default for a leaf under an unset optional parent", () => {

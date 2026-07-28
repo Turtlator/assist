@@ -1,5 +1,6 @@
 import type { Command } from "commander";
-import { type ConfigHelpEntry, configHelp } from "../../shared/configHelp";
+import { configHelp } from "../../shared/configHelp";
+import { harnessConfigHelp } from "./harnessConfigHelp";
 import { refine } from "./refine";
 import { resolveHarness } from "./resolveHarness";
 
@@ -11,24 +12,6 @@ type RefineLaunchOpts = {
 
 const HARNESS_FLAG =
 	"Coding harness to launch (claude|codex|pi); defaults to the configured harness.engine";
-
-const HARNESS_CONFIG_HELP: ConfigHelpEntry[] = [
-	{
-		key: "harness.engine",
-		setter: "assist config set harness.engine <claude|codex|pi>",
-		note: "default coding harness launched by refine and other flows",
-	},
-	{
-		key: "harness.exposeCodexActions",
-		setter: "assist config set harness.exposeCodexActions <true|false>",
-		note: "force the web UI 'with Codex' actions off even when codex is on PATH",
-	},
-	{
-		key: "harness.exposePiActions",
-		setter: "assist config set harness.exposePiActions <true|false>",
-		note: "force the web UI 'with pi' actions off even when pi is on PATH",
-	},
-];
 
 function runRefine(
 	id: string | undefined,
@@ -55,5 +38,5 @@ export function registerRefineLaunch(
 		.option("--resume-session <id>", resumeFlag)
 		.option("--harness <kind>", HARNESS_FLAG)
 		.action(runRefine);
-	configHelp(command, HARNESS_CONFIG_HELP);
+	configHelp(command, harnessConfigHelp);
 }
