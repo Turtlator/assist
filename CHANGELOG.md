@@ -1,3 +1,10 @@
+# [0.492.0](https://github.com/staff0rd/assist/compare/v0.491.1...v0.492.0) (2026-07-28)
+
+
+### Features
+
+* nest worktree sessions under run ([c56386f](https://github.com/staff0rd/assist/commit/c56386ff08905b850585af85e0a4a2f37246a393))
+
 ## [0.491.1](https://github.com/staff0rd/assist/compare/v0.491.0...v0.491.1) (2026-07-28)
 
 
