@@ -1,8 +1,11 @@
 import type { Socket } from "node:net";
 import { PassThrough } from "node:stream";
 import { describe, expect, it, vi } from "vitest";
+import { daemonLog } from "./daemonLog";
 import { handleConnection } from "./handleConnection";
 import type { SessionManager } from "./SessionManager";
+
+vi.mock("./daemonLog", () => ({ daemonLog: vi.fn() }));
 
 function createSocket() {
 	const socket = new PassThrough();
@@ -64,6 +67,25 @@ describe("handleConnection", () => {
 					type: "error",
 					message: "create-assist failed: posix_spawnp failed.",
 				})}\n`,
+			);
+		});
+
+		it("logs the reason to daemon.log", async () => {
+			const { socket, feed } = createSocket();
+			const manager = createManager({
+				spawnAssist: vi.fn(() => {
+					throw new Error("git worktree add failed: no space left on device");
+				}),
+			});
+
+			handleConnection(socket, manager);
+			feed.push(
+				`${JSON.stringify({ type: "create-assist", assistArgs: ["next"] })}\n`,
+			);
+			await flush();
+
+			expect(vi.mocked(daemonLog)).toHaveBeenCalledWith(
+				"create-assist failed: git worktree add failed: no space left on device",
 			);
 		});
 	});

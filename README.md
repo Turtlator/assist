@@ -371,6 +371,9 @@ Concurrent sessions in one repo can be isolated with native git worktrees instea
 
 - `worktree.enabled` (parallel work) — spill concurrent sessions into adjacent `<clone>-N` worktrees. Off means every session on the repo shares its single working copy.
 - `worktree.trunk` (trunk-based) — on, a spilled worktree's branch tracks `origin/<trunk>` so commits land on the mainline. Off, it starts off the remote default branch with no mainline tracking, leaving the session to raise its own branch and PR.
+
+  While it is on, a job that commits never runs in the clone: `backlog run <id>` (spawned fresh or chained into from a session already sitting in the clone) and PR checkouts (`review <n>`, `review-pr-comments <n>`) always allocate a `<clone>-N`, even when the clone is idle and clean. Committing there would land the work on the local mainline and leave every later worktree starting from that HEAD. Plain prompts, `spawnInTree` sessions, `draft`/`bug`/`refine` and every other command keep the normal clone-preferring placement, and a session pinned in place stays where it was launched. There is no fallback — if the worktree can't be created the spawn fails with the reason in `daemon.log` rather than dropping the job in the clone. Non-trunk repos are unaffected.
+
 - `worktree.includeDrafts` — give draft, bug and refine sessions their own `<clone>-N`. They change no code, so by default they run in the clone's working copy at no worktree, dep-install or teardown cost.
 
 Neither flag leaves permanent state on the clone: nothing writes to the clone's `.git/config` (`assist commit` derives its push refspec from the current branch), so turning parallel work back off leaves the repo as it was.

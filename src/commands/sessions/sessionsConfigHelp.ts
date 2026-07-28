@@ -50,7 +50,7 @@ export const sessionsConfigHelp: ConfigHelpEntry[] = [
 	{
 		key: "worktree.trunk",
 		setter: "assist config set worktree.trunk true -g --repo",
-		note: "trunk-based: a spilled worktree lands on the mainline (default off: it starts off the remote default with no mainline tracking, so the session raises its own branch and PR)",
+		note: "trunk-based: a spilled worktree lands on the mainline, and committing jobs (backlog run <id>, review/review-pr-comments) never run in the clone — they always get a <clone>-N (default off: a worktree starts off the remote default with no mainline tracking, so the session raises its own branch and PR)",
 	},
 	{
 		key: "worktree.includeDrafts",

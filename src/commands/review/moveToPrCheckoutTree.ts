@@ -19,6 +19,7 @@ export async function moveToPrCheckoutTree(): Promise<void> {
 	const from = process.cwd();
 	const alloc = allocateTree(from, persistedTreeRoots(), {
 		forCheckout: true,
+		commits: true,
 	});
 	if (!alloc.cwd || alloc.cwd === from) return;
 	process.chdir(alloc.cwd);

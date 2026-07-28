@@ -50,13 +50,30 @@ describe("moveToPrCheckoutTree", () => {
 		expect(allocateMock).toHaveBeenCalledWith(
 			"/git/repo",
 			new Set(["/git/repo"]),
-			{ forCheckout: true },
+			{ forCheckout: true, commits: true },
 		);
 		expect(chdir).toHaveBeenCalledWith("/git/repo-2");
 		expect(seedMock).toHaveBeenCalledWith(
 			"/git/repo-2",
 			"/git/repo",
 			expect.any(Function),
+		);
+	});
+
+	it("asks for a workspace that can take the checkout's commits", async () => {
+		allocateMock.mockReturnValue({
+			cwd: "/git/repo-2",
+			kind: "worktree",
+			created: false,
+			clone: "/git/repo",
+		});
+
+		await moveToPrCheckoutTree();
+
+		expect(allocateMock).toHaveBeenCalledWith(
+			"/git/repo",
+			new Set(["/git/repo"]),
+			expect.objectContaining({ commits: true }),
 		);
 	});
 

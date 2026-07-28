@@ -1,10 +1,8 @@
 import { broadcast, type SessionClient } from "./broadcast";
 import type { Session } from "./createSession";
 import { daemonLog } from "./daemonLog";
-import { refuseSpawn } from "./refuseSpawn";
 import { resetCardForRun } from "./resetCardForRun";
-import { spawnPty } from "./spawnPty";
-import { startOrHoldPty } from "./startOrHoldPty";
+import { startReusedRunPty } from "./startReusedRunPty";
 import { wirePtyEvents } from "./wirePtyEvents";
 import type { Allocation } from "./worktree/allocateTree";
 import { bindNewWorktree } from "./worktree/bindNewWorktree";
@@ -36,24 +34,15 @@ export function reuseSessionForRun(
 		return;
 	}
 	if (alloc) session.cwd = alloc.cwd;
-	try {
-		Object.assign(
-			session,
-			startOrHoldPty(
-				() => spawnPty(["assist", ...assistArgs], session.cwd, session.id),
-				alloc !== undefined,
-			),
-		);
-	} catch (error) {
-		refuseSpawn(
-			session,
-			error,
-			clients,
-			onStatusChange,
-			`reused for backlog run ${itemId}`,
-		);
-		return;
-	}
+	const started = startReusedRunPty(
+		session,
+		assistArgs,
+		itemId,
+		alloc !== undefined,
+		clients,
+		onStatusChange,
+	);
+	if (!started) return;
 	broadcast(clients, { type: "clear", sessionId: session.id });
 	if (alloc)
 		bindNewWorktree(

@@ -1,6 +1,7 @@
 import type { Socket } from "node:net";
 import { createInterface } from "node:readline";
 import { type SessionClient, sendTo } from "./broadcast";
+import { daemonLog } from "./daemonLog";
 import { dispatchMessage } from "./dispatchMessage";
 import type { SessionManager } from "./SessionManager";
 
@@ -30,9 +31,11 @@ export function handleConnection(
 		try {
 			dispatchMessage(client, manager, data);
 		} catch (error) {
+			const reason = error instanceof Error ? error.message : String(error);
+			daemonLog(`${data.type} failed: ${reason}`);
 			sendTo(client, {
 				type: "error",
-				message: `${data.type} failed: ${error instanceof Error ? error.message : String(error)}`,
+				message: `${data.type} failed: ${reason}`,
 			});
 		}
 	});
