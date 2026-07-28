@@ -1,4 +1,5 @@
 import type { PersistedSession } from "./loadPersistedSessions";
+import { restoredAutoAdvance } from "./restoredAutoAdvance";
 
 export function restoreBase(id: string, persisted: PersistedSession) {
 	return {
@@ -14,5 +15,8 @@ export function restoreBase(id: string, persisted: PersistedSession) {
 		assistArgs: persisted.assistArgs,
 		initialPrompt: persisted.initialPrompt,
 		starred: persisted.starred,
+		autoRun: persisted.autoRun,
+		autoAdvance: restoredAutoAdvance(id, persisted),
+		reviewStarted: persisted.reviewStarted,
 	};
 }

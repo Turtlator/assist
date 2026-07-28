@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { isPausePending } from "../../backlog/consumePause";
 import { findTranscriptPathSync } from "../shared/findTranscriptPathSync";
 import type { PersistedSession } from "./loadPersistedSessions";
 import { restoreSession } from "./restoreSession";
@@ -17,11 +18,18 @@ vi.mock("../shared/findTranscriptPathSync", () => ({
 	findTranscriptPathSync: vi.fn(() => "/transcripts/found.jsonl"),
 }));
 
+vi.mock("../../backlog/consumePause", () => ({
+	isPausePending: vi.fn(() => false),
+}));
+
 vi.mock("./deriveRestoreStatus", () => ({
 	deriveRestoreStatus: (p: PersistedSession) =>
 		p.status === "running" ? "running" : "waiting",
 }));
 
+const isPausePendingMock = isPausePending as unknown as ReturnType<
+	typeof vi.fn
+>;
 const spawnClaudeMock = spawnClaude as unknown as ReturnType<typeof vi.fn>;
 const spawnPtyMock = spawnPty as unknown as ReturnType<typeof vi.fn>;
 const findTranscriptPathSyncMock =
@@ -31,6 +39,32 @@ describe("restoreSession", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		findTranscriptPathSyncMock.mockReturnValue("/transcripts/found.jsonl");
+		isPausePendingMock.mockReturnValue(false);
+	});
+
+	it("keeps a pending pause alive when relaunching a backlog run, so Continue stays off", () => {
+		isPausePendingMock.mockReturnValue(true);
+		const persisted: PersistedSession = {
+			name: "repo/Run backlog 295",
+			commandType: "assist",
+			status: "running",
+			cwd: "/home/user/repo",
+			startedAt: 123,
+			claudeSessionId: "abc-123",
+			assistArgs: ["backlog", "run", "295"],
+			activity: { kind: "backlog", itemId: 295, startedAt: 123 },
+			autoAdvance: false,
+		};
+
+		const session = restoreSession("1", persisted);
+
+		expect(spawnPtyMock).toHaveBeenCalledWith(
+			["assist", "backlog", "run", "295", "--resume-session", "abc-123"],
+			"/home/user/repo",
+			"1",
+			{ ASSIST_KEEP_PAUSE: "1" },
+		);
+		expect(session.autoAdvance).toBe(false);
 	});
 
 	it("respawns a claude session with a known sessionId via --resume", () => {

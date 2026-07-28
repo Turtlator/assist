@@ -5,6 +5,7 @@ import { hasTranscriptOnDisk } from "./hasTranscriptOnDisk";
 import type { PersistedSession } from "./loadPersistedSessions";
 import { restoreBase } from "./restoreBase";
 import { restoreInteractiveSession } from "./restoreInteractiveSession";
+import { resumedRunEnv } from "./resumedRunEnv";
 import {
 	runningSession,
 	stoppedSession,
@@ -42,7 +43,7 @@ export function restoreSession(
 				: assistResumeArgs({ assistArgs: persisted.assistArgs }),
 			persisted.cwd,
 			id,
-			reattachesIdleConversation ? { ASSIST_RESUME_IDLE: "1" } : undefined,
+			resumedRunEnv(persisted.activity?.itemId, reattachesIdleConversation),
 		);
 		return reattachesIdleConversation
 			? waitingSession(base, persisted, pty)

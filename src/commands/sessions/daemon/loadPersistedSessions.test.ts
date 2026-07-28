@@ -278,6 +278,62 @@ describe("persistLiveSessions", () => {
 		expect(restoreBase("1", parsed).starred).toBe(true);
 	});
 
+	it("round-trips the auto-run, auto-advance and review-started toggles", () => {
+		const sessions = new Map<string, Session>([
+			[
+				"1",
+				fakeSession({
+					id: "1",
+					claudeSessionId: "abc",
+					autoRun: true,
+					autoAdvance: false,
+					reviewStarted: true,
+				}),
+			],
+		]);
+
+		persistLiveSessions(sessions);
+
+		const [, persisted] = saveJsonMock.mock.lastCall as [
+			string,
+			PersistedSession[],
+		];
+		expect(persisted[0]).toMatchObject({
+			autoRun: true,
+			autoAdvance: false,
+			reviewStarted: true,
+		});
+
+		loadJsonMock.mockReturnValue(persisted);
+		const [parsed] = loadPersistedSessions();
+
+		expect(restoreBase("1", parsed)).toMatchObject({
+			autoRun: true,
+			autoAdvance: false,
+			reviewStarted: true,
+		});
+	});
+
+	it("leaves untouched toggles undefined so their defaults apply after restore", () => {
+		const sessions = new Map<string, Session>([
+			["1", fakeSession({ id: "1", claudeSessionId: "abc" })],
+		]);
+
+		persistLiveSessions(sessions);
+
+		const [, persisted] = saveJsonMock.mock.lastCall as [
+			string,
+			PersistedSession[],
+		];
+		loadJsonMock.mockReturnValue(persisted);
+		const [parsed] = loadPersistedSessions();
+		const restored = restoreBase("1", parsed);
+
+		expect(restored.autoRun).toBeUndefined();
+		expect(restored.autoAdvance).toBeUndefined();
+		expect(restored.reviewStarted).toBeUndefined();
+	});
+
 	it("round-trips the harness through persist, schema parse, and restore", () => {
 		const sessions = new Map<string, Session>([
 			["1", fakeSession({ id: "1", claudeSessionId: "abc", harness: "pi" })],
