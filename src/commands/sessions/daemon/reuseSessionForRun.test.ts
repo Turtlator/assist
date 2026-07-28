@@ -208,5 +208,73 @@ describe("reuseSessionForRun", () => {
 			expect(spawnPtyMock).toHaveBeenCalledOnce();
 			expect(bindNewWorktree).not.toHaveBeenCalled();
 		});
+
+		it("asks the allocator for a workspace that can take the run's commits", () => {
+			const session = makeSession();
+			const tree = treeCtx();
+
+			reuseSessionForRun(session, 42, new Set(), vi.fn(), tree);
+
+			expect(planReuseTree).toHaveBeenCalledWith(session, tree, {
+				commits: true,
+			});
+		});
+	});
+
+	describe("when the workspace cannot be created", () => {
+		function treeCtx(): TreeSpawnContext {
+			return {
+				sessions: new Map(),
+				spawnWith: vi.fn(),
+				notify: vi.fn(),
+				startHeld: vi.fn(),
+			};
+		}
+
+		beforeEach(() => {
+			vi.mocked(planReuseTree).mockImplementation(() => {
+				throw new Error("git worktree add failed: no space left on device");
+			});
+		});
+
+		it("fails the card instead of throwing out of the status-change handler", () => {
+			const session = makeSession();
+
+			expect(() =>
+				reuseSessionForRun(session, 42, new Set(), vi.fn(), treeCtx()),
+			).not.toThrow();
+
+			expect(session.status).toBe("error");
+			expect(session.error).toContain(
+				"git worktree add failed: no space left on device",
+			);
+		});
+
+		it("never starts the run in the tree the session was sitting in", () => {
+			const session = makeSession();
+
+			reuseSessionForRun(session, 42, new Set(), vi.fn(), treeCtx());
+
+			expect(spawnPtyMock).not.toHaveBeenCalled();
+			expect(session.pty).toBeNull();
+			expect(session.pendingStart).toBeUndefined();
+			expect(bindNewWorktree).not.toHaveBeenCalled();
+			expect(session.cwd).toBe("/home/user/repo");
+		});
+
+		it("shows the reason on the card and refreshes it", () => {
+			const client: SessionClient = { send: vi.fn() };
+			const tree = treeCtx();
+
+			reuseSessionForRun(makeSession(), 42, new Set([client]), vi.fn(), tree);
+
+			expect(
+				vi
+					.mocked(client.send)
+					.mock.calls.map(([message]) => message)
+					.join(""),
+			).toContain("no space left on device");
+			expect(tree.notify).toHaveBeenCalled();
+		});
 	});
 });

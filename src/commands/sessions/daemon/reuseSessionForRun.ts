@@ -6,9 +6,12 @@ import { resetCardForRun } from "./resetCardForRun";
 import { spawnPty } from "./spawnPty";
 import { startOrHoldPty } from "./startOrHoldPty";
 import { wirePtyEvents } from "./wirePtyEvents";
+import type { Allocation } from "./worktree/allocateTree";
 import { bindNewWorktree } from "./worktree/bindNewWorktree";
+import { isCommittingArgs } from "./worktree/isCommittingArgs";
 import { planReuseTree } from "./worktree/planReuseTree";
 import type { TreeSpawnContext } from "./worktree/spawnInTree";
+import { failChainedRun } from "./failChainedRun";
 
 export function reuseSessionForRun(
 	session: Session,
@@ -23,7 +26,15 @@ export function reuseSessionForRun(
 ): void {
 	const assistArgs = ["backlog", "run", String(itemId)];
 	resetCardForRun(session, assistArgs);
-	const alloc = planReuseTree(session, tree);
+	let alloc: Allocation | undefined;
+	try {
+		alloc = planReuseTree(session, tree, {
+			commits: isCommittingArgs(assistArgs),
+		});
+	} catch (error) {
+		failChainedRun(session, itemId, error, clients, tree);
+		return;
+	}
 	if (alloc) session.cwd = alloc.cwd;
 	try {
 		Object.assign(

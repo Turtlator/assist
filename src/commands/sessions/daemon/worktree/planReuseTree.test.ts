@@ -71,7 +71,23 @@ describe("planReuseTree", () => {
 
 		planReuseTree(draft, ctx(draft));
 
-		expect(allocateMock).toHaveBeenCalledWith("/git/repo", new Set());
+		expect(allocateMock).toHaveBeenCalledWith("/git/repo", new Set(), {});
+	});
+
+	it("forwards the caller's allocation options", () => {
+		allocateMock.mockReturnValue({
+			cwd: "/git/repo-2",
+			kind: "worktree",
+			created: true,
+			clone: "/git/repo",
+		});
+		const draft = session();
+
+		planReuseTree(draft, ctx(draft), { commits: true });
+
+		expect(allocateMock).toHaveBeenCalledWith("/git/repo", new Set(), {
+			commits: true,
+		});
 	});
 
 	it("counts a session that shares the clone with it", () => {
@@ -89,6 +105,7 @@ describe("planReuseTree", () => {
 		expect(allocateMock).toHaveBeenCalledWith(
 			"/git/repo",
 			new Set(["/git/repo"]),
+			{},
 		);
 	});
 
