@@ -1,3 +1,10 @@
+## [0.490.2](https://github.com/staff0rd/assist/compare/v0.490.1...v0.490.2) (2026-07-28)
+
+
+### Bug Fixes
+
+* discard clears a detached worktree ([b7ec306](https://github.com/staff0rd/assist/commit/b7ec30637fe7289ccdac2a7b0aacd268029bd308))
+
 ## [0.490.1](https://github.com/staff0rd/assist/compare/v0.490.0...v0.490.1) (2026-07-28)
 
 
