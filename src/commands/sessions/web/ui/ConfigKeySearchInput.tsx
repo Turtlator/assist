@@ -14,7 +14,7 @@ export function ConfigKeySearchInput({
 			size="small"
 			value={search}
 			onChange={(e) => onChange(e.target.value)}
-			placeholder="Filter keys..."
+			placeholder="Search"
 			sx={{ width: 240 }}
 			slotProps={{
 				htmlInput: { "aria-label": "Filter config keys" },
