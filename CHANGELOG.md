@@ -1,3 +1,10 @@
+## [0.490.3](https://github.com/staff0rd/assist/compare/v0.490.2...v0.490.3) (2026-07-28)
+
+
+### Bug Fixes
+
+* hide Clear where the scope holds no value ([c4ebefe](https://github.com/staff0rd/assist/commit/c4ebefeb8fe082702cfc226c985e78f4f5b74822))
+
 ## [0.490.2](https://github.com/staff0rd/assist/compare/v0.490.1...v0.490.2) (2026-07-28)
 
 
