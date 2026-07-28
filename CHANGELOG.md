@@ -1,3 +1,10 @@
+## [0.500.1](https://github.com/staff0rd/assist/compare/v0.500.0...v0.500.1) (2026-07-28)
+
+
+### Bug Fixes
+
+* config search placeholder wording ([7a5034d](https://github.com/staff0rd/assist/commit/7a5034dfa54d37eeb83857bba3950655097d1de7))
+
 # [0.500.0](https://github.com/staff0rd/assist/compare/v0.499.0...v0.500.0) (2026-07-28)
 
 
