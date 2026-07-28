@@ -3,7 +3,27 @@ import { emitActivity } from "../shared/emitActivity";
 import { spawnClaude } from "../shared/spawnClaude";
 import { checkoutPr } from "./review/checkoutPr";
 
-export async function reviewPrComments(number?: string): Promise<void> {
+type ReviewPrCommentsOptions = {
+	announce?: boolean;
+};
+
+function buildPrompt(number: string | undefined, announce: boolean): string {
+	if (!announce) return "/review-pr-comments";
+	return `/review-pr-comments --announce ${number}`;
+}
+
+function validateAnnounce(number: string | undefined, announce: boolean): void {
+	if (!announce || number) return;
+	console.error("Error: --announce requires a PR number.");
+	process.exit(1);
+}
+
+export async function reviewPrComments(
+	number?: string,
+	options: ReviewPrCommentsOptions = {},
+): Promise<void> {
+	const announce = options.announce === true;
+	validateAnnounce(number, announce);
 	if (number) await checkoutPr(number);
 	/* why: assign the conversation id up front and report it via activity so the
 	 * daemon binds the card to this transcript rather than guessing via the cwd
@@ -14,7 +34,7 @@ export async function reviewPrComments(number?: string): Promise<void> {
 		name: "review-pr-comments",
 		claudeSessionId,
 	});
-	const { done } = spawnClaude("/review-pr-comments", {
+	const { done } = spawnClaude(buildPrompt(number, announce), {
 		permissionMode: "acceptEdits",
 		sessionId: claudeSessionId,
 	});

@@ -51,7 +51,13 @@ function registerReviewPrComments(program: Command): void {
 		.command("review-pr-comments")
 		.argument("[number]", "PR number to check out first")
 		.description("Launch Claude in /review-pr-comments mode (single session)")
-		.action((number) => reviewPrComments(number));
+		.option(
+			"--announce",
+			"After every comment thread is processed, announce the PR in Slack via /prs-slack <number> --no-confirm (requires a PR number)",
+		)
+		.action((number, opts: { announce?: boolean }) =>
+			reviewPrComments(number, opts),
+		);
 }
 
 export function registerLaunch(program: Command): void {

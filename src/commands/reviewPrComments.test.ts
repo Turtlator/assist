@@ -45,4 +45,39 @@ describe("reviewPrComments", () => {
 			expect(mockSpawnClaude).toHaveBeenCalled();
 		});
 	});
+
+	describe("with --announce", () => {
+		it("should ask the pass to announce the PR when it finishes", async () => {
+			await reviewPrComments("123", { announce: true });
+
+			expect(mockSpawnClaude).toHaveBeenCalledWith(
+				"/review-pr-comments --announce 123",
+				expect.anything(),
+			);
+		});
+
+		it("should exit when no PR number is given", async () => {
+			const exit = vi.spyOn(process, "exit").mockImplementation(() => {
+				throw new Error("process.exit");
+			});
+			vi.spyOn(console, "error").mockImplementation(() => {});
+
+			await expect(
+				reviewPrComments(undefined, { announce: true }),
+			).rejects.toThrow("process.exit");
+
+			exit.mockRestore();
+		});
+	});
+
+	describe("without --announce", () => {
+		it("should run the plain pass", async () => {
+			await reviewPrComments("123");
+
+			expect(mockSpawnClaude).toHaveBeenCalledWith(
+				"/review-pr-comments",
+				expect.anything(),
+			);
+		});
+	});
 });

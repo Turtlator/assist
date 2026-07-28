@@ -40,6 +40,10 @@ export function registerReview(program: Command): void {
 			"After posting and submitting the review, start an Address Comments session (assist review-pr-comments <n>) for the PR; no-op when nothing was posted or the review was not submitted, and only inside an assist session",
 		)
 		.option(
+			"--announce",
+			"Announce the PR in Slack (/prs-slack <n> --no-confirm) once the chain finishes: from the Address Comments session when one was started, otherwise from a session started directly; only inside an assist session",
+		)
+		.option(
 			"--verbose",
 			"Disable spinner UI and use per-line log output (per-tool lines, starting/done lines)",
 		)

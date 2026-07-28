@@ -45,6 +45,10 @@ Create a task for each **thread** (not each comment). For each thread:
 
 5. **Repeat** until all comments have been processed
 
+## Announcing when done
+
+If `$ARGUMENTS` contains `--announce <number>`, then once every thread has been processed (addressed, wontfixed, or skipped) run `/prs-slack <number> --no-confirm` exactly once to announce the PR in Slack. Do this only at the very end, and only once, no matter how many threads there were. Without `--announce`, never announce.
+
 ## Important
 
 - Process comments one at a time to avoid overwhelming the user

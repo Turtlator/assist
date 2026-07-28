@@ -11,7 +11,7 @@ type PostAndMaybeSubmitOptions = {
 	submit: boolean;
 };
 
-type PostOutcome = {
+export type PostOutcome = {
 	posted: number;
 	submitted: boolean;
 };

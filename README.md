@@ -50,7 +50,7 @@ After installation, the `assist` command will be available globally. You can als
 - `/forward-comments` - Split a coarse PR comment into per-line review comments, attributed to the original reviewer
 - `/handover` - Write a session handover note for the next conversation
 - `/pr` - Raise a PR with a concise description, then watch CI in the background
-- `/prs-slack <number>` - Post a PR's title and URL to the Slack channel configured in `prs.slack`
+- `/prs-slack <number> [--no-confirm]` - Post a PR's title and URL to the Slack channel configured in `prs.slack`; `--no-confirm` skips the confirmation and posts straight away (used by chained announces)
 - `/refactor` - Run refactoring checks for code quality
 - `/prompts` - Analyze denied tool calls and suggest settings changes to auto-allow recurring prompts
 - `/recall` - Recall the most recent handover note for this repo
@@ -121,6 +121,7 @@ Every command supports `--help` for full detail on its flags and behaviour.
   - `--apply` - Skip posting; walk through each finding asking apply/skip. Applied findings are fixed in the working tree
   - `--backlog` - Skip posting; file all findings as a single bug backlog item with one phase per finding
   - `--address-comments` - After the review posts comments and submits, start an Address Comments session (`assist review-pr-comments <n>`) for the PR. Only fires inside an assist session, and only when at least one comment was posted and the review was submitted
+  - `--announce` - Announce the PR in Slack (`/prs-slack <n> --no-confirm`) at the tail of the chain: the Address Comments session announces once every thread is processed when one was started, otherwise a `/prs-slack` session is started directly. Announces exactly once, and only inside an assist session
   - `--verbose` - Per-line log output instead of the stacked-spinner UI (automatic in CI)
 - `assist github commits <org> [--since <date>] [--top <n>] [--json]` - Report commit activity across a GitHub organisation: repos ranked by commits, top committers, and a per-repo author breakdown
 - `assist news add [url]` - Add an RSS feed URL (rendered in the sessions web News tab)
@@ -338,7 +339,7 @@ The Config tab of the sessions web dashboard never receives secret values: `GET 
 - `assist draft [description] [--once]` (alias: `feat`) - Launch Claude in `/draft` mode, chain into next on `/next` signal
 - `assist bug [description] [--once]` - Launch Claude in `/bug` mode, chain into next on `/next` signal
 - `assist refine [id] [--once] [--harness <claude|codex|pi>]` - Launch a coding harness in `/refine` mode; `--harness` picks the engine, defaulting to the configured `harness.engine` (Claude)
-- `assist review-pr-comments [number]` - Launch Claude in `/review-pr-comments` mode; a PR number is checked out first via `gh pr checkout`
+- `assist review-pr-comments [number] [--announce]` - Launch Claude in `/review-pr-comments` mode; a PR number is checked out first via `gh pr checkout`. `--announce` (requires a number) announces the PR in Slack via `/prs-slack <number> --no-confirm` once every comment thread has been processed
 - `assist signal next [id]` - Write a next signal to chain into `assist next`
 - `assist signal done [id]` - Write a done signal marking the session's initial task complete; an optional `id` surfaces the backlog item the session created onto its card
 

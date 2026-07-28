@@ -4,8 +4,6 @@ import { fetchExistingComments } from "./fetchExistingComments";
 import { gatherContext } from "./gatherContext";
 import { handlePostSynthesis } from "./handlePostSynthesis";
 import { prepareReviewDir } from "./prepareReviewDir";
-import { runApplySession } from "./runApplySession";
-import { runBacklogSession } from "./runBacklogSession";
 import { runReviewPipeline } from "./runReviewPipeline";
 
 type ReviewPrOptions = {
@@ -17,6 +15,7 @@ type ReviewPrOptions = {
 	backlog?: boolean;
 	verbose?: boolean;
 	addressComments?: boolean;
+	announce?: boolean;
 };
 
 function logPriorComments(count: number): void {
@@ -49,23 +48,19 @@ function setupReviewDir(
 	return paths;
 }
 
-async function runPostSynthesis(
+function runPostSynthesis(
 	synthesisPath: string,
+	prNumber: number,
 	options: ReviewPrOptions,
 ): Promise<void> {
-	if (options.backlog) {
-		await runBacklogSession(synthesisPath);
-		return;
-	}
-	if (options.apply) {
-		await runApplySession(synthesisPath);
-		return;
-	}
-	await handlePostSynthesis(synthesisPath, {
+	return handlePostSynthesis(synthesisPath, prNumber, {
 		refine: options.refine ?? false,
+		apply: options.apply ?? false,
+		backlog: options.backlog ?? false,
 		prompt: options.prompt ?? true,
 		submit: options.submit ?? false,
 		addressComments: options.addressComments ?? false,
+		announce: options.announce ?? false,
 	});
 }
 
@@ -78,6 +73,7 @@ export async function reviewPr(
 	const synthesisOk = await runReviewPipeline(paths, {
 		verbose: options.verbose ?? false,
 	});
-	if (synthesisOk) await runPostSynthesis(paths.synthesisPath, options);
+	if (synthesisOk)
+		await runPostSynthesis(paths.synthesisPath, context.prNumber, options);
 	console.log(`Done. Review folder: ${paths.reviewDir}`);
 }

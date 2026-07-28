@@ -23,10 +23,19 @@ afterEach(() => {
 
 describe("chainAddressComments", () => {
 	it("should request a review-pr-comments session for the PR", async () => {
-		await chainAddressComments(42);
+		await chainAddressComments(42, false);
 
 		expect(mockRequestAssistSession).toHaveBeenCalledWith(
 			["review-pr-comments", "42"],
+			process.cwd(),
+		);
+	});
+
+	it("should pass --announce so the session announces when it is done", async () => {
+		await chainAddressComments(42, true);
+
+		expect(mockRequestAssistSession).toHaveBeenCalledWith(
+			["review-pr-comments", "42", "--announce"],
 			process.cwd(),
 		);
 	});
@@ -35,7 +44,7 @@ describe("chainAddressComments", () => {
 		it("should not request a session", async () => {
 			delete process.env.ASSIST_SESSION;
 
-			await chainAddressComments(42);
+			await chainAddressComments(42, false);
 
 			expect(mockRequestAssistSession).not.toHaveBeenCalled();
 		});
@@ -45,7 +54,7 @@ describe("chainAddressComments", () => {
 		it("should warn instead of throwing", async () => {
 			mockRequestAssistSession.mockRejectedValue(new Error("no daemon"));
 
-			await expect(chainAddressComments(42)).resolves.toBeUndefined();
+			await expect(chainAddressComments(42, false)).resolves.toBeUndefined();
 
 			expect(console.error).toHaveBeenCalledWith(
 				expect.stringContaining("no daemon"),

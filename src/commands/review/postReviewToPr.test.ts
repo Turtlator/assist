@@ -2,8 +2,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { LineBoundFinding } from "./partitionFindings";
 
 const mockPostAndMaybeSubmit = vi.fn();
-const mockChainAddressComments = vi.fn();
+const mockChainAfterReview = vi.fn();
 const mockSelectPostableFindings = vi.fn();
+const mockPromptConfirm = vi.fn();
 
 vi.mock("node:fs", () => ({
 	readFileSync: () => "synthesis markdown",
@@ -22,76 +23,70 @@ vi.mock("./postAndMaybeSubmit", () => ({
 	postAndMaybeSubmit: (...args: unknown[]) => mockPostAndMaybeSubmit(...args),
 }));
 
-vi.mock("./chainAddressComments", () => ({
-	chainAddressComments: (...args: unknown[]) =>
-		mockChainAddressComments(...args),
+vi.mock("./chainAfterReview", () => ({
+	chainAfterReview: (...args: unknown[]) => mockChainAfterReview(...args),
 }));
 
 vi.mock("../../shared/promptConfirm", () => ({
-	promptConfirm: () => Promise.resolve(true),
+	promptConfirm: (...args: unknown[]) => mockPromptConfirm(...args),
 }));
 
 import { postReviewToPr } from "./postReviewToPr";
 
 const finding = { file: "a.ts", line: 1 } as LineBoundFinding;
+const options = {
+	prompt: false,
+	submit: true,
+	addressComments: true,
+	announce: true,
+};
 
 beforeEach(() => {
 	vi.clearAllMocks();
 	vi.spyOn(console, "log").mockImplementation(() => {});
 	mockSelectPostableFindings.mockReturnValue([finding]);
 	mockPostAndMaybeSubmit.mockResolvedValue({ posted: 1, submitted: true });
+	mockPromptConfirm.mockResolvedValue(true);
 });
 
-const options = { prompt: false, submit: true, addressComments: true };
-
 describe("postReviewToPr", () => {
-	describe("with --address-comments", () => {
-		it("should chain an Address Comments session once posted and submitted", async () => {
-			await postReviewToPr("synthesis.md", options);
+	it("should hand the post outcome to the chain", async () => {
+		await postReviewToPr("synthesis.md", options);
 
-			expect(mockChainAddressComments).toHaveBeenCalledWith(42);
-		});
+		expect(mockChainAfterReview).toHaveBeenCalledWith(
+			42,
+			{ posted: 1, submitted: true },
+			options,
+		);
+	});
 
-		it("should not chain when nothing was posted", async () => {
-			mockPostAndMaybeSubmit.mockResolvedValue({
-				posted: 0,
-				submitted: false,
-			});
-
-			await postReviewToPr("synthesis.md", options);
-
-			expect(mockChainAddressComments).not.toHaveBeenCalled();
-		});
-
-		it("should not chain when the review was left unsubmitted", async () => {
-			mockPostAndMaybeSubmit.mockResolvedValue({
-				posted: 2,
-				submitted: false,
-			});
-
-			await postReviewToPr("synthesis.md", options);
-
-			expect(mockChainAddressComments).not.toHaveBeenCalled();
-		});
-
-		it("should not chain when there are no findings to post", async () => {
+	describe("when there are no findings to post", () => {
+		it("should still run the chain with nothing posted", async () => {
 			mockSelectPostableFindings.mockReturnValue([]);
 
 			await postReviewToPr("synthesis.md", options);
 
 			expect(mockPostAndMaybeSubmit).not.toHaveBeenCalled();
-			expect(mockChainAddressComments).not.toHaveBeenCalled();
+			expect(mockChainAfterReview).toHaveBeenCalledWith(
+				42,
+				{ posted: 0, submitted: false },
+				options,
+			);
 		});
 	});
 
-	describe("without --address-comments", () => {
-		it("should not chain even when posted and submitted", async () => {
-			await postReviewToPr("synthesis.md", {
-				...options,
-				addressComments: false,
-			});
+	describe("when the user declines posting", () => {
+		it("should still run the chain with nothing posted", async () => {
+			mockPromptConfirm.mockResolvedValue(false);
 
-			expect(mockChainAddressComments).not.toHaveBeenCalled();
+			await postReviewToPr("synthesis.md", { ...options, prompt: true });
+
+			expect(mockPostAndMaybeSubmit).not.toHaveBeenCalled();
+			expect(mockChainAfterReview).toHaveBeenCalledWith(
+				42,
+				{ posted: 0, submitted: false },
+				expect.objectContaining({ announce: true }),
+			);
 		});
 	});
 });

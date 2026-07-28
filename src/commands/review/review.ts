@@ -12,6 +12,7 @@ export type ReviewOptions = {
 	backlog?: boolean;
 	verbose?: boolean;
 	addressComments?: boolean;
+	announce?: boolean;
 	number?: string;
 };
 

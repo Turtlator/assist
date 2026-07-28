@@ -1,18 +1,14 @@
 import { requestAssistSession } from "../sessions/shared/requestAssistSession";
+import { startChainedSession } from "./startChainedSession";
 
-export async function chainAddressComments(prNumber: number): Promise<void> {
-	if (process.env.ASSIST_SESSION !== "1") return;
-	try {
-		await requestAssistSession(
-			["review-pr-comments", String(prNumber)],
-			process.cwd(),
-		);
-		console.log(`Started an Address Comments session for PR #${prNumber}.`);
-	} catch (error) {
-		console.error(
-			`Warning: could not start an Address Comments session: ${
-				error instanceof Error ? error.message : String(error)
-			}`,
-		);
-	}
+export function chainAddressComments(
+	prNumber: number,
+	announce: boolean,
+): Promise<void> {
+	const args = ["review-pr-comments", String(prNumber)];
+	if (announce) args.push("--announce");
+	return startChainedSession(
+		`an Address Comments session for PR #${prNumber}`,
+		() => requestAssistSession(args, process.cwd()),
+	);
 }
