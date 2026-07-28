@@ -9,7 +9,11 @@ function gitInvocation(cwd: string, args: string[]) {
 	return {
 		file: windows ? "git.exe" : "git",
 		argv: windows ? ["-C", cwd, ...args] : args,
-		options: { encoding: "utf8" as const, ...(windows ? {} : { cwd }) },
+		options: {
+			encoding: "utf8" as const,
+			windowsHide: true,
+			...(windows ? {} : { cwd }),
+		},
 	};
 }
 

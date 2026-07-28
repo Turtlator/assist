@@ -53,7 +53,7 @@ async function getCurrentBranch(cwd: string): Promise<string | undefined> {
 		const { stdout } = await execFileAsync(
 			"git",
 			["rev-parse", "--abbrev-ref", "HEAD"],
-			{ encoding: "utf8", cwd: toGitCwd(cwd) },
+			{ encoding: "utf8", windowsHide: true, cwd: toGitCwd(cwd) },
 		);
 		const branch = stdout.trim();
 		return branch && branch !== "HEAD" ? branch : undefined;

@@ -48,6 +48,7 @@ function tryGit(cwd: string, args: string[]): string | null {
 	try {
 		const out = execFileSync(file, argv, {
 			encoding: "utf8",
+			windowsHide: true,
 			stdio: ["pipe", "pipe", "pipe"],
 			...(windows ? {} : { cwd }),
 		}).trim();

@@ -12,7 +12,7 @@ export async function generateSessionTitle(
 		const { stdout } = await execFileAsync(
 			"claude",
 			["-p", "--model", "haiku", buildPrompt(prompt)],
-			{ encoding: "utf8", timeout: 30_000 },
+			{ encoding: "utf8", windowsHide: true, timeout: 30_000 },
 		);
 		return normaliseTitle(stdout);
 	} catch {

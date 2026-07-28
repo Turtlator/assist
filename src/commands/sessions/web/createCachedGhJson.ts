@@ -24,6 +24,7 @@ export function createCachedGhJson<T>(
 		try {
 			const { stdout } = await execFileAsync("gh", [...args, ...extraArgs], {
 				encoding: "utf8",
+				windowsHide: true,
 				cwd: toGitCwd(cwd),
 			});
 			value = parse(stdout);

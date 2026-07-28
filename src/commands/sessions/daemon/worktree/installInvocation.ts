@@ -4,7 +4,12 @@ export function installInvocation(
 ): [
 	string,
 	string[],
-	{ cwd: string; detached: boolean; stdio: ["ignore", "ignore", "pipe"] },
+	{
+		cwd: string;
+		detached: boolean;
+		windowsHide: true;
+		stdio: ["ignore", "ignore", "pipe"];
+	},
 ] {
 	const windows = /^[A-Za-z]:[\\/]/.test(worktreePath);
 	const shell = windows ? "cmd.exe" : (process.env.SHELL ?? "bash");
@@ -14,7 +19,12 @@ export function installInvocation(
 	return [
 		shell,
 		args,
-		{ cwd: worktreePath, detached: true, stdio: ["ignore", "ignore", "pipe"] },
+		{
+			cwd: worktreePath,
+			detached: true,
+			windowsHide: true,
+			stdio: ["ignore", "ignore", "pipe"],
+		},
 	];
 }
 

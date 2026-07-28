@@ -20,6 +20,7 @@ export async function execGit(
 	try {
 		const { stdout } = await execFileAsync(file, argv, {
 			encoding: "utf8",
+			windowsHide: true,
 			...(maxBuffer ? { maxBuffer } : {}),
 			...(file === "git" ? { cwd } : {}),
 		});

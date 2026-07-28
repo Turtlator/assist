@@ -17,7 +17,7 @@ export async function openInCode(
 		const command = /^[A-Za-z]:[\\/]/.test(cwd)
 			? `cmd.exe /c code "${cwd}"`
 			: `code "${cwd}"`;
-		await execAsync(command);
+		await execAsync(command, { windowsHide: true });
 		respondJson(res, 200, { ok: true });
 	} catch {
 		respondJson(res, 500, {

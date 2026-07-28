@@ -82,6 +82,7 @@ function spawnDaemon(reason: string): void {
 	const log = openSync(daemonPaths.log, "a");
 	const child = spawn(process.execPath, [process.argv[1], "daemon", "run"], {
 		detached: true,
+		windowsHide: true,
 		stdio: ["ignore", log, log],
 		env: { ...process.env, ASSIST_DAEMON_SPAWN_REASON: reason },
 	});

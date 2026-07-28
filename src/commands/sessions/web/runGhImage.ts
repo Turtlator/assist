@@ -20,6 +20,7 @@ export async function runGhImage(
 	try {
 		({ stdout } = await execFileAsync("gh", ["image", filePath], {
 			cwd,
+			windowsHide: true,
 			maxBuffer: 10 * 1024 * 1024,
 		}));
 	} catch (error) {

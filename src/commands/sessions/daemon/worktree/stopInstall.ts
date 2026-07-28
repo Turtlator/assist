@@ -26,7 +26,12 @@ export function stopInstall(worktreePath: string): void {
 
 function killTree(pid: number): void {
 	if (process.platform === "win32") {
-		execFile("taskkill", ["/T", "/F", "/PID", String(pid)], () => {});
+		execFile(
+			"taskkill",
+			["/T", "/F", "/PID", String(pid)],
+			{ windowsHide: true },
+			() => {},
+		);
 		return;
 	}
 	try {
