@@ -17,6 +17,26 @@ vi.mock("../../../backlog/web/ui/components/MarkdownBlock", () => ({
 	),
 }));
 
+vi.mock("./MonacoEditor", () => ({
+	MonacoEditor: ({
+		value,
+		language,
+		readOnly,
+	}: {
+		value: string;
+		language?: string;
+		readOnly?: boolean;
+	}) => (
+		<div
+			data-testid="editor"
+			data-language={language ?? ""}
+			data-read-only={String(Boolean(readOnly))}
+		>
+			{value}
+		</div>
+	),
+}));
+
 afterEach(() => {
 	cleanup();
 	vi.unstubAllGlobals();
@@ -45,41 +65,46 @@ function renderView(entry: string, selectedCwd = "/repo") {
 	);
 }
 
-function gutter(): string[] {
-	return [...document.querySelectorAll(".file-line-number")].map(
-		(node) => node.textContent ?? "",
-	);
+function editor(): HTMLElement | null {
+	return screen.queryByTestId("editor");
 }
 
-function bodyLines(): string[] {
-	return [...document.querySelectorAll(".file-line-text")].map(
-		(node) => node.textContent ?? "",
-	);
-}
-
-async function waitForBody(): Promise<void> {
-	await waitFor(() => expect(bodyLines().length).toBeGreaterThan(0));
+async function findEditor(): Promise<HTMLElement> {
+	return screen.findByTestId("editor");
 }
 
 describe("FileView", () => {
-	it("renders the file with a line-number gutter", async () => {
+	it("renders the file in the editor", async () => {
 		stubContent("const a = 1;\nconst b = 2;\n");
 
 		renderView("/file?path=src/a.ts");
 
-		await waitForBody();
-		expect(bodyLines()).toEqual(["const a = 1;", "const b = 2;"]);
-		expect(gutter()).toEqual(["1", "2"]);
+		const view = await findEditor();
+		expect(view.textContent).toBe("const a = 1;\nconst b = 2;\n");
 	});
 
-	it("syntax highlights the body", async () => {
+	it("resolves the editor language from the extension", async () => {
 		stubContent("const a = 1;\n");
 
 		renderView("/file?path=src/a.ts");
 
-		await waitForBody();
-		expect(document.querySelector(".token.keyword")?.textContent).toBe("const");
-		expect(document.querySelector(".token.number")?.textContent).toBe("1");
+		expect((await findEditor()).dataset.language).toBe("typescript");
+	});
+
+	it("leaves the language unset for an unknown extension", async () => {
+		stubContent("plain\n");
+
+		renderView("/file?path=notes.unknownext");
+
+		expect((await findEditor()).dataset.language).toBe("");
+	});
+
+	it("opens the editor read-only", async () => {
+		stubContent("const a = 1;\n");
+
+		renderView("/file?path=src/a.ts");
+
+		expect((await findEditor()).dataset.readOnly).toBe("true");
 	});
 
 	it("toggles markdown between raw and rendered", async () => {
@@ -87,19 +112,18 @@ describe("FileView", () => {
 
 		renderView("/file?path=docs/a.md");
 
-		await waitForBody();
-		expect(bodyLines()).toEqual(["# Title"]);
+		expect((await findEditor()).textContent).toBe("# Title\n");
 		expect(screen.queryByTestId("markdown")).toBeNull();
 
 		fireEvent.click(screen.getByRole("button", { name: "Rendered" }));
 
 		expect(screen.getByTestId("markdown").textContent).toBe("# Title\n");
-		expect(bodyLines()).toEqual([]);
+		expect(editor()).toBeNull();
 
 		fireEvent.click(screen.getByRole("button", { name: "Raw" }));
 
 		expect(screen.queryByTestId("markdown")).toBeNull();
-		expect(gutter()).toEqual(["1"]);
+		expect(editor()?.textContent).toBe("# Title\n");
 	});
 
 	it("offers no toggle for non-markdown files", async () => {
@@ -107,7 +131,7 @@ describe("FileView", () => {
 
 		renderView("/file?path=src/a.ts");
 
-		await waitForBody();
+		await findEditor();
 		expect(screen.queryByRole("button", { name: "Rendered" })).toBeNull();
 	});
 
@@ -116,7 +140,7 @@ describe("FileView", () => {
 
 		renderView("/file?path=docs/a.md");
 
-		await waitForBody();
+		await findEditor();
 		expect(screen.getByRole("button", { name: "Close" })).toBeTruthy();
 	});
 
@@ -125,8 +149,7 @@ describe("FileView", () => {
 
 		renderView("/file?path=src/a.ts");
 
-		await waitForBody();
-		expect(screen.queryByRole("button", { name: "Rendered" })).toBeNull();
+		await findEditor();
 		expect(screen.getByRole("button", { name: "Close" })).toBeTruthy();
 	});
 
@@ -147,6 +170,7 @@ describe("FileView", () => {
 		expect(
 			await screen.findByText("This file is not in the working tree."),
 		).toBeTruthy();
+		await waitFor(() => expect(editor()).toBeNull());
 	});
 
 	it("reports a file that is too large", async () => {

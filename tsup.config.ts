@@ -36,5 +36,24 @@ export default defineConfig({
 				__ASSIST_VERSION__: JSON.stringify(pkg.version),
 			},
 		});
+		await build({
+			entryPoints: ["src/commands/sessions/web/ui/installMonacoGlobal.ts"],
+			bundle: true,
+			minify: true,
+			format: "iife",
+			target: "es2020",
+			outfile: "dist/commands/sessions/web/monaco.js",
+			loader: { ".ttf": "dataurl" },
+		});
+		await build({
+			entryPoints: [
+				"node_modules/monaco-editor/esm/vs/editor/editor.worker.js",
+			],
+			bundle: true,
+			minify: true,
+			format: "iife",
+			target: "es2020",
+			outfile: "dist/commands/sessions/web/monaco.worker.js",
+		});
 	},
 });

@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router";
 import { MarkdownBlock } from "../../../backlog/web/ui/components/MarkdownBlock";
-import { FileLines } from "./FileLines";
 import { type FileViewMode, FileViewHeader } from "./FileViewHeader";
 import { fileViewMessage } from "./fileViewMessage";
+import { MonacoEditor } from "./MonacoEditor";
+import { monacoLanguageForPath } from "./monacoLanguageForPath";
 import { PageShell } from "./PageShell";
 import { languageForPath } from "./refractorHighlighter";
 import { useFileContent } from "./useFileContent";
 import { useRepoSelectionContext } from "./useRepoSelectionContext";
+
+const EDITOR_HEIGHT = "calc(100vh - 152px)";
 
 export function FileView() {
 	const [searchParams] = useSearchParams();
@@ -33,7 +36,12 @@ export function FileView() {
 				(isMarkdown && mode === "rendered" ? (
 					<MarkdownBlock content={state.content} renderMermaid wide />
 				) : (
-					<FileLines content={state.content} path={path} />
+					<MonacoEditor
+						value={state.content}
+						language={monacoLanguageForPath(path)}
+						height={EDITOR_HEIGHT}
+						readOnly
+					/>
 				))}
 		</PageShell>
 	);

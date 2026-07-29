@@ -44,6 +44,19 @@ const routes: Record<string, Handler> = {
 		"commands/sessions/web/bundle.css",
 		"text/css",
 	),
+	"GET /monaco.js": createBundleHandler(
+		import.meta.url,
+		"commands/sessions/web/monaco.js",
+	),
+	"GET /monaco.worker.js": createBundleHandler(
+		import.meta.url,
+		"commands/sessions/web/monaco.worker.js",
+	),
+	"GET /monaco.css": createBundleHandler(
+		import.meta.url,
+		"commands/sessions/web/monaco.css",
+		"text/css",
+	),
 	"GET /api/items": listItems,
 	"GET /api/backlog/summary": getBacklogSummary,
 	"POST /api/open-in-code": openInCode,
