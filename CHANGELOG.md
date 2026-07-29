@@ -1,3 +1,10 @@
+## [0.503.1](https://github.com/staff0rd/assist/compare/v0.503.0...v0.503.1) (2026-07-29)
+
+
+### Bug Fixes
+
+* chain announce in place, guard wrong PR ([80ef8ce](https://github.com/staff0rd/assist/commit/80ef8cec3e866b91b72ee384a4d97fe31854bb6d))
+
 # [0.503.0](https://github.com/staff0rd/assist/compare/v0.502.2...v0.503.0) (2026-07-29)
 
 
