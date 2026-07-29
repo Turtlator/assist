@@ -1,3 +1,10 @@
+# [0.504.0](https://github.com/staff0rd/assist/compare/v0.503.2...v0.504.0) (2026-07-29)
+
+
+### Features
+
+* diff view file tree panel ([4a0b58f](https://github.com/staff0rd/assist/commit/4a0b58fc1cb0d0d43ff6af87c29c9b1d2996f9fb))
+
 ## [0.503.2](https://github.com/staff0rd/assist/compare/v0.503.1...v0.503.2) (2026-07-29)
 
 
