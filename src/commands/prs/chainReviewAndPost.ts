@@ -15,6 +15,6 @@ export function chainReviewAndPost(
 	if (announce) args.push("--announce");
 	return startChainedSession(
 		`a Review + Post session for PR #${prNumber}`,
-		() => requestAssistSession(args, process.cwd()),
+		() => requestAssistSession(args, process.cwd(), { inPlace: true }),
 	);
 }

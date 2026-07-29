@@ -28,6 +28,7 @@ describe("chainAddressComments", () => {
 		expect(mockRequestAssistSession).toHaveBeenCalledWith(
 			["review-pr-comments", "42"],
 			process.cwd(),
+			{ inPlace: true },
 		);
 	});
 
@@ -37,6 +38,7 @@ describe("chainAddressComments", () => {
 		expect(mockRequestAssistSession).toHaveBeenCalledWith(
 			["review-pr-comments", "42", "--announce"],
 			process.cwd(),
+			{ inPlace: true },
 		);
 	});
 

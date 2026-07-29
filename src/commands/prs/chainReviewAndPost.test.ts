@@ -36,6 +36,7 @@ describe("chainReviewAndPost", () => {
 		expect(mockRequestAssistSession).toHaveBeenCalledWith(
 			CHAINED_ARGS,
 			process.cwd(),
+			{ inPlace: true },
 		);
 	});
 
@@ -45,6 +46,7 @@ describe("chainReviewAndPost", () => {
 		expect(mockRequestAssistSession).toHaveBeenCalledWith(
 			[...CHAINED_ARGS, "--announce"],
 			process.cwd(),
+			{ inPlace: true },
 		);
 	});
 

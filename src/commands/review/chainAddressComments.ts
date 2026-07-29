@@ -9,6 +9,6 @@ export function chainAddressComments(
 	if (announce) args.push("--announce");
 	return startChainedSession(
 		`an Address Comments session for PR #${prNumber}`,
-		() => requestAssistSession(args, process.cwd()),
+		() => requestAssistSession(args, process.cwd(), { inPlace: true }),
 	);
 }
