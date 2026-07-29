@@ -23,12 +23,16 @@ function renderToolbar({
 	scopeCommits = [],
 	scopeBranchBase = null,
 	onScopeChange = vi.fn(),
+	treeVisible = true,
+	onToggleTree = vi.fn(),
 	commentHint,
 }: {
 	scope?: string;
 	scopeCommits?: CommitRef[];
 	scopeBranchBase?: string | null;
 	onScopeChange?: (scope: string) => void;
+	treeVisible?: boolean;
+	onToggleTree?: () => void;
 	commentHint?: string;
 } = {}) {
 	render(
@@ -46,6 +50,8 @@ function renderToolbar({
 					branchBase: scopeBranchBase,
 				}}
 				onScopeChange={onScopeChange}
+				treeVisible={treeVisible}
+				onToggleTree={onToggleTree}
 				commentHint={commentHint}
 			/>
 			<LocationProbe />
@@ -163,6 +169,21 @@ describe("DiffToolbar", () => {
 		renderToolbar();
 
 		expect(screen.queryByText(/session/)).toBeNull();
+	});
+
+	it("offers to hide the file tree while it is showing", () => {
+		const onToggleTree = vi.fn();
+		renderToolbar({ treeVisible: true, onToggleTree });
+
+		fireEvent.click(screen.getByRole("button", { name: "Hide file tree" }));
+
+		expect(onToggleTree).toHaveBeenCalled();
+	});
+
+	it("offers to show the file tree while it is hidden", () => {
+		renderToolbar({ treeVisible: false });
+
+		expect(screen.getByRole("button", { name: "Show file tree" })).toBeTruthy();
 	});
 
 	it("reports the chosen scope", () => {

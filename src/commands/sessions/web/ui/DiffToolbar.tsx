@@ -5,6 +5,7 @@ import { CloseViewButton } from "./CloseViewButton";
 import { DiffChangeTypeFilter } from "./DiffChangeTypeFilter";
 import { DiffFileSearchInput } from "./DiffFileSearchInput";
 import { DiffScopePicker } from "./DiffScopePicker";
+import { DiffTreeToggle } from "./DiffTreeToggle";
 import { DiffViewTypeToggle } from "./DiffViewTypeToggle";
 import type { DiffChangeType } from "./filterDiffFiles";
 import type { DiffScopeState } from "./useDiffScopeState";
@@ -33,6 +34,8 @@ export function DiffToolbar({
 	onChangeTypeChange,
 	scope,
 	onScopeChange,
+	treeVisible,
+	onToggleTree,
 	commentHint,
 }: {
 	viewType: ViewType;
@@ -43,10 +46,13 @@ export function DiffToolbar({
 	onChangeTypeChange: (changeType: DiffChangeType) => void;
 	scope: DiffScopeState;
 	onScopeChange: (scope: string) => void;
+	treeVisible: boolean;
+	onToggleTree: () => void;
 	commentHint?: string;
 }) {
 	return (
 		<Box sx={toolbarSx}>
+			<DiffTreeToggle treeVisible={treeVisible} onToggleTree={onToggleTree} />
 			<DiffViewTypeToggle viewType={viewType} onChange={onChange} />
 			<DiffScopePicker {...scope} onChange={onScopeChange} />
 			<DiffChangeTypeFilter

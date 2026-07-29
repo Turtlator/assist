@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import { useState } from "react";
 import type { FileData, ViewType } from "react-diff-view";
 import { DiffCommentLayer } from "./DiffCommentLayer";
+import { diffFileDomId } from "./diffFileDomId";
 import { FileDiffBody } from "./FileDiffBody";
 import { FileDiffHeader } from "./FileDiffHeader";
 import type { DiffComment } from "./formatDiffComment";
@@ -30,7 +31,7 @@ export function FileDiff({
 	const path = filePath(file);
 
 	return (
-		<Box sx={{ mb: 3 }}>
+		<Box id={diffFileDomId(path)} sx={{ mb: 3 }}>
 			<FileDiffHeader
 				path={path}
 				collapsed={collapsed}
