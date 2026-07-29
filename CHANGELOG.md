@@ -1,3 +1,10 @@
+# [0.503.0](https://github.com/staff0rd/assist/compare/v0.502.2...v0.503.0) (2026-07-29)
+
+
+### Features
+
+* split preview chain into Review/Post ([2c68bc5](https://github.com/staff0rd/assist/commit/2c68bc5655fb61c0c1bdda3082616a9b85653198))
+
 ## [0.502.2](https://github.com/staff0rd/assist/compare/v0.502.1...v0.502.2) (2026-07-28)
 
 
