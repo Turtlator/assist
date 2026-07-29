@@ -149,6 +149,48 @@ describe("ConfigNodeEditor", () => {
 		]);
 	});
 
+	it("keeps trailing spaces and newlines while typing a scalar list", () => {
+		render(
+			<Harness nodeKey="run" initial={[{ name: "build", command: "npm" }]} />,
+		);
+
+		click("Edit run[0]");
+		type("run[0].args", "run ");
+		expect(screen.getByLabelText("run[0].args")).toHaveProperty(
+			"value",
+			"run ",
+		);
+		expect(edited()).toEqual([
+			{ name: "build", command: "npm", args: ["run"] },
+		]);
+
+		type("run[0].args", "run\n");
+		expect(screen.getByLabelText("run[0].args")).toHaveProperty(
+			"value",
+			"run\n",
+		);
+
+		type("run[0].args", "run\nbuild");
+		expect(edited()).toEqual([
+			{ name: "build", command: "npm", args: ["run", "build"] },
+		]);
+	});
+
+	it("loads an existing scalar list one entry per line", () => {
+		render(
+			<Harness
+				nodeKey="run"
+				initial={[{ name: "build", command: "npm", args: ["run", "build"] }]}
+			/>,
+		);
+
+		click("Edit run[0]");
+		expect(screen.getByLabelText("run[0].args")).toHaveProperty(
+			"value",
+			"run\nbuild",
+		);
+	});
+
 	it("adds, renames and removes record entries", () => {
 		render(<Harness nodeKey="cliReadVerbs" initial={{ docker: ["ps"] }} />);
 

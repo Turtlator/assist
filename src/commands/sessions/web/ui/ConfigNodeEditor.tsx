@@ -1,9 +1,5 @@
 import type { ReactElement } from "react";
-import {
-	ConfigListInput,
-	joinConfigListInput,
-	splitConfigListInput,
-} from "./ConfigListInput";
+import { ConfigListInput } from "./ConfigListInput";
 import type { ConfigNodeEditorProps } from "./ConfigNodeEditorRenderer";
 import { ConfigObjectEditor } from "./ConfigObjectEditor";
 import { ConfigObjectListEditor } from "./ConfigObjectListEditor";
@@ -23,9 +19,9 @@ export function ConfigNodeEditor(props: ConfigNodeEditorProps): ReactElement {
 			return (
 				<ConfigListInput
 					label={label}
-					value={joinConfigListInput(value)}
+					value={value}
 					disabled={disabled}
-					onChange={(text) => onChange(splitConfigListInput(text))}
+					onChange={onChange}
 				/>
 			);
 		case "object":
