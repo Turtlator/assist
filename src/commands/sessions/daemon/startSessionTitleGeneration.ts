@@ -15,7 +15,7 @@ export function startSessionTitleGeneration(
 	if (!prompt) return;
 	if (isReferenceOnlyPrompt(prompt)) {
 		daemonLog(
-			`session ${session.id} title deferred: prompt is a reference only (${prompt})`,
+			`session ${session.id} title deferred pending context: prompt is a reference (${prompt})`,
 		);
 		return;
 	}

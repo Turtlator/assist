@@ -29,8 +29,15 @@ describe("isReferenceOnlyPrompt", () => {
 	});
 
 	it.each([
-		"PA-556 is failing on save",
 		"look at https://centium.atlassian.net/browse/PA-556",
+		"https://github.com/owner/repo/issues/12 breaks on save",
+		"see\nhttps://myteam.slack.com/archives/C123/p1700000000000\nfor context",
+	])("defers on a tracker url surrounded by prose: %j", (prompt) => {
+		expect(isReferenceOnlyPrompt(prompt)).toBe(true);
+	});
+
+	it.each([
+		"PA-556 is failing on save",
 		"fix #123 before release",
 		"the login page redirects",
 		"add dark mode to the settings page",

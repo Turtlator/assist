@@ -117,12 +117,24 @@ describe("startSessionTitleGeneration", () => {
 		expect(session.titleGenerationStarted).toBeUndefined();
 		expect(notify).not.toHaveBeenCalled();
 		expect(mockLog).toHaveBeenCalledWith(
-			"session 7 title deferred: prompt is a reference only (https://centium.atlassian.net/browse/PA-556)",
+			"session 7 title deferred pending context: prompt is a reference (https://centium.atlassian.net/browse/PA-556)",
 		);
 	});
 
 	it("defers titling a claude session whose whole prompt is a bare issue key", () => {
 		const session = makeSession({ initialPrompt: "PA-556" });
+
+		startSessionTitleGeneration(session, vi.fn());
+
+		expect(mockGenerate).not.toHaveBeenCalled();
+		expect(session.titleGenerationStarted).toBeUndefined();
+	});
+
+	it("defers titling a prompt that wraps a tracker url in prose", () => {
+		const session = makeSession({
+			initialPrompt:
+				"have a look at https://centium.atlassian.net/browse/PA-556",
+		});
 
 		startSessionTitleGeneration(session, vi.fn());
 

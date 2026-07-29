@@ -6,7 +6,7 @@ const ASSIST_ITEM_ID = /^a[0-9a-f]{2,}$/;
 export function isReferenceOnlyPrompt(prompt: string): boolean {
 	const tokens = prompt.trim().split(/\s+/).filter(Boolean);
 	if (tokens.length === 0) return false;
-	return tokens.every(isReference);
+	return tokens.some(isTrackerUrl) || tokens.every(isReference);
 }
 
 function isReference(token: string): boolean {
