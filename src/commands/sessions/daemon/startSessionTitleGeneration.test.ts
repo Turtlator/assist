@@ -100,6 +100,49 @@ describe("startSessionTitleGeneration", () => {
 		expect(mockGenerate).not.toHaveBeenCalled();
 	});
 
+	it("defers titling a bug card whose whole prompt is a tracker reference", () => {
+		const session = makeSession({
+			commandType: "assist",
+			assistArgs: [
+				"bug",
+				"--once",
+				"https://centium.atlassian.net/browse/PA-556",
+			],
+		});
+		const notify = vi.fn();
+
+		startSessionTitleGeneration(session, notify);
+
+		expect(mockGenerate).not.toHaveBeenCalled();
+		expect(session.titleGenerationStarted).toBeUndefined();
+		expect(notify).not.toHaveBeenCalled();
+		expect(mockLog).toHaveBeenCalledWith(
+			"session 7 title deferred: prompt is a reference only (https://centium.atlassian.net/browse/PA-556)",
+		);
+	});
+
+	it("defers titling a claude session whose whole prompt is a bare issue key", () => {
+		const session = makeSession({ initialPrompt: "PA-556" });
+
+		startSessionTitleGeneration(session, vi.fn());
+
+		expect(mockGenerate).not.toHaveBeenCalled();
+		expect(session.titleGenerationStarted).toBeUndefined();
+	});
+
+	it("still titles a prompt that mixes a reference with real text", async () => {
+		const session = makeSession({
+			commandType: "assist",
+			assistArgs: ["bug", "--once", "PA-556 is failing on save"],
+		});
+
+		startSessionTitleGeneration(session, vi.fn());
+		await flush();
+
+		expect(mockGenerate).toHaveBeenCalledWith("PA-556 is failing on save");
+		expect(session.generatedTitle).toBe("Fix login redirect");
+	});
+
 	it("skips assist commands outside draft, bug and refine", () => {
 		startSessionTitleGeneration(
 			makeSession({
