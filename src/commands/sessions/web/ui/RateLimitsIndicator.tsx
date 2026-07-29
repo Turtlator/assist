@@ -3,6 +3,10 @@ import Tooltip from "@mui/material/Tooltip";
 import { Link as RouterLink } from "react-router";
 import type { RateLimits } from "../../../../shared/RateLimits";
 import { RateLimitChips } from "./RateLimitChips";
+import {
+	RATE_LIMITS_TOOLTIP_HINT,
+	RateLimitsTooltip,
+} from "./RateLimitsTooltip";
 
 const containerSx = {
 	display: "flex",
@@ -24,8 +28,17 @@ export function RateLimitsIndicator({
 }: {
 	rateLimits: RateLimits | null;
 }) {
+	const usage = hasUsage(rateLimits);
 	return (
-		<Tooltip title="Claude account usage (5h / 7d windows) — view history">
+		<Tooltip
+			title={
+				usage ? (
+					<RateLimitsTooltip rateLimits={rateLimits} />
+				) : (
+					RATE_LIMITS_TOOLTIP_HINT
+				)
+			}
+		>
 			<Link
 				component={RouterLink}
 				to="/usage"
@@ -33,11 +46,7 @@ export function RateLimitsIndicator({
 				color="inherit"
 				sx={containerSx}
 			>
-				{hasUsage(rateLimits) ? (
-					<RateLimitChips rateLimits={rateLimits} />
-				) : (
-					"Usage"
-				)}
+				{usage ? <RateLimitChips rateLimits={rateLimits} /> : "Usage"}
 			</Link>
 		</Tooltip>
 	);

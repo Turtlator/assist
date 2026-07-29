@@ -3,6 +3,18 @@ export const SEVEN_DAY_SECONDS = 7 * 86400;
 
 export type RateLimitLevel = "ok" | "warn" | "over";
 
+export function rateLimitElapsedFraction(
+	resetsAt: number | undefined,
+	windowSeconds: number,
+	now: number,
+): number | undefined {
+	if (resetsAt == null) return undefined;
+	const timeRemaining = Math.max(0, resetsAt - now);
+	const elapsed = Math.max(0, windowSeconds - timeRemaining) / windowSeconds;
+	if (elapsed < 0.05) return undefined;
+	return elapsed;
+}
+
 export function formatRateLimitTimeLeft(resetsAt: number, now: number): string {
 	const seconds = Math.max(0, resetsAt - now);
 	const days = Math.floor(seconds / 86400);
@@ -21,10 +33,8 @@ function projectUsage(
 	windowSeconds: number,
 	now: number,
 ): number | undefined {
-	if (resetsAt == null) return undefined;
-	const timeRemaining = Math.max(0, resetsAt - now);
-	const elapsed = Math.max(0, windowSeconds - timeRemaining) / windowSeconds;
-	if (elapsed < 0.05) return undefined;
+	const elapsed = rateLimitElapsedFraction(resetsAt, windowSeconds, now);
+	if (elapsed == null) return undefined;
 	return pct / elapsed;
 }
 
