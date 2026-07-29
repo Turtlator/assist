@@ -1,3 +1,10 @@
+# [0.512.0](https://github.com/staff0rd/assist/compare/v0.511.0...v0.512.0) (2026-07-29)
+
+
+### Features
+
+* grid session cards, status gutter ([3cc9a46](https://github.com/staff0rd/assist/commit/3cc9a4695f280d51d0f0d7d380ca9a1d3f91b856))
+
 # [0.511.0](https://github.com/staff0rd/assist/compare/v0.510.0...v0.511.0) (2026-07-29)
 
 
