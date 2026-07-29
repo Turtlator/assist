@@ -1,6 +1,8 @@
 import { parse } from "shell-quote";
 import { groupByOperator } from "./groupByOperator";
 import { hasUnquotedBackticks } from "./hasUnquotedBackticks";
+import { separateCommandLines } from "./separateCommandLines";
+import { stripHeredocBodies } from "./stripHeredocBodies";
 
 type Tokens = ReturnType<typeof parse>;
 
@@ -30,7 +32,7 @@ export function splitCompound(command: string): SplitResult {
 	if (!grouped.ok) return grouped;
 
 	const parts = grouped.groups
-		.map((g) => stripEnvPrefix(g).join(" "))
+		.map((g) => stripEnvPrefix(g.filter((word) => word !== "")).join(" "))
 		.filter((cmd) => cmd !== "");
 
 	if (parts.length === 0) return UNPARSEABLE;
@@ -38,8 +40,7 @@ export function splitCompound(command: string): SplitResult {
 }
 
 function tokenizeCommand(command: string): Tokens | undefined {
-	const trimmed = command
-		.trim()
+	const trimmed = separateCommandLines(stripHeredocBodies(command.trim()))
 		.replace(FD_DEVNULL_RE, "")
 		.replace(FD_REDIRECT_RE, "");
 	if (!trimmed) return undefined;

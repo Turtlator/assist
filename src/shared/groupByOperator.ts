@@ -1,4 +1,6 @@
 import type { parse } from "shell-quote";
+import { consumeHeredoc } from "./consumeHeredoc";
+import { consumeInputRedirect } from "./consumeInputRedirect";
 import { consumeRedirect, type StepResult } from "./consumeRedirect";
 
 type Tokens = ReturnType<typeof parse>;
@@ -10,12 +12,14 @@ type GroupResult =
 
 const SEPARATOR_OPS = new Set(["|", "&&", "||", ";"]);
 const OUTPUT_REDIRECT_OPS = new Set([">", ">>"]);
+const INPUT_REDIRECT_OP = "<";
 const UNPARSEABLE = { ok: false, error: "unable to parse" } as const;
 
 /**
  * Group tokens into sub-command word arrays split on separator operators.
- * Strips output redirects when the target is under the OS temp directory.
- * Returns an error for unsafe operators, non-string tokens, or redirects
+ * Strips output redirects when the target is under the OS temp directory, and
+ * input redirects — including heredoc headers — regardless of source path.
+ * Returns an error for unsafe operators, non-string tokens, or output redirects
  * pointing outside the OS temp directory.
  */
 export function groupByOperator(tokens: Tokens): GroupResult {
@@ -46,6 +50,12 @@ function handleToken(
 	}
 	if (OUTPUT_REDIRECT_OPS.has(op)) {
 		return consumeRedirect(tokens, i, groups[groups.length - 1]);
+	}
+	if (op === INPUT_REDIRECT_OP) {
+		const current = groups[groups.length - 1];
+		return getOp(tokens[i + 1]) === INPUT_REDIRECT_OP
+			? consumeHeredoc(tokens, i, current)
+			: consumeInputRedirect(tokens, i, current);
 	}
 	return UNPARSEABLE;
 }

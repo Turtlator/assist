@@ -24,8 +24,12 @@ export function consumeRedirect(
 			error: `redirect target '${target}' is outside the OS temp directory`,
 		};
 	}
+	popFdPrefix(current);
+	return { ok: true, nextIndex: opIndex + 1 };
+}
+
+export function popFdPrefix(current: string[]): void {
 	if (current.length > 0 && /^\d$/.test(current[current.length - 1])) {
 		current.pop();
 	}
-	return { ok: true, nextIndex: opIndex + 1 };
 }

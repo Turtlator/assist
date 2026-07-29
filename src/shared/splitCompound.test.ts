@@ -263,6 +263,158 @@ describe("splitCompound", () => {
 		});
 	});
 
+	describe("when the command reads from an input redirect", () => {
+		it("should strip the source path", () => {
+			const command = "cat < file.txt";
+
+			const result = splitCompound(command);
+
+			expect(result).toEqual(ok(["cat"]));
+		});
+
+		it("should strip a source path outside the OS temp directory", () => {
+			const command = "assist backlog propose --json - < ./item.json";
+
+			const result = splitCompound(command);
+
+			expect(result).toEqual(ok(["assist backlog propose --json -"]));
+		});
+
+		it("should strip an absolute source path", () => {
+			const command = "assist backlog propose --json - < /etc/hosts";
+
+			const result = splitCompound(command);
+
+			expect(result).toEqual(ok(["assist backlog propose --json -"]));
+		});
+
+		it("should strip the source path inside a compound command", () => {
+			const command = "cat < ./item.json | assist backlog propose --json -";
+
+			const result = splitCompound(command);
+
+			expect(result).toEqual(ok(["cat", "assist backlog propose --json -"]));
+		});
+
+		it("should strip an fd-prefixed input redirect", () => {
+			const command = "cat 0< ./item.json";
+
+			const result = splitCompound(command);
+
+			expect(result).toEqual(ok(["cat"]));
+		});
+
+		it("should reject when the input redirect has no source word", () => {
+			const command = "cat <";
+
+			const result = splitCompound(command);
+
+			expect(result).toEqual(unparseable);
+		});
+	});
+
+	describe("when the command contains a heredoc", () => {
+		const propose = "assist backlog propose --json -";
+
+		it("should strip the header from a single-line invocation", () => {
+			const command = `cat <<'JSON' | ${propose} 2>&1`;
+
+			const result = splitCompound(command);
+
+			expect(result).toEqual(ok(["cat", propose]));
+		});
+
+		it("should strip the body and terminator from a multi-line invocation", () => {
+			const command = `cat <<'JSON' | ${propose} 2>&1\n{"name":"x"}\nJSON`;
+
+			const result = splitCompound(command);
+
+			expect(result).toEqual(ok(["cat", propose]));
+		});
+
+		it("should strip the body of an unquoted delimiter heredoc", () => {
+			const command = `cat << JSON | ${propose}\n{"name":"x"}\nJSON`;
+
+			const result = splitCompound(command);
+
+			expect(result).toEqual(ok(["cat", propose]));
+		});
+
+		it("should strip the body of a tab-indented <<- heredoc", () => {
+			const command = `cat <<-'JSON' | ${propose}\n\t{"name":"x"}\n\tJSON`;
+
+			const result = splitCompound(command);
+
+			expect(result).toEqual(ok(["cat", propose]));
+		});
+
+		it("should strip an unterminated body", () => {
+			const command = `cat <<'JSON' | ${propose}\n{"name":"x"}`;
+
+			const result = splitCompound(command);
+
+			expect(result).toEqual(ok(["cat", propose]));
+		});
+
+		it("should not expose body text that would trip a deny rule", () => {
+			const command = `cat <<'JSON' | ${propose}\n{"name":"rm -rf / and assist config set apiKey secret"}\nJSON`;
+
+			const result = splitCompound(command);
+
+			expect(result).toEqual(ok(["cat", propose]));
+		});
+
+		it("should keep a << inside a quoted argument as a literal", () => {
+			const command = "echo 'a << b'";
+
+			const result = splitCompound(command);
+
+			expect(result).toEqual(ok(["echo a << b"]));
+		});
+
+		it("should reject a here-string", () => {
+			const command = "cat <<< hello";
+
+			const result = splitCompound(command);
+
+			expect(result).toEqual(unparseable);
+		});
+
+		it("should keep a command after the terminator as its own part", () => {
+			const command = `cat <<'JSON' | ${propose}\n{"name":"x"}\nJSON\nrm -rf /tmp/zz`;
+
+			const result = splitCompound(command);
+
+			expect(result).toEqual(ok(["cat", propose, "rm -rf /tmp/zz"]));
+		});
+	});
+
+	describe("when the command spans multiple lines", () => {
+		it("should return each line as its own part", () => {
+			const command = "echo hi\nrm -rf /tmp/zz";
+
+			const result = splitCompound(command);
+
+			expect(result).toEqual(ok(["echo hi", "rm -rf /tmp/zz"]));
+		});
+
+		it("should join a backslash continuation into one part", () => {
+			const command = "echo hi \\\n  --flag";
+
+			const result = splitCompound(command);
+
+			expect(result).toEqual(ok(["echo hi --flag"]));
+		});
+
+		it("should keep a quoted newline inside its part", () => {
+			const command = "echo 'a\nb'";
+
+			const result = splitCompound(command);
+
+			expect(result).toEqual(ok(["echo a\nb"]));
+		});
+	});
+
 	describe("when the command contains unsafe constructs", () => {
 		describe("when using $() substitution", () => {
 			it("should reject", () => {
@@ -326,16 +478,6 @@ describe("splitCompound", () => {
 				const result = splitCompound(command);
 
 				expect(result).toEqual(redirectError("file.txt"));
-			});
-		});
-
-		describe("when using input redirection", () => {
-			it("should reject", () => {
-				const command = "cat < file.txt";
-
-				const result = splitCompound(command);
-
-				expect(result).toEqual(unparseable);
 			});
 		});
 

@@ -1,0 +1,17 @@
+import type { parse } from "shell-quote";
+import { popFdPrefix, type StepResult } from "./consumeRedirect";
+
+type Tokens = ReturnType<typeof parse>;
+
+export function consumeInputRedirect(
+	tokens: Tokens,
+	opIndex: number,
+	current: string[],
+): StepResult {
+	const source = tokens[opIndex + 1];
+	if (typeof source !== "string") {
+		return { ok: false, error: "unable to parse" };
+	}
+	popFdPrefix(current);
+	return { ok: true, nextIndex: opIndex + 1 };
+}
