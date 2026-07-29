@@ -1,32 +1,11 @@
 import Box from "@mui/material/Box";
-import { HistoryList } from "./HistoryList";
-import type { PendingLaunch } from "./PendingLaunch";
-import { SessionList } from "./SessionList";
+import { SidebarBody } from "./SidebarBody";
 import { SidebarTabs } from "./SidebarTabs";
-import type {
-	HistoricalSession,
-	SessionInfo,
-	SessionListHandlers,
-	SidebarTab,
-} from "./types";
-
-type SidebarProps = {
-	sessions: SessionInfo[];
-	pendingLaunches: PendingLaunch[];
-	history: HistoricalSession[];
-	activeId: string | null;
-	tab: SidebarTab;
-	onTabChange: (tab: SidebarTab) => void;
-	onSelect: (id: string) => void;
-	onDismissPending: (id: string) => void;
-	onView: (session: HistoricalSession) => void;
-	onResume: (session: HistoricalSession) => void;
-	initialized: Set<string>;
-	isFloatingWaiter?: (session: SessionInfo) => boolean;
-} & SessionListHandlers;
+import type { SidebarProps } from "./types";
 
 const sidebarSx = {
-	width: "25%",
+	width: 400,
+	flexShrink: 0,
 	borderRight: 1,
 	borderColor: "divider",
 	display: "flex",
@@ -44,28 +23,7 @@ export function Sidebar(props: SidebarProps) {
 				onChange={props.onTabChange}
 			/>
 
-			{props.tab === "active" ? (
-				<SessionList
-					sessions={props.sessions}
-					pendingLaunches={props.pendingLaunches}
-					activeId={props.activeId}
-					initialized={props.initialized}
-					onSelect={props.onSelect}
-					onDismissPending={props.onDismissPending}
-					onRetry={props.onRetry}
-					onRestart={props.onRestart}
-					onDismiss={props.onDismiss}
-					onSetAutoRun={props.onSetAutoRun}
-					onSetAutoAdvance={props.onSetAutoAdvance}
-					isFloatingWaiter={props.isFloatingWaiter}
-				/>
-			) : (
-				<HistoryList
-					sessions={props.history}
-					onView={props.onView}
-					onResume={props.onResume}
-				/>
-			)}
+			<SidebarBody {...props} />
 		</Box>
 	);
 }

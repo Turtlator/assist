@@ -3,6 +3,7 @@ import type { SessionType } from "../../shared/deriveHistoryFields";
 import type { SessionOrigin } from "../../shared/parseSessionFile";
 import type { RepoGroup } from "../../shared/RepoGroup";
 import type { SessionInfoBase } from "../../shared/SessionInfoBase";
+import type { PendingLaunch } from "./PendingLaunch";
 
 export type SessionStatus =
 	| "running"
@@ -25,6 +26,21 @@ export type CardHeaderProps = {
 	onRestart?: () => void;
 	onDismiss: () => void;
 };
+
+export type SidebarProps = {
+	sessions: SessionInfo[];
+	pendingLaunches: PendingLaunch[];
+	history: HistoricalSession[];
+	activeId: string | null;
+	tab: SidebarTab;
+	onTabChange: (tab: SidebarTab) => void;
+	onSelect: (id: string) => void;
+	onDismissPending: (id: string) => void;
+	onView: (session: HistoricalSession) => void;
+	onResume: (session: HistoricalSession) => void;
+	initialized: Set<string>;
+	isFloatingWaiter?: (session: SessionInfo) => boolean;
+} & SessionListHandlers;
 
 export type SessionLifecycleHandlers = {
 	onRetry: (id: string) => void;
