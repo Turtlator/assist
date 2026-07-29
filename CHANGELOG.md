@@ -1,3 +1,10 @@
+## [0.504.1](https://github.com/staff0rd/assist/compare/v0.504.0...v0.504.1) (2026-07-29)
+
+
+### Bug Fixes
+
+* config list keeps typed whitespace ([42580f4](https://github.com/staff0rd/assist/commit/42580f4559168e912d573fbaa79f96b391d8ee8d))
+
 # [0.504.0](https://github.com/staff0rd/assist/compare/v0.503.2...v0.504.0) (2026-07-29)
 
 
