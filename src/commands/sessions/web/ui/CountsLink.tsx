@@ -1,7 +1,6 @@
 import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
-import { Link as RouterLink } from "react-router";
-import { diffQuery } from "./diffQuery";
+import { useDiffPanels } from "./useDiffPanels";
 
 const containerSx = {
 	display: "flex",
@@ -9,6 +8,10 @@ const containerSx = {
 	gap: 0.75,
 	fontFamily: "monospace",
 	whiteSpace: "nowrap",
+	border: 0,
+	p: 0,
+	bgcolor: "transparent",
+	cursor: "pointer",
 } as const;
 
 export type StatusGroup = {
@@ -28,22 +31,29 @@ function GitStatusChips({ groups }: { groups: StatusGroup[] }) {
 }
 
 export function CountsLink({
+	panelSessionId,
 	cwd,
 	sessionId,
 	scope,
 	groups,
 	bracketed,
 }: {
+	panelSessionId: string;
 	cwd: string;
 	sessionId?: string;
 	scope: string;
 	groups: StatusGroup[];
 	bracketed?: boolean;
 }) {
+	const { togglePanel } = useDiffPanels();
+
 	return (
 		<Link
-			component={RouterLink}
-			to={`/diff?${diffQuery(cwd, sessionId, scope)}`}
+			component="button"
+			type="button"
+			onClick={() =>
+				togglePanel(panelSessionId, { cwd, claudeSessionId: sessionId, scope })
+			}
 			variant="caption"
 			underline="hover"
 			color="inherit"

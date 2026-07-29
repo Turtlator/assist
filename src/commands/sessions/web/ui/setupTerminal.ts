@@ -1,5 +1,6 @@
 import { createTerminal, type TerminalHandle } from "./createTerminal";
 import { handleClipboardKey } from "./handleClipboardKey";
+import { hasTerminalSize } from "./hasTerminalSize";
 import { isQuickOpenKey } from "./isQuickOpenKey";
 
 type ResizeFn = (sessionId: string, cols: number, rows: number) => void;
@@ -23,6 +24,7 @@ export function setupTerminal(
 	const unsubOutput = onOutput(sessionId, (data) => handle.term.write(data));
 
 	const observer = new ResizeObserver(() => {
+		if (!hasTerminalSize(el)) return;
 		handle.fitAddon.fit();
 		sendResize(sessionId, handle.term.cols, handle.term.rows);
 	});

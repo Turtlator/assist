@@ -1,9 +1,16 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import {
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CardBody } from "./CardBody";
 import type { SessionInfo } from "./types";
+import { DiffPanelsProvider } from "./useDiffPanels";
 import { TopBarLayoutContext } from "./useTopBarLayoutContext";
 
 beforeEach(() => {
@@ -38,15 +45,21 @@ function session(overrides: Partial<SessionInfo> = {}): SessionInfo {
 	};
 }
 
-function renderBody(s: SessionInfo, loading: boolean) {
+function renderBody(
+	s: SessionInfo,
+	loading: boolean,
+	onActivateSession: (id: string) => void = vi.fn(),
+) {
 	return render(
 		<MemoryRouter>
-			<CardBody
-				session={s}
-				loading={loading}
-				onSetAutoRun={vi.fn()}
-				onSetAutoAdvance={vi.fn()}
-			/>
+			<DiffPanelsProvider onActivateSession={onActivateSession}>
+				<CardBody
+					session={s}
+					loading={loading}
+					onSetAutoRun={vi.fn()}
+					onSetAutoAdvance={vi.fn()}
+				/>
+			</DiffPanelsProvider>
 		</MemoryRouter>,
 	);
 }
@@ -92,26 +105,29 @@ describe("CardBody status caption", () => {
 });
 
 describe("CardBody git status counts", () => {
-	it("links the card's own working-tree counts to that repo's diff", async () => {
+	it("shows the card's own working-tree counts", async () => {
 		renderBody(session(), false);
 
 		expect(await screen.findByText("+1")).toBeTruthy();
 		expect(screen.getByText("~2")).toBeTruthy();
 		expect(screen.queryByText("-0")).toBeNull();
-		expect(screen.getByRole("link").getAttribute("href")).toBe(
-			"/diff?cwd=%2Fgit%2Frepo-2",
-		);
 	});
 
-	it("carries the claude session id into the counts request and the diff link", async () => {
+	it("activates the card's session when its counts are clicked", async () => {
+		const onActivateSession = vi.fn();
+		renderBody(session(), false, onActivateSession);
+
+		fireEvent.click(await screen.findByText("+1"));
+
+		expect(onActivateSession).toHaveBeenCalledWith("5");
+	});
+
+	it("carries the claude session id into the counts request", async () => {
 		renderBody(session({ claudeSessionId: "sess-1" }), false);
 
 		expect(await screen.findByText("+1")).toBeTruthy();
 		expect(fetch).toHaveBeenCalledWith(
 			"/api/git-status?cwd=%2Fgit%2Frepo-2&session=sess-1",
-		);
-		expect(screen.getByRole("link").getAttribute("href")).toBe(
-			"/diff?cwd=%2Fgit%2Frepo-2&session=sess-1",
 		);
 	});
 
@@ -138,12 +154,14 @@ describe("CardBody top bar layout", () => {
 		render(
 			<MemoryRouter>
 				<TopBarLayoutContext.Provider value={topBar}>
-					<CardBody
-						session={session({ runningMs: 65_000, restored: true })}
-						loading={false}
-						onSetAutoRun={vi.fn()}
-						onSetAutoAdvance={vi.fn()}
-					/>
+					<DiffPanelsProvider onActivateSession={vi.fn()}>
+						<CardBody
+							session={session({ runningMs: 65_000, restored: true })}
+							loading={false}
+							onSetAutoRun={vi.fn()}
+							onSetAutoAdvance={vi.fn()}
+						/>
+					</DiffPanelsProvider>
 				</TopBarLayoutContext.Provider>
 			</MemoryRouter>,
 		);

@@ -16,11 +16,13 @@ export const GROUPS = [
 ] as const;
 
 export function GitStatusLink({
+	panelSessionId,
 	cwd,
 	sessionId,
 	groups,
 	uncommitted,
 }: {
+	panelSessionId: string;
 	cwd: string;
 	sessionId?: string;
 	groups: StatusGroup[];
@@ -31,6 +33,7 @@ export function GitStatusLink({
 			<Box sx={rowSx}>
 				{groups.length > 0 && (
 					<CountsLink
+						panelSessionId={panelSessionId}
 						cwd={cwd}
 						sessionId={sessionId}
 						scope="all"
@@ -39,6 +42,7 @@ export function GitStatusLink({
 				)}
 				{uncommitted && uncommitted.length > 0 && (
 					<CountsLink
+						panelSessionId={panelSessionId}
 						cwd={cwd}
 						sessionId={sessionId}
 						scope="uncommitted"

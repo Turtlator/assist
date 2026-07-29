@@ -5,6 +5,7 @@ import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CardHeader } from "./CardHeader";
 import type { SessionInfo } from "./types";
+import { DiffPanelsProvider } from "./useDiffPanels";
 import { StarredSessionsProvider } from "./useStarredSessions";
 import { TopBarLayoutContext } from "./useTopBarLayoutContext";
 
@@ -21,7 +22,9 @@ const session: SessionInfo = {
 function Stars({ children }: { children: ReactNode }) {
 	return (
 		<StarredSessionsProvider sessions={[]} setSessionStarred={() => {}}>
-			{children}
+			<DiffPanelsProvider onActivateSession={() => {}}>
+				{children}
+			</DiffPanelsProvider>
 		</StarredSessionsProvider>
 	);
 }

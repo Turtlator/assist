@@ -1,5 +1,6 @@
 import { type RefObject, useEffect, useRef } from "react";
 import type { TerminalHandle } from "./createTerminal";
+import { hasTerminalSize } from "./hasTerminalSize";
 import { setupTerminal } from "./setupTerminal";
 
 type ResizeFn = (sessionId: string, cols: number, rows: number) => void;
@@ -35,10 +36,11 @@ export function useTerminal(
 		const h = handleRef.current;
 		if (!visible || !h) return;
 		const id = setTimeout(() => {
+			if (!hasTerminalSize(containerRef.current)) return;
 			h.fitAddon.fit();
 			h.term.focus();
 			sendResize(sessionId, h.term.cols, h.term.rows);
 		}, 50);
 		return () => clearTimeout(id);
-	}, [visible, sessionId, sendResize]);
+	}, [containerRef, visible, sessionId, sendResize]);
 }

@@ -12,6 +12,7 @@ export function CardInlineStatus({ session }: { session: SessionInfo }) {
 			/>
 			{session.cwd && (
 				<GitStatusCounts
+					panelSessionId={session.id}
 					cwd={session.cwd}
 					sessionId={session.claudeSessionId}
 				/>

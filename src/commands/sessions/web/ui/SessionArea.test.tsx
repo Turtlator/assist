@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PrPreview } from "../../shared/SessionInfoBase";
 import { SessionArea } from "./SessionArea";
 import type { SessionInfo, SessionListHandlers } from "./types";
+import { DiffPanelsProvider } from "./useDiffPanels";
 import { StarredSessionsProvider } from "./useStarredSessions";
 import { TopBarLayoutContext } from "./useTopBarLayoutContext";
 
@@ -46,24 +47,26 @@ function renderArea(
 	list: SessionInfo[] = sessions,
 ) {
 	render(
-		<SessionArea
-			sessions={list}
-			activeId={activeId}
-			initialized={initialized}
-			onOutput={() => () => {}}
-			sendInput={() => {}}
-			sendResize={() => {}}
-			lifecycle={{
-				onRetry: () => {},
-				onRestart: () => {},
-				onDismiss: () => {},
-				onSetAutoRun: () => {},
-				onSetAutoAdvance: () => {},
-			}}
-			viewingTranscriptSessionId={null}
-			transcript={null}
-			sendPrDecision={() => {}}
-		/>,
+		<DiffPanelsProvider onActivateSession={() => {}}>
+			<SessionArea
+				sessions={list}
+				activeId={activeId}
+				initialized={initialized}
+				onOutput={() => () => {}}
+				sendInput={() => {}}
+				sendResize={() => {}}
+				lifecycle={{
+					onRetry: () => {},
+					onRestart: () => {},
+					onDismiss: () => {},
+					onSetAutoRun: () => {},
+					onSetAutoAdvance: () => {},
+				}}
+				viewingTranscriptSessionId={null}
+				transcript={null}
+				sendPrDecision={() => {}}
+			/>
+		</DiffPanelsProvider>,
 	);
 }
 
@@ -195,25 +198,27 @@ function renderWithTopBar(
 	render(
 		<TopBarLayoutContext.Provider value={topBar}>
 			<StarredSessionsProvider sessions={[]} setSessionStarred={() => {}}>
-				<SessionArea
-					sessions={list}
-					activeId={activeId}
-					initialized={new Set(list.map((s) => s.id))}
-					onOutput={() => () => {}}
-					sendInput={vi.fn()}
-					sendResize={vi.fn()}
-					viewingTranscriptSessionId={viewingTranscriptSessionId}
-					transcript={null}
-					sendPrDecision={vi.fn()}
-					lifecycle={{
-						onRetry: vi.fn(),
-						onRestart: vi.fn(),
-						onDismiss: vi.fn(),
-						onSetAutoRun: vi.fn(),
-						onSetAutoAdvance: vi.fn(),
-						...lifecycle,
-					}}
-				/>
+				<DiffPanelsProvider onActivateSession={() => {}}>
+					<SessionArea
+						sessions={list}
+						activeId={activeId}
+						initialized={new Set(list.map((s) => s.id))}
+						onOutput={() => () => {}}
+						sendInput={vi.fn()}
+						sendResize={vi.fn()}
+						viewingTranscriptSessionId={viewingTranscriptSessionId}
+						transcript={null}
+						sendPrDecision={vi.fn()}
+						lifecycle={{
+							onRetry: vi.fn(),
+							onRestart: vi.fn(),
+							onDismiss: vi.fn(),
+							onSetAutoRun: vi.fn(),
+							onSetAutoAdvance: vi.fn(),
+							...lifecycle,
+						}}
+					/>
+				</DiffPanelsProvider>
 			</StarredSessionsProvider>
 		</TopBarLayoutContext.Provider>,
 	);

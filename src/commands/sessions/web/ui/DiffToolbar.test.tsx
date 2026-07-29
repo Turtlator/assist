@@ -11,6 +11,7 @@ import { MemoryRouter, useLocation } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CommitRef } from "../../../../shared/db/listCommitRefs";
 import { DiffToolbar } from "./DiffToolbar";
+import type { DiffPanelMode } from "./toggleDiffPanel";
 
 afterEach(cleanup);
 
@@ -26,6 +27,8 @@ function renderToolbar({
 	treeVisible = true,
 	onToggleTree = vi.fn(),
 	commentHint,
+	mode,
+	onToggleMode,
 }: {
 	scope?: string;
 	scopeCommits?: CommitRef[];
@@ -34,6 +37,8 @@ function renderToolbar({
 	treeVisible?: boolean;
 	onToggleTree?: () => void;
 	commentHint?: string;
+	mode?: DiffPanelMode;
+	onToggleMode?: () => void;
 } = {}) {
 	render(
 		<MemoryRouter initialEntries={["/sessions", "/diff"]} initialIndex={1}>
@@ -53,6 +58,8 @@ function renderToolbar({
 				treeVisible={treeVisible}
 				onToggleTree={onToggleTree}
 				commentHint={commentHint}
+				mode={mode}
+				onToggleMode={onToggleMode}
 			/>
 			<LocationProbe />
 		</MemoryRouter>,
@@ -195,5 +202,37 @@ describe("DiffToolbar", () => {
 		);
 
 		expect(onScopeChange).toHaveBeenCalledWith("uncommitted");
+	});
+});
+
+describe("DiffToolbar half/full toggle", () => {
+	it("offers to fill the window while the diff sits beside the terminal", () => {
+		const onToggleMode = vi.fn();
+		renderToolbar({ mode: "half", onToggleMode });
+
+		fireEvent.click(
+			screen.getByRole("button", { name: "Fill the window with diff" }),
+		);
+
+		expect(onToggleMode).toHaveBeenCalled();
+	});
+
+	it("offers to bring the terminal back while the diff fills the window", () => {
+		const onToggleMode = vi.fn();
+		renderToolbar({ mode: "full", onToggleMode });
+
+		fireEvent.click(
+			screen.getByRole("button", { name: "Show terminal beside diff" }),
+		);
+
+		expect(onToggleMode).toHaveBeenCalled();
+	});
+
+	it("shows no toggle on the standalone diff route", () => {
+		renderToolbar();
+
+		expect(
+			screen.queryByRole("button", { name: /Fill the window|Show terminal/ }),
+		).toBeNull();
 	});
 });

@@ -9,9 +9,11 @@ function toGroups(counts: Counts) {
 }
 
 export function GitStatusCounts({
+	panelSessionId,
 	cwd,
 	sessionId,
 }: {
+	panelSessionId: string;
 	cwd: string;
 	sessionId?: string;
 }) {
@@ -27,6 +29,7 @@ export function GitStatusCounts({
 
 	return (
 		<GitStatusLink
+			panelSessionId={panelSessionId}
 			cwd={cwd}
 			sessionId={sessionId}
 			groups={groups}

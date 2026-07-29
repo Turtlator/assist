@@ -3,13 +3,19 @@ import IconButton from "@mui/material/IconButton";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { useNavigate } from "react-router";
 
-export function CloseViewButton({ sx }: { sx?: SxProps<Theme> }) {
+export function CloseViewButton({
+	sx,
+	onClose,
+}: {
+	sx?: SxProps<Theme>;
+	onClose?: () => void;
+}) {
 	const navigate = useNavigate();
 
 	return (
 		<IconButton
 			size="small"
-			onClick={() => navigate(-1)}
+			onClick={onClose ?? (() => navigate(-1))}
 			title="Close"
 			sx={[
 				{ color: "text.disabled", "&:hover": { color: "text.primary" } },

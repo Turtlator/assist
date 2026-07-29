@@ -4,6 +4,7 @@ import {
 	type SendPrDecision,
 	SessionPreviewSplit,
 } from "./SessionPreviewSplit";
+import { SessionDiffSplit } from "./SessionDiffSplit";
 import { TerminalArea, type TerminalAreaProps } from "./TerminalArea";
 import { TranscriptArea } from "./TranscriptArea";
 import type { SessionListHandlers, Transcript } from "./types";
@@ -47,12 +48,18 @@ export function SessionArea({
 			{topBar && activeSession !== undefined && (
 				<ActiveSessionTopBar session={activeSession} lifecycle={lifecycle} />
 			)}
-			<SessionPreviewSplit
-				session={activeSession}
-				sendPrDecision={sendPrDecision}
+			<SessionDiffSplit
+				sessionId={terminal.activeId}
+				sessions={terminal.sessions}
+				sendInput={terminal.sendInput}
 			>
-				<TerminalArea {...terminal} />
-			</SessionPreviewSplit>
+				<SessionPreviewSplit
+					session={activeSession}
+					sendPrDecision={sendPrDecision}
+				>
+					<TerminalArea {...terminal} />
+				</SessionPreviewSplit>
+			</SessionDiffSplit>
 		</Box>
 	);
 }

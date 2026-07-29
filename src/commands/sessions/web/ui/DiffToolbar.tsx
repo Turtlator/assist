@@ -1,10 +1,12 @@
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import type { ViewType } from "react-diff-view";
-import { CloseViewButton } from "./CloseViewButton";
 import { DiffChangeTypeFilter } from "./DiffChangeTypeFilter";
 import { DiffFileSearchInput } from "./DiffFileSearchInput";
 import { DiffScopePicker } from "./DiffScopePicker";
+import {
+	type DiffToolbarActionProps,
+	DiffToolbarActions,
+} from "./DiffToolbarActions";
 import { DiffTreeToggle } from "./DiffTreeToggle";
 import { DiffViewTypeToggle } from "./DiffViewTypeToggle";
 import type { DiffChangeType } from "./filterDiffFiles";
@@ -36,8 +38,8 @@ export function DiffToolbar({
 	onScopeChange,
 	treeVisible,
 	onToggleTree,
-	commentHint,
-}: {
+	...actions
+}: DiffToolbarActionProps & {
 	viewType: ViewType;
 	onChange: (viewType: ViewType) => void;
 	search: string;
@@ -48,7 +50,6 @@ export function DiffToolbar({
 	onScopeChange: (scope: string) => void;
 	treeVisible: boolean;
 	onToggleTree: () => void;
-	commentHint?: string;
 }) {
 	return (
 		<Box sx={toolbarSx}>
@@ -60,13 +61,7 @@ export function DiffToolbar({
 				onChange={onChangeTypeChange}
 			/>
 			<DiffFileSearchInput search={search} onChange={onSearchChange} />
-			<Box sx={{ ml: "auto" }} />
-			{commentHint ? (
-				<Typography variant="caption" color="text.secondary" noWrap>
-					{commentHint}
-				</Typography>
-			) : null}
-			<CloseViewButton />
+			<DiffToolbarActions {...actions} />
 		</Box>
 	);
 }

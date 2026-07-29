@@ -27,6 +27,7 @@ export function CardBody({
 				<StatusRow
 					status={displayStatus(session)}
 					elapsed={elapsed}
+					panelSessionId={session.id}
 					cwd={session.cwd}
 					sessionId={session.claudeSessionId}
 					restored={session.restored}

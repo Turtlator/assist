@@ -7,6 +7,7 @@ import type { SessionStatus } from "./types";
 export function StatusRow({
 	status,
 	elapsed,
+	panelSessionId,
 	cwd,
 	sessionId,
 	restored,
@@ -15,6 +16,7 @@ export function StatusRow({
 }: {
 	status: SessionStatus;
 	elapsed: string;
+	panelSessionId: string;
 	cwd?: string;
 	sessionId?: string;
 	restored?: boolean;
@@ -30,7 +32,13 @@ export function StatusRow({
 				undurable={undurable}
 			/>
 			<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-				{cwd && <GitStatusCounts cwd={cwd} sessionId={sessionId} />}
+				{cwd && (
+					<GitStatusCounts
+						panelSessionId={panelSessionId}
+						cwd={cwd}
+						sessionId={sessionId}
+					/>
+				)}
 				<Typography
 					variant="caption"
 					color="text.disabled"

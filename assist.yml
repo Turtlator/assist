@@ -223,3 +223,5 @@ deny:
     message: STOP. Do not attempt any workaround. Building is a verify command and must be run via /verify (the skill). Do not try tsup, tsc, or any alternative — invoke /verify now.
   - pattern: npm run build
     message: STOP. Do not attempt any workaround. Building is a verify command and must be run via /verify (the skill). Do not try npm run, tsc, tsup, or any alternative — invoke /verify now.
+  - pattern: npx biome
+    message: STOP. This project does not use biome. Formatting is oxfmt and runs as a verify command — invoke /verify (the skill) instead of formatting or linting separately.
