@@ -1,3 +1,10 @@
+# [0.511.0](https://github.com/staff0rd/assist/compare/v0.510.0...v0.511.0) (2026-07-29)
+
+
+### Features
+
+* per-session diff panel lifecycle ([67b8183](https://github.com/staff0rd/assist/commit/67b8183a9f62dbc0fdbaec1fdb6e8aaec7270a79))
+
 # [0.510.0](https://github.com/staff0rd/assist/compare/v0.509.0...v0.510.0) (2026-07-29)
 
 
