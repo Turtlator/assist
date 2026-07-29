@@ -1,7 +1,7 @@
-import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { CloseViewButton } from "./CloseViewButton";
 import { DiffModeToggle } from "./DiffModeToggle";
+import { DiffToolbarRule } from "./DiffToolbarRule";
 import type { DiffPanelMode } from "./toggleDiffPanel";
 
 export type DiffToolbarActionProps = {
@@ -10,15 +10,6 @@ export type DiffToolbarActionProps = {
 	onToggleMode?: () => void;
 	onClose?: () => void;
 };
-
-const ruleSx = {
-	flex: "0 0 auto",
-	width: "1px",
-	alignSelf: "stretch",
-	my: 1,
-	mx: 0.25,
-	bgcolor: "divider",
-} as const;
 
 export function DiffToolbarActions({
 	commentHint,
@@ -33,7 +24,7 @@ export function DiffToolbarActions({
 					{commentHint}
 				</Typography>
 			) : null}
-			<Box sx={ruleSx} />
+			<DiffToolbarRule />
 			{mode !== undefined && onToggleMode !== undefined && (
 				<DiffModeToggle mode={mode} onToggleMode={onToggleMode} />
 			)}

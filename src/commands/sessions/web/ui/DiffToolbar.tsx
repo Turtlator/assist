@@ -8,10 +8,12 @@ import {
 	type DiffToolbarControlProps,
 	DiffToolbarControls,
 } from "./DiffToolbarControls";
+import { DiffToolbarRule } from "./DiffToolbarRule";
 import {
 	type DiffToolbarSubjectProps,
 	DiffToolbarSubject,
 } from "./DiffToolbarSubject";
+import { DiffTreeToggle } from "./DiffTreeToggle";
 import { useElementWidth } from "./useElementWidth";
 
 export const DIFF_TOOLBAR_HEIGHT = 40;
@@ -35,7 +37,10 @@ const toolbarSx = {
 
 type DiffToolbarProps = DiffToolbarSubjectProps &
 	DiffToolbarControlProps &
-	DiffToolbarActionProps;
+	DiffToolbarActionProps & {
+		treeVisible: boolean;
+		onToggleTree: () => void;
+	};
 
 export function DiffToolbar(props: DiffToolbarProps) {
 	const barRef = useRef<HTMLDivElement>(null);
@@ -44,6 +49,11 @@ export function DiffToolbar(props: DiffToolbarProps) {
 
 	return (
 		<Box ref={barRef} sx={toolbarSx}>
+			<DiffTreeToggle
+				treeVisible={props.treeVisible}
+				onToggleTree={props.onToggleTree}
+			/>
+			<DiffToolbarRule />
 			<DiffToolbarSubject {...props} compact={compact} />
 			<Box sx={{ ml: "auto" }} />
 			<DiffToolbarControls {...props} />

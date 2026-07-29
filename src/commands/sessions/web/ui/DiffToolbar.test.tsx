@@ -139,6 +139,17 @@ describe("DiffToolbar", () => {
 		expect(screen.getByRole("button", { name: "Show file tree" })).toBeTruthy();
 	});
 
+	it("puts the tree toggle left of the scope, over the column it controls", () => {
+		renderToolbar();
+
+		const tree = screen.getByRole("button", { name: "Hide file tree" });
+
+		expect(
+			tree.compareDocumentPosition(scopeButton()) &
+				Node.DOCUMENT_POSITION_FOLLOWING,
+		).toBeTruthy();
+	});
+
 	it("offers both view types", () => {
 		renderToolbar();
 
