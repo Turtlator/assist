@@ -1,22 +1,20 @@
 import { startChainedSession } from "../review/startChainedSession";
 import { requestAssistSession } from "../sessions/shared/requestAssistSession";
-import { findCurrentPrNumber } from "./shared";
 
-export function chainReviewAndPost(prNumber: number | null): Promise<void> {
-	return startChainedSession("a Review + Post session for the PR", () => {
-		const number = prNumber ?? findCurrentPrNumber();
-		if (number === null)
-			throw new Error("no pull request found for the current branch");
-		return requestAssistSession(
-			[
-				"review",
-				"--no-prompt",
-				"--submit",
-				String(number),
-				"--address-comments",
-				"--announce",
-			],
-			process.cwd(),
-		);
-	});
+export function chainReviewAndPost(
+	prNumber: number,
+	announce: boolean,
+): Promise<void> {
+	const args = [
+		"review",
+		"--no-prompt",
+		"--submit",
+		String(prNumber),
+		"--address-comments",
+	];
+	if (announce) args.push("--announce");
+	return startChainedSession(
+		`a Review + Post session for PR #${prNumber}`,
+		() => requestAssistSession(args, process.cwd()),
+	);
 }

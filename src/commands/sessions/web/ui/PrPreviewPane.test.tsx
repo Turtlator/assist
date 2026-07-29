@@ -114,6 +114,7 @@ describe("PrPreviewPane inline comments", () => {
 			comments: [{ quote: "Adds x", note: "say what x is" }],
 			screenshots: [],
 			reviewAfter: false,
+			announceAfter: false,
 		});
 	});
 
@@ -163,6 +164,7 @@ describe("PrPreviewPane inline comments", () => {
 			comments: [],
 			screenshots: [],
 			reviewAfter: true,
+			announceAfter: true,
 		});
 
 		fireEvent.click(screen.getByRole("button", { name: "Reject" }));
@@ -170,37 +172,69 @@ describe("PrPreviewPane inline comments", () => {
 			comments: [],
 			screenshots: [],
 			reviewAfter: false,
+			announceAfter: false,
 		});
 	});
 
-	describe("Review + Post after raising", () => {
-		const checkbox = () =>
-			screen.getByLabelText("Review + Post after raising") as HTMLInputElement;
+	describe("Review and Post chain toggles", () => {
+		const toggle = (label: string) =>
+			screen.getByLabelText(label) as HTMLInputElement;
+		const approve = () =>
+			fireEvent.click(screen.getByRole("button", { name: "Approve" }));
 
-		it("is checked by default and approves with the chain on", () => {
+		it("are both checked by default and approve with the whole chain on", () => {
 			const onDecision = vi.fn();
 			render(<PrPreviewPane preview={preview} onDecision={onDecision} />);
 
-			expect(checkbox().checked).toBe(true);
+			expect(toggle("Review").checked).toBe(true);
+			expect(toggle("Post").checked).toBe(true);
 
-			fireEvent.click(screen.getByRole("button", { name: "Approve" }));
+			approve();
 			expect(onDecision).toHaveBeenCalledWith(
 				"approve",
-				expect.objectContaining({ reviewAfter: true }),
+				expect.objectContaining({ reviewAfter: true, announceAfter: true }),
 			);
 		});
 
-		it("approves without the chain once unchecked", () => {
+		it("keeps the announce when only Review is unchecked", () => {
 			const onDecision = vi.fn();
 			render(<PrPreviewPane preview={preview} onDecision={onDecision} />);
 
-			fireEvent.click(checkbox());
-			expect(checkbox().checked).toBe(false);
+			fireEvent.click(toggle("Review"));
+			expect(toggle("Review").checked).toBe(false);
+			expect(toggle("Post").checked).toBe(true);
 
-			fireEvent.click(screen.getByRole("button", { name: "Approve" }));
+			approve();
 			expect(onDecision).toHaveBeenCalledWith(
 				"approve",
-				expect.objectContaining({ reviewAfter: false }),
+				expect.objectContaining({ reviewAfter: false, announceAfter: true }),
+			);
+		});
+
+		it("keeps the review when only Post is unchecked", () => {
+			const onDecision = vi.fn();
+			render(<PrPreviewPane preview={preview} onDecision={onDecision} />);
+
+			fireEvent.click(toggle("Post"));
+
+			approve();
+			expect(onDecision).toHaveBeenCalledWith(
+				"approve",
+				expect.objectContaining({ reviewAfter: true, announceAfter: false }),
+			);
+		});
+
+		it("approves with nothing chained when both are unchecked", () => {
+			const onDecision = vi.fn();
+			render(<PrPreviewPane preview={preview} onDecision={onDecision} />);
+
+			fireEvent.click(toggle("Review"));
+			fireEvent.click(toggle("Post"));
+
+			approve();
+			expect(onDecision).toHaveBeenCalledWith(
+				"approve",
+				expect.objectContaining({ reviewAfter: false, announceAfter: false }),
 			);
 		});
 	});
@@ -352,6 +386,7 @@ describe("PrPreviewPane inline comments", () => {
 			comments: [],
 			screenshots: [],
 			reviewAfter: false,
+			announceAfter: false,
 		});
 
 		fireEvent.click(screen.getByRole("button", { name: "Approve" }));
@@ -359,6 +394,7 @@ describe("PrPreviewPane inline comments", () => {
 			comments: [],
 			screenshots: ["![shot](https://x/y.png)"],
 			reviewAfter: true,
+			announceAfter: true,
 		});
 	});
 
@@ -422,13 +458,15 @@ describe("PrPreviewPane inline comments", () => {
 				comments: [{ quote: "stays shut", note: "which pane?" }],
 				screenshots: [],
 				reviewAfter: false,
+				announceAfter: false,
 			});
 		});
 
-		it("offers no Review + Post checkbox", () => {
+		it("offers no chain toggles", () => {
 			render(<PrPreviewPane preview={item} onDecision={vi.fn()} />);
 
-			expect(screen.queryByLabelText("Review + Post after raising")).toBeNull();
+			expect(screen.queryByLabelText("Review")).toBeNull();
+			expect(screen.queryByLabelText("Post")).toBeNull();
 		});
 	});
 

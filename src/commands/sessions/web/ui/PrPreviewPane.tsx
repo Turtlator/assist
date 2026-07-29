@@ -45,8 +45,8 @@ export function PrPreviewPane({
 				onDecision={pane.onDecide}
 				onAdd={pane.onAdd}
 				onCancel={pane.onCancel}
-				reviewAfter={isPr ? pane.reviewAfter : undefined}
-				onReviewAfterChange={pane.setReviewAfter}
+				chain={isPr ? pane.chain : undefined}
+				onChainChange={pane.setChain}
 			/>
 		</Box>
 	);

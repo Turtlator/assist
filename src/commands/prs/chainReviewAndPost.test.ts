@@ -1,15 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockRequestAssistSession = vi.fn();
-const mockFindCurrentPrNumber = vi.fn();
 
 vi.mock("../sessions/shared/requestAssistSession", () => ({
 	requestAssistSession: (...args: unknown[]) =>
 		mockRequestAssistSession(...args),
-}));
-
-vi.mock("./shared", () => ({
-	findCurrentPrNumber: () => mockFindCurrentPrNumber(),
 }));
 
 import { chainReviewAndPost } from "./chainReviewAndPost";
@@ -26,55 +21,38 @@ afterEach(() => {
 	delete process.env.ASSIST_SESSION;
 });
 
-const chainedArgs = (n: string) => [
+const CHAINED_ARGS = [
 	"review",
 	"--no-prompt",
 	"--submit",
-	n,
+	"42",
 	"--address-comments",
-	"--announce",
 ];
 
 describe("chainReviewAndPost", () => {
-	it("should request a Review + Post session that chains the rest of the tail", async () => {
-		await chainReviewAndPost(42);
+	it("should request a review that posts and then addresses its own comments", async () => {
+		await chainReviewAndPost(42, false);
 
 		expect(mockRequestAssistSession).toHaveBeenCalledWith(
-			chainedArgs("42"),
-			process.cwd(),
-		);
-		expect(mockFindCurrentPrNumber).not.toHaveBeenCalled();
-	});
-
-	it("should resolve the number of a newly created PR from the branch", async () => {
-		mockFindCurrentPrNumber.mockReturnValue(7);
-
-		await chainReviewAndPost(null);
-
-		expect(mockRequestAssistSession).toHaveBeenCalledWith(
-			chainedArgs("7"),
+			CHAINED_ARGS,
 			process.cwd(),
 		);
 	});
 
-	describe("when the branch has no PR", () => {
-		it("should warn instead of requesting a session", async () => {
-			mockFindCurrentPrNumber.mockReturnValue(null);
+	it("should pass --announce so the tail of the chain announces", async () => {
+		await chainReviewAndPost(42, true);
 
-			await expect(chainReviewAndPost(null)).resolves.toBeUndefined();
-
-			expect(mockRequestAssistSession).not.toHaveBeenCalled();
-			expect(console.error).toHaveBeenCalledWith(
-				expect.stringContaining("no pull request found"),
-			);
-		});
+		expect(mockRequestAssistSession).toHaveBeenCalledWith(
+			[...CHAINED_ARGS, "--announce"],
+			process.cwd(),
+		);
 	});
 
 	describe("when not running inside an assist session", () => {
 		it("should not request a session", async () => {
 			delete process.env.ASSIST_SESSION;
 
-			await chainReviewAndPost(42);
+			await chainReviewAndPost(42, true);
 
 			expect(mockRequestAssistSession).not.toHaveBeenCalled();
 		});
@@ -84,7 +62,7 @@ describe("chainReviewAndPost", () => {
 		it("should warn instead of throwing", async () => {
 			mockRequestAssistSession.mockRejectedValue(new Error("no daemon"));
 
-			await expect(chainReviewAndPost(42)).resolves.toBeUndefined();
+			await expect(chainReviewAndPost(42, true)).resolves.toBeUndefined();
 
 			expect(console.error).toHaveBeenCalledWith(
 				expect.stringContaining("no daemon"),

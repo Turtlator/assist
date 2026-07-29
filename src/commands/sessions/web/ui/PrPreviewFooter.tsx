@@ -3,6 +3,7 @@ import type { PrPreviewComment } from "../../shared/SessionInfoBase";
 import type { PendingComment } from "./PendingComment";
 import { PrCommentList } from "./PrCommentList";
 import { PrPreviewActions } from "./PrPreviewActions";
+import type { PrPreviewChain } from "./PrPreviewChain";
 import { SelectionCommentPopover } from "./SelectionCommentPopover";
 import type { LocalComment } from "./usePrComments";
 
@@ -14,8 +15,8 @@ export function PrPreviewFooter({
 	onRemove,
 	onCancel,
 	onDecision,
-	reviewAfter,
-	onReviewAfterChange,
+	chain,
+	onChainChange,
 }: {
 	comments: LocalComment[];
 	commentColors: string[];
@@ -27,8 +28,8 @@ export function PrPreviewFooter({
 		decision: "approve" | "reject",
 		comments: PrPreviewComment[],
 	) => void;
-	reviewAfter?: boolean;
-	onReviewAfterChange: (reviewAfter: boolean) => void;
+	chain?: PrPreviewChain;
+	onChainChange: (chain: PrPreviewChain) => void;
 }) {
 	return (
 		<>
@@ -40,8 +41,8 @@ export function PrPreviewFooter({
 			<Divider />
 			<PrPreviewActions
 				commentCount={comments.length}
-				reviewAfter={reviewAfter}
-				onReviewAfterChange={onReviewAfterChange}
+				chain={chain}
+				onChainChange={onChainChange}
 				onApprove={() => onDecision("approve", [])}
 				onReject={() => onDecision("reject", [])}
 				onRequestChanges={() =>

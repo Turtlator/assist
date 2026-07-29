@@ -1,0 +1,40 @@
+import { announcePr } from "../review/announcePr";
+import { chainReviewAndPost } from "./chainReviewAndPost";
+import { findCurrentPrNumber } from "./shared";
+
+type ChainChoice = {
+	reviewAfter?: boolean;
+	announceAfter?: boolean;
+};
+
+export async function chainAfterRaise(
+	prNumber: number | null,
+	choice: ChainChoice,
+): Promise<void> {
+	const review = choice.reviewAfter === true;
+	const announce = choice.announceAfter === true;
+	if (!review && !announce) return;
+	if (process.env.ASSIST_SESSION !== "1") return;
+
+	const number = resolvePrNumber(prNumber);
+	if (number === null) return;
+
+	if (review) await chainReviewAndPost(number, announce);
+	else await announcePr(number);
+}
+
+function resolvePrNumber(prNumber: number | null): number | null {
+	if (prNumber !== null) return prNumber;
+	try {
+		const found = findCurrentPrNumber();
+		if (found === null) warn("no pull request found for the current branch");
+		return found;
+	} catch (error) {
+		warn(error instanceof Error ? error.message : String(error));
+		return null;
+	}
+}
+
+function warn(reason: string): void {
+	console.error(`Warning: could not chain sessions after raising: ${reason}`);
+}

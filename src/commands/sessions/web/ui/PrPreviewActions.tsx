@@ -1,16 +1,18 @@
-import { Box, Button, Checkbox, FormControlLabel, Stack } from "@mui/material";
+import { Button, Stack } from "@mui/material";
+import type { PrPreviewChain } from "./PrPreviewChain";
+import { PrPreviewChainToggles } from "./PrPreviewChainToggles";
 
 export function PrPreviewActions({
 	commentCount,
-	reviewAfter,
-	onReviewAfterChange,
+	chain,
+	onChainChange,
 	onApprove,
 	onReject,
 	onRequestChanges,
 }: {
 	commentCount: number;
-	reviewAfter?: boolean;
-	onReviewAfterChange: (reviewAfter: boolean) => void;
+	chain?: PrPreviewChain;
+	onChainChange: (chain: PrPreviewChain) => void;
 	onApprove: () => void;
 	onReject: () => void;
 	onRequestChanges: () => void;
@@ -21,20 +23,8 @@ export function PrPreviewActions({
 			spacing={1}
 			sx={{ p: 2, alignItems: "center", justifyContent: "flex-end" }}
 		>
-			{reviewAfter !== undefined && (
-				<Box sx={{ mr: "auto" }}>
-					<FormControlLabel
-						control={
-							<Checkbox
-								size="small"
-								checked={reviewAfter}
-								onChange={(e) => onReviewAfterChange(e.target.checked)}
-							/>
-						}
-						label="Review + Post after raising"
-						sx={{ "& .MuiFormControlLabel-label": { fontSize: 12 } }}
-					/>
-				</Box>
+			{chain && (
+				<PrPreviewChainToggles chain={chain} onChange={onChainChange} />
 			)}
 			<Button color="error" variant="outlined" onClick={onReject}>
 				Reject

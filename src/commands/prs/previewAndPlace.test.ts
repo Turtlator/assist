@@ -2,12 +2,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const placePrMock = vi.fn();
 const requestPrDecisionMock = vi.fn();
-const chainReviewAndPostMock = vi.fn();
+const chainAfterRaiseMock = vi.fn();
 vi.mock("./placePr", () => ({
 	placePr: (...args: unknown[]) => placePrMock(...args),
 }));
-vi.mock("./chainReviewAndPost", () => ({
-	chainReviewAndPost: (...args: unknown[]) => chainReviewAndPostMock(...args),
+vi.mock("./chainAfterRaise", () => ({
+	chainAfterRaise: (...args: unknown[]) => chainAfterRaiseMock(...args),
 }));
 vi.mock("../sessions/shared/requestPreviewDecision", () => ({
 	requestPreviewDecision: (...args: unknown[]) =>
@@ -53,48 +53,41 @@ describe("previewAndPlace", () => {
 		expect(placePrMock).toHaveBeenCalledWith(null, "t", "## What\n\nx", {});
 	});
 
-	describe("chaining a Review + Post session", () => {
-		it("chains after the PR is placed when the reviewer asked for it", async () => {
+	describe("chaining after the PR is placed", () => {
+		it("hands the reviewer's toggles to the chain once the PR exists", async () => {
 			requestPrDecisionMock.mockResolvedValue({
 				decision: "approve",
 				reviewAfter: true,
+				announceAfter: false,
 			});
+			const placedFirst: string[] = [];
+			placePrMock.mockImplementationOnce(() => placedFirst.push("place"));
+			chainAfterRaiseMock.mockImplementationOnce(() =>
+				placedFirst.push("chain"),
+			);
 
 			await previewAndPlace({ ...args, prNumber: 42 });
 
-			expect(placePrMock).toHaveBeenCalled();
-			expect(chainReviewAndPostMock).toHaveBeenCalledWith(42);
+			expect(chainAfterRaiseMock).toHaveBeenCalledWith(
+				42,
+				expect.objectContaining({ reviewAfter: true, announceAfter: false }),
+			);
+			expect(placedFirst).toEqual(["place", "chain"]);
 		});
 
 		it("passes a null PR number through for a newly created PR", async () => {
 			requestPrDecisionMock.mockResolvedValue({
 				decision: "approve",
 				reviewAfter: true,
+				announceAfter: true,
 			});
 
 			await previewAndPlace(args);
 
-			expect(chainReviewAndPostMock).toHaveBeenCalledWith(null);
-		});
-
-		it("chains nothing when the reviewer turned it off", async () => {
-			requestPrDecisionMock.mockResolvedValue({
-				decision: "approve",
-				reviewAfter: false,
-			});
-
-			await previewAndPlace(args);
-
-			expect(placePrMock).toHaveBeenCalled();
-			expect(chainReviewAndPostMock).not.toHaveBeenCalled();
-		});
-
-		it("chains nothing when the decision carries no choice", async () => {
-			requestPrDecisionMock.mockResolvedValue({ decision: "approve" });
-
-			await previewAndPlace(args);
-
-			expect(chainReviewAndPostMock).not.toHaveBeenCalled();
+			expect(chainAfterRaiseMock).toHaveBeenCalledWith(
+				null,
+				expect.objectContaining({ reviewAfter: true, announceAfter: true }),
+			);
 		});
 	});
 });

@@ -71,7 +71,7 @@ describe("PrPreviewCoordinator", () => {
 		expect(sessions.get("1")?.pendingPrPreview).toBeUndefined();
 	});
 
-	it("forwards the Review + Post choice to the waiting client", () => {
+	it("forwards the Review and Post chain choices to the waiting client", () => {
 		const sessions = makeSessions("1");
 		const coord = new PrPreviewCoordinator(sessions, vi.fn());
 		const client = makeClient();
@@ -83,9 +83,13 @@ describe("PrPreviewCoordinator", () => {
 			requestId: "r1",
 			decision: "approve",
 			reviewAfter: true,
+			announceAfter: false,
 		});
 
-		expect(client.sent.at(-1)).toMatchObject({ reviewAfter: true });
+		expect(client.sent.at(-1)).toMatchObject({
+			reviewAfter: true,
+			announceAfter: false,
+		});
 	});
 
 	it("forwards inline comments to the waiting client on rejection", () => {

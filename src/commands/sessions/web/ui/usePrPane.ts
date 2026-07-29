@@ -55,8 +55,8 @@ export function usePrPane(
 		onAdd,
 		onCancel: clear,
 		onDecide: decision.onDecide,
-		reviewAfter: decision.reviewAfter,
-		setReviewAfter: decision.setReviewAfter,
+		chain: decision.chain,
+		setChain: decision.setChain,
 		...shots,
 	};
 }
