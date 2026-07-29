@@ -1,3 +1,10 @@
+## [0.506.1](https://github.com/staff0rd/assist/compare/v0.506.0...v0.506.1) (2026-07-29)
+
+
+### Bug Fixes
+
+* move diff tree toggle left of scope ([624ef5b](https://github.com/staff0rd/assist/commit/624ef5b04cbbaf2e1033151489274ec6de657732))
+
 # [0.506.0](https://github.com/staff0rd/assist/compare/v0.505.0...v0.506.0) (2026-07-29)
 
 
