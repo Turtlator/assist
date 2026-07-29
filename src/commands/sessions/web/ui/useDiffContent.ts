@@ -1,4 +1,5 @@
 import { diffEmptyMessage } from "./diffEmptyMessage";
+import { diffFileTotals } from "./diffFileTotals";
 import type { SessionInfo } from "./types";
 import { useDiff } from "./useDiff";
 import { useDiffComments } from "./useDiffComments";
@@ -33,6 +34,7 @@ export function useDiffContent(
 		treePanel,
 		comments,
 		visibleFiles,
+		totals: diffFileTotals(visibleFiles),
 		emptyMessage: diffEmptyMessage(error, files.length),
 	};
 }

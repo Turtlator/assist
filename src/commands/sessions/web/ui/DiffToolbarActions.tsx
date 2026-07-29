@@ -11,6 +11,15 @@ export type DiffToolbarActionProps = {
 	onClose?: () => void;
 };
 
+const ruleSx = {
+	flex: "0 0 auto",
+	width: "1px",
+	alignSelf: "stretch",
+	my: 1,
+	mx: 0.25,
+	bgcolor: "divider",
+} as const;
+
 export function DiffToolbarActions({
 	commentHint,
 	mode,
@@ -19,12 +28,12 @@ export function DiffToolbarActions({
 }: DiffToolbarActionProps) {
 	return (
 		<>
-			<Box sx={{ ml: "auto" }} />
 			{commentHint ? (
 				<Typography variant="caption" color="text.secondary" noWrap>
 					{commentHint}
 				</Typography>
 			) : null}
+			<Box sx={ruleSx} />
 			{mode !== undefined && onToggleMode !== undefined && (
 				<DiffModeToggle mode={mode} onToggleMode={onToggleMode} />
 			)}

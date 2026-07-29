@@ -1,67 +1,53 @@
 import Box from "@mui/material/Box";
-import type { ViewType } from "react-diff-view";
-import { DiffChangeTypeFilter } from "./DiffChangeTypeFilter";
-import { DiffFileSearchInput } from "./DiffFileSearchInput";
-import { DiffScopePicker } from "./DiffScopePicker";
+import { useRef } from "react";
 import {
 	type DiffToolbarActionProps,
 	DiffToolbarActions,
 } from "./DiffToolbarActions";
-import { DiffTreeToggle } from "./DiffTreeToggle";
-import { DiffViewTypeToggle } from "./DiffViewTypeToggle";
-import type { DiffChangeType } from "./filterDiffFiles";
-import type { DiffScopeState } from "./useDiffScopeState";
+import {
+	type DiffToolbarControlProps,
+	DiffToolbarControls,
+} from "./DiffToolbarControls";
+import {
+	type DiffToolbarSubjectProps,
+	DiffToolbarSubject,
+} from "./DiffToolbarSubject";
+import { useElementWidth } from "./useElementWidth";
 
 export const DIFF_TOOLBAR_HEIGHT = 40;
+
+const COMPACT_WIDTH = 400;
 
 const toolbarSx = {
 	position: "sticky",
 	top: 0,
 	zIndex: 2,
-	height: DIFF_TOOLBAR_HEIGHT,
+	minHeight: DIFF_TOOLBAR_HEIGHT,
 	display: "flex",
 	alignItems: "center",
-	gap: 1,
+	flexWrap: "wrap",
+	gap: 0.5,
+	px: 0.5,
 	bgcolor: "background.default",
 	borderBottom: 1,
 	borderColor: "divider",
 } as const;
 
-export function DiffToolbar({
-	viewType,
-	onChange,
-	search,
-	onSearchChange,
-	changeType,
-	onChangeTypeChange,
-	scope,
-	onScopeChange,
-	treeVisible,
-	onToggleTree,
-	...actions
-}: DiffToolbarActionProps & {
-	viewType: ViewType;
-	onChange: (viewType: ViewType) => void;
-	search: string;
-	onSearchChange: (search: string) => void;
-	changeType: DiffChangeType;
-	onChangeTypeChange: (changeType: DiffChangeType) => void;
-	scope: DiffScopeState;
-	onScopeChange: (scope: string) => void;
-	treeVisible: boolean;
-	onToggleTree: () => void;
-}) {
+type DiffToolbarProps = DiffToolbarSubjectProps &
+	DiffToolbarControlProps &
+	DiffToolbarActionProps;
+
+export function DiffToolbar(props: DiffToolbarProps) {
+	const barRef = useRef<HTMLDivElement>(null);
+	const width = useElementWidth(barRef);
+	const compact = width !== null && width < COMPACT_WIDTH;
+
 	return (
-		<Box sx={toolbarSx}>
-			<DiffTreeToggle treeVisible={treeVisible} onToggleTree={onToggleTree} />
-			<DiffViewTypeToggle viewType={viewType} onChange={onChange} />
-			<DiffScopePicker {...scope} onChange={onScopeChange} />
-			<DiffChangeTypeFilter
-				changeType={changeType}
-				onChange={onChangeTypeChange}
-			/>
-			<DiffFileSearchInput search={search} onChange={onSearchChange} />
-			<DiffToolbarActions {...actions} />
+		<Box ref={barRef} sx={toolbarSx}>
+			<DiffToolbarSubject {...props} compact={compact} />
+			<Box sx={{ ml: "auto" }} />
+			<DiffToolbarControls {...props} />
+			<DiffToolbarActions {...props} />
 		</Box>
 	);
 }

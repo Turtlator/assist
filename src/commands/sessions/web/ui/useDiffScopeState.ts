@@ -1,5 +1,5 @@
 import type { CommitRef } from "../../../../shared/db/listCommitRefs";
-import { BRANCH_DIFF_SCOPE, DEFAULT_DIFF_SCOPE } from "./DiffScopePicker";
+import { BRANCH_DIFF_SCOPE, DEFAULT_DIFF_SCOPE } from "./diffScopeOptions";
 import { useDiffScopes } from "./useDiffScopes";
 
 export type DiffScopeState = {

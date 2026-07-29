@@ -10,7 +10,9 @@ import {
 import { MemoryRouter, useLocation } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CommitRef } from "../../../../shared/db/listCommitRefs";
+import type { DiffTotals } from "./diffFileTotals";
 import { DiffToolbar } from "./DiffToolbar";
+import type { DiffChangeType } from "./filterDiffFiles";
 import type { DiffPanelMode } from "./toggleDiffPanel";
 
 afterEach(cleanup);
@@ -18,6 +20,8 @@ afterEach(cleanup);
 function LocationProbe() {
 	return <div data-testid="location">{useLocation().pathname}</div>;
 }
+
+const noTotals: DiffTotals = { files: 0, added: 0, removed: 0 };
 
 function renderToolbar({
 	scope = "all",
@@ -29,6 +33,11 @@ function renderToolbar({
 	commentHint,
 	mode,
 	onToggleMode,
+	changeType = "all",
+	onChangeTypeChange = vi.fn(),
+	search = "",
+	onSearchChange = vi.fn(),
+	totals = noTotals,
 }: {
 	scope?: string;
 	scopeCommits?: CommitRef[];
@@ -39,22 +48,28 @@ function renderToolbar({
 	commentHint?: string;
 	mode?: DiffPanelMode;
 	onToggleMode?: () => void;
+	changeType?: DiffChangeType;
+	onChangeTypeChange?: (changeType: DiffChangeType) => void;
+	search?: string;
+	onSearchChange?: (search: string) => void;
+	totals?: DiffTotals;
 } = {}) {
 	render(
 		<MemoryRouter initialEntries={["/sessions", "/diff"]} initialIndex={1}>
 			<DiffToolbar
 				viewType="unified"
 				onChange={vi.fn()}
-				search=""
-				onSearchChange={vi.fn()}
-				changeType="all"
-				onChangeTypeChange={vi.fn()}
+				search={search}
+				onSearchChange={onSearchChange}
+				changeType={changeType}
+				onChangeTypeChange={onChangeTypeChange}
 				scope={{
 					scope,
 					commits: scopeCommits,
 					branchBase: scopeBranchBase,
 				}}
 				onScopeChange={onScopeChange}
+				totals={totals}
 				treeVisible={treeVisible}
 				onToggleTree={onToggleTree}
 				commentHint={commentHint}
@@ -71,9 +86,18 @@ const commits: CommitRef[] = [
 	{ sha: "cccccccddddddd" },
 ];
 
-function openScopePicker(): HTMLElement {
-	fireEvent.mouseDown(screen.getByRole("combobox", { name: "Scope" }));
-	return screen.getByRole("listbox");
+function scopeButton(): HTMLElement {
+	return screen.getByRole("button", { name: /^Diff scope/ });
+}
+
+function openScopeMenu(): HTMLElement {
+	fireEvent.click(scopeButton());
+	return screen.getByRole("menu");
+}
+
+function openChangeTypeMenu(): HTMLElement {
+	fireEvent.click(screen.getByRole("button", { name: /change type/i }));
+	return screen.getByRole("menu");
 }
 
 describe("DiffToolbar", () => {
@@ -85,84 +109,6 @@ describe("DiffToolbar", () => {
 
 		await waitFor(() =>
 			expect(screen.getByTestId("location").textContent).toBe("/sessions"),
-		);
-	});
-
-	it("shows the scope picker when the item has no recorded commits", () => {
-		renderToolbar();
-
-		const options = within(openScopePicker()).getAllByRole("option");
-
-		expect(options.map((option) => option.textContent)).toEqual([
-			"All",
-			"Uncommitted",
-		]);
-	});
-
-	it("lists All, Uncommitted, Branch and one entry per commit", () => {
-		renderToolbar({ scopeCommits: commits, scopeBranchBase: "origin/main" });
-
-		const options = within(openScopePicker()).getAllByRole("option");
-
-		expect(options.map((option) => option.textContent)).toEqual([
-			"All",
-			"Uncommitted",
-			"Branch (origin/main)",
-			"feat: the first commit",
-			"ccccccc",
-		]);
-	});
-
-	it("omits the Branch option when no branch base resolves", () => {
-		renderToolbar({ scopeCommits: commits });
-
-		const options = within(openScopePicker()).getAllByRole("option");
-
-		expect(options.map((option) => option.textContent)).toEqual([
-			"All",
-			"Uncommitted",
-			"feat: the first commit",
-			"ccccccc",
-		]);
-	});
-
-	it("shows the selected branch scope by its base ref", () => {
-		renderToolbar({ scope: "branch", scopeBranchBase: "origin/main" });
-
-		expect(screen.getByRole("combobox", { name: "Scope" }).textContent).toBe(
-			"Branch (origin/main)",
-		);
-	});
-
-	it("falls back to All when branch is selected without a branch base", () => {
-		renderToolbar({ scope: "branch" });
-
-		expect(screen.getByRole("combobox", { name: "Scope" }).textContent).toBe(
-			"All",
-		);
-	});
-
-	it("defaults to All", () => {
-		renderToolbar({ scopeCommits: commits });
-
-		expect(screen.getByRole("combobox", { name: "Scope" }).textContent).toBe(
-			"All",
-		);
-	});
-
-	it("shows the selected commit by its subject", () => {
-		renderToolbar({ scope: "aaaaaaabbbbbbb", scopeCommits: commits });
-
-		expect(screen.getByRole("combobox", { name: "Scope" }).textContent).toBe(
-			"feat: the first commit",
-		);
-	});
-
-	it("falls back to All when the url names an unknown scope", () => {
-		renderToolbar({ scope: "deadbeef", scopeCommits: commits });
-
-		expect(screen.getByRole("combobox", { name: "Scope" }).textContent).toBe(
-			"All",
 		);
 	});
 
@@ -193,15 +139,219 @@ describe("DiffToolbar", () => {
 		expect(screen.getByRole("button", { name: "Show file tree" })).toBeTruthy();
 	});
 
+	it("offers both view types", () => {
+		renderToolbar();
+
+		expect(screen.getByRole("button", { name: "Unified view" })).toBeTruthy();
+		expect(screen.getByRole("button", { name: "Split view" })).toBeTruthy();
+	});
+});
+
+describe("DiffToolbar scope", () => {
+	it("names the scope on the button rather than in a form field", () => {
+		renderToolbar();
+
+		expect(scopeButton().textContent).toBe("All changes");
+		expect(screen.queryByRole("combobox")).toBeNull();
+	});
+
+	it("lists All, Uncommitted, Branch and one entry per commit", () => {
+		renderToolbar({ scopeCommits: commits, scopeBranchBase: "origin/main" });
+
+		const items = within(openScopeMenu()).getAllByRole("menuitem");
+
+		expect(items.map((item) => item.textContent)).toEqual([
+			"All changes",
+			"Uncommitted",
+			"Branchvs origin/main",
+			"feat: the first commit",
+			"ccccccc",
+		]);
+	});
+
+	it("omits the Branch option when no branch base resolves", () => {
+		renderToolbar({ scopeCommits: commits });
+
+		const items = within(openScopeMenu()).getAllByRole("menuitem");
+
+		expect(items.map((item) => item.textContent)).toEqual([
+			"All changes",
+			"Uncommitted",
+			"feat: the first commit",
+			"ccccccc",
+		]);
+	});
+
+	it("shows what the branch scope is measured against", () => {
+		renderToolbar({ scope: "branch", scopeBranchBase: "origin/main" });
+
+		expect(scopeButton().textContent).toBe("Branchvs origin/main");
+	});
+
+	it("falls back to All when branch is selected without a branch base", () => {
+		renderToolbar({ scope: "branch" });
+
+		expect(scopeButton().textContent).toBe("All changes");
+	});
+
+	it("shows the selected commit by its subject", () => {
+		renderToolbar({ scope: "aaaaaaabbbbbbb", scopeCommits: commits });
+
+		expect(scopeButton().textContent).toBe("feat: the first commit");
+	});
+
+	it("falls back to All when the url names an unknown scope", () => {
+		renderToolbar({ scope: "deadbeef", scopeCommits: commits });
+
+		expect(scopeButton().textContent).toBe("All changes");
+	});
+
 	it("reports the chosen scope", () => {
 		const onScopeChange = vi.fn();
 		renderToolbar({ scopeCommits: commits, onScopeChange });
 
 		fireEvent.click(
-			within(openScopePicker()).getByRole("option", { name: "Uncommitted" }),
+			within(openScopeMenu()).getByRole("menuitem", { name: "Uncommitted" }),
 		);
 
 		expect(onScopeChange).toHaveBeenCalledWith("uncommitted");
+	});
+});
+
+describe("DiffToolbar counts", () => {
+	it("summarises the files and line totals in the row", () => {
+		renderToolbar({ totals: { files: 32, added: 925, removed: 172 } });
+
+		expect(screen.getByText(/32 files/)).toBeTruthy();
+		expect(screen.getByText("+925")).toBeTruthy();
+		expect(screen.getByText("−172")).toBeTruthy();
+	});
+
+	it("says file in the singular", () => {
+		renderToolbar({ totals: { files: 1, added: 2, removed: 0 } });
+
+		expect(screen.getByText(/1 file(?!s)/)).toBeTruthy();
+	});
+
+	it("shows no summary for an empty diff", () => {
+		renderToolbar();
+
+		expect(screen.queryByText(/files/)).toBeNull();
+	});
+
+	it("drops the summary while a change type is filtering", () => {
+		renderToolbar({
+			changeType: "modified",
+			totals: { files: 32, added: 925, removed: 172 },
+		});
+
+		expect(screen.queryByText(/32 files/)).toBeNull();
+	});
+
+	it("drops the summary while a file search is filtering", () => {
+		renderToolbar({
+			search: "Diff",
+			totals: { files: 32, added: 925, removed: 172 },
+		});
+
+		expect(screen.queryByText(/32 files/)).toBeNull();
+	});
+});
+
+describe("DiffToolbar change type", () => {
+	it("offers every change type behind the filter button", () => {
+		const items =
+			(renderToolbar(), within(openChangeTypeMenu()).getAllByRole("menuitem"));
+
+		expect(items.map((item) => item.textContent)).toEqual([
+			"All files",
+			"Modified",
+			"Added",
+			"Removed",
+			"Renamed",
+		]);
+	});
+
+	it("reports the chosen change type", () => {
+		const onChangeTypeChange = vi.fn();
+		renderToolbar({ onChangeTypeChange });
+
+		fireEvent.click(
+			within(openChangeTypeMenu()).getByRole("menuitem", { name: "Modified" }),
+		);
+
+		expect(onChangeTypeChange).toHaveBeenCalledWith("modified");
+	});
+
+	it("shows no chip while every change type is included", () => {
+		renderToolbar();
+
+		expect(screen.queryByRole("button", { name: /Clear the/ })).toBeNull();
+	});
+
+	it("shows the active change type as a chip that clears it", () => {
+		const onChangeTypeChange = vi.fn();
+		renderToolbar({ changeType: "removed", onChangeTypeChange });
+
+		expect(screen.getByText("Removed")).toBeTruthy();
+		fireEvent.click(
+			screen.getByRole("button", { name: "Clear the Removed filter" }),
+		);
+
+		expect(onChangeTypeChange).toHaveBeenCalledWith("all");
+	});
+});
+
+describe("DiffToolbar file search", () => {
+	it("stays collapsed to an icon until it is opened", () => {
+		renderToolbar();
+
+		expect(screen.queryByRole("textbox")).toBeNull();
+		expect(
+			screen.getByRole("button", { name: "Filter files by name" }),
+		).toBeTruthy();
+	});
+
+	it("expands in place when the icon is clicked", () => {
+		renderToolbar();
+
+		fireEvent.click(
+			screen.getByRole("button", { name: "Filter files by name" }),
+		);
+
+		expect(screen.getByRole("textbox", { name: "Filter files" })).toBeTruthy();
+	});
+
+	it("stays expanded while a search is active", () => {
+		renderToolbar({ search: "Diff" });
+
+		expect(
+			(
+				screen.getByRole("textbox", {
+					name: "Filter files",
+				}) as HTMLInputElement
+			).value,
+		).toBe("Diff");
+	});
+
+	it("reports what was typed", () => {
+		const onSearchChange = vi.fn();
+		renderToolbar({ search: "D", onSearchChange });
+
+		fireEvent.change(screen.getByRole("textbox", { name: "Filter files" }), {
+			target: { value: "Diff" },
+		});
+
+		expect(onSearchChange).toHaveBeenCalledWith("Diff");
+	});
+
+	it("clears the search when it is dismissed", () => {
+		const onSearchChange = vi.fn();
+		renderToolbar({ search: "Diff", onSearchChange });
+
+		fireEvent.click(screen.getByRole("button", { name: "Clear file filter" }));
+
+		expect(onSearchChange).toHaveBeenCalledWith("");
 	});
 });
 

@@ -22,7 +22,7 @@ export function DiffTreeToggle({
 				"&:hover": { color: "text.primary" },
 			}}
 		>
-			<AccountTreeOutlined sx={{ fontSize: 18 }} />
+			<AccountTreeOutlined sx={{ fontSize: 16 }} />
 		</IconButton>
 	);
 }

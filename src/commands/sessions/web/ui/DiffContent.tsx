@@ -1,7 +1,6 @@
 import { DiffCommentSnackbar } from "./DiffCommentSnackbar";
+import { DiffContentBody } from "./DiffContentBody";
 import { DiffToolbar } from "./DiffToolbar";
-import { DiffViewBody } from "./DiffViewBody";
-import { PageSpinner } from "./PageSpinner";
 import type { DiffPanelMode } from "./toggleDiffPanel";
 import type { SessionInfo } from "./types";
 import { useDiffContent } from "./useDiffContent";
@@ -27,43 +26,33 @@ export function DiffContent({
 	onToggleMode?: () => void;
 	onClose?: () => void;
 }) {
-	const {
-		scopeState,
-		loading,
-		filters,
-		treePanel,
-		comments,
-		visibleFiles,
-		emptyMessage,
-	} = useDiffContent(cwd, sessionId, scope, sessions, sendInput);
+	const diff = useDiffContent(cwd, sessionId, scope, sessions, sendInput);
 
 	return (
 		<>
 			<DiffToolbar
-				{...filters}
-				{...treePanel}
-				scope={scopeState}
+				{...diff.filters}
+				{...diff.treePanel}
+				scope={diff.scopeState}
 				onScopeChange={onScopeChange}
-				commentHint={comments.unavailable}
+				totals={diff.totals}
+				commentHint={diff.comments.unavailable}
 				mode={mode}
 				onToggleMode={onToggleMode}
 				onClose={onClose}
 			/>
-			{loading ? (
-				<PageSpinner />
-			) : (
-				<DiffViewBody
-					files={visibleFiles}
-					treeVisible={treePanel.treeVisible}
-					viewType={filters.viewType}
-					cwd={cwd}
-					onComment={comments.onComment}
-					emptyMessage={emptyMessage}
-				/>
-			)}
+			<DiffContentBody
+				loading={diff.loading}
+				files={diff.visibleFiles}
+				treeVisible={diff.treePanel.treeVisible}
+				viewType={diff.filters.viewType}
+				cwd={cwd}
+				onComment={diff.comments.onComment}
+				emptyMessage={diff.emptyMessage}
+			/>
 			<DiffCommentSnackbar
-				sessionName={comments.sentTo}
-				onClose={comments.clearSent}
+				sessionName={diff.comments.sentTo}
+				onClose={diff.comments.clearSent}
 			/>
 		</>
 	);
