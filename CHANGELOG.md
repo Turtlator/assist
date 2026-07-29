@@ -1,3 +1,10 @@
+## [0.503.2](https://github.com/staff0rd/assist/compare/v0.503.1...v0.503.2) (2026-07-29)
+
+
+### Bug Fixes
+
+* chain PR sessions in place ([88ce1b5](https://github.com/staff0rd/assist/commit/88ce1b56d91bdc9a94a4acc26051fb3bb1417947))
+
 ## [0.503.1](https://github.com/staff0rd/assist/compare/v0.503.0...v0.503.1) (2026-07-29)
 
 
