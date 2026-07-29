@@ -1,3 +1,10 @@
+## [0.512.1](https://github.com/staff0rd/assist/compare/v0.512.0...v0.512.1) (2026-07-29)
+
+
+### Bug Fixes
+
+* defer titling reference-only prompts ([7cee50c](https://github.com/staff0rd/assist/commit/7cee50c6d39040c05b800db945c4459a939f2292))
+
 # [0.512.0](https://github.com/staff0rd/assist/compare/v0.511.0...v0.512.0) (2026-07-29)
 
 
