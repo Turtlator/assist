@@ -1,3 +1,11 @@
+# [0.515.0](https://github.com/staff0rd/assist/compare/v0.514.2...v0.515.0) (2026-07-29)
+
+
+### Features
+
+* coloured usage tooltip thresholds ([106228e](https://github.com/staff0rd/assist/commit/106228e7da26fa923fe4a77db7464602f39a741d))
+* monaco editor at /file ([3da7d67](https://github.com/staff0rd/assist/commit/3da7d67fbf40c7d63cc711003b7f166d9356cab4))
+
 ## [0.514.2](https://github.com/staff0rd/assist/compare/v0.514.1...v0.514.2) (2026-07-29)
 
 
