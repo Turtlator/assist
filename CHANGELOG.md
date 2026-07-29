@@ -1,3 +1,10 @@
+# [0.507.0](https://github.com/staff0rd/assist/compare/v0.506.1...v0.507.0) (2026-07-29)
+
+
+### Features
+
+* persist diff view type globally ([52d2c00](https://github.com/staff0rd/assist/commit/52d2c00f046d0965e37bc6194620d3d55783b7db))
+
 ## [0.506.1](https://github.com/staff0rd/assist/compare/v0.506.0...v0.506.1) (2026-07-29)
 
 
