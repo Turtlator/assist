@@ -1,3 +1,10 @@
+# [0.514.0](https://github.com/staff0rd/assist/compare/v0.513.0...v0.514.0) (2026-07-29)
+
+
+### Features
+
+* expand/collapse all diff files ([6f20904](https://github.com/staff0rd/assist/commit/6f209049f83e4ca468584619adc1681e3f1d7f50))
+
 # [0.513.0](https://github.com/staff0rd/assist/compare/v0.512.1...v0.513.0) (2026-07-29)
 
 
