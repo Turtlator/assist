@@ -10,7 +10,7 @@ import { useStarredSessions } from "./useStarredSessions";
 
 const unpaddedScrollportSx = { flex: 1, overflow: "auto" } as const;
 
-const paddedContentSx = { p: 1 } as const;
+const paddedContentSx = { py: 0.5 } as const;
 
 export function SessionList({
 	sessions,

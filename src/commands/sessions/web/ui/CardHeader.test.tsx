@@ -61,17 +61,17 @@ describe("CardHeader title", () => {
 });
 
 describe("CardHeader loading", () => {
-	it("shows a spinner instead of chips while starting", () => {
+	it("replaces the status glyph with a spinner while starting", () => {
 		const starting: SessionInfo = { ...session, cwd: "/home/me/repo" };
 		render(<CardHeader session={starting} loading onDismiss={() => {}} />, {
 			wrapper: Stars,
 		});
 
 		expect(screen.getByRole("progressbar")).toBeTruthy();
-		expect(screen.queryByText("repo")).toBeNull();
+		expect(screen.queryByTitle("running")).toBeNull();
 	});
 
-	it("shows chips and no spinner once loaded", () => {
+	it("shows the status glyph and no spinner once loaded", () => {
 		const loaded: SessionInfo = { ...session, cwd: "/home/me/repo" };
 		render(
 			<CardHeader session={loaded} loading={false} onDismiss={() => {}} />,
@@ -79,7 +79,7 @@ describe("CardHeader loading", () => {
 		);
 
 		expect(screen.queryByRole("progressbar")).toBeNull();
-		expect(screen.getByText("repo")).toBeTruthy();
+		expect(screen.getByTitle("running").textContent).toBe("●");
 	});
 
 	it("keeps the spinner for an assist session until its activity resolves", () => {
@@ -95,7 +95,7 @@ describe("CardHeader loading", () => {
 		);
 
 		expect(screen.getByRole("progressbar")).toBeTruthy();
-		expect(screen.queryByText("repo")).toBeNull();
+		expect(screen.queryByTitle("running")).toBeNull();
 	});
 
 	it("leaves the awaiting-activity spinner bare, with no busy caption", () => {
@@ -115,7 +115,7 @@ describe("CardHeader loading", () => {
 		expect(screen.queryByText("Closing…")).toBeNull();
 	});
 
-	it("shows chips once an assist session's activity arrives", () => {
+	it("shows the glyph once an assist session's activity arrives", () => {
 		const resolved: SessionInfo = {
 			...session,
 			commandType: "assist",
@@ -129,7 +129,7 @@ describe("CardHeader loading", () => {
 		);
 
 		expect(screen.queryByRole("progressbar")).toBeNull();
-		expect(screen.getByText("repo")).toBeTruthy();
+		expect(screen.getByTitle("running")).toBeTruthy();
 	});
 
 	it("does not hang the spinner on a finished assist session with no activity", () => {
@@ -145,7 +145,7 @@ describe("CardHeader loading", () => {
 		});
 
 		expect(screen.queryByRole("progressbar")).toBeNull();
-		expect(screen.getByText("repo")).toBeTruthy();
+		expect(screen.getByTitle("done")).toBeTruthy();
 	});
 });
 
@@ -178,36 +178,7 @@ describe("CardHeader busy caption", () => {
 	});
 });
 
-describe("CardHeader phase caption", () => {
-	const phased: SessionInfo = {
-		...session,
-		activity: { kind: "backlog", startedAt: 0, phaseName: "Phase 1: flag" },
-	};
-
-	function renderHeader(topBar: boolean) {
-		render(
-			<TopBarLayoutContext.Provider value={topBar}>
-				<CardHeader session={phased} loading={false} onDismiss={() => {}} />
-			</TopBarLayoutContext.Provider>,
-			{ wrapper: Stars },
-		);
-	}
-
-	it("shows the phase caption in the default layout", () => {
-		renderHeader(false);
-
-		expect(screen.getByText("Phase 1: flag")).toBeTruthy();
-	});
-
-	it("drops the phase caption when the top bar owns it", () => {
-		renderHeader(true);
-
-		expect(screen.queryByText("Phase 1: flag")).toBeNull();
-		expect(screen.getByText("my session")).toBeTruthy();
-	});
-});
-
-describe("CardHeader inline status", () => {
+describe("CardHeader status glyph", () => {
 	const busy: SessionInfo = { ...session, cwd: "/home/me/repo", usedPct: 42 };
 
 	beforeEach(() => {
@@ -232,13 +203,6 @@ describe("CardHeader inline status", () => {
 		);
 	}
 
-	it("leaves status, context and counts to the body in the default layout", () => {
-		renderHeader(false);
-
-		expect(screen.queryByTitle("running")).toBeNull();
-		expect(screen.queryByText("42%")).toBeNull();
-	});
-
 	it("keeps the status wordless, leaving the name to the top bar", () => {
 		renderHeader(true);
 
@@ -246,39 +210,26 @@ describe("CardHeader inline status", () => {
 		expect(screen.getByTitle("running").textContent).toBe("●");
 	});
 
-	it("puts the dot, context and the diff counts on the chips line", async () => {
+	it("leaves context and counts to the body", () => {
 		renderHeader(true);
 
-		expect(await screen.findByText("+1")).toBeTruthy();
-
-		const chip = screen.getByText("repo").closest(".MuiChip-root");
-		const row = chip?.parentElement;
-		expect(row?.textContent).toContain("●");
-		expect(row?.textContent).toContain("42%");
-		expect(row?.textContent).toContain("+1");
-		expect(row?.textContent).not.toContain("my session");
+		expect(screen.queryByText("42%")).toBeNull();
+		expect(fetch).not.toHaveBeenCalled();
 	});
 
-	it("leads the chips with the dot and trails them with the rest", async () => {
+	it("orders the row glyph, then title, then actions", () => {
 		renderHeader(true);
 
-		const dot = screen.getByTitle("running");
-		const context = await screen.findByText("42%");
-		const row = screen
-			.getByText("repo")
-			.closest(".MuiChip-root")?.parentElement;
-		const chips = row?.querySelectorAll(".MuiChip-root") ?? [];
-		const buttons = row?.querySelectorAll("button") ?? [];
+		const glyph = screen.getByTitle("running");
+		const title = screen.getByText("my session");
+		const dismiss = screen.getByTitle("Dismiss session 1");
 		const follows = (from: Node, to: Node) =>
 			Boolean(
 				from.compareDocumentPosition(to) & Node.DOCUMENT_POSITION_FOLLOWING,
 			);
 
-		expect(chips.length).toBeGreaterThan(0);
-		expect(buttons.length).toBeGreaterThan(0);
-		expect(follows(dot, chips[0] as Node)).toBe(true);
-		expect(follows(chips[chips.length - 1] as Node, context)).toBe(true);
-		expect(follows(context, buttons[buttons.length - 1] as Node)).toBe(true);
+		expect(follows(glyph, title)).toBe(true);
+		expect(follows(title, dismiss)).toBe(true);
 	});
 
 	it("holds the status back while the card is still starting", () => {

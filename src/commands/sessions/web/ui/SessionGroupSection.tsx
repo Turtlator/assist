@@ -4,26 +4,16 @@ import type { ReactNode } from "react";
 import { InRepoGroupContext } from "./useInRepoGroupContext";
 import { useTopBarLayoutContext } from "./useTopBarLayoutContext";
 
-const containerSx = {
-	mb: 1,
-	p: 0.5,
-	borderRadius: 1.5,
-	border: 2,
-	borderColor: "text.secondary",
-	bgcolor: "background.paper",
-} as const;
+const containerSx = { mb: 0.5 } as const;
 
 const headerSx = {
-	display: "block",
-	px: "6px",
-	pt: 0.25,
+	display: "flex",
+	alignItems: "center",
+	gap: 1,
+	px: "10px",
+	pt: 1,
 	pb: 0.5,
-	overflow: "hidden",
-	textOverflow: "ellipsis",
-	whiteSpace: "nowrap",
-	fontWeight: 600,
-	textTransform: "uppercase",
-	letterSpacing: 0.5,
+	bgcolor: "background.paper",
 } as const;
 
 const stickyHeaderSx = {
@@ -31,30 +21,56 @@ const stickyHeaderSx = {
 	position: "sticky",
 	top: 0,
 	zIndex: 1,
-	bgcolor: "background.paper",
 } as const;
+
+const labelSx = {
+	minWidth: 0,
+	overflow: "hidden",
+	textOverflow: "ellipsis",
+	whiteSpace: "nowrap",
+	color: "text.secondary",
+} as const;
+
+const caretSx = { color: "text.disabled", fontSize: "0.6rem" } as const;
+
+const countSx = {
+	color: "text.disabled",
+	fontVariantNumeric: "tabular-nums",
+} as const;
+
+const ruleSx = { flex: 1, height: "1px", bgcolor: "divider" } as const;
+
+const bodySx = { ml: "17px", borderLeft: 1, borderColor: "divider" } as const;
 
 export function SessionGroupSection({
 	label,
+	count,
 	children,
 }: {
 	label: string;
+	count: number;
 	children: ReactNode;
 }) {
 	const topBar = useTopBarLayoutContext();
 	return (
 		<Box sx={containerSx}>
-			<Typography
-				variant="caption"
-				color="text.secondary"
-				title={label}
-				sx={topBar ? stickyHeaderSx : headerSx}
-			>
-				{label}
-			</Typography>
-			<InRepoGroupContext.Provider value>
-				{children}
-			</InRepoGroupContext.Provider>
+			<Box sx={topBar ? stickyHeaderSx : headerSx}>
+				<Typography variant="caption" sx={caretSx}>
+					▾
+				</Typography>
+				<Typography variant="body2" title={label} sx={labelSx}>
+					{label}
+				</Typography>
+				<Typography variant="caption" sx={countSx}>
+					{count}
+				</Typography>
+				<Box sx={ruleSx} />
+			</Box>
+			<Box sx={bodySx}>
+				<InRepoGroupContext.Provider value>
+					{children}
+				</InRepoGroupContext.Provider>
+			</Box>
 		</Box>
 	);
 }

@@ -1,7 +1,8 @@
 import ButtonBase from "@mui/material/ButtonBase";
 import { CardBody } from "./CardBody";
 import { CardHeader } from "./CardHeader";
-import { cardSx } from "./cardSx";
+import { displayStatus } from "./displayStatus";
+import { sessionCardSx } from "./sessionCardSx";
 import type { SessionInfo } from "./types";
 
 export function SessionCard({
@@ -28,7 +29,7 @@ export function SessionCard({
 	return (
 		<ButtonBase
 			onClick={onClick}
-			sx={cardSx(active)}
+			sx={sessionCardSx(active, displayStatus(session))}
 			data-session-id={session.id}
 		>
 			<CardHeader

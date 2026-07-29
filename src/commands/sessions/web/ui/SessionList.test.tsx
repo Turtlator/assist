@@ -34,12 +34,4 @@ describe("SessionList scroll area", () => {
 		expect(getComputedStyle(scrollport).overflow).toBe("auto");
 		expect(getComputedStyle(scrollport).paddingTop).toBe("0");
 	});
-
-	it("pads its content instead", () => {
-		const { container } = renderList();
-		const content = container.firstElementChild
-			?.firstElementChild as HTMLElement;
-
-		expect(getComputedStyle(content).padding).toBe("8px");
-	});
 });

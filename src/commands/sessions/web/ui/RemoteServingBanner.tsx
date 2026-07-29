@@ -9,12 +9,11 @@ const bannerSx = {
 	display: "flex",
 	alignItems: "center",
 	gap: 0.5,
-	mb: 0.5,
-	px: "6px",
+	px: "10px",
 	py: 0.25,
-	borderRadius: 1,
-	border: 1,
-	borderColor: "success.main",
+	borderRadius: 0,
+	borderLeft: 2,
+	borderLeftColor: "success.main",
 	bgcolor: "success.dark",
 } as const;
 

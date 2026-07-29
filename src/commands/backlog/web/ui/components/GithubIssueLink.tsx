@@ -1,10 +1,10 @@
 import { shortenGithubIssue } from "../../../shortenGithubIssue";
-import { TrackerLink } from "./TrackerLink";
+import { TrackerLink, type TrackerLinkVariant } from "./TrackerLink";
 
 type GithubIssueLinkProps = {
 	githubIssue?: string;
 	origin?: string;
-	variant?: "link" | "chip";
+	variant?: TrackerLinkVariant;
 };
 
 const shorthand = /^([^/\s]+)\/([^/\s]+)#(\d+)$/;

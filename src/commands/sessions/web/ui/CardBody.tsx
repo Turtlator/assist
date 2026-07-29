@@ -1,8 +1,7 @@
-import { CardToggles } from "./CardToggles";
-import { displayStatus } from "./displayStatus";
-import { StatusRow } from "./StatusRow";
+import { CardDataLine } from "./CardDataLine";
+import { CardExtraLines } from "./CardExtraLines";
+import { CardMetaLine } from "./CardMetaLine";
 import type { SessionInfo } from "./types";
-import { useElapsed } from "./useElapsed";
 import { useTopBarLayoutContext } from "./useTopBarLayoutContext";
 
 export function CardBody({
@@ -16,30 +15,21 @@ export function CardBody({
 	onSetAutoRun: (enabled: boolean) => void;
 	onSetAutoAdvance: (enabled: boolean) => void;
 }) {
-	const elapsed = useElapsed(session.runningMs, session.runningSince);
 	const topBar = useTopBarLayoutContext();
 
 	if (loading) return null;
 
 	return (
 		<>
+			<CardMetaLine session={session} />
+			<CardDataLine session={session} />
 			{!topBar && (
-				<StatusRow
-					status={displayStatus(session)}
-					elapsed={elapsed}
-					panelSessionId={session.id}
-					cwd={session.cwd}
-					sessionId={session.claudeSessionId}
-					restored={session.restored}
-					usedPct={session.usedPct}
-					undurable={session.undurable}
+				<CardExtraLines
+					session={session}
+					onSetAutoRun={onSetAutoRun}
+					onSetAutoAdvance={onSetAutoAdvance}
 				/>
 			)}
-			<CardToggles
-				session={session}
-				onSetAutoRun={onSetAutoRun}
-				onSetAutoAdvance={onSetAutoAdvance}
-			/>
 		</>
 	);
 }

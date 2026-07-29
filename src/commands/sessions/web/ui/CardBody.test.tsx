@@ -49,8 +49,9 @@ function renderBody(
 	s: SessionInfo,
 	loading: boolean,
 	onActivateSession: (id: string) => void = vi.fn(),
+	topBar?: boolean,
 ) {
-	return render(
+	const body = (
 		<MemoryRouter>
 			<DiffPanelsProvider sessionIds={[]} onActivateSession={onActivateSession}>
 				<CardBody
@@ -60,7 +61,13 @@ function renderBody(
 					onSetAutoAdvance={vi.fn()}
 				/>
 			</DiffPanelsProvider>
-		</MemoryRouter>,
+		</MemoryRouter>
+	);
+	if (topBar === undefined) return render(body);
+	return render(
+		<TopBarLayoutContext.Provider value={topBar}>
+			{body}
+		</TopBarLayoutContext.Provider>,
 	);
 }
 
@@ -78,6 +85,38 @@ describe("CardBody while busy", () => {
 
 		expect(container.innerHTML).toBe("");
 		expect(screen.queryByText("Closing…")).toBeNull();
+	});
+});
+
+describe("CardBody meta line", () => {
+	it("names the repo as plain text once the activity resolves", () => {
+		renderBody(session({ activity: { kind: "command", startedAt: 0 } }), false);
+
+		const repo = screen.getByText("repo-2");
+		expect(repo.closest(".MuiChip-root")).toBeNull();
+	});
+
+	it("holds the meta line back while the activity is still unknown", () => {
+		renderBody(session(), false);
+
+		expect(screen.queryByText("repo-2")).toBeNull();
+	});
+
+	const phased = () =>
+		session({
+			activity: { kind: "backlog", startedAt: 0, phaseName: "Phase 1: flag" },
+		});
+
+	it("shows the phase caption in the default layout", () => {
+		renderBody(phased(), false, vi.fn(), false);
+
+		expect(screen.getByText("Phase 1: flag")).toBeTruthy();
+	});
+
+	it("drops the phase caption when the top bar owns it", () => {
+		renderBody(phased(), false, vi.fn(), true);
+
+		expect(screen.queryByText("Phase 1: flag")).toBeNull();
 	});
 });
 
@@ -167,7 +206,7 @@ describe("CardBody top bar layout", () => {
 		);
 	}
 
-	it("keeps the status row in the default layout", async () => {
+	it("keeps the elapsed time and status words in the default layout", async () => {
 		renderWithTopBar(false);
 
 		expect(screen.getByText("1m 5s")).toBeTruthy();
@@ -176,13 +215,12 @@ describe("CardBody top bar layout", () => {
 		expect(await screen.findByText("+1")).toBeTruthy();
 	});
 
-	it("drops the whole status row, which the chips line now carries", () => {
+	it("keeps only the diff counts when the top bar owns the rest", async () => {
 		renderWithTopBar(true);
 
+		expect(await screen.findByText("+1")).toBeTruthy();
 		expect(screen.queryByText("1m 5s")).toBeNull();
 		expect(screen.queryByText("restored")).toBeNull();
 		expect(screen.queryByText("● running")).toBeNull();
-		expect(screen.queryByText("+1")).toBeNull();
-		expect(fetch).not.toHaveBeenCalled();
 	});
 });

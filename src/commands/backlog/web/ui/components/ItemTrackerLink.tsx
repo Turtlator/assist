@@ -1,10 +1,11 @@
 import type { ItemTracker } from "../types";
 import { GithubIssueLink } from "./GithubIssueLink";
 import { JiraKeyLink } from "./JiraKeyLink";
+import type { TrackerLinkVariant } from "./TrackerLink";
 
 type ItemTrackerLinkProps = {
 	tracker?: ItemTracker;
-	variant?: "link" | "chip";
+	variant?: TrackerLinkVariant;
 };
 
 export function ItemTrackerLink({

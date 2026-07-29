@@ -12,10 +12,22 @@ type SessionCardProps = {
 	onSelect: (id: string) => void;
 } & SessionListHandlers;
 
+const branchSx = {
+	position: "relative",
+	"&::before": {
+		content: '""',
+		position: "absolute",
+		left: 0,
+		top: "15px",
+		width: "7px",
+		height: "1px",
+		bgcolor: "divider",
+	},
+} as const;
+
 const nestedChildrenSx = {
-	ml: 2,
-	pl: 1,
-	borderLeft: 2,
+	ml: "13px",
+	borderLeft: 1,
 	borderColor: "divider",
 } as const;
 
@@ -29,20 +41,29 @@ export function SessionGroupItem({
 	const renderCard = (session: SessionInfo) => (
 		<SessionListCard key={session.id} session={session} {...cardProps} />
 	);
+	const renderBranch = (session: SessionInfo) => (
+		<Box key={session.id} sx={branchSx}>
+			{renderCard(session)}
+		</Box>
+	);
 	const renderRow = (row: NestedSessionRow) =>
 		row.children.length === 0 ? (
-			renderCard(row.session)
+			renderBranch(row.session)
 		) : (
 			<Box key={row.session.id}>
-				{renderCard(row.session)}
-				<Box sx={nestedChildrenSx}>{row.children.map(renderCard)}</Box>
+				{renderBranch(row.session)}
+				<Box sx={nestedChildrenSx}>{row.children.map(renderBranch)}</Box>
 			</Box>
 		);
 	return group.kind === "single" ? (
 		renderCard(group.session)
 	) : (
-		<SessionGroupSection label={group.label}>
+		<SessionGroupSection label={group.label} count={countRows(group.rows)}>
 			{group.rows.map(renderRow)}
 		</SessionGroupSection>
 	);
+}
+
+function countRows(rows: NestedSessionRow[]): number {
+	return rows.reduce((total, row) => total + 1 + row.children.length, 0);
 }

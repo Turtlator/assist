@@ -1,9 +1,9 @@
 import { useJiraSite } from "./useJiraSite";
-import { TrackerLink } from "./TrackerLink";
+import { TrackerLink, type TrackerLinkVariant } from "./TrackerLink";
 
 type JiraKeyLinkProps = {
 	jiraKey?: string;
-	variant?: "link" | "chip";
+	variant?: TrackerLinkVariant;
 };
 
 export function JiraKeyLink({ jiraKey, variant = "link" }: JiraKeyLinkProps) {
