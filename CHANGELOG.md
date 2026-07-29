@@ -1,3 +1,10 @@
+## [0.514.2](https://github.com/staff0rd/assist/compare/v0.514.1...v0.514.2) (2026-07-29)
+
+
+### Bug Fixes
+
+* defer titling when prompt holds a tracker url ([a399e88](https://github.com/staff0rd/assist/commit/a399e88e2985ff2795cbc87f5413b844df4c7c89))
+
 ## [0.514.1](https://github.com/staff0rd/assist/compare/v0.514.0...v0.514.1) (2026-07-29)
 
 
