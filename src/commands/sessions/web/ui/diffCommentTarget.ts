@@ -13,7 +13,7 @@ export function diffCommentTarget(
 			unavailable: "Open this diff from a session card to comment on it.",
 		};
 	const session = sessions.find((s) => s.claudeSessionId === claudeSessionId);
-	if (!session)
+	if (!session || session.status === "stopped" || session.closing === true)
 		return {
 			unavailable: "Comments are unavailable — that session is no longer live.",
 		};

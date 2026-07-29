@@ -44,7 +44,7 @@ function renderDiff(
 	useGitStatusCountsMock.mockReturnValue(counts);
 	render(
 		<MemoryRouter>
-			<DiffPanelsProvider onActivateSession={() => {}}>
+			<DiffPanelsProvider sessionIds={["card-1"]} onActivateSession={() => {}}>
 				<SessionTopBarDiff session={{ ...session, ...overrides }} />
 				<PanelProbe />
 			</DiffPanelsProvider>

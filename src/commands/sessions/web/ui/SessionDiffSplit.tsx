@@ -37,6 +37,7 @@ export function SessionDiffSplit({
 			</Box>
 			{panel && sessionId !== null && (
 				<DiffPanelColumn
+					key={sessionId}
 					sessionId={sessionId}
 					panel={panel}
 					sessions={sessions}

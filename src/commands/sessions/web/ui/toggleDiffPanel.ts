@@ -29,6 +29,18 @@ export function closeDiffPanel(
 	return closed ? rest : panels;
 }
 
+export function pruneDiffPanels(
+	panels: DiffPanelMap,
+	liveSessionIds: string[],
+): DiffPanelMap {
+	const live = new Set(liveSessionIds);
+	const kept = Object.entries(panels).filter(([sessionId]) =>
+		live.has(sessionId),
+	);
+	if (kept.length === Object.keys(panels).length) return panels;
+	return Object.fromEntries(kept);
+}
+
 export function setDiffPanelScope(
 	panels: DiffPanelMap,
 	sessionId: string,

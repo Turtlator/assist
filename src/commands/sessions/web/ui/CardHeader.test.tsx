@@ -22,7 +22,7 @@ const session: SessionInfo = {
 function Stars({ children }: { children: ReactNode }) {
 	return (
 		<StarredSessionsProvider sessions={[]} setSessionStarred={() => {}}>
-			<DiffPanelsProvider onActivateSession={() => {}}>
+			<DiffPanelsProvider sessionIds={[]} onActivateSession={() => {}}>
 				{children}
 			</DiffPanelsProvider>
 		</StarredSessionsProvider>

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+	closeDiffPanel,
 	type DiffPanelMap,
+	pruneDiffPanels,
 	toggleDiffPanel,
 	toggleDiffPanelMode,
 } from "./toggleDiffPanel";
@@ -55,5 +57,43 @@ describe("diff panel mode", () => {
 		const toggled = toggleDiffPanelMode(both, "card-1");
 
 		expect(toggled["card-2"]?.mode).toBe("half");
+	});
+});
+
+describe("pruneDiffPanels", () => {
+	const both = toggleDiffPanel(
+		toggleDiffPanel({}, "card-1", target),
+		"card-2",
+		target,
+	);
+
+	it("drops panels for sessions that are gone", () => {
+		expect(Object.keys(pruneDiffPanels(both, ["card-2"]))).toEqual(["card-2"]);
+	});
+
+	it("drops every panel when no sessions are left", () => {
+		expect(pruneDiffPanels(both, [])).toEqual({});
+	});
+
+	it("keeps the map identical when every session is still present", () => {
+		expect(pruneDiffPanels(both, ["card-1", "card-2"])).toBe(both);
+	});
+
+	it("ignores sessions that never had a panel", () => {
+		const one = closeDiffPanel(both, "card-2");
+
+		expect(pruneDiffPanels(one, ["card-1", "card-3"])).toBe(one);
+	});
+
+	it("reopens at half after a session comes back", () => {
+		const full = toggleDiffPanelMode(both, "card-1");
+
+		const reopened = toggleDiffPanel(
+			pruneDiffPanels(full, ["card-2"]),
+			"card-1",
+			target,
+		);
+
+		expect(reopened["card-1"]?.mode).toBe("half");
 	});
 });

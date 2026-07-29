@@ -47,7 +47,7 @@ function renderArea(
 	list: SessionInfo[] = sessions,
 ) {
 	render(
-		<DiffPanelsProvider onActivateSession={() => {}}>
+		<DiffPanelsProvider sessionIds={[]} onActivateSession={() => {}}>
 			<SessionArea
 				sessions={list}
 				activeId={activeId}
@@ -198,7 +198,7 @@ function renderWithTopBar(
 	render(
 		<TopBarLayoutContext.Provider value={topBar}>
 			<StarredSessionsProvider sessions={[]} setSessionStarred={() => {}}>
-				<DiffPanelsProvider onActivateSession={() => {}}>
+				<DiffPanelsProvider sessionIds={[]} onActivateSession={() => {}}>
 					<SessionArea
 						sessions={list}
 						activeId={activeId}

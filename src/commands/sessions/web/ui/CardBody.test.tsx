@@ -52,7 +52,7 @@ function renderBody(
 ) {
 	return render(
 		<MemoryRouter>
-			<DiffPanelsProvider onActivateSession={onActivateSession}>
+			<DiffPanelsProvider sessionIds={[]} onActivateSession={onActivateSession}>
 				<CardBody
 					session={s}
 					loading={loading}
@@ -154,7 +154,7 @@ describe("CardBody top bar layout", () => {
 		render(
 			<MemoryRouter>
 				<TopBarLayoutContext.Provider value={topBar}>
-					<DiffPanelsProvider onActivateSession={vi.fn()}>
+					<DiffPanelsProvider sessionIds={[]} onActivateSession={vi.fn()}>
 						<CardBody
 							session={session({ runningMs: 65_000, restored: true })}
 							loading={false}

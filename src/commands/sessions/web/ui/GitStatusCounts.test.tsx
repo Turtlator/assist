@@ -33,7 +33,10 @@ function renderCounts(
 	useGitStatusCountsMock.mockReturnValue(counts);
 	render(
 		<MemoryRouter>
-			<DiffPanelsProvider onActivateSession={onActivateSession}>
+			<DiffPanelsProvider
+				sessionIds={["card-1"]}
+				onActivateSession={onActivateSession}
+			>
 				<GitStatusCounts
 					panelSessionId="card-1"
 					cwd="/repo"

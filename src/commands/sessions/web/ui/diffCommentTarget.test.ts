@@ -33,4 +33,22 @@ describe("diffCommentTarget", () => {
 		expect(session).toBeUndefined();
 		expect(unavailable).toContain("no longer live");
 	});
+
+	it("rejects a session that has stopped", () => {
+		const stopped = [{ ...sessions[0], status: "stopped" }] as SessionInfo[];
+
+		const { session, unavailable } = diffCommentTarget(stopped, "claude-1");
+
+		expect(session).toBeUndefined();
+		expect(unavailable).toContain("no longer live");
+	});
+
+	it("rejects a session that is closing", () => {
+		const closing = [{ ...sessions[0], closing: true }] as SessionInfo[];
+
+		const { session, unavailable } = diffCommentTarget(closing, "claude-1");
+
+		expect(session).toBeUndefined();
+		expect(unavailable).toContain("no longer live");
+	});
 });

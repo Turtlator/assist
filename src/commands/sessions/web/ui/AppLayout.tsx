@@ -1,42 +1,37 @@
 import Box from "@mui/material/Box";
-import { useCallback, useState } from "react";
 import { Outlet, useLocation } from "react-router";
 import { AppSidebar } from "./AppSidebar";
 import { ErrorBoundary } from "./ErrorBoundary";
-import type { SidebarTab } from "./types";
 import { useActivateSession } from "./useActivateSession";
 import { DiffPanelsProvider } from "./useDiffPanels";
 import { useScrollRestoration } from "./useScrollRestoration";
 import { ScrollRestorationContext } from "./useScrollRestorationContext";
 import type { SessionSocket } from "./useSessionSocket";
+import { useSidebarTab } from "./useSidebarTab";
 import { StarredSessionsProvider } from "./useStarredSessions";
 
 export function AppLayout({ socket }: { socket: SessionSocket }) {
-	const [tab, setTab] = useState<SidebarTab>("active");
 	const { pathname } = useLocation();
 	const { containerRef, restoration } = useScrollRestoration(pathname);
-	const { requestHistory, clearTranscript } = socket;
-	const activateSession = useActivateSession(socket.selectSession);
-
-	const handleTabChange = useCallback(
-		(next: SidebarTab) => {
-			if (next === "history") requestHistory();
-			else clearTranscript();
-			setTab(next);
-		},
-		[requestHistory, clearTranscript],
+	const { tab, onTabChange } = useSidebarTab(
+		socket.requestHistory,
+		socket.clearTranscript,
 	);
+	const activateSession = useActivateSession(socket.selectSession);
 
 	return (
 		<StarredSessionsProvider
 			sessions={socket.sessions}
 			setSessionStarred={socket.setStarred}
 		>
-			<DiffPanelsProvider onActivateSession={activateSession}>
+			<DiffPanelsProvider
+				sessionIds={socket.sessions.map((s) => s.id)}
+				onActivateSession={activateSession}
+			>
 				<Box
 					sx={{ display: "flex", width: "100%", height: "calc(100vh - 48px)" }}
 				>
-					<AppSidebar socket={socket} tab={tab} onTabChange={handleTabChange} />
+					<AppSidebar socket={socket} tab={tab} onTabChange={onTabChange} />
 					<Box
 						ref={containerRef}
 						sx={{
