@@ -1,3 +1,10 @@
+# [0.506.0](https://github.com/staff0rd/assist/compare/v0.505.0...v0.506.0) (2026-07-29)
+
+
+### Features
+
+* redesign diff toolbar row ([8496666](https://github.com/staff0rd/assist/commit/8496666fca1a9dffd095d966aa202e59f73ad1ea))
+
 # [0.505.0](https://github.com/staff0rd/assist/compare/v0.504.1...v0.505.0) (2026-07-29)
 
 
