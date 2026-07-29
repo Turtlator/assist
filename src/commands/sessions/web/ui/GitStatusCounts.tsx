@@ -1,39 +1,39 @@
-import type { GitStatusCounts as Counts } from "../parseGitStatus";
-import { GitStatusLink, GROUPS } from "./GitStatusLink";
+import { BranchDiffLink } from "./BranchDiffLink";
+import { GitStatusLink } from "./GitStatusLink";
+import { sessionDiffAffordance } from "./sessionDiffAffordance";
 import { useGitStatusCounts } from "./useGitStatusCounts";
-
-function toGroups(counts: Counts) {
-	return GROUPS.map((g) => ({ ...g, count: counts[g.key].length })).filter(
-		(g) => g.count > 0,
-	);
-}
 
 export function GitStatusCounts({
 	panelSessionId,
 	cwd,
 	sessionId,
+	offerBranchDiff = false,
 }: {
 	panelSessionId: string;
 	cwd: string;
 	sessionId?: string;
+	offerBranchDiff?: boolean;
 }) {
-	const counts = useGitStatusCounts(cwd, sessionId);
-	if (!counts) return null;
+	const affordance = sessionDiffAffordance(useGitStatusCounts(cwd, sessionId));
+	if (!affordance) return null;
 
-	const groups = toGroups(counts);
-	const uncommitted =
-		counts.hasCommits && counts.uncommitted
-			? toGroups(counts.uncommitted)
-			: undefined;
-	if (groups.length === 0 && (uncommitted?.length ?? 0) === 0) return null;
+	if (affordance.kind === "branch")
+		return offerBranchDiff ? (
+			<BranchDiffLink
+				panelSessionId={panelSessionId}
+				cwd={cwd}
+				sessionId={sessionId}
+				defaultBranch={affordance.defaultBranch}
+			/>
+		) : null;
 
 	return (
 		<GitStatusLink
 			panelSessionId={panelSessionId}
 			cwd={cwd}
 			sessionId={sessionId}
-			groups={groups}
-			uncommitted={uncommitted}
+			groups={affordance.groups}
+			uncommitted={affordance.uncommitted}
 		/>
 	);
 }

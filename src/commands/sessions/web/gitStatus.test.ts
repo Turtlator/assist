@@ -2,16 +2,25 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { respondJson } from "../../../shared/web";
 import { execGit } from "./execGit";
+import { gitBranchInfo } from "./gitBranchInfo";
 import { type ItemStatusCounts, gitStatus } from "./gitStatus";
 import { itemChangeSet } from "./itemChangeSet";
 
 vi.mock("../../../shared/web", () => ({ respondJson: vi.fn() }));
 vi.mock("./execGit", () => ({ execGit: vi.fn() }));
 vi.mock("./itemChangeSet", () => ({ itemChangeSet: vi.fn() }));
+vi.mock("./gitBranchInfo", () => ({ gitBranchInfo: vi.fn() }));
 
 const respondJsonMock = vi.mocked(respondJson);
 const execGitMock = vi.mocked(execGit);
 const itemChangeSetMock = vi.mocked(itemChangeSet);
+const gitBranchInfoMock = vi.mocked(gitBranchInfo);
+
+const NO_BRANCH = {
+	branch: null,
+	defaultBranch: null,
+	onDefaultBranch: false,
+};
 
 function withGit(responder: (args: string[]) => string): void {
 	execGitMock.mockImplementation(async (_cwd, args) => responder(args));
@@ -38,6 +47,7 @@ describe("gitStatus", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		itemChangeSetMock.mockResolvedValue(undefined);
+		gitBranchInfoMock.mockResolvedValue(NO_BRANCH);
 	});
 
 	it("rejects a request without a cwd", async () => {
@@ -56,6 +66,7 @@ describe("gitStatus", () => {
 			new: ["added.ts"],
 			modified: ["changed.ts"],
 			deleted: ["gone.ts"],
+			...NO_BRANCH,
 		});
 		expect(execGitMock).toHaveBeenCalledExactlyOnceWith("/repo", [
 			"status",
@@ -157,7 +168,38 @@ describe("gitStatus", () => {
 
 		const { counts } = await request();
 
-		expect(Object.keys(counts)).toEqual(["new", "modified", "deleted"]);
+		expect(counts.uncommitted).toBeUndefined();
+		expect(counts.hasCommits).toBeUndefined();
+	});
+
+	it("reports the branch the session sits on", async () => {
+		gitBranchInfoMock.mockResolvedValue({
+			branch: "feature/x",
+			defaultBranch: "origin/main",
+			onDefaultBranch: false,
+		});
+		withGit(() => "");
+
+		const { counts } = await request();
+
+		expect(counts.branch).toBe("feature/x");
+		expect(counts.defaultBranch).toBe("origin/main");
+		expect(counts.onDefaultBranch).toBe(false);
+	});
+
+	it("reports the branch alongside an item change set", async () => {
+		withChangeSet([{ base: "base-one", paths: ["a.ts"] }]);
+		gitBranchInfoMock.mockResolvedValue({
+			branch: "main",
+			defaultBranch: "origin/main",
+			onDefaultBranch: true,
+		});
+		withGit(() => "");
+
+		const { counts } = await request();
+
+		expect(counts.onDefaultBranch).toBe(true);
+		expect(counts.hasCommits).toBe(true);
 	});
 
 	it("builds the change set for the requested session", async () => {
@@ -196,6 +238,7 @@ describe("gitStatus", () => {
 			new: [],
 			modified: ["changed.ts"],
 			deleted: [],
+			...NO_BRANCH,
 		});
 	});
 });

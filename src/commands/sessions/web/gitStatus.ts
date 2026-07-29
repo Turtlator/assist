@@ -1,48 +1,18 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { respondJson } from "../../../shared/web";
-import { execGit } from "./execGit";
 import { getCwdParam } from "./getCwdParam";
 import { getSessionParam } from "./getSessionParam";
-import { type ChangeGroup, itemChangeSet } from "./itemChangeSet";
-import { parseDiffNameStatus } from "./parseDiffNameStatus";
-import { type GitStatusCounts, parseGitStatus } from "./parseGitStatus";
+import { type GitBranchInfo, gitBranchInfo } from "./gitBranchInfo";
+import { groupedCounts } from "./groupedCounts";
+import { itemChangeSet } from "./itemChangeSet";
+import type { GitStatusCounts } from "./parseGitStatus";
+import { workingTreeCounts } from "./workingTreeCounts";
 
-export type ItemStatusCounts = GitStatusCounts & {
-	uncommitted?: GitStatusCounts;
-	hasCommits?: boolean;
-};
-
-async function untrackedPaths(cwd: string): Promise<string[]> {
-	const list = await execGit(cwd, [
-		"ls-files",
-		"--others",
-		"--exclude-standard",
-	]);
-	return list.split("\n").filter(Boolean);
-}
-
-async function groupedCounts(
-	cwd: string,
-	groups: ChangeGroup[],
-): Promise<GitStatusCounts> {
-	const outputs = await Promise.all(
-		groups.map((group) =>
-			execGit(cwd, ["diff", "--name-status", group.base, "--", ...group.paths]),
-		),
-	);
-	const counts = parseDiffNameStatus(outputs.join(""));
-	counts.new.push(...(await untrackedPaths(cwd)));
-	return counts;
-}
-
-async function workingTreeCounts(cwd: string): Promise<GitStatusCounts> {
-	const output = await execGit(cwd, [
-		"status",
-		"--porcelain",
-		"--untracked-files=all",
-	]);
-	return parseGitStatus(output);
-}
+export type ItemStatusCounts = GitStatusCounts &
+	Partial<GitBranchInfo> & {
+		uncommitted?: GitStatusCounts;
+		hasCommits?: boolean;
+	};
 
 export async function gitStatus(
 	req: IncomingMessage,
@@ -51,11 +21,12 @@ export async function gitStatus(
 	const cwd = getCwdParam(req, res);
 	if (!cwd) return;
 	try {
+		const branch = await gitBranchInfo(cwd);
 		const changeSet = await itemChangeSet(cwd, getSessionParam(req)).catch(
 			() => undefined,
 		);
 		if (!changeSet) {
-			respondJson(res, 200, await workingTreeCounts(cwd));
+			respondJson(res, 200, { ...(await workingTreeCounts(cwd)), ...branch });
 			return;
 		}
 		const [counts, uncommitted] = await Promise.all([
@@ -64,6 +35,7 @@ export async function gitStatus(
 		]);
 		respondJson(res, 200, {
 			...counts,
+			...branch,
 			uncommitted,
 			hasCommits: changeSet.commits.length > 0,
 		});
