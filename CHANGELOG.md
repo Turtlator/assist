@@ -1,3 +1,10 @@
+# [0.513.0](https://github.com/staff0rd/assist/compare/v0.512.1...v0.513.0) (2026-07-29)
+
+
+### Features
+
+* remember diff collapse state per worktree ([b358215](https://github.com/staff0rd/assist/commit/b3582157b49f84550543fa0c43812fb3d8bb27e2))
+
 ## [0.512.1](https://github.com/staff0rd/assist/compare/v0.512.0...v0.512.1) (2026-07-29)
 
 
