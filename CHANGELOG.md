@@ -1,3 +1,10 @@
+# [0.510.0](https://github.com/staff0rd/assist/compare/v0.509.0...v0.510.0) (2026-07-29)
+
+
+### Features
+
+* flat session cards, left accent ([3306e9b](https://github.com/staff0rd/assist/commit/3306e9b5c35065e81952c58c410373bd3622855d))
+
 # [0.509.0](https://github.com/staff0rd/assist/compare/v0.508.0...v0.509.0) (2026-07-29)
 
 
