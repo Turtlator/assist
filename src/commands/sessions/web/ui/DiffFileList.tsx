@@ -9,12 +9,16 @@ export function DiffFileList({
 	files,
 	viewType,
 	cwd,
+	isCollapsed,
+	onToggleCollapsed,
 	onComment,
 	emptyMessage,
 }: {
 	files: FileData[];
 	viewType: ViewType;
 	cwd: string;
+	isCollapsed: (path: string) => boolean;
+	onToggleCollapsed: (path: string) => void;
 	onComment?: (comment: DiffComment) => void;
 	emptyMessage: string;
 }) {
@@ -33,6 +37,8 @@ export function DiffFileList({
 					file={file}
 					viewType={viewType}
 					cwd={cwd}
+					collapsed={isCollapsed(filePath(file))}
+					onToggle={() => onToggleCollapsed(filePath(file))}
 					onComment={onComment}
 				/>
 			))}

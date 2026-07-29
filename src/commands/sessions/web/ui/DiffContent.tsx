@@ -47,6 +47,8 @@ export function DiffContent({
 				treeVisible={diff.treePanel.treeVisible}
 				viewType={diff.filters.viewType}
 				cwd={cwd}
+				isCollapsed={diff.collapsedFiles.isCollapsed}
+				onToggleCollapsed={diff.collapsedFiles.toggle}
 				onComment={diff.comments.onComment}
 				emptyMessage={diff.emptyMessage}
 			/>

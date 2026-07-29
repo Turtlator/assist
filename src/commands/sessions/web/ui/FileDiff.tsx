@@ -19,14 +19,17 @@ export function FileDiff({
 	file,
 	viewType,
 	cwd,
+	collapsed,
+	onToggle,
 	onComment,
 }: {
 	file: FileData;
 	viewType: ViewType;
 	cwd: string | undefined;
+	collapsed: boolean;
+	onToggle: () => void;
 	onComment?: (comment: DiffComment) => void;
 }) {
-	const [collapsed, setCollapsed] = useState(false);
 	const [previewOpen, setPreviewOpen] = useState(false);
 	const path = filePath(file);
 
@@ -35,7 +38,7 @@ export function FileDiff({
 			<FileDiffHeader
 				path={path}
 				collapsed={collapsed}
-				onToggle={() => setCollapsed((c) => !c)}
+				onToggle={onToggle}
 				onPreview={
 					isMarkdownPath(path) && file.type !== "delete"
 						? () => setPreviewOpen(true)

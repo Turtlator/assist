@@ -1,6 +1,7 @@
 import { diffEmptyMessage } from "./diffEmptyMessage";
 import { diffFileTotals } from "./diffFileTotals";
 import type { SessionInfo } from "./types";
+import { useCollapsedFiles } from "./useCollapsedFiles";
 import { useDiff } from "./useDiff";
 import { useDiffComments } from "./useDiffComments";
 import { useDiffFileData } from "./useDiffFileData";
@@ -20,6 +21,7 @@ export function useDiffContent(
 	const filters = useDiffFilters();
 	const treePanel = useDiffTreePanel();
 	const comments = useDiffComments(sessions, sessionId, sendInput);
+	const collapsedFiles = useCollapsedFiles(cwd);
 	const { files, visibleFiles } = useDiffFileData({
 		diff,
 		error,
@@ -33,6 +35,7 @@ export function useDiffContent(
 		filters,
 		treePanel,
 		comments,
+		collapsedFiles,
 		visibleFiles,
 		totals: diffFileTotals(visibleFiles),
 		emptyMessage: diffEmptyMessage(error, files.length),

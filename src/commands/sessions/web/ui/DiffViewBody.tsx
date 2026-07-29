@@ -7,21 +7,27 @@ import { scrollToDiffFile } from "./scrollToDiffFile";
 
 const columnsSx = { display: "flex", alignItems: "flex-start" } as const;
 
+export type DiffViewBodyProps = {
+	files: FileData[];
+	treeVisible: boolean;
+	viewType: ViewType;
+	cwd: string;
+	isCollapsed: (path: string) => boolean;
+	onToggleCollapsed: (path: string) => void;
+	onComment?: (comment: DiffComment) => void;
+	emptyMessage: string;
+};
+
 export function DiffViewBody({
 	files,
 	treeVisible,
 	viewType,
 	cwd,
+	isCollapsed,
+	onToggleCollapsed,
 	onComment,
 	emptyMessage,
-}: {
-	files: FileData[];
-	treeVisible: boolean;
-	viewType: ViewType;
-	cwd: string;
-	onComment?: (comment: DiffComment) => void;
-	emptyMessage: string;
-}) {
+}: DiffViewBodyProps) {
 	return (
 		<Box sx={columnsSx}>
 			{treeVisible && (
@@ -32,6 +38,8 @@ export function DiffViewBody({
 					files={files}
 					viewType={viewType}
 					cwd={cwd}
+					isCollapsed={isCollapsed}
+					onToggleCollapsed={onToggleCollapsed}
 					onComment={onComment}
 					emptyMessage={emptyMessage}
 				/>
