@@ -1,3 +1,10 @@
+# [0.508.0](https://github.com/staff0rd/assist/compare/v0.507.0...v0.508.0) (2026-07-29)
+
+
+### Features
+
+* fixed 400px sessions sidebar ([d11a562](https://github.com/staff0rd/assist/commit/d11a56242e128212e66a2fc8156cb39ce42e5412))
+
 # [0.507.0](https://github.com/staff0rd/assist/compare/v0.506.1...v0.507.0) (2026-07-29)
 
 
