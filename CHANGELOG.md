@@ -1,3 +1,10 @@
+# [0.509.0](https://github.com/staff0rd/assist/compare/v0.508.0...v0.509.0) (2026-07-29)
+
+
+### Features
+
+* diff in top bar with branch fallback ([2a3a56c](https://github.com/staff0rd/assist/commit/2a3a56c1a44370e84c6de64a3f4b7a8e7def4918))
+
 # [0.508.0](https://github.com/staff0rd/assist/compare/v0.507.0...v0.508.0) (2026-07-29)
 
 
