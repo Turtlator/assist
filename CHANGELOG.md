@@ -1,3 +1,10 @@
+# [0.505.0](https://github.com/staff0rd/assist/compare/v0.504.1...v0.505.0) (2026-07-29)
+
+
+### Features
+
+* per-session diff panel ([8d05e1c](https://github.com/staff0rd/assist/commit/8d05e1ca21fda83fc66b62c1f53cfc5c91ef10e0))
+
 ## [0.504.1](https://github.com/staff0rd/assist/compare/v0.504.0...v0.504.1) (2026-07-29)
 
 
