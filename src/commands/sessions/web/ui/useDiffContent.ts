@@ -1,5 +1,6 @@
 import { diffEmptyMessage } from "./diffEmptyMessage";
 import { diffFileTotals } from "./diffFileTotals";
+import { filePath } from "./FileDiff";
 import type { SessionInfo } from "./types";
 import { useCollapsedFiles } from "./useCollapsedFiles";
 import { useDiff } from "./useDiff";
@@ -29,6 +30,11 @@ export function useDiffContent(
 		changeType: filters.changeType,
 	});
 
+	const visiblePaths = visibleFiles.map((file) => filePath(file));
+	const allCollapsed =
+		visiblePaths.length > 0 &&
+		visiblePaths.every((path) => collapsedFiles.isCollapsed(path));
+
 	return {
 		scopeState,
 		loading,
@@ -36,6 +42,11 @@ export function useDiffContent(
 		treePanel,
 		comments,
 		collapsedFiles,
+		collapseAll: {
+			allCollapsed,
+			onToggleCollapseAll: () =>
+				collapsedFiles.setAll(visiblePaths, !allCollapsed),
+		},
 		visibleFiles,
 		totals: diffFileTotals(visibleFiles),
 		emptyMessage: diffEmptyMessage(error, files.length),

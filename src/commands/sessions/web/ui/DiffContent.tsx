@@ -33,6 +33,7 @@ export function DiffContent({
 			<DiffToolbar
 				{...diff.filters}
 				{...diff.treePanel}
+				{...diff.collapseAll}
 				scope={diff.scopeState}
 				onScopeChange={onScopeChange}
 				totals={diff.totals}

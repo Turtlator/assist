@@ -37,6 +37,8 @@ function renderToolbar({
 	onChangeTypeChange = vi.fn(),
 	search = "",
 	onSearchChange = vi.fn(),
+	allCollapsed = false,
+	onToggleCollapseAll = vi.fn(),
 	totals = noTotals,
 }: {
 	scope?: string;
@@ -52,6 +54,8 @@ function renderToolbar({
 	onChangeTypeChange?: (changeType: DiffChangeType) => void;
 	search?: string;
 	onSearchChange?: (search: string) => void;
+	allCollapsed?: boolean;
+	onToggleCollapseAll?: () => void;
 	totals?: DiffTotals;
 } = {}) {
 	render(
@@ -63,6 +67,8 @@ function renderToolbar({
 				onSearchChange={onSearchChange}
 				changeType={changeType}
 				onChangeTypeChange={onChangeTypeChange}
+				allCollapsed={allCollapsed}
+				onToggleCollapseAll={onToggleCollapseAll}
 				scope={{
 					scope,
 					commits: scopeCommits,
@@ -363,6 +369,29 @@ describe("DiffToolbar file search", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Clear file filter" }));
 
 		expect(onSearchChange).toHaveBeenCalledWith("");
+	});
+});
+
+describe("DiffToolbar collapse all", () => {
+	it("offers to collapse every file while any is expanded", () => {
+		const onToggleCollapseAll = vi.fn();
+		renderToolbar({ allCollapsed: false, onToggleCollapseAll });
+
+		fireEvent.click(screen.getByRole("button", { name: "Collapse all files" }));
+
+		expect(onToggleCollapseAll).toHaveBeenCalled();
+	});
+
+	it("offers to expand every file once they are all collapsed", () => {
+		const onToggleCollapseAll = vi.fn();
+		renderToolbar({ allCollapsed: true, onToggleCollapseAll });
+
+		expect(
+			screen.queryByRole("button", { name: "Collapse all files" }),
+		).toBeNull();
+		fireEvent.click(screen.getByRole("button", { name: "Expand all files" }));
+
+		expect(onToggleCollapseAll).toHaveBeenCalled();
 	});
 });
 

@@ -1,5 +1,6 @@
 import type { ViewType } from "react-diff-view";
 import { DiffChangeTypeMenu } from "./DiffChangeTypeMenu";
+import { DiffCollapseAllToggle } from "./DiffCollapseAllToggle";
 import { DiffFileSearch } from "./DiffFileSearch";
 import { DiffViewTypeToggle } from "./DiffViewTypeToggle";
 import type { DiffChangeType } from "./filterDiffFiles";
@@ -9,6 +10,8 @@ export type DiffToolbarControlProps = {
 	onSearchChange: (search: string) => void;
 	changeType: DiffChangeType;
 	onChangeTypeChange: (changeType: DiffChangeType) => void;
+	allCollapsed: boolean;
+	onToggleCollapseAll: () => void;
 	viewType: ViewType;
 	onChange: (viewType: ViewType) => void;
 };
@@ -18,6 +21,8 @@ export function DiffToolbarControls({
 	onSearchChange,
 	changeType,
 	onChangeTypeChange,
+	allCollapsed,
+	onToggleCollapseAll,
 	viewType,
 	onChange,
 }: DiffToolbarControlProps) {
@@ -27,6 +32,10 @@ export function DiffToolbarControls({
 			<DiffChangeTypeMenu
 				changeType={changeType}
 				onChange={onChangeTypeChange}
+			/>
+			<DiffCollapseAllToggle
+				allCollapsed={allCollapsed}
+				onToggleCollapseAll={onToggleCollapseAll}
 			/>
 			<DiffViewTypeToggle viewType={viewType} onChange={onChange} />
 		</>

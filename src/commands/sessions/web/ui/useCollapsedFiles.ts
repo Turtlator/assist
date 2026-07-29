@@ -26,6 +26,7 @@ function writeCollapsed(cwd: string, paths: Set<string>): void {
 export function useCollapsedFiles(cwd: string): {
 	isCollapsed: (path: string) => boolean;
 	toggle: (path: string) => void;
+	setAll: (paths: string[], collapsed: boolean) => void;
 } {
 	const [collapsed, setCollapsed] = useState(() => readCollapsed(cwd));
 
@@ -42,5 +43,19 @@ export function useCollapsedFiles(cwd: string): {
 		[cwd],
 	);
 
-	return { isCollapsed: (path: string) => collapsed.has(path), toggle };
+	const setAll = useCallback(
+		(paths: string[], collapse: boolean) =>
+			setCollapsed((prev) => {
+				const next = new Set(prev);
+				for (const path of paths) {
+					if (collapse) next.add(path);
+					else next.delete(path);
+				}
+				writeCollapsed(cwd, next);
+				return next;
+			}),
+		[cwd],
+	);
+
+	return { isCollapsed: (path: string) => collapsed.has(path), toggle, setAll };
 }
