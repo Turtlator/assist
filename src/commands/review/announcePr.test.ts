@@ -22,12 +22,13 @@ afterEach(() => {
 });
 
 describe("announcePr", () => {
-	it("should request a hands-off /prs-slack session", async () => {
+	it("should request a hands-off /prs-slack session in the current tree", async () => {
 		await announcePr(42);
 
 		expect(mockRequestClaudeSession).toHaveBeenCalledWith(
 			"/prs-slack 42 --no-confirm",
 			process.cwd(),
+			{ inPlace: true },
 		);
 	});
 

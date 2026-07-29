@@ -1,5 +1,5 @@
 import { announcePr } from "./announcePr";
-import { postReviewToPr } from "./postReviewToPr";
+import { type PrDiffRef, postReviewToPr } from "./postReviewToPr";
 import { runApplySession } from "./runApplySession";
 import { runBacklogSession } from "./runBacklogSession";
 import { runRefineSession } from "./runRefineSession";
@@ -27,12 +27,12 @@ function nonPostingSession(
 
 export async function handlePostSynthesis(
 	synthesisPath: string,
-	prNumber: number,
+	prInfo: PrDiffRef,
 	options: PostSynthesisOptions,
 ): Promise<void> {
 	const session = nonPostingSession(options);
 	if (!session) {
-		await postReviewToPr(synthesisPath, {
+		await postReviewToPr(synthesisPath, prInfo, {
 			prompt: options.prompt,
 			submit: options.submit,
 			addressComments: options.addressComments,
@@ -41,5 +41,5 @@ export async function handlePostSynthesis(
 		return;
 	}
 	await session(synthesisPath);
-	if (options.announce) await announcePr(prNumber);
+	if (options.announce) await announcePr(prInfo.prNumber);
 }

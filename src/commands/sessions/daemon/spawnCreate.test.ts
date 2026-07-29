@@ -20,7 +20,13 @@ describe("spawnCreate", () => {
 
 		expect(spawnCreate(m, { prompt: "go", cwd: "/git/repo" })).toBe("9");
 		expect(m.addAgent).not.toHaveBeenCalled();
-		expect(m.spawn).toHaveBeenCalledWith("go", "/git/repo", false, undefined);
+		expect(m.spawn).toHaveBeenCalledWith(
+			"go",
+			"/git/repo",
+			false,
+			undefined,
+			false,
+		);
 	});
 
 	it("adds an agent to the named stream instead of allocating a workspace", () => {
@@ -43,6 +49,12 @@ describe("spawnCreate", () => {
 		expect(
 			spawnCreate(m, { prompt: "go", cwd: "/git/repo-2", joinSessionId: "3" }),
 		).toBe("9");
-		expect(m.spawn).toHaveBeenCalledWith("go", "/git/repo-2", false, undefined);
+		expect(m.spawn).toHaveBeenCalledWith(
+			"go",
+			"/git/repo-2",
+			false,
+			undefined,
+			false,
+		);
 	});
 });

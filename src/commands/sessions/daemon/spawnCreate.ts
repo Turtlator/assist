@@ -23,5 +23,11 @@ export function spawnCreate(
 			`create: falling back to a fresh isolated session (cwd=${(d.cwd as string) ?? ""})`,
 		);
 	}
-	return m.spawn(prompt, d.cwd as string | undefined, design, harness);
+	return m.spawn(
+		prompt,
+		d.cwd as string | undefined,
+		design,
+		harness,
+		d.inPlace === true,
+	);
 }

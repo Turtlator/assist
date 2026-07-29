@@ -1,9 +1,9 @@
 import { readFileSync } from "node:fs";
 import { promptConfirm } from "../../shared/promptConfirm";
 import { chainAfterReview } from "./chainAfterReview";
-import { fetchPrDiffInfo } from "./fetchPrDiffInfo";
 import { type PostOutcome, postAndMaybeSubmit } from "./postAndMaybeSubmit";
 import { selectPostableFindings } from "./selectPostableFindings";
+import { stillOnReviewedPr } from "./stillOnReviewedPr";
 
 type PostReviewOptions = {
 	prompt: boolean;
@@ -12,7 +12,11 @@ type PostReviewOptions = {
 	announce: boolean;
 };
 
-type PrDiffRef = ReturnType<typeof fetchPrDiffInfo>;
+export type PrDiffRef = {
+	prNumber: number;
+	baseSha: string;
+	headSha: string;
+};
 
 const NOTHING_POSTED: PostOutcome = { posted: 0, submitted: false };
 
@@ -46,9 +50,10 @@ async function postFindingsToPr(
 
 export async function postReviewToPr(
 	synthesisPath: string,
+	prInfo: PrDiffRef,
 	options: PostReviewOptions,
 ): Promise<void> {
-	const prInfo = fetchPrDiffInfo();
+	if (!stillOnReviewedPr(prInfo.prNumber)) return;
 	const outcome = await postFindingsToPr(prInfo, synthesisPath, options);
 	await chainAfterReview(prInfo.prNumber, outcome, options);
 }

@@ -28,6 +28,8 @@ vi.mock("./runBacklogSession", () => ({
 
 import { handlePostSynthesis } from "./handlePostSynthesis";
 
+const prInfo = { prNumber: 42, baseSha: "base", headSha: "head" };
+
 const base = {
 	refine: false,
 	apply: false,
@@ -45,13 +47,13 @@ beforeEach(() => {
 describe("handlePostSynthesis", () => {
 	describe("on the posting path", () => {
 		it("should leave the chaining to postReviewToPr", async () => {
-			await handlePostSynthesis("synthesis.md", 42, {
+			await handlePostSynthesis("synthesis.md", prInfo, {
 				...base,
 				addressComments: true,
 				announce: true,
 			});
 
-			expect(mockPostReviewToPr).toHaveBeenCalledWith("synthesis.md", {
+			expect(mockPostReviewToPr).toHaveBeenCalledWith("synthesis.md", prInfo, {
 				prompt: false,
 				submit: true,
 				addressComments: true,
@@ -65,7 +67,7 @@ describe("handlePostSynthesis", () => {
 		it.each([["refine"], ["apply"], ["backlog"]])(
 			"should announce after the %s session",
 			async (mode) => {
-				await handlePostSynthesis("synthesis.md", 42, {
+				await handlePostSynthesis("synthesis.md", prInfo, {
 					...base,
 					[mode]: true,
 					announce: true,
@@ -79,7 +81,10 @@ describe("handlePostSynthesis", () => {
 
 	describe("on a non-posting mode without --announce", () => {
 		it("should not announce", async () => {
-			await handlePostSynthesis("synthesis.md", 42, { ...base, apply: true });
+			await handlePostSynthesis("synthesis.md", prInfo, {
+				...base,
+				apply: true,
+			});
 
 			expect(mockRunApplySession).toHaveBeenCalledWith("synthesis.md");
 			expect(mockAnnouncePr).not.toHaveBeenCalled();

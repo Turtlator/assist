@@ -114,6 +114,7 @@ describe("create handler", () => {
 			"/repo",
 			true,
 			undefined,
+			false,
 		);
 		expect(daemonLogMock).toHaveBeenCalledWith(
 			"create: design session (cwd=/repo)",
@@ -132,7 +133,13 @@ describe("create handler", () => {
 			cwd: "/repo",
 		});
 
-		expect(m.spawn).toHaveBeenCalledWith("hello", "/repo", false, undefined);
+		expect(m.spawn).toHaveBeenCalledWith(
+			"hello",
+			"/repo",
+			false,
+			undefined,
+			false,
+		);
 		expect(daemonLogMock).not.toHaveBeenCalled();
 	});
 
@@ -146,7 +153,7 @@ describe("create handler", () => {
 			harness: "pi",
 		});
 
-		expect(m.spawn).toHaveBeenCalledWith("hello", "/repo", false, "pi");
+		expect(m.spawn).toHaveBeenCalledWith("hello", "/repo", false, "pi", false);
 		expect(daemonLogMock).toHaveBeenCalledWith(
 			"create: pi session (cwd=/repo)",
 		);

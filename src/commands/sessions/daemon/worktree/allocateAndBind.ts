@@ -1,0 +1,28 @@
+import type { Session } from "../createSession";
+import { type AllocateOptions, allocateTree } from "./allocateTree";
+import { bindNewWorktree } from "./bindNewWorktree";
+import { boundTreeRoots } from "./boundTreeRoots";
+
+export type TreeSpawnContext = {
+	sessions: Map<string, Session>;
+	spawnWith: (create: (id: string) => Session) => string;
+	notify: () => void;
+	startHeld: (session: Session) => void;
+};
+
+export function allocateAndBind(
+	ctx: TreeSpawnContext,
+	cwd: string | undefined,
+	create: (
+		id: string,
+		resolvedCwd: string | undefined,
+		holdUntilSeeded: boolean,
+	) => Session,
+	options: AllocateOptions = {},
+): string {
+	const alloc = allocateTree(cwd, boundTreeRoots(ctx.sessions), options);
+	const needsSeeding = alloc.kind === "worktree" && alloc.created === true;
+	const id = ctx.spawnWith((sid) => create(sid, alloc.cwd, needsSeeding));
+	bindNewWorktree(ctx.sessions.get(id), alloc, ctx.notify, ctx.startHeld);
+	return id;
+}

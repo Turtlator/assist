@@ -8,6 +8,7 @@ export function announcePr(prNumber: number): Promise<void> {
 			requestClaudeSession(
 				`/prs-slack ${prNumber} --no-confirm`,
 				process.cwd(),
+				{ inPlace: true },
 			),
 	);
 }

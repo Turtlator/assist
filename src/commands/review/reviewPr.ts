@@ -3,6 +3,7 @@ import { buildReviewPaths, type ReviewPaths } from "./buildReviewPaths";
 import { fetchExistingComments } from "./fetchExistingComments";
 import { gatherContext } from "./gatherContext";
 import { handlePostSynthesis } from "./handlePostSynthesis";
+import type { PrDiffRef } from "./postReviewToPr";
 import { prepareReviewDir } from "./prepareReviewDir";
 import { runReviewPipeline } from "./runReviewPipeline";
 
@@ -50,10 +51,10 @@ function setupReviewDir(
 
 function runPostSynthesis(
 	synthesisPath: string,
-	prNumber: number,
+	prInfo: PrDiffRef,
 	options: ReviewPrOptions,
 ): Promise<void> {
-	return handlePostSynthesis(synthesisPath, prNumber, {
+	return handlePostSynthesis(synthesisPath, prInfo, {
 		refine: options.refine ?? false,
 		apply: options.apply ?? false,
 		backlog: options.backlog ?? false,
@@ -74,6 +75,6 @@ export async function reviewPr(
 		verbose: options.verbose ?? false,
 	});
 	if (synthesisOk)
-		await runPostSynthesis(paths.synthesisPath, context.prNumber, options);
+		await runPostSynthesis(paths.synthesisPath, context, options);
 	console.log(`Done. Review folder: ${paths.reviewDir}`);
 }

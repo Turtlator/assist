@@ -117,8 +117,9 @@ export class SessionManager {
 		cwd?: string,
 		design?: boolean,
 		harness?: HarnessKind,
+		inPlace?: boolean,
 	): string {
-		return spawnInTree(this.treeCtx(), prompt, cwd, design, harness);
+		return spawnInTree(this.treeCtx(), prompt, cwd, design, harness, inPlace);
 	}
 
 	addAgent(targetId: string, prompt?: string, harness?: HarnessKind) {

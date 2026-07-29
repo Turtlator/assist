@@ -69,6 +69,30 @@ describe("dispatchMessage", () => {
 			});
 		});
 
+		it("forwards the in-place flag from a create", () => {
+			const client = { send: vi.fn() };
+			const spawn = vi.fn(() => "s5");
+			const manager = {
+				windowsProxy: { route: () => false },
+				spawn,
+			} as unknown as SessionManager;
+
+			dispatchMessage(client, manager, {
+				type: "create",
+				prompt: "/prs-slack 42 --no-confirm",
+				cwd: "/git/repo",
+				inPlace: true,
+			});
+
+			expect(spawn).toHaveBeenCalledWith(
+				"/prs-slack 42 --no-confirm",
+				"/git/repo",
+				false,
+				undefined,
+				true,
+			);
+		});
+
 		it("does not flag a resume as new", () => {
 			const client = { send: vi.fn() };
 			const manager = {
