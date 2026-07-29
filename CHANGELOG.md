@@ -1,3 +1,10 @@
+## [0.514.1](https://github.com/staff0rd/assist/compare/v0.514.0...v0.514.1) (2026-07-29)
+
+
+### Bug Fixes
+
+* split heredoc and input redirects ([b9231d0](https://github.com/staff0rd/assist/commit/b9231d08c9616855925b23c680508b0d670b0cfc))
+
 # [0.514.0](https://github.com/staff0rd/assist/compare/v0.513.0...v0.514.0) (2026-07-29)
 
 
