@@ -1,3 +1,10 @@
+# [0.518.0](https://github.com/staff0rd/assist/compare/v0.517.0...v0.518.0) (2026-07-30)
+
+
+### Features
+
+* save files from the web editor ([6ec64b6](https://github.com/staff0rd/assist/commit/6ec64b627fd637ed9dcf7ec5cc8fc886e9a52c99))
+
 # [0.517.0](https://github.com/staff0rd/assist/compare/v0.516.2...v0.517.0) (2026-07-30)
 
 
