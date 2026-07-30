@@ -1,3 +1,10 @@
+## [0.516.1](https://github.com/staff0rd/assist/compare/v0.516.0...v0.516.1) (2026-07-30)
+
+
+### Bug Fixes
+
+* config scope defaults to holding scope ([8456baf](https://github.com/staff0rd/assist/commit/8456baf9b0c993d33b38acd76c59ce90cda67a7c))
+
 # [0.516.0](https://github.com/staff0rd/assist/compare/v0.515.0...v0.516.0) (2026-07-30)
 
 
