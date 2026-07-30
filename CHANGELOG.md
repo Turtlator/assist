@@ -1,3 +1,10 @@
+# [0.520.0](https://github.com/staff0rd/assist/compare/v0.519.0...v0.520.0) (2026-07-30)
+
+
+### Features
+
+* terser PR body guidance ([c7c92d6](https://github.com/staff0rd/assist/commit/c7c92d68ba9f4c9b2793eda9783f26f198b159ef))
+
 # [0.519.0](https://github.com/staff0rd/assist/compare/v0.518.0...v0.519.0) (2026-07-30)
 
 
