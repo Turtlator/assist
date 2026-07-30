@@ -1,3 +1,10 @@
+# [0.521.0](https://github.com/staff0rd/assist/compare/v0.520.0...v0.521.0) (2026-07-30)
+
+
+### Features
+
+* reviewers never ask for comments ([0c945bf](https://github.com/staff0rd/assist/commit/0c945bfacaa84ce312c99a9b5a3faa5b359befd9))
+
 # [0.520.0](https://github.com/staff0rd/assist/compare/v0.519.0...v0.520.0) (2026-07-30)
 
 
