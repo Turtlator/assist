@@ -353,6 +353,97 @@ describe("ConfigView", () => {
 		);
 	});
 
+	it("saves back to the scope the effective value is already set at", async () => {
+		const fetchMock = stubApi(
+			[
+				{
+					key: "worktree.enabled",
+					type: "boolean",
+					value: true,
+					source: "repo",
+					sources: ["repo"],
+					repoKey: "assist",
+					node: node("worktree.enabled"),
+				},
+			],
+			{ ok: true, status: 200, body: { target: "repo", repoKey: "assist" } },
+		);
+		renderView("/repo/one");
+
+		await waitFor(() =>
+			expect(screen.getByText("worktree.enabled")).toBeTruthy(),
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Edit worktree.enabled" }),
+		);
+		expect(
+			screen
+				.getByRole("button", { name: "This repo" })
+				.getAttribute("aria-pressed"),
+		).toBe("true");
+
+		fireEvent.click(screen.getByLabelText("worktree.enabled value"));
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() =>
+			expect(lastSetBody(fetchMock)).toEqual({
+				key: "worktree.enabled",
+				value: false,
+				cwd: "/repo/one",
+				scope: "repo",
+			}),
+		);
+	});
+
+	it("saves an edited repo-scoped run command back to the repo scope", async () => {
+		const fetchMock = stubApi(
+			[
+				{
+					key: "run",
+					type: "array",
+					value: [{ name: "build", command: "npm run build" }],
+					source: "repo",
+					sources: ["repo"],
+					repoKey: "assist",
+					node: node("run"),
+				},
+			],
+			{ ok: true, status: 200, body: { target: "repo", repoKey: "assist" } },
+		);
+		renderView("/repo/one");
+
+		await waitFor(() => expect(screen.getByText("run")).toBeTruthy());
+		fireEvent.click(screen.getByRole("button", { name: "Edit run[0]" }));
+		fireEvent.change(screen.getByLabelText("run[0].command"), {
+			target: { value: "npm run build -- --watch" },
+		});
+		expect(
+			screen
+				.getByRole("button", { name: "This repo" })
+				.getAttribute("aria-pressed"),
+		).toBe("true");
+		expect(
+			screen
+				.getByRole("button", { name: "Project" })
+				.getAttribute("aria-pressed"),
+		).toBe("false");
+
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() =>
+			expect(lastSetBody(fetchMock)).toEqual({
+				key: "run",
+				value: [{ name: "build", command: "npm run build -- --watch" }],
+				cwd: "/repo/one",
+				scope: "repo",
+			}),
+		);
+		expect(
+			fetchMock.mock.calls.filter(([url]) => String(url) === "/api/config/set")
+				.length,
+		).toBe(1);
+	});
+
 	it("forces a global write for a global-only key", async () => {
 		const fetchMock = stubApi(
 			[
@@ -891,15 +982,15 @@ describe("ConfigView", () => {
 		expect(
 			screen.getByRole("button", { name: "Project" }).getAttribute("title"),
 		).toBe("Not set in this repo's assist.yml");
-		expect(screen.queryByRole("button", { name: "Clear" })).toBeNull();
-
-		fireEvent.click(screen.getByRole("button", { name: "Global" }));
-
 		expect(
 			screen.getByRole("button", { name: "Clear" }).getAttribute("title"),
 		).toBe(
 			"Remove worktree.trunk from ~/.assist.yml — reverts to the schema default",
 		);
+
+		fireEvent.click(screen.getByRole("button", { name: "Project" }));
+
+		expect(screen.queryByRole("button", { name: "Clear" })).toBeNull();
 	});
 
 	it("reports that nothing was removed when the value vanished under it", async () => {
@@ -965,9 +1056,6 @@ describe("ConfigView", () => {
 		fireEvent.click(
 			screen.getByRole("button", { name: "Edit worktree.enabled" }),
 		);
-		expect(screen.queryByRole("button", { name: "Clear" })).toBeNull();
-
-		fireEvent.click(screen.getByRole("button", { name: "This repo" }));
 		expect(
 			screen.getByRole("button", { name: "Clear" }).getAttribute("title"),
 		).toBe(
@@ -1155,7 +1243,7 @@ describe("ConfigView", () => {
 					},
 				],
 				cwd: "/repo/one",
-				scope: "project",
+				scope: "global",
 			}),
 		);
 	});

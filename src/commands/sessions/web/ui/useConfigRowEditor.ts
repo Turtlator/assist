@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ConfigEntry } from "../../../config/readConfigEntries";
 import { configScopesWithValue } from "./configScopesWithValue";
+import { defaultConfigScope } from "./defaultConfigScope";
 import { effectiveConfigValue } from "./effectiveConfigValue";
 import type { ConfigScope } from "./saveConfigValue";
 import { useConfigRowWrites } from "./useConfigRowWrites";
@@ -16,9 +17,7 @@ export function useConfigRowEditor({ entry, cwd, onSaved, onError }: Options) {
 	const scopeLocked = entry.globalOnly === true;
 	const saved = effectiveConfigValue(entry);
 	const [value, setValue] = useState<unknown>(saved);
-	const [scope, setScope] = useState<ConfigScope>(
-		scopeLocked ? "global" : "project",
-	);
+	const [scope, setScope] = useState<ConfigScope>(defaultConfigScope(entry));
 	const { saving, save, clear } = useConfigRowWrites({
 		entry,
 		cwd,
