@@ -53,9 +53,15 @@ export function getCurrentPrNumber(): number {
 	}
 }
 
-export function getCurrentPr(): { number: number; body: string } {
+export function getCurrentPr(): {
+	number: number;
+	title: string;
+	body: string;
+} {
 	try {
-		return viewCurrentPr<{ number: number; body: string }>("number,body");
+		return viewCurrentPr<{ number: number; title: string; body: string }>(
+			"number,title,body",
+		);
 	} catch (error) {
 		if (error instanceof Error && error.message.includes("no pull requests")) {
 			console.error("Error: No pull request found for the current branch.");
