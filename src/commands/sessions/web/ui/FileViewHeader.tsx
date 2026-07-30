@@ -27,12 +27,14 @@ export function FileViewHeader({
 	onModeChange,
 	onSave,
 	saving,
+	dirty,
 }: {
 	path: string;
 	mode?: FileViewMode;
 	onModeChange: (mode: FileViewMode) => void;
 	onSave: () => void;
 	saving: boolean;
+	dirty: boolean;
 }) {
 	return (
 		<Box sx={headerSx}>
@@ -47,6 +49,7 @@ export function FileViewHeader({
 				onModeChange={onModeChange}
 				onSave={onSave}
 				saving={saving}
+				dirty={dirty}
 			/>
 		</Box>
 	);

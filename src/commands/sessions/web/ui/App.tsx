@@ -2,7 +2,7 @@ import { CssBaseline, createTheme, ThemeProvider } from "@mui/material";
 import { useMemo } from "react";
 import "react-diff-view/style/index.css";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router";
+import { createBrowserRouter, RouterProvider } from "react-router";
 import { AppShell } from "./AppShell";
 import { useColorMode } from "./useColorMode";
 
@@ -22,7 +22,7 @@ const components = {
 	},
 } as const;
 
-export function App() {
+function Root() {
 	const { mode, toggle } = useColorMode();
 	const theme = useMemo(
 		() =>
@@ -41,11 +41,17 @@ export function App() {
 	return (
 		<ThemeProvider theme={theme}>
 			<CssBaseline />
-			<BrowserRouter>
-				<AppShell mode={mode} toggle={toggle} />
-			</BrowserRouter>
+			<AppShell mode={mode} toggle={toggle} />
 		</ThemeProvider>
 	);
+}
+
+const dataRouterForNavigationBlocking = createBrowserRouter([
+	{ path: "*", element: <Root /> },
+]);
+
+export function App() {
+	return <RouterProvider router={dataRouterForNavigationBlocking} />;
 }
 
 const root = document.getElementById("app");

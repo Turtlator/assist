@@ -6,7 +6,7 @@ import {
 	screen,
 	waitFor,
 } from "@testing-library/react";
-import { MemoryRouter } from "react-router";
+import { createMemoryRouter, RouterProvider } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { FileView } from "./FileView";
 import { RepoSelectionContext } from "./useRepoSelectionContext";
@@ -50,26 +50,40 @@ type SaveResponse = {
 	body: Record<string, unknown>;
 };
 
+const LOADED_MTIME = 1000;
+
 function stubContent(content: string, save?: SaveResponse) {
 	const fetchMock = vi.fn(async (_url: string, init?: RequestInit) => {
 		if (init?.method === "POST" && save)
 			return { ok: save.ok, status: save.status, json: async () => save.body };
-		return { ok: true, status: 200, json: async () => ({ content }) };
+		return {
+			ok: true,
+			status: 200,
+			json: async () => ({ content, mtimeMs: LOADED_MTIME }),
+		};
 	});
 	vi.stubGlobal("fetch", fetchMock);
 	return fetchMock;
 }
 
 function renderView(entry: string, selectedCwd = "/repo") {
-	render(
-		<MemoryRouter initialEntries={[entry]}>
-			<RepoSelectionContext.Provider
-				value={{ repos: [], selectedCwd, setSelectedCwd: vi.fn() }}
-			>
-				<FileView />
-			</RepoSelectionContext.Provider>
-		</MemoryRouter>,
+	const router = createMemoryRouter(
+		[
+			{
+				path: "*",
+				element: (
+					<RepoSelectionContext.Provider
+						value={{ repos: [], selectedCwd, setSelectedCwd: vi.fn() }}
+					>
+						<FileView />
+					</RepoSelectionContext.Provider>
+				),
+			},
+		],
+		{ initialEntries: [entry] },
 	);
+	render(<RouterProvider router={router} />);
+	return router;
 }
 
 function editor(): HTMLElement | null {
@@ -139,7 +153,7 @@ describe("FileView", () => {
 		const fetchMock = stubContent("const  a =1\n", {
 			ok: true,
 			status: 200,
-			body: { content: "const a = 2;\n" },
+			body: { content: "const a = 2;\n", mtimeMs: 2000 },
 		});
 
 		renderView("/file?path=src/a.ts");
@@ -152,26 +166,160 @@ describe("FileView", () => {
 		await waitFor(() => expect(editorValue()).toBe("const a = 2;\n"));
 		const { url, body } = postCall(fetchMock);
 		expect(url).toContain("path=src%2Fa.ts");
-		expect(body).toEqual({ content: "const  a =2\n" });
+		expect(body).toEqual({
+			content: "const  a =2\n",
+			mtimeMs: LOADED_MTIME,
+		});
 	});
 
 	it("saves on ctrl+s", async () => {
 		const fetchMock = stubContent("const a = 1;\n", {
 			ok: true,
 			status: 200,
-			body: { content: "const a = 1;\n" },
+			body: { content: "const a = 2;\n", mtimeMs: 2000 },
 		});
 
 		renderView("/file?path=src/a.ts");
-		await findEditor();
+		fireEvent.change(await findEditor(), {
+			target: { value: "const a = 2;\n" },
+		});
 
 		fireEvent.keyDown(document, { key: "s", ctrlKey: true });
 
 		await waitFor(() =>
 			expect(postCall(fetchMock).body).toEqual({
-				content: "const a = 1;\n",
+				content: "const a = 2;\n",
+				mtimeMs: LOADED_MTIME,
 			}),
 		);
+	});
+
+	it("sends the modification time the save returned on the next save", async () => {
+		const fetchMock = stubContent("const a = 1;\n", {
+			ok: true,
+			status: 200,
+			body: { content: "const a = 2;\n", mtimeMs: 2000 },
+		});
+
+		renderView("/file?path=src/a.ts");
+		fireEvent.change(await findEditor(), {
+			target: { value: "const a = 2;\n" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+		await waitFor(() => expect(editorValue()).toBe("const a = 2;\n"));
+
+		fireEvent.change(await findEditor(), {
+			target: { value: "const a = 3;\n" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() => {
+			const posts = fetchMock.mock.calls.filter(
+				([, init]) => init?.method === "POST",
+			);
+			expect(JSON.parse(String(posts.at(-1)?.[1]?.body)).mtimeMs).toBe(2000);
+		});
+	});
+
+	it("disables save until the buffer is edited", async () => {
+		stubContent("const a = 1;\n");
+
+		renderView("/file?path=src/a.ts");
+		await findEditor();
+
+		expect(
+			(screen.getByRole("button", { name: "Save" }) as HTMLButtonElement)
+				.disabled,
+		).toBe(true);
+
+		fireEvent.change(await findEditor(), {
+			target: { value: "const a = 2;\n" },
+		});
+
+		expect(
+			(screen.getByRole("button", { name: "Save" }) as HTMLButtonElement)
+				.disabled,
+		).toBe(false);
+	});
+
+	it("reports a stale file and keeps the buffer", async () => {
+		stubContent("const a = 1;\n", {
+			ok: false,
+			status: 409,
+			body: { error: "The file changed on disk since it was opened" },
+		});
+
+		renderView("/file?path=src/a.ts");
+
+		fireEvent.change(await findEditor(), {
+			target: { value: "const a = 2;\n" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		expect(
+			await screen.findByText("The file changed on disk since it was opened"),
+		).toBeTruthy();
+		expect(editorValue()).toBe("const a = 2;\n");
+	});
+
+	it("prompts before navigating away from a dirty buffer", async () => {
+		stubContent("const a = 1;\n");
+
+		const router = renderView("/file?path=src/a.ts");
+		fireEvent.change(await findEditor(), {
+			target: { value: "const a = 2;\n" },
+		});
+
+		router.navigate("/sessions");
+
+		expect(await screen.findByText("Discard unsaved changes?")).toBeTruthy();
+		expect(editorValue()).toBe("const a = 2;\n");
+	});
+
+	it("leaves the buffer in place when the prompt is cancelled", async () => {
+		stubContent("const a = 1;\n");
+
+		const router = renderView("/file?path=src/a.ts");
+		fireEvent.change(await findEditor(), {
+			target: { value: "const a = 2;\n" },
+		});
+		router.navigate("/sessions");
+		fireEvent.click(await screen.findByRole("button", { name: "Cancel" }));
+
+		await waitFor(() =>
+			expect(screen.queryByText("Discard unsaved changes?")).toBeNull(),
+		);
+		expect(router.state.location.pathname).toBe("/file");
+		expect(editorValue()).toBe("const a = 2;\n");
+	});
+
+	it("navigates on when the prompt is confirmed", async () => {
+		stubContent("const a = 1;\n");
+
+		const router = renderView("/file?path=src/a.ts");
+		fireEvent.change(await findEditor(), {
+			target: { value: "const a = 2;\n" },
+		});
+		router.navigate("/sessions");
+		fireEvent.click(await screen.findByRole("button", { name: "Discard" }));
+
+		await waitFor(() =>
+			expect(router.state.location.pathname).toBe("/sessions"),
+		);
+	});
+
+	it("navigates away without prompting when the buffer is clean", async () => {
+		stubContent("const a = 1;\n");
+
+		const router = renderView("/file?path=src/a.ts");
+		await findEditor();
+
+		router.navigate("/sessions");
+
+		await waitFor(() =>
+			expect(router.state.location.pathname).toBe("/sessions"),
+		);
+		expect(screen.queryByText("Discard unsaved changes?")).toBeNull();
 	});
 
 	it("reports a failed save and keeps the buffer", async () => {

@@ -21,7 +21,10 @@ export async function fileContent(
 			respondJson(res, 413, { error: "File too large" });
 			return;
 		}
-		respondJson(res, 200, { content: await readFile(resolved.target, "utf8") });
+		respondJson(res, 200, {
+			content: await readFile(resolved.target, "utf8"),
+			mtimeMs: info.mtimeMs,
+		});
 	} catch {
 		respondJson(res, 404, { error: "File not found" });
 	}

@@ -18,11 +18,13 @@ export function FileViewActions({
 	onModeChange,
 	onSave,
 	saving,
+	dirty,
 }: {
 	mode?: FileViewMode;
 	onModeChange: (mode: FileViewMode) => void;
 	onSave: () => void;
 	saving: boolean;
+	dirty: boolean;
 }) {
 	return (
 		<Box sx={actionsSx}>
@@ -44,7 +46,7 @@ export function FileViewActions({
 				variant="outlined"
 				startIcon={<SaveIcon sx={{ fontSize: 16 }} />}
 				onClick={onSave}
-				disabled={saving}
+				disabled={saving || !dirty}
 				title="Save (Ctrl+S)"
 			>
 				Save

@@ -1,4 +1,10 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+	mkdirSync,
+	mkdtempSync,
+	rmSync,
+	statSync,
+	writeFileSync,
+} from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -22,7 +28,7 @@ afterAll(() => {
 
 async function request(
 	query: string,
-): Promise<[number, Record<string, string>]> {
+): Promise<[number, Record<string, unknown>]> {
 	await fileContent(
 		{ url: `/api/file?${query}` } as IncomingMessage,
 		{} as ServerResponse,
@@ -30,7 +36,7 @@ async function request(
 	const [, status, body] = mockRespondJson.mock.lastCall as [
 		ServerResponse,
 		number,
-		Record<string, string>,
+		Record<string, unknown>,
 	];
 	return [status, body];
 }
@@ -48,6 +54,11 @@ describe("fileContent", () => {
 		const [status, body] = await request(`${cwdParam()}&path=README.md`);
 		expect(status).toBe(200);
 		expect(body.content).toBe("# Title\n");
+	});
+
+	it("returns the file's modification time", async () => {
+		const [, body] = await request(`${cwdParam()}&path=README.md`);
+		expect(body.mtimeMs).toBe(statSync(join(root, "README.md")).mtimeMs);
 	});
 
 	it("rejects a request without a path", async () => {

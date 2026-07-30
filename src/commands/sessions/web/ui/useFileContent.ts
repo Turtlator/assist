@@ -1,11 +1,5 @@
 import { useEffect, useState } from "react";
-
-export type FileContentState =
-	| { status: "loading" }
-	| { status: "absent" }
-	| { status: "too-large" }
-	| { status: "error" }
-	| { status: "ready"; content: string };
+import { type FileContentState, fetchFileContent } from "./fetchFileContent";
 
 export function useFileContent(
 	cwd: string | undefined,
@@ -20,36 +14,9 @@ export function useFileContent(
 		}
 		let cancelled = false;
 		setState({ status: "loading" });
-		const load = async () => {
-			try {
-				const res = await fetch(
-					`/api/file?cwd=${encodeURIComponent(cwd)}&path=${encodeURIComponent(path)}`,
-				);
-				if (cancelled) return;
-				if (res.status === 404) {
-					setState({ status: "absent" });
-					return;
-				}
-				if (res.status === 413) {
-					setState({ status: "too-large" });
-					return;
-				}
-				if (!res.ok) {
-					setState({ status: "error" });
-					return;
-				}
-				const body = await res.json();
-				if (cancelled) return;
-				if (typeof body.content !== "string") {
-					setState({ status: "error" });
-					return;
-				}
-				setState({ status: "ready", content: body.content });
-			} catch {
-				if (!cancelled) setState({ status: "error" });
-			}
-		};
-		load();
+		fetchFileContent(cwd, path).then((next) => {
+			if (!cancelled) setState(next);
+		});
 		return () => {
 			cancelled = true;
 		};

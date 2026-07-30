@@ -4,6 +4,7 @@ import {
 	mkdtempSync,
 	readFileSync,
 	rmSync,
+	statSync,
 	symlinkSync,
 	writeFileSync,
 } from "node:fs";
@@ -36,7 +37,7 @@ afterAll(() => {
 function request(
 	query: string,
 	body: unknown,
-): Promise<[number, Record<string, string>]> {
+): Promise<[number, Record<string, unknown>]> {
 	const req = Readable.from([
 		Buffer.from(JSON.stringify(body)),
 	]) as unknown as IncomingMessage;
@@ -45,7 +46,7 @@ function request(
 		const [, status, payload] = mockRespondJson.mock.lastCall as [
 			ServerResponse,
 			number,
-			Record<string, string>,
+			Record<string, unknown>,
 		];
 		return [status, payload];
 	});
@@ -55,23 +56,41 @@ function cwdParam(): string {
 	return `cwd=${encodeURIComponent(root)}`;
 }
 
+function seed(name: string, content: string): number {
+	writeFileSync(join(root, name), content);
+	return statSync(join(root, name)).mtimeMs;
+}
+
 describe("writeFileContent", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
 	it("formats a written typescript file with oxfmt", async () => {
+		const mtimeMs = seed("a.ts", "const old = 1;\n");
 		const [status, body] = await request(`${cwdParam()}&path=a.ts`, {
 			content: "const  x   =1\n",
+			mtimeMs,
 		});
 		expect(status).toBe(200);
 		expect(body.content).toBe("const x = 1;\n");
 		expect(readFileSync(join(root, "a.ts"), "utf8")).toBe("const x = 1;\n");
 	});
 
+	it("returns the modification time the write left behind", async () => {
+		const mtimeMs = seed("stamped.ts", "const old = 1;\n");
+		const [, body] = await request(`${cwdParam()}&path=stamped.ts`, {
+			content: "const x = 1;\n",
+			mtimeMs,
+		});
+		expect(body.mtimeMs).toBe(statSync(join(root, "stamped.ts")).mtimeMs);
+	});
+
 	it("writes a file oxfmt does not handle verbatim", async () => {
+		const mtimeMs = seed("notes.txt", "old\n");
 		const [status, body] = await request(`${cwdParam()}&path=notes.txt`, {
 			content: "plain   text\n",
+			mtimeMs,
 		});
 		expect(status).toBe(200);
 		expect(body.content).toBe("plain   text\n");
@@ -80,9 +99,48 @@ describe("writeFileContent", () => {
 		);
 	});
 
+	it("rejects a write whose file changed on disk, leaving it untouched", async () => {
+		const mtimeMs = seed("raced.ts", "const fromAgent = 1;\n");
+		const [status, body] = await request(`${cwdParam()}&path=raced.ts`, {
+			content: "const fromBrowser = 1;\n",
+			mtimeMs: mtimeMs - 1000,
+		});
+		expect(status).toBe(409);
+		expect(body.error).toBe("The file changed on disk since it was opened");
+		expect(readFileSync(join(root, "raced.ts"), "utf8")).toBe(
+			"const fromAgent = 1;\n",
+		);
+	});
+
+	it("accepts the write once the buffer is reloaded", async () => {
+		const mtimeMs = seed("reloaded.ts", "const fromAgent = 1;\n");
+		await request(`${cwdParam()}&path=reloaded.ts`, {
+			content: "const fromBrowser = 1;\n",
+			mtimeMs: mtimeMs - 1000,
+		});
+		const [status] = await request(`${cwdParam()}&path=reloaded.ts`, {
+			content: "const fromBrowser = 1;\n",
+			mtimeMs: statSync(join(root, "reloaded.ts")).mtimeMs,
+		});
+		expect(status).toBe(200);
+		expect(readFileSync(join(root, "reloaded.ts"), "utf8")).toBe(
+			"const fromBrowser = 1;\n",
+		);
+	});
+
+	it("rejects a write to a file that no longer exists", async () => {
+		const [status] = await request(`${cwdParam()}&path=deleted.ts`, {
+			content: "const x = 1;\n",
+			mtimeMs: 1,
+		});
+		expect(status).toBe(409);
+		expect(existsSync(join(root, "deleted.ts"))).toBe(false);
+	});
+
 	it("rejects a relative path that escapes the cwd without writing", async () => {
 		const [status, body] = await request(`${cwdParam()}&path=../escaped.ts`, {
 			content: "const  x   =1\n",
+			mtimeMs: 1,
 		});
 		expect(status).toBe(400);
 		expect(body.error).toBe("Path outside cwd");
@@ -93,28 +151,39 @@ describe("writeFileContent", () => {
 		const outside = join(root, "..", "absolute-escape.ts");
 		const [status] = await request(
 			`${cwdParam()}&path=${encodeURIComponent(outside)}`,
-			{ content: "const x = 1;\n" },
+			{ content: "const x = 1;\n", mtimeMs: 1 },
 		);
 		expect(status).toBe(400);
 		expect(existsSync(outside)).toBe(false);
 	});
 
 	it("leaves the file untouched when the body has no content", async () => {
-		writeFileSync(join(root, "kept.ts"), "const kept = 1;\n");
-		const [status] = await request(`${cwdParam()}&path=kept.ts`, {});
+		const mtimeMs = seed("kept.ts", "const kept = 1;\n");
+		const [status] = await request(`${cwdParam()}&path=kept.ts`, { mtimeMs });
 		expect(status).toBe(400);
 		expect(readFileSync(join(root, "kept.ts"), "utf8")).toBe(
 			"const kept = 1;\n",
 		);
 	});
 
+	it("leaves the file untouched when the body has no modification time", async () => {
+		seed("unstamped.ts", "const kept = 1;\n");
+		const [status] = await request(`${cwdParam()}&path=unstamped.ts`, {
+			content: "const changed = 1;\n",
+		});
+		expect(status).toBe(400);
+		expect(readFileSync(join(root, "unstamped.ts"), "utf8")).toBe(
+			"const kept = 1;\n",
+		);
+	});
+
 	it("rejects a request without a path", async () => {
-		const [status] = await request(cwdParam(), { content: "x\n" });
+		const [status] = await request(cwdParam(), { content: "x\n", mtimeMs: 1 });
 		expect(status).toBe(400);
 	});
 
 	it("rejects a missing cwd", async () => {
-		const [status] = await request("path=a.ts", { content: "x\n" });
+		const [status] = await request("path=a.ts", { content: "x\n", mtimeMs: 1 });
 		expect(status).toBe(400);
 	});
 });

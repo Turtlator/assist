@@ -1,10 +1,20 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, stat, writeFile } from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { respondJson } from "../../../shared/web";
 import { formatWithOxfmt } from "./formatWithOxfmt";
 import { getFileTarget } from "./getFileTarget";
-import { readJsonBody } from "./readJsonBody";
+import { getFileWriteBody } from "./getFileWriteBody";
 import { repoRoot } from "./resolveWithinCwd";
+
+const STALE_MESSAGE = "The file changed on disk since it was opened";
+
+async function currentMtimeMs(target: string): Promise<number | null> {
+	try {
+		return (await stat(target)).mtimeMs;
+	} catch {
+		return null;
+	}
+}
 
 export async function writeFileContent(
 	req: IncomingMessage,
@@ -12,15 +22,10 @@ export async function writeFileContent(
 ): Promise<void> {
 	const resolved = getFileTarget(req, res);
 	if (!resolved) return;
-	let body: { content?: unknown };
-	try {
-		body = (await readJsonBody(req)) as { content?: unknown };
-	} catch {
-		respondJson(res, 400, { error: "Invalid JSON body" });
-		return;
-	}
-	if (typeof body.content !== "string") {
-		respondJson(res, 400, { error: "Missing content" });
+	const body = await getFileWriteBody(req, res);
+	if (!body) return;
+	if ((await currentMtimeMs(resolved.target)) !== body.mtimeMs) {
+		respondJson(res, 409, { error: STALE_MESSAGE });
 		return;
 	}
 	try {
@@ -28,6 +33,7 @@ export async function writeFileContent(
 		await formatWithOxfmt(resolved.target, repoRoot(resolved.cwd));
 		respondJson(res, 200, {
 			content: await readFile(resolved.target, "utf8"),
+			mtimeMs: await currentMtimeMs(resolved.target),
 		});
 	} catch (error) {
 		respondJson(res, 500, {

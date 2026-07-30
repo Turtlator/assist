@@ -1,18 +1,21 @@
 import { useCallback, useRef, useState } from "react";
-import { saveFileContent } from "./saveFileContent";
-import type { FileContentState } from "./useFileContent";
+import { type SavedFile, saveFileContent } from "./saveFileContent";
+import type { FileContentState } from "./fetchFileContent";
 
 type FileBuffer = {
 	value: string;
 	setValue: (value: string) => void;
 	save: () => void;
 	saving: boolean;
+	dirty: boolean;
 	error: string | null;
 	clearError: () => void;
 };
 
-function loadedContent(state: FileContentState): string {
-	return state.status === "ready" ? state.content : "";
+function loadedFile(state: FileContentState): SavedFile {
+	return state.status === "ready"
+		? { content: state.content, mtimeMs: state.mtimeMs }
+		: { content: "", mtimeMs: 0 };
 }
 
 function saveFailure(error: unknown): string {
@@ -25,28 +28,34 @@ export function useFileBuffer(
 	state: FileContentState,
 ): FileBuffer {
 	const [loaded, setLoaded] = useState(state);
-	const [value, setValue] = useState(() => loadedContent(state));
+	const [saved, setSaved] = useState<SavedFile>(() => loadedFile(state));
+	const [value, setValue] = useState(() => loadedFile(state).content);
 	const [saving, setSaving] = useState(false);
 	const [saveError, setSaveError] = useState<string | null>(null);
 	const latest = useRef(value);
 
 	if (loaded !== state) {
+		const next = loadedFile(state);
 		setLoaded(state);
-		setValue(loadedContent(state));
+		setSaved(next);
+		setValue(next.content);
 	}
 	latest.current = value;
 
-	const ready = state.status === "ready";
+	const dirty = state.status === "ready" && value !== saved.content;
 	const save = useCallback(() => {
-		if (!cwd || !ready || saving) return;
+		if (!cwd || !dirty || saving) return;
 		setSaving(true);
-		saveFileContent(cwd, path, latest.current)
-			.then(setValue)
+		saveFileContent(cwd, path, latest.current, saved.mtimeMs)
+			.then((result) => {
+				setSaved(result);
+				setValue(result.content);
+			})
 			.catch((error: unknown) => setSaveError(saveFailure(error)))
 			.finally(() => setSaving(false));
-	}, [cwd, path, ready, saving]);
+	}, [cwd, path, dirty, saving, saved.mtimeMs]);
 
 	const clearError = useCallback(() => setSaveError(null), []);
 
-	return { value, setValue, save, saving, error: saveError, clearError };
+	return { value, setValue, save, saving, dirty, error: saveError, clearError };
 }

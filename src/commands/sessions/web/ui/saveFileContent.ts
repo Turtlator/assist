@@ -1,14 +1,17 @@
+export type SavedFile = { content: string; mtimeMs: number };
+
 export async function saveFileContent(
 	cwd: string,
 	path: string,
 	content: string,
-): Promise<string> {
+	mtimeMs: number,
+): Promise<SavedFile> {
 	const res = await fetch(
 		`/api/file?cwd=${encodeURIComponent(cwd)}&path=${encodeURIComponent(path)}`,
 		{
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ content }),
+			body: JSON.stringify({ content, mtimeMs }),
 		},
 	);
 	const body = await res.json().catch(() => ({}));
@@ -18,5 +21,8 @@ export async function saveFileContent(
 		);
 	if (typeof body.content !== "string")
 		throw new Error("The server returned no file content");
-	return body.content;
+	return {
+		content: body.content,
+		mtimeMs: typeof body.mtimeMs === "number" ? body.mtimeMs : mtimeMs,
+	};
 }
