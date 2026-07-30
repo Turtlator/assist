@@ -1,3 +1,10 @@
+# [0.516.0](https://github.com/staff0rd/assist/compare/v0.515.0...v0.516.0) (2026-07-30)
+
+
+### Features
+
+* title reference cards from context ([f612fbb](https://github.com/staff0rd/assist/commit/f612fbb5b5438e1b0d7789896ee213ddfc02e50d))
+
 # [0.515.0](https://github.com/staff0rd/assist/compare/v0.514.2...v0.515.0) (2026-07-29)
 
 
