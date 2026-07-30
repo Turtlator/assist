@@ -1,3 +1,10 @@
+## [0.522.2](https://github.com/staff0rd/assist/compare/v0.522.1...v0.522.2) (2026-07-30)
+
+
+### Bug Fixes
+
+* scope toggle tracks write target ([18c8b69](https://github.com/staff0rd/assist/commit/18c8b69ea876110cc303e0543d2d1cece5cc088a))
+
 ## [0.522.1](https://github.com/staff0rd/assist/compare/v0.522.0...v0.522.1) (2026-07-30)
 
 
