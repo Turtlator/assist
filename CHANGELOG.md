@@ -1,3 +1,10 @@
+# [0.517.0](https://github.com/staff0rd/assist/compare/v0.516.2...v0.517.0) (2026-07-30)
+
+
+### Features
+
+* preview pane gates prs edit ([67ef35c](https://github.com/staff0rd/assist/commit/67ef35c750df94b73abe45e8ea2e7ca11c8c8f73))
+
 ## [0.516.2](https://github.com/staff0rd/assist/compare/v0.516.1...v0.516.2) (2026-07-30)
 
 
