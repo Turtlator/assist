@@ -16,16 +16,27 @@ type CreateOptions = {
 };
 
 let buffer = "";
+let notifyChange: (() => void) | undefined;
 const model = { dispose: vi.fn() };
+const changeSubscription = { dispose: vi.fn() };
 const instance = {
 	getValue: () => buffer,
 	setValue: vi.fn((next: string) => {
 		buffer = next;
 	}),
 	getModel: () => model,
+	onDidChangeModelContent: vi.fn((listener: () => void) => {
+		notifyChange = listener;
+		return changeSubscription;
+	}),
 	updateOptions: vi.fn(),
 	dispose: vi.fn(),
 };
+
+function type(text: string) {
+	buffer = text;
+	notifyChange?.();
+}
 const create = vi.fn((_element: HTMLElement, options: CreateOptions) => {
 	buffer = options.value;
 	return instance;
@@ -53,6 +64,7 @@ function wrapper(mode: "light" | "dark") {
 beforeEach(() => {
 	vi.clearAllMocks();
 	buffer = "";
+	notifyChange = undefined;
 	vi.mocked(loadMonaco).mockResolvedValue(api);
 });
 
@@ -145,7 +157,32 @@ describe("MonacoEditor", () => {
 		expect(setModelLanguage).toHaveBeenCalledWith(model, "yaml");
 	});
 
-	it("disposes the editor and its model on unmount", async () => {
+	it("reports typing through onChange", async () => {
+		const onChange = vi.fn();
+		render(<MonacoEditor value="a" height="100px" onChange={onChange} />);
+
+		await waitFor(() => expect(create).toHaveBeenCalled());
+		type("ab");
+
+		expect(onChange).toHaveBeenCalledWith("ab");
+	});
+
+	it("reports typing to the latest onChange", async () => {
+		const first = vi.fn();
+		const second = vi.fn();
+		const view = render(
+			<MonacoEditor value="a" height="100px" onChange={first} />,
+		);
+
+		await waitFor(() => expect(create).toHaveBeenCalled());
+		view.rerender(<MonacoEditor value="a" height="100px" onChange={second} />);
+		type("ab");
+
+		expect(first).not.toHaveBeenCalled();
+		expect(second).toHaveBeenCalledWith("ab");
+	});
+
+	it("disposes the editor, its model and the change listener on unmount", async () => {
 		const view = render(<MonacoEditor value="a" height="100px" />);
 
 		await waitFor(() => expect(create).toHaveBeenCalled());
@@ -153,6 +190,7 @@ describe("MonacoEditor", () => {
 
 		expect(model.dispose).toHaveBeenCalled();
 		expect(instance.dispose).toHaveBeenCalled();
+		expect(changeSubscription.dispose).toHaveBeenCalled();
 	});
 
 	it("reports a bundle that fails to load", async () => {

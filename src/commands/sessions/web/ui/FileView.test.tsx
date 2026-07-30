@@ -22,18 +22,20 @@ vi.mock("./MonacoEditor", () => ({
 		value,
 		language,
 		readOnly,
+		onChange,
 	}: {
 		value: string;
 		language?: string;
 		readOnly?: boolean;
+		onChange?: (value: string) => void;
 	}) => (
-		<div
+		<textarea
 			data-testid="editor"
 			data-language={language ?? ""}
 			data-read-only={String(Boolean(readOnly))}
-		>
-			{value}
-		</div>
+			value={value}
+			onChange={(event) => onChange?.(event.target.value)}
+		/>
 	),
 }));
 
@@ -42,15 +44,20 @@ afterEach(() => {
 	vi.unstubAllGlobals();
 });
 
-function stubContent(content: string) {
-	vi.stubGlobal(
-		"fetch",
-		vi.fn().mockResolvedValue({
-			ok: true,
-			status: 200,
-			json: async () => ({ content }),
-		}),
-	);
+type SaveResponse = {
+	ok: boolean;
+	status: number;
+	body: Record<string, unknown>;
+};
+
+function stubContent(content: string, save?: SaveResponse) {
+	const fetchMock = vi.fn(async (_url: string, init?: RequestInit) => {
+		if (init?.method === "POST" && save)
+			return { ok: save.ok, status: save.status, json: async () => save.body };
+		return { ok: true, status: 200, json: async () => ({ content }) };
+	});
+	vi.stubGlobal("fetch", fetchMock);
+	return fetchMock;
 }
 
 function renderView(entry: string, selectedCwd = "/repo") {
@@ -69,8 +76,18 @@ function editor(): HTMLElement | null {
 	return screen.queryByTestId("editor");
 }
 
-async function findEditor(): Promise<HTMLElement> {
-	return screen.findByTestId("editor");
+async function findEditor(): Promise<HTMLTextAreaElement> {
+	return (await screen.findByTestId("editor")) as HTMLTextAreaElement;
+}
+
+function editorValue(): string {
+	return (screen.getByTestId("editor") as HTMLTextAreaElement).value;
+}
+
+function postCall(fetchMock: ReturnType<typeof stubContent>) {
+	const call = fetchMock.mock.calls.find(([, init]) => init?.method === "POST");
+	if (!call) throw new Error("no save request was sent");
+	return { url: call[0], body: JSON.parse(String(call[1]?.body)) };
 }
 
 describe("FileView", () => {
@@ -79,8 +96,7 @@ describe("FileView", () => {
 
 		renderView("/file?path=src/a.ts");
 
-		const view = await findEditor();
-		expect(view.textContent).toBe("const a = 1;\nconst b = 2;\n");
+		expect((await findEditor()).value).toBe("const a = 1;\nconst b = 2;\n");
 	});
 
 	it("resolves the editor language from the extension", async () => {
@@ -99,12 +115,81 @@ describe("FileView", () => {
 		expect((await findEditor()).dataset.language).toBe("");
 	});
 
-	it("opens the editor read-only", async () => {
+	it("opens the editor for editing", async () => {
 		stubContent("const a = 1;\n");
 
 		renderView("/file?path=src/a.ts");
 
-		expect((await findEditor()).dataset.readOnly).toBe("true");
+		expect((await findEditor()).dataset.readOnly).toBe("false");
+	});
+
+	it("keeps edits in the buffer", async () => {
+		stubContent("const a = 1;\n");
+
+		renderView("/file?path=src/a.ts");
+
+		fireEvent.change(await findEditor(), {
+			target: { value: "const a = 2;\n" },
+		});
+
+		expect(editorValue()).toBe("const a = 2;\n");
+	});
+
+	it("saves the buffer and replaces it with the formatted text", async () => {
+		const fetchMock = stubContent("const  a =1\n", {
+			ok: true,
+			status: 200,
+			body: { content: "const a = 2;\n" },
+		});
+
+		renderView("/file?path=src/a.ts");
+
+		fireEvent.change(await findEditor(), {
+			target: { value: "const  a =2\n" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() => expect(editorValue()).toBe("const a = 2;\n"));
+		const { url, body } = postCall(fetchMock);
+		expect(url).toContain("path=src%2Fa.ts");
+		expect(body).toEqual({ content: "const  a =2\n" });
+	});
+
+	it("saves on ctrl+s", async () => {
+		const fetchMock = stubContent("const a = 1;\n", {
+			ok: true,
+			status: 200,
+			body: { content: "const a = 1;\n" },
+		});
+
+		renderView("/file?path=src/a.ts");
+		await findEditor();
+
+		fireEvent.keyDown(document, { key: "s", ctrlKey: true });
+
+		await waitFor(() =>
+			expect(postCall(fetchMock).body).toEqual({
+				content: "const a = 1;\n",
+			}),
+		);
+	});
+
+	it("reports a failed save and keeps the buffer", async () => {
+		stubContent("const a = 1;\n", {
+			ok: false,
+			status: 400,
+			body: { error: "Path outside cwd" },
+		});
+
+		renderView("/file?path=src/a.ts");
+
+		fireEvent.change(await findEditor(), {
+			target: { value: "const a = 2;\n" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		expect(await screen.findByText("Path outside cwd")).toBeTruthy();
+		expect(editorValue()).toBe("const a = 2;\n");
 	});
 
 	it("toggles markdown between raw and rendered", async () => {
@@ -112,7 +197,7 @@ describe("FileView", () => {
 
 		renderView("/file?path=docs/a.md");
 
-		expect((await findEditor()).textContent).toBe("# Title\n");
+		expect((await findEditor()).value).toBe("# Title\n");
 		expect(screen.queryByTestId("markdown")).toBeNull();
 
 		fireEvent.click(screen.getByRole("button", { name: "Rendered" }));
@@ -123,7 +208,7 @@ describe("FileView", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Raw" }));
 
 		expect(screen.queryByTestId("markdown")).toBeNull();
-		expect(editor()?.textContent).toBe("# Title\n");
+		expect(editorValue()).toBe("# Title\n");
 	});
 
 	it("offers no toggle for non-markdown files", async () => {

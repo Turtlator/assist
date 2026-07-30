@@ -6,6 +6,7 @@ export type MonacoEditorSettings = {
 	value: string;
 	language?: string;
 	readOnly?: boolean;
+	onChange?: (value: string) => void;
 };
 
 export const PLAIN_TEXT = "plaintext";

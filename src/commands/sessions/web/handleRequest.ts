@@ -28,6 +28,7 @@ import { sessionView } from "./sessionView";
 import { setConfig } from "./setConfig";
 import { unsetConfig } from "./unsetConfig";
 import { uploadPrImage } from "./uploadPrImage";
+import { writeFileContent } from "./writeFileContent";
 import { createCssHandler } from "./createCssHandler";
 
 const htmlHandler = createHtmlHandler(getHtml);
@@ -67,6 +68,7 @@ const routes: Record<string, Handler> = {
 	"GET /api/diff": diff,
 	"GET /api/diff-scopes": diffScopes,
 	"GET /api/file": fileContent,
+	"POST /api/file": writeFileContent,
 	"GET /api/files": listFiles,
 	"GET /api/jira-site": jiraSite,
 	"GET /api/harness": harnessCapabilities,

@@ -30,8 +30,12 @@ export function useMonacoEditor(
 			latest.current.theme,
 		);
 		editorRef.current = editor;
+		const changes = editor.onDidChangeModelContent(() =>
+			latest.current.settings.onChange?.(editor.getValue()),
+		);
 		return () => {
 			editorRef.current = null;
+			changes.dispose();
 			editor.getModel()?.dispose();
 			editor.dispose();
 		};
