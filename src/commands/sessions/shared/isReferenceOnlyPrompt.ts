@@ -4,9 +4,19 @@ const HASH_NUMBER = /^#\d+$/;
 const ASSIST_ITEM_ID = /^a[0-9a-f]{2,}$/;
 
 export function isReferenceOnlyPrompt(prompt: string): boolean {
-	const tokens = prompt.trim().split(/\s+/).filter(Boolean);
+	const tokens = tokenise(prompt);
 	if (tokens.length === 0) return false;
-	return tokens.some(isTrackerUrl) || tokens.every(isReference);
+	return tokens.some(isTrackerUrl) || isBareReferencePrompt(prompt);
+}
+
+export function isBareReferencePrompt(prompt: string): boolean {
+	const tokens = tokenise(prompt);
+	if (tokens.length === 0) return false;
+	return tokens.every(isReference);
+}
+
+function tokenise(prompt: string): string[] {
+	return prompt.trim().split(/\s+/).filter(Boolean);
 }
 
 function isReference(token: string): boolean {

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { findTranscriptPathSync } from "../shared/findTranscriptPathSync";
+import { extractContextAfterReference } from "../summarise/extractContextAfterReference";
 import { extractFirstUserMessage } from "../summarise/extractFirstUserMessage";
 import { daemonLog } from "./daemonLog";
 import { generateSessionTitle } from "./generateSessionTitle";
@@ -14,6 +15,11 @@ vi.mock("./generateSessionTitle", () => ({
 vi.mock("../summarise/extractFirstUserMessage", () => ({
 	extractFirstUserMessage: vi.fn(() => "please add dark mode to settings"),
 }));
+vi.mock("../summarise/extractContextAfterReference", () => ({
+	extractContextAfterReference: vi.fn(
+		() => "saving a client record twice drops the contact email",
+	),
+}));
 vi.mock("../shared/findTranscriptPathSync", () => ({
 	findTranscriptPathSync: vi.fn(() => "/projects/repo/abc.jsonl"),
 }));
@@ -25,6 +31,8 @@ const mockLog = daemonLog as unknown as ReturnType<typeof vi.fn>;
 const mockExtract = extractFirstUserMessage as unknown as ReturnType<
 	typeof vi.fn
 >;
+const mockExtractContext =
+	extractContextAfterReference as unknown as ReturnType<typeof vi.fn>;
 const mockFindPath = findTranscriptPathSync as unknown as ReturnType<
 	typeof vi.fn
 >;
@@ -57,6 +65,9 @@ describe("startTranscriptTitleGeneration", () => {
 		vi.clearAllMocks();
 		mockGenerate.mockResolvedValue("Add dark mode");
 		mockExtract.mockReturnValue("please add dark mode to settings");
+		mockExtractContext.mockReturnValue(
+			"saving a client record twice drops the contact email",
+		);
 		mockFindPath.mockReturnValue("/projects/repo/abc.jsonl");
 	});
 
@@ -183,5 +194,115 @@ describe("startTranscriptTitleGeneration", () => {
 
 		expect(mockExtract).not.toHaveBeenCalled();
 		expect(session.titleGenerationStarted).toBeUndefined();
+	});
+
+	describe("assist card whose prompt was a reference", () => {
+		function referenceCard(overrides: Partial<Session> = {}): Session {
+			return makeSession({
+				commandType: "assist",
+				assistArgs: [
+					"bug",
+					"--once",
+					"https://centium.atlassian.net/browse/PA-556",
+				],
+				...overrides,
+			});
+		}
+
+		it("titles the card from the context that follows the reference", async () => {
+			const session = referenceCard();
+			const notify = vi.fn();
+
+			startTranscriptTitleGeneration(session, notify);
+			await flush();
+
+			expect(mockExtractContext).toHaveBeenCalledWith(
+				"/projects/repo/abc.jsonl",
+			);
+			expect(mockExtract).not.toHaveBeenCalled();
+			expect(mockGenerate).toHaveBeenCalledWith(
+				"saving a client record twice drops the contact email",
+			);
+			expect(session.generatedTitle).toBe("Add dark mode");
+			expect(notify).toHaveBeenCalledOnce();
+			expect(mockLog).toHaveBeenCalledWith(
+				"session 7 deriving title from transcript context after the reference",
+			);
+		});
+
+		it("generates nothing while the transcript holds only the reference", () => {
+			const session = referenceCard();
+			mockExtractContext.mockReturnValue(undefined);
+
+			startTranscriptTitleGeneration(session, vi.fn());
+
+			expect(mockGenerate).not.toHaveBeenCalled();
+			expect(session.titleGenerationStarted).toBeUndefined();
+		});
+
+		it("generates exactly once as the context arrives", async () => {
+			const session = referenceCard();
+			const notify = vi.fn();
+			mockExtractContext.mockReturnValueOnce(undefined);
+
+			startTranscriptTitleGeneration(session, notify);
+			expect(mockGenerate).not.toHaveBeenCalled();
+
+			startTranscriptTitleGeneration(session, notify);
+			startTranscriptTitleGeneration(session, notify);
+			await flush();
+			startTranscriptTitleGeneration(session, notify);
+			await flush();
+
+			expect(mockGenerate).toHaveBeenCalledOnce();
+			expect(notify).toHaveBeenCalledOnce();
+			expect(session.generatedTitle).toBe("Add dark mode");
+		});
+
+		it("leaves a card with a real prompt to the spawn-time path", () => {
+			startTranscriptTitleGeneration(
+				referenceCard({
+					assistArgs: ["bug", "--once", "saving a client loses the email"],
+				}),
+				vi.fn(),
+			);
+
+			expect(mockGenerate).not.toHaveBeenCalled();
+			expect(mockExtractContext).not.toHaveBeenCalled();
+		});
+
+		it("leaves a card that already has its backlog item name alone", () => {
+			startTranscriptTitleGeneration(
+				referenceCard({
+					activity: {
+						kind: "command",
+						name: "bug",
+						itemId: 556,
+						itemName: "Saving a client drops the contact email",
+						startedAt: 0,
+					},
+				}),
+				vi.fn(),
+			);
+
+			expect(mockGenerate).not.toHaveBeenCalled();
+			expect(mockExtractContext).not.toHaveBeenCalled();
+		});
+
+		it("ignores an assist card that is not a draft command", () => {
+			startTranscriptTitleGeneration(
+				referenceCard({
+					assistArgs: [
+						"next",
+						"--once",
+						"https://centium.atlassian.net/browse/PA-556",
+					],
+				}),
+				vi.fn(),
+			);
+
+			expect(mockGenerate).not.toHaveBeenCalled();
+			expect(mockExtractContext).not.toHaveBeenCalled();
+		});
 	});
 });

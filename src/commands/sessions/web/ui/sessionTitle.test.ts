@@ -154,6 +154,29 @@ describe("sessionTitle", () => {
 		expect(sessionTitle(session)).toBe("Add refine mode button");
 	});
 
+	it("prefers a filed item name over a bug card's generated title", () => {
+		const session = makeSession({
+			commandType: "assist",
+			assistArgs: [
+				"bug",
+				"--once",
+				"https://centium.atlassian.net/browse/PA-556",
+			],
+			generatedTitle: "Contact email dropped on save",
+			activity: {
+				kind: "command",
+				name: "bug",
+				itemId: 871,
+				itemName: "Saving a client twice drops the contact email",
+				startedAt: 0,
+			},
+		});
+
+		expect(sessionTitle(session)).toBe(
+			"Saving a client twice drops the contact email",
+		);
+	});
+
 	it("shows the entered prompt text for an assist command that gets no title", () => {
 		const session = makeSession({
 			commandType: "assist",

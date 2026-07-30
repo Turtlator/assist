@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { isReferenceOnlyPrompt } from "./isReferenceOnlyPrompt";
+import {
+	isBareReferencePrompt,
+	isReferenceOnlyPrompt,
+} from "./isReferenceOnlyPrompt";
 
 describe("isReferenceOnlyPrompt", () => {
 	it.each([
@@ -61,5 +64,29 @@ describe("isReferenceOnlyPrompt", () => {
 		"azz1",
 	])("does not treat %s as a reference", (prompt) => {
 		expect(isReferenceOnlyPrompt(prompt)).toBe(false);
+	});
+});
+
+describe("isBareReferencePrompt", () => {
+	it.each([
+		"https://centium.atlassian.net/browse/PA-556",
+		"PA-556",
+		"#123",
+		"a791",
+		"PA-556 https://github.com/owner/repo/issues/12",
+		"  PA-556\n",
+	])("treats %j as nothing but references", (prompt) => {
+		expect(isBareReferencePrompt(prompt)).toBe(true);
+	});
+
+	it.each([
+		"look at https://centium.atlassian.net/browse/PA-556",
+		"https://github.com/owner/repo/issues/12 breaks on save",
+		"PA-556 is failing on save",
+		"the login page redirects",
+		"",
+		"   ",
+	])("treats %j as carrying prose worth summarising", (prompt) => {
+		expect(isBareReferencePrompt(prompt)).toBe(false);
 	});
 });

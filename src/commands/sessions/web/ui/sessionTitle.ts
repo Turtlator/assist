@@ -1,3 +1,4 @@
+import { isDraftCommand } from "../../shared/isDraftCommand";
 import { sessionTitlePrompt } from "../../shared/sessionTitlePrompt";
 import type { SessionInfo } from "./types";
 
@@ -7,7 +8,7 @@ export function sessionTitle(session: SessionInfo): string {
 	if (activity?.kind === "backlog") {
 		return activity.itemName ?? session.generatedTitle ?? session.name;
 	}
-	if (session.assistArgs?.[0] === "refine" && activity?.itemName) {
+	if (isDraftCommand(session.assistArgs?.[0]) && activity?.itemName) {
 		return activity.itemName;
 	}
 	switch (session.commandType) {
