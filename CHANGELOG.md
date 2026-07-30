@@ -1,3 +1,10 @@
+## [0.522.1](https://github.com/staff0rd/assist/compare/v0.522.0...v0.522.1) (2026-07-30)
+
+
+### Bug Fixes
+
+* retry kills tree, defers respawn ([10870a2](https://github.com/staff0rd/assist/commit/10870a2c2181d1e3e29ef60fc56eadd4298e2d68))
+
 # [0.522.0](https://github.com/staff0rd/assist/compare/v0.521.0...v0.522.0) (2026-07-30)
 
 
