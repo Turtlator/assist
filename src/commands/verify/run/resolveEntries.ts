@@ -1,7 +1,8 @@
 import * as path from "node:path";
-import { getConfigDir, loadConfig } from "../../../shared/loadConfig";
+import { loadConfig } from "../../../shared/loadConfig";
 import { findPackageJsonWithVerifyScripts } from "../../../shared/readPackageJson";
 import { resolveRunConfigs } from "../../../shared/resolveRunConfigs";
+import { runConfigBaseDir } from "../../../shared/runConfigBaseDir";
 import { shellQuote } from "../../../shared/shellQuote";
 
 function buildFullCommand(command: string, args?: string[]): string {
@@ -19,13 +20,14 @@ export type VerifyEntry = {
 
 function getRunEntries(): VerifyEntry[] {
 	const { run } = loadConfig();
-	const configs = resolveRunConfigs(run, getConfigDir());
+	const baseDir = runConfigBaseDir();
+	const configs = resolveRunConfigs(run, baseDir);
 	return configs
 		.filter((r) => r.name.startsWith("verify:"))
 		.map((r) => ({
 			name: r.name,
 			fullCommand: buildFullCommand(r.command, r.args),
-			cwd: r.cwd ? path.resolve(getConfigDir(), r.cwd) : undefined,
+			cwd: r.cwd ? path.resolve(baseDir, r.cwd) : undefined,
 			env: r.env,
 			filter: r.filter,
 			quiet: r.quiet,

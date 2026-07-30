@@ -1,5 +1,3 @@
-import { resolve } from "node:path";
-import { getConfigDir } from "../../shared/loadConfig";
 import { pullIfConfigured } from "../../shared/pullIfConfigured";
 import type { SpawnClaudeOptions } from "../../shared/spawnClaude";
 import type { RunConfig } from "../../shared/types";
@@ -11,6 +9,7 @@ import {
 } from "./findRunConfig";
 import { formatConfiguredCommands } from "./formatConfiguredCommands";
 import { resolveParams } from "./resolveParams";
+import { resolveRunCwd } from "./resolveRunCwd";
 import { runPreCommands } from "./runPreCommands";
 import { spawnRunCommand } from "./spawnRunCommand";
 
@@ -27,7 +26,7 @@ export function listRunConfigs(verbose: boolean): void {
 }
 
 function execRunConfig(config: RunConfig, args: string[]): void {
-	const cwd = config.cwd ? resolve(getConfigDir(), config.cwd) : undefined;
+	const cwd = resolveRunCwd(config);
 	if (config.pre) runPreCommands(config.pre, cwd);
 	const resolved = resolveParams(config.params, args);
 	spawnRunCommand(

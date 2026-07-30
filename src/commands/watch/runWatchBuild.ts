@@ -1,14 +1,19 @@
-import { resolve } from "node:path";
-import { getConfigDir } from "../../shared/loadConfig";
 import { findRunConfig } from "../run/findRunConfig";
 import { resolveParams } from "../run/resolveParams";
+import { MissingRunCwdError, resolveRunCwd } from "../run/resolveRunCwd";
 import { runCommandToCompletion } from "../run/runCommandToCompletion";
 import { runPreCommands } from "../run/runPreCommands";
 import type { BuildOutcome } from "./BuildOutcome";
 
 export async function runWatchBuild(entry: string): Promise<BuildOutcome> {
 	const config = findRunConfig(entry);
-	const cwd = config.cwd ? resolve(getConfigDir(), config.cwd) : undefined;
+	let cwd: string | undefined;
+	try {
+		cwd = resolveRunCwd(config);
+	} catch (error) {
+		if (!(error instanceof MissingRunCwdError)) throw error;
+		return { kind: "failed", exitCode: 1, output: error.message };
+	}
 	if (config.pre) runPreCommands(config.pre, cwd);
 
 	const result = await runCommandToCompletion(

@@ -1,9 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import {
-	getConfigDirFrom,
-	loadConfigFrom,
-} from "../../../shared/loadConfigFrom";
+import { loadConfigFrom } from "../../../shared/loadConfigFrom";
 import { resolveRunConfigs } from "../../../shared/resolveRunConfigs";
+import { runConfigBaseDirFrom } from "../../../shared/runConfigBaseDir";
 import { respondJson } from "../../../shared/web";
 import { getCwdParam } from "./getCwdParam";
 import { toGitCwd } from "./toGitCwd";
@@ -14,7 +12,7 @@ function getServerRuns(rawCwd: string): ServerRunInfo[] {
 	try {
 		const cwd = toGitCwd(rawCwd);
 		const { run } = loadConfigFrom(cwd);
-		return resolveRunConfigs(run, getConfigDirFrom(cwd))
+		return resolveRunConfigs(run, runConfigBaseDirFrom(cwd))
 			.filter((r) => r.server)
 			.map((r) => ({ name: r.name, port: r.port }));
 	} catch {

@@ -183,6 +183,9 @@ Backlog item ids are written and displayed in an `a`-prefixed form (e.g. item 55
 - `assist run add` - Add a new run configuration to assist.yml and create a Claude command file
 - `assist run link <path> --prefix <prefix>` - Link run configurations from another project's assist.yml
 - `assist run remove <name>` - Remove a run configuration and delete its Claude command file
+
+A run entry's relative `cwd` (and a `link` path) resolves against the **repo root** - the directory holding `assist.yml` or `.claude/`, or the enclosing git repository when the repo has no project config at all (entries coming only from a `repos:` override in `~/.assist.yml`). The base does not shift with which config file the entry came from. A resolved `cwd` that does not exist fails with `run config "<name>": cwd <path> does not exist` rather than a `spawn <command> ENOENT`, and the daemon logs that reason when a `run:` session errors.
+
 - `assist config get <key>` - Get a config value. Secret values (`database.url`, `roam.*` tokens, `sql.connections[].password`, `seq.connections[].apiToken`) print as `<hidden>`; `--reveal` prints the raw value undecorated for command substitution and always needs an explicit permission prompt (the CLI hook never auto-approves it). An unset key still reports `Key "<key>" is not set`
 - `assist config list` - List all config values, with secret values shown as `<hidden>` (no reveal option)
 - `assist config set <key> <value>` - Set a config value. `--global` writes to `~/.assist.yml`; `-g --repo [name]` writes a per-repo override there. The confirmation line and any validation error mask secret values

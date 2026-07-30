@@ -1,5 +1,11 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { RunConfig } from "../../shared/types";
+
+const baseDir = mkdtempSync(join(tmpdir(), "watch-build-"));
+mkdirSync(join(baseDir, "packages", "api"), { recursive: true });
 
 const mockFindRunConfig = vi.fn();
 const mockRunCommandToCompletion = vi.fn();
@@ -18,8 +24,9 @@ vi.mock("../run/runPreCommands", () => ({
 	runPreCommands: (...args: unknown[]) => mockRunPreCommands(...args),
 }));
 
-vi.mock("../../shared/loadConfig", () => ({
-	getConfigDir: () => "/repo",
+vi.mock("../../shared/runConfigBaseDir", () => ({
+	runConfigBaseDir: () => baseDir,
+	runConfigBaseDirFrom: () => baseDir,
 }));
 
 import { runWatchBuild } from "./runWatchBuild";
@@ -33,6 +40,10 @@ const autoBuild: RunConfig = {
 beforeEach(() => {
 	vi.clearAllMocks();
 	mockFindRunConfig.mockReturnValue(autoBuild);
+});
+
+afterAll(() => {
+	rmSync(baseDir, { recursive: true, force: true });
 });
 
 describe("runWatchBuild", () => {
@@ -99,7 +110,18 @@ describe("runWatchBuild", () => {
 
 		expect(mockRunPreCommands).toHaveBeenCalledWith(
 			["npm ci"],
-			"/repo/packages/api",
+			join(baseDir, "packages", "api"),
 		);
+	});
+
+	it("fails by naming the run config and missing cwd without spawning", async () => {
+		mockFindRunConfig.mockReturnValue({ ...autoBuild, cwd: "packages/gone" });
+
+		await expect(runWatchBuild("auto-build")).resolves.toEqual({
+			kind: "failed",
+			exitCode: 1,
+			output: `run config "auto-build": cwd ${join(baseDir, "packages", "gone")} does not exist`,
+		});
+		expect(mockRunCommandToCompletion).not.toHaveBeenCalled();
 	});
 });

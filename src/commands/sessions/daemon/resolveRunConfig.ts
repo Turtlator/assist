@@ -1,8 +1,6 @@
-import {
-	getConfigDirFrom,
-	loadConfigFrom,
-} from "../../../shared/loadConfigFrom";
+import { loadConfigFrom } from "../../../shared/loadConfigFrom";
 import { resolveRunConfigs } from "../../../shared/resolveRunConfigs";
+import { runConfigBaseDirFrom } from "../../../shared/runConfigBaseDir";
 import type { RunConfig } from "../../../shared/types";
 
 export function resolveRunConfig(
@@ -11,7 +9,7 @@ export function resolveRunConfig(
 ): RunConfig | undefined {
 	try {
 		const { run } = loadConfigFrom(cwd);
-		const configs = resolveRunConfigs(run, getConfigDirFrom(cwd));
+		const configs = resolveRunConfigs(run, runConfigBaseDirFrom(cwd));
 		const exact = configs.find((r) => r.name === name);
 		if (exact) return exact;
 		const suffixMatches = configs.filter((r) => r.name.endsWith(`:${name}`));

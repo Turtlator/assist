@@ -3,17 +3,12 @@ import chalk from "chalk";
 import { stringify as stringifyYaml } from "yaml";
 import {
 	findConfigUp,
-	getConfigDirFrom,
 	getGlobalConfigPath,
 	loadConfigFrom,
 	projectConfigPathFrom,
 } from "./loadConfigFrom";
 import { loadRawYaml } from "./loadRawYaml";
 import type { AssistConfig, TranscriptConfig } from "./types";
-
-export function getConfigDir(): string {
-	return getConfigDirFrom(process.cwd());
-}
 
 export function getProjectRoot(): string {
 	const found = findConfigUp(process.cwd());

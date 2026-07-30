@@ -1,3 +1,5 @@
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { RunConfig } from "../../shared/types";
 
@@ -35,8 +37,9 @@ vi.mock("./runPreCommands", () => ({
 	runPreCommands: (...args: unknown[]) => mockRunPreCommands(...args),
 }));
 
-vi.mock("../../shared/loadConfig", () => ({
-	getConfigDir: () => "/tmp",
+vi.mock("../../shared/runConfigBaseDir", () => ({
+	runConfigBaseDir: () => tmpdir(),
+	runConfigBaseDirFrom: () => tmpdir(),
 }));
 
 import { run } from ".";
@@ -132,6 +135,21 @@ describe("run", () => {
 		expect(mockBacklogRun).not.toHaveBeenCalled();
 		expect(mockFindRunConfig).toHaveBeenCalledWith("deploy");
 		expect(mockSpawnRunCommand).toHaveBeenCalled();
+	});
+
+	it("fails by naming the run config and resolved cwd when it does not exist", async () => {
+		mockFindRunConfig.mockReturnValue({
+			name: "start",
+			command: "npm",
+			cwd: "no-such-dir",
+			pre: ["npm ci"],
+		});
+
+		await expect(run("start", [])).rejects.toThrow(
+			`run config "start": cwd ${join(tmpdir(), "no-such-dir")} does not exist`,
+		);
+		expect(mockRunPreCommands).not.toHaveBeenCalled();
+		expect(mockSpawnRunCommand).not.toHaveBeenCalled();
 	});
 
 	it("keeps existing not-found error behavior for a non-numeric name", async () => {

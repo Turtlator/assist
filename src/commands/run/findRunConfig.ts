@@ -1,4 +1,5 @@
-import { getConfigDir, loadConfig } from "../../shared/loadConfig";
+import { loadConfig } from "../../shared/loadConfig";
+import { runConfigBaseDir } from "../../shared/runConfigBaseDir";
 import { resolveRunConfigs } from "../../shared/resolveRunConfigs";
 import type { RunConfig } from "../../shared/types";
 
@@ -33,7 +34,7 @@ function exitWithAmbiguousConfig(
 
 export function requireRunConfigs(): RunConfig[] {
 	const { run } = loadConfig();
-	const configs = resolveRunConfigs(run, getConfigDir());
+	const configs = resolveRunConfigs(run, runConfigBaseDir());
 	if (configs.length === 0) return exitNoRunConfigs();
 	return configs;
 }

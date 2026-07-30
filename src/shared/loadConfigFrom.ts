@@ -33,10 +33,6 @@ export function getGlobalConfigPath(): string {
 	return join(homedir(), ".assist.yml");
 }
 
-export function getConfigDirFrom(cwd: string): string {
-	return dirname(getConfigPathFrom(cwd));
-}
-
 export function projectConfigPathFrom(cwd: string): string {
 	if (findConfigUp(cwd)) return getConfigPathFrom(cwd);
 	const clone = linkedWorktree(cwd)?.clone;
