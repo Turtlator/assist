@@ -1,4 +1,5 @@
 import { loadConfig } from "../../shared/loadConfig";
+import { prConcisenessGuidance } from "./prConcisenessGuidance";
 
 const RESOLVES_WITH_PROMPT = `  --resolves <key>  Jira issue key resolved by this PR; repeatable. Each key's
                     browse URL is appended inline to ## Why. Unless a Jira key is
@@ -50,17 +51,7 @@ a genuine non-obvious decision. Litmus — a sentence is almost certainly mechan
 X filters/needs/uses", or names an internal component, property, function, or
 file.
 
-Brevity budget — keep each section within these limits:
-
-  ## What  a few sentences (2–3).
-  ## Why   1–2 sentences.
-  ## How   omit by default; a sentence or two, only for non-obvious decisions.
-
-Write prose. A short paragraph is the natural form for ## What and ## Why —
-bullets in ## What are a smell. Use bullets only when there are genuinely several
-independent, parallel items (3+); a single bullet is never right. A single
-non-list paragraph over ~600 characters or ~4 sentences is a wall of text and
-will be rejected.
+${prConcisenessGuidance}
 
 If a pull request already exists for the branch, this command errors — pass
 --force to fully overwrite its title and body, or use 'assist prs edit' to update

@@ -1,4 +1,5 @@
 import type { Command } from "commander";
+import { editHelpText } from "./prs/editHelpText";
 import { edit as prsEdit } from "./prs/index";
 
 function collect(value: string, previous: string[]): string[] {
@@ -21,5 +22,6 @@ export function registerPrsEdit(prsCommand: Command): void {
 			collect,
 			[],
 		)
+		.addHelpText("after", () => editHelpText())
 		.action(prsEdit);
 }
