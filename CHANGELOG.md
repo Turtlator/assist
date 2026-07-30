@@ -1,3 +1,10 @@
+# [0.519.0](https://github.com/staff0rd/assist/compare/v0.518.0...v0.519.0) (2026-07-30)
+
+
+### Features
+
+* reject stale file saves in the web editor ([e4fe980](https://github.com/staff0rd/assist/commit/e4fe980e8ef49be414b6b274c50073176d78e5b7))
+
 # [0.518.0](https://github.com/staff0rd/assist/compare/v0.517.0...v0.518.0) (2026-07-30)
 
 
