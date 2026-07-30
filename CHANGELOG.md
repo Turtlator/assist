@@ -1,3 +1,10 @@
+# [0.522.0](https://github.com/staff0rd/assist/compare/v0.521.0...v0.522.0) (2026-07-30)
+
+
+### Features
+
+* synthesis drops comment-add nits ([f6fe25d](https://github.com/staff0rd/assist/commit/f6fe25dd60a8289f714e29c09ab0007f851b009c))
+
 # [0.521.0](https://github.com/staff0rd/assist/compare/v0.520.0...v0.521.0) (2026-07-30)
 
 
