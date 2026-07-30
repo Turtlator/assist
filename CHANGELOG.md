@@ -1,3 +1,10 @@
+## [0.516.2](https://github.com/staff0rd/assist/compare/v0.516.1...v0.516.2) (2026-07-30)
+
+
+### Bug Fixes
+
+* report missing run config cwd ([0520367](https://github.com/staff0rd/assist/commit/0520367bae8c7c34da3de9514d940fdee9ba0c4d))
+
 ## [0.516.1](https://github.com/staff0rd/assist/compare/v0.516.0...v0.516.1) (2026-07-30)
 
 
