@@ -17,6 +17,15 @@ A finding is worth raising only if all of the following hold:
 7. You can name the concretely affected code path. Speculation that a change *might* disrupt something elsewhere is not enough — identify the other code that is provably affected.
 8. It is clearly not an intentional change by the author.
 
+## Never recommend adding a code comment
+
+This codebase enforces self-documenting code. Never raise a finding whose recommendation is to add a code comment — including a comment that restates what the code does, labels a block, or narrates why the change was made. The absence of comments is never a defect: do not ask for explanatory comments, doc comments, or TODOs, and do not list "missing comments" as an observation.
+
+Two cases are still legitimate findings:
+
+1. A comment this change made stale or wrong. Recommend removing or correcting it.
+2. Genuinely misleading code. You may raise it, but the recommendation must be a clearer name, a smaller function, or a test. Only as a last resort, when none of those can carry the meaning, may you mention that \`assist code-comment\` exists for a single short comment.
+
 ## How to write the comment (Impact + Recommendation)
 
 1. Make clear *why* the issue is a bug.
