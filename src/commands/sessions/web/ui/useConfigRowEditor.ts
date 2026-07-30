@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { ConfigEntry } from "../../../config/readConfigEntries";
+import { configEntryScopeSignature } from "./configEntryScopeSignature";
 import { configScopesWithValue } from "./configScopesWithValue";
 import { defaultConfigScope } from "./defaultConfigScope";
 import { effectiveConfigValue } from "./effectiveConfigValue";
@@ -13,11 +14,24 @@ type Options = {
 	onError: (message: string) => void;
 };
 
+type ScopePick = { signature: string; scope: ConfigScope };
+
+function scopeForSignature(
+	entry: ConfigEntry,
+	signature: string,
+	picked: ScopePick | null,
+): ConfigScope {
+	if (picked && picked.signature === signature) return picked.scope;
+	return defaultConfigScope(entry);
+}
+
 export function useConfigRowEditor({ entry, cwd, onSaved, onError }: Options) {
 	const scopeLocked = entry.globalOnly === true;
 	const saved = effectiveConfigValue(entry);
 	const [value, setValue] = useState<unknown>(saved);
-	const [scope, setScope] = useState<ConfigScope>(defaultConfigScope(entry));
+	const [picked, setPicked] = useState<ScopePick | null>(null);
+	const signature = configEntryScopeSignature(entry);
+	const scope = scopeForSignature(entry, signature, picked);
 	const { saving, save, clear } = useConfigRowWrites({
 		entry,
 		cwd,
@@ -30,7 +44,7 @@ export function useConfigRowEditor({ entry, cwd, onSaved, onError }: Options) {
 		value,
 		setValue,
 		scope,
-		setScope,
+		setScope: (next: ConfigScope) => setPicked({ signature, scope: next }),
 		scopeLocked,
 		saving,
 		save: () => save(value),

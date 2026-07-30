@@ -38,16 +38,23 @@ describe("ConfigScopeToggle", () => {
 		expect(dotState("global")).toBe("overridden");
 	});
 
-	it("titles each scope with where the value lives", () => {
+	it("titles each unselected scope with where the value lives", () => {
 		renderToggle(["repo", "global"]);
 
 		expect(screen.getByTitle("Not set in this repo's assist.yml")).toBeTruthy();
 		expect(
-			screen.getByTitle("Set in repos.assist in ~/.assist.yml — in effect"),
-		).toBeTruthy();
-		expect(
 			screen.getByTitle("Set in ~/.assist.yml — overridden by This repo"),
 		).toBeTruthy();
+	});
+
+	it("titles the selected scope with where the pending save is written", () => {
+		renderToggle(["repo", "global"]);
+
+		expect(
+			screen.getByRole("button", { name: "This repo" }).getAttribute("title"),
+		).toBe(
+			"This save will be written to repos.assist in ~/.assist.yml — currently set here, in effect",
+		);
 	});
 
 	it("disables the project and repo scopes for a global-only key", () => {

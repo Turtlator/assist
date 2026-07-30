@@ -427,6 +427,9 @@ describe("ConfigView", () => {
 				.getByRole("button", { name: "Project" })
 				.getAttribute("aria-pressed"),
 		).toBe("false");
+		expect(screen.getByTestId("config-write-target").textContent).toBe(
+			"This save writes to repos.assist in ~/.assist.yml. Dots mark where the saved value lives now.",
+		);
 
 		fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
@@ -442,6 +445,43 @@ describe("ConfigView", () => {
 			fetchMock.mock.calls.filter(([url]) => String(url) === "/api/config/set")
 				.length,
 		).toBe(1);
+	});
+
+	it("preselects the repo scope for an item added to a repo-scoped array", async () => {
+		stubApi(
+			[
+				{
+					key: "run",
+					type: "array",
+					value: [{ name: "build", command: "npm run build" }],
+					source: "repo",
+					sources: ["repo"],
+					repoKey: "planner-assistant",
+					node: node("run"),
+				},
+			],
+			{
+				ok: true,
+				status: 200,
+				body: { target: "repo", repoKey: "planner-assistant" },
+			},
+		);
+		renderView("/repo/one");
+
+		await waitFor(() => expect(screen.getByText("run")).toBeTruthy());
+		fireEvent.click(screen.getByRole("button", { name: "Add run entry" }));
+
+		expect(
+			screen
+				.getByRole("button", { name: "This repo" })
+				.getAttribute("aria-pressed"),
+		).toBe("true");
+		expect(
+			screen.getByTestId("scope-dot-repo").getAttribute("data-state"),
+		).toBe("effective");
+		expect(screen.getByTestId("config-write-target").textContent).toBe(
+			"This save writes to repos.planner-assistant in ~/.assist.yml. Dots mark where the saved value lives now.",
+		);
 	});
 
 	it("forces a global write for a global-only key", async () => {

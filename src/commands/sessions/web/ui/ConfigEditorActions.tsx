@@ -4,6 +4,7 @@ import { configClearTitle } from "./configClearTitle";
 import { ConfigScopeToggle } from "./ConfigScopeToggle";
 import { configScopesWithValue } from "./configScopesWithValue";
 import { ConfigWriteButtons } from "./ConfigWriteButtons";
+import { ConfigWriteTargetHint } from "./ConfigWriteTargetHint";
 import type { ConfigScope } from "./saveConfigValue";
 
 type Props = {
@@ -30,27 +31,30 @@ export function ConfigEditorActions({
 	onCancel,
 }: Props) {
 	return (
-		<Stack
-			spacing={1}
-			direction="row"
-			sx={{ alignItems: "center", flexWrap: "wrap" }}
-		>
-			<ConfigScopeToggle
-				scope={scope}
-				disabled={saving}
-				lockedToGlobal={scopeLocked}
-				scopesWithValue={configScopesWithValue(entry)}
-				repoKey={entry.repoKey}
-				onChange={onScopeChange}
-			/>
-			<ConfigWriteButtons
-				saving={saving}
-				canClear={canClear}
-				clearTitle={configClearTitle(entry, scope)}
-				onSave={onSave}
-				onClear={onClear}
-				onCancel={onCancel}
-			/>
+		<Stack spacing={0.5} sx={{ alignItems: "flex-start" }}>
+			<Stack
+				spacing={1}
+				direction="row"
+				sx={{ alignItems: "center", flexWrap: "wrap" }}
+			>
+				<ConfigScopeToggle
+					scope={scope}
+					disabled={saving}
+					lockedToGlobal={scopeLocked}
+					scopesWithValue={configScopesWithValue(entry)}
+					repoKey={entry.repoKey}
+					onChange={onScopeChange}
+				/>
+				<ConfigWriteButtons
+					saving={saving}
+					canClear={canClear}
+					clearTitle={configClearTitle(entry, scope)}
+					onSave={onSave}
+					onClear={onClear}
+					onCancel={onCancel}
+				/>
+			</Stack>
+			<ConfigWriteTargetHint scope={scope} repoKey={entry.repoKey} />
 		</Stack>
 	);
 }

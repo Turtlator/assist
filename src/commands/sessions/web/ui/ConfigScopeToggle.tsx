@@ -44,6 +44,7 @@ export function ConfigScopeToggle({
 						scopesWithValue,
 						repoKey,
 						lockedToGlobal,
+						selected: candidate === scope,
 					})}
 				>
 					<ScopeDot scope={candidate} scopesWithValue={scopesWithValue} />

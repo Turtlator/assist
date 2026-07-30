@@ -12,6 +12,20 @@ const title = (
 		scopesWithValue,
 		repoKey: "assist",
 		lockedToGlobal,
+		selected: false,
+	});
+
+const selectedTitle = (
+	scope: ConfigScope,
+	scopesWithValue: ConfigScope[],
+	lockedToGlobal = false,
+) =>
+	configScopeToggleTitle({
+		scope,
+		scopesWithValue,
+		repoKey: "assist",
+		lockedToGlobal,
+		selected: true,
 	});
 
 describe("configScopeToggleTitle", () => {
@@ -54,7 +68,24 @@ describe("configScopeToggleTitle", () => {
 				scopesWithValue: [],
 				repoKey: undefined,
 				lockedToGlobal: false,
+				selected: false,
 			}),
 		).toBe("Not set in this repo's entry under repos: in ~/.assist.yml");
+	});
+
+	it("names the file the pending save will be written to", () => {
+		expect(selectedTitle("repo", ["repo"])).toBe(
+			"This save will be written to repos.assist in ~/.assist.yml — currently set here, in effect",
+		);
+		expect(selectedTitle("project", ["repo"])).toBe(
+			"This save will be written to this repo's assist.yml — not currently set here",
+		);
+		expect(selectedTitle("global", ["repo", "global"])).toBe(
+			"This save will be written to ~/.assist.yml — currently set here, overridden by This repo",
+		);
+	});
+
+	it("keeps the global-only explanation for a selected disabled scope", () => {
+		expect(selectedTitle("project", ["global"], true)).toBe("Global-only key");
 	});
 });
