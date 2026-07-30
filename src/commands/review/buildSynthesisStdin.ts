@@ -38,6 +38,15 @@ Rules:
 - If a finding has no specific file:line, set Location to \`n/a\` exactly.
 - Do not invent findings beyond what the two reviews support.
 
+## Drop comment-adding findings
+
+This codebase enforces self-documenting code, so a recommendation to add a code comment cannot be applied. Omit from the consolidated output entirely any finding whose recommendation is to add a code comment — including a comment that restates what the code does, labels a block, or narrates why the change was made — and any finding whose defect is that comments are absent. Omit it, do not downgrade it to nit: drop it even when only one reviewer raised it, and even when both reviewers agreed on it.
+
+Two cases survive consolidation and must be kept:
+
+1. A finding about a comment this change made stale or wrong, where the recommendation is to remove or correct it.
+2. A finding about genuinely misleading code, where the recommendation is a clearer name, a smaller function, or a test. If the recommendation is instead to add a comment, drop it.
+
 Output only the consolidated Markdown. No preamble, no commentary about your process.`;
 
 export function buildSynthesisStdin(
