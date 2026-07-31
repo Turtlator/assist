@@ -5,6 +5,7 @@ type WorktreeConfig = NonNullable<AssistConfig["worktree"]>;
 
 const DISABLED: WorktreeConfig = {
 	enabled: false,
+	watcher: false,
 	trunk: false,
 	includeDrafts: false,
 	install: true,

@@ -10,6 +10,8 @@ import { isDraftCommand } from "../../shared/isDraftCommand";
 import { resumeSession } from "../resumeSession";
 import { allocateAndBind, type TreeSpawnContext } from "./allocateAndBind";
 import { bindResumedWorktree } from "./bindNewWorktree";
+import { ensureWatcher } from "./ensureWatcher";
+import { isBacklogRunArgs } from "./isBacklogRunArgs";
 import { isCommittingArgs } from "./isCommittingArgs";
 import { isPrCheckoutArgs } from "./isPrCheckoutArgs";
 import { resumeInReplacementTree } from "./resumeInReplacementTree";
@@ -39,7 +41,7 @@ export function spawnAssistInTree(
 	cwd: string | undefined,
 	meta: AssistSessionMeta | undefined,
 ): string {
-	return allocateAndBind(
+	const id = allocateAndBind(
 		ctx,
 		cwd,
 		(sid, resolvedCwd, holdUntilSeeded) =>
@@ -51,6 +53,8 @@ export function spawnAssistInTree(
 			inPlace: meta?.inPlace,
 		},
 	);
+	if (isBacklogRunArgs(assistArgs)) ensureWatcher(ctx, cwd);
+	return id;
 }
 
 export function resumeInTree(

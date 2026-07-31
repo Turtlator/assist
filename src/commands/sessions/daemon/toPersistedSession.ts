@@ -21,6 +21,7 @@ export function toPersistedSession(session: Session): PersistedSession {
 		assistArgs: session.assistArgs,
 		activity: session.activity,
 		starred: session.starred,
+		watcher: session.watcher,
 		autoRun: session.autoRun,
 		autoAdvance: session.autoAdvance,
 		reviewStarted: session.reviewStarted,

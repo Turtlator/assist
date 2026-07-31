@@ -65,6 +65,7 @@ export type Session = {
 	autoRun?: boolean;
 	autoAdvance?: boolean;
 	starred?: boolean;
+	watcher?: boolean;
 	design?: boolean;
 	reviewStarted?: boolean;
 	usageSeeded?: boolean;

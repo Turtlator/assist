@@ -46,6 +46,7 @@ export type SessionInfoBase = {
 	autoRun?: boolean;
 	autoAdvance?: boolean;
 	starred?: boolean;
+	watcher?: boolean;
 	usedPct?: number;
 	design?: boolean;
 	pendingPrPreview?: PrPreview;

@@ -9,6 +9,7 @@ type SpawnOpts = {
 	sessionId?: string;
 	claudeSessionId?: string;
 	design?: boolean;
+	auto?: boolean;
 };
 
 export function spawnClaude(opts: SpawnOpts = {}) {
@@ -19,6 +20,8 @@ function buildArgs(opts: SpawnOpts): string[] {
 	const base = ["claude", "--settings", ensureHooksSettings()];
 	if (opts.design) {
 		base.push("--append-system-prompt", readDesignSystemPrompt());
+		base.push("--permission-mode", "auto");
+	} else if (opts.auto) {
 		base.push("--permission-mode", "auto");
 	}
 	/* why: resuming replays the existing transcript, so the original prompt is
