@@ -1,3 +1,16 @@
+# [0.525.0](https://github.com/staff0rd/assist/compare/v0.524.0...v0.525.0) (2026-07-31)
+
+
+### Bug Fixes
+
+* resume reaped worktree in a new tree ([9bb2eb9](https://github.com/staff0rd/assist/commit/9bb2eb94307766002d2593a642ab042c4449f029))
+
+
+### Features
+
+* add worktree.watcher config key ([2ba58a5](https://github.com/staff0rd/assist/commit/2ba58a5ad6a69f5233021f33c8b8a3c7df6f9a56))
+* watch the clone on backlog runs ([8a364e5](https://github.com/staff0rd/assist/commit/8a364e526d2b966c18d31209f6e924d7aa6157a5))
+
 # [0.524.0](https://github.com/staff0rd/assist/compare/v0.523.0...v0.524.0) (2026-07-31)
 
 
