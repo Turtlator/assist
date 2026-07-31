@@ -1,3 +1,10 @@
+# [0.524.0](https://github.com/staff0rd/assist/compare/v0.523.0...v0.524.0) (2026-07-31)
+
+
+### Features
+
+* nest runs under launching card ([8420760](https://github.com/staff0rd/assist/commit/8420760a3e6b1968fb8b0ceff3e602dc50b17617))
+
 # [0.523.0](https://github.com/staff0rd/assist/compare/v0.522.2...v0.523.0) (2026-07-31)
 
 
