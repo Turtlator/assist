@@ -1,3 +1,10 @@
+# [0.523.0](https://github.com/staff0rd/assist/compare/v0.522.2...v0.523.0) (2026-07-31)
+
+
+### Features
+
+* carry unanchored findings to body ([cf21ba4](https://github.com/staff0rd/assist/commit/cf21ba498da9cc41f8e38def899a4bcea63296c2))
+
 ## [0.522.2](https://github.com/staff0rd/assist/compare/v0.522.1...v0.522.2) (2026-07-30)
 
 
