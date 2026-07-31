@@ -1,6 +1,6 @@
 import { buildDiffLineIndex } from "./buildDiffLineIndex";
 import { fetchPrDiff } from "./fetchPrDiff";
-import type { LineBoundFinding } from "./partitionFindings";
+import type { LineBoundFinding, UnanchoredFinding } from "./partitionFindings";
 import { partitionFindingsByDiff } from "./partitionFindingsByDiff";
 import { warnOutOfDiff } from "./warnOutOfDiff";
 
@@ -10,17 +10,25 @@ type PrDiffRef = {
 	headSha: string;
 };
 
-// Keeps only findings whose lines GitHub can actually anchor a comment on,
-// warning about the rest so they are not silently dropped.
+type InDiffSelection = {
+	inDiff: LineBoundFinding[];
+	unanchored: UnanchoredFinding[];
+};
+
 export function selectInDiffFindings(
 	lineBound: LineBoundFinding[],
 	prDiff: PrDiffRef,
-): LineBoundFinding[] {
+): InDiffSelection {
 	const diff = fetchPrDiff(prDiff.prNumber, prDiff.baseSha, prDiff.headSha);
 	const { inDiff, outOfDiff } = partitionFindingsByDiff(
 		lineBound,
 		buildDiffLineIndex(diff),
 	);
 	warnOutOfDiff(outOfDiff);
-	return inDiff;
+	return {
+		inDiff,
+		unanchored: outOfDiff.map(
+			(finding): UnanchoredFinding => ({ ...finding, reason: "out-of-diff" }),
+		),
+	};
 }

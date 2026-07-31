@@ -5,7 +5,7 @@ export function warnUnlocated(unlocated: ParsedFinding[]): void {
 	if (unlocated.length === 0) return;
 	console.warn(
 		chalk.yellow(
-			`Skipped ${unlocated.length} finding(s) without a parseable file:line:`,
+			`Moved ${unlocated.length} finding(s) without a parseable file:line into the review body:`,
 		),
 	);
 	for (const finding of unlocated) {

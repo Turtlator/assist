@@ -6,6 +6,12 @@ export type LineBoundFinding = ParsedFinding & {
 	startLine?: number;
 };
 
+export type UnanchorReason = "out-of-diff" | "unlocated";
+
+export type UnanchoredFinding = ParsedFinding & {
+	reason: UnanchorReason;
+};
+
 function isValidLine(n: number): boolean {
 	return Number.isInteger(n) && n >= 1;
 }

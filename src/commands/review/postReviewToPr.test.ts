@@ -46,7 +46,10 @@ const options = {
 beforeEach(() => {
 	vi.clearAllMocks();
 	vi.spyOn(console, "log").mockImplementation(() => {});
-	mockSelectPostableFindings.mockReturnValue([finding]);
+	mockSelectPostableFindings.mockReturnValue({
+		inDiff: [finding],
+		unanchored: [],
+	});
 	mockPostAndMaybeSubmit.mockResolvedValue({ posted: 1, submitted: true });
 	mockPromptConfirm.mockResolvedValue(true);
 	mockStillOnReviewedPr.mockReturnValue(true);
@@ -63,9 +66,29 @@ describe("postReviewToPr", () => {
 		);
 	});
 
+	it("should pass the un-anchorable findings on to the submit step", async () => {
+		const carried = [{ title: "outside the diff", reason: "out-of-diff" }];
+		mockSelectPostableFindings.mockReturnValue({
+			inDiff: [finding],
+			unanchored: carried,
+		});
+
+		await postReviewToPr("synthesis.md", prInfo, options);
+
+		expect(mockPostAndMaybeSubmit).toHaveBeenCalledWith(
+			[finding],
+			carried,
+			"synthesis markdown",
+			options,
+		);
+	});
+
 	describe("when there are no findings to post", () => {
 		it("should still run the chain with nothing posted", async () => {
-			mockSelectPostableFindings.mockReturnValue([]);
+			mockSelectPostableFindings.mockReturnValue({
+				inDiff: [],
+				unanchored: [],
+			});
 
 			await postReviewToPr("synthesis.md", prInfo, options);
 
@@ -74,6 +97,75 @@ describe("postReviewToPr", () => {
 				42,
 				{ posted: 0, submitted: false },
 				options,
+			);
+		});
+
+		it("should not post when the only un-anchorable finding was already raised", async () => {
+			mockSelectPostableFindings.mockReturnValue({
+				inDiff: [],
+				unanchored: [{ title: "covered", source: "already-raised" }],
+			});
+
+			await postReviewToPr("synthesis.md", prInfo, options);
+
+			expect(mockPostAndMaybeSubmit).not.toHaveBeenCalled();
+		});
+	});
+
+	describe("when no finding falls inside the diff", () => {
+		beforeEach(() => {
+			mockSelectPostableFindings.mockReturnValue({
+				inDiff: [],
+				unanchored: [{ title: "outside the diff", reason: "out-of-diff" }],
+			});
+		});
+
+		it("should still hand the un-anchorable findings to the submit step", async () => {
+			mockPostAndMaybeSubmit.mockResolvedValue({ posted: 0, submitted: true });
+
+			await postReviewToPr("synthesis.md", prInfo, options);
+
+			expect(mockPostAndMaybeSubmit).toHaveBeenCalledWith(
+				[],
+				[{ title: "outside the diff", reason: "out-of-diff" }],
+				"synthesis markdown",
+				options,
+			);
+			expect(mockChainAfterReview).toHaveBeenCalledWith(
+				42,
+				{ posted: 0, submitted: true },
+				options,
+			);
+		});
+
+		it("should ask only about the review body findings", async () => {
+			await postReviewToPr("synthesis.md", prInfo, {
+				...options,
+				prompt: true,
+			});
+
+			expect(mockPromptConfirm).toHaveBeenCalledWith(
+				"Post 1 finding(s) in the review body to PR #42?",
+				false,
+			);
+		});
+	});
+
+	describe("when the diff holds some findings and others cannot be anchored", () => {
+		it("should state both counts in the confirm prompt", async () => {
+			mockSelectPostableFindings.mockReturnValue({
+				inDiff: [finding, finding],
+				unanchored: [{ title: "outside the diff", reason: "out-of-diff" }],
+			});
+
+			await postReviewToPr("synthesis.md", prInfo, {
+				...options,
+				prompt: true,
+			});
+
+			expect(mockPromptConfirm).toHaveBeenCalledWith(
+				"Post 2 line comment(s) and 1 finding(s) in the review body to PR #42?",
+				false,
 			);
 		});
 	});

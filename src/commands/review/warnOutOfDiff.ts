@@ -5,7 +5,7 @@ export function warnOutOfDiff(outOfDiff: LineBoundFinding[]): void {
 	if (outOfDiff.length === 0) return;
 	console.warn(
 		chalk.yellow(
-			`Skipped ${outOfDiff.length} finding(s) whose lines fall outside the PR diff (GitHub would silently drop these):`,
+			`Moved ${outOfDiff.length} finding(s) whose lines fall outside the PR diff into the review body (GitHub cannot anchor a comment on these):`,
 		),
 	);
 	for (const finding of outOfDiff) {
