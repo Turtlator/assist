@@ -8,6 +8,7 @@ export type ServerConflict = {
 	runName?: string;
 	cwd?: string;
 	sessionId?: string;
+	launchedFrom?: string;
 };
 
 /** Transient error and success notices surfaced as snackbars. */

@@ -7,6 +7,7 @@ import { ClientHub, persistUsagePeak } from "./ClientHub";
 import type { AssistSessionMeta } from "./createAssistSession";
 import {
 	createRunSession,
+	type RunSpawnRequest,
 	type Session,
 	type SessionInfo,
 	type SessionStatus,
@@ -26,7 +27,6 @@ import {
 } from "./restartManagedSession";
 import { restoreAllSessions } from "./restoreAllSessions";
 import type { ServerConflictInfo } from "./serverConflictInfo";
-import type { ServerRunMeta } from "./serverRunMeta";
 import { runRetry } from "./runRetry";
 import { liveServerRun, stopServerSession } from "./liveServerRun";
 import { reuseSessionForRun } from "./reuseSessionForRun";
@@ -126,15 +126,8 @@ export class SessionManager {
 		return addAgentToStream(this.treeCtx(), targetId, prompt, harness);
 	}
 
-	spawnRun(
-		runName: string,
-		runArgs: string[],
-		cwd?: string,
-		meta?: ServerRunMeta,
-	): string {
-		return this.spawnWith((id) =>
-			createRunSession(id, runName, runArgs, cwd, meta),
-		);
+	spawnRun(request: RunSpawnRequest): string {
+		return this.spawnWith((id) => createRunSession(id, request));
 	}
 
 	liveServerRun(origin: string, excludeId?: string): Session | undefined {

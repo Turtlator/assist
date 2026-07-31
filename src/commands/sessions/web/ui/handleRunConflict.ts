@@ -14,5 +14,6 @@ export function handleRunConflict(
 		runName: msg.runName as string | undefined,
 		cwd: msg.cwd as string | undefined,
 		sessionId: msg.sessionId as string | undefined,
+		launchedFrom: msg.launchedFrom as string | undefined,
 	});
 }

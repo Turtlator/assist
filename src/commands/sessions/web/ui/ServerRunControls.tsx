@@ -16,7 +16,12 @@ export function ServerRunControls({ session }: { session: SessionInfo }) {
 				servingRun === r.name ? (
 					<StopServerButton key={r.name} id={session.id} />
 				) : (
-					<StartServerButton key={r.name} runName={r.name} cwd={session.cwd} />
+					<StartServerButton
+						key={r.name}
+						runName={r.name}
+						cwd={session.cwd}
+						launchedFrom={session.id}
+					/>
 				),
 			)}
 		</>

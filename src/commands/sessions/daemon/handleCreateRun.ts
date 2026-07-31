@@ -13,6 +13,7 @@ export function handleCreateRun(
 	const runName = d.runName as string;
 	const cwd = d.cwd as string | undefined;
 	const runArgs = (d.runArgs as string[]) ?? [];
+	const launchedFrom = d.launchedFrom as string | undefined;
 	const meta = serverRunMeta(runName, cwd);
 	if (meta.server && meta.origin) {
 		const existing = m.liveServerRun(meta.origin);
@@ -24,6 +25,7 @@ export function handleCreateRun(
 				type: "run-conflict",
 				runName,
 				cwd,
+				launchedFrom,
 				existing: serverConflictInfo(existing),
 			});
 			return;
@@ -37,7 +39,7 @@ export function handleCreateRun(
 	}
 	sendTo(client, {
 		type: "created",
-		sessionId: m.spawnRun(runName, runArgs, cwd, meta),
+		sessionId: m.spawnRun({ runName, runArgs, cwd, meta, launchedFrom }),
 		isNew: true,
 	});
 }

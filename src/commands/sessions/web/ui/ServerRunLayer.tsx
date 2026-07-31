@@ -29,7 +29,12 @@ export function ServerRunLayer({
 	const replace = () => {
 		if (!serverConflict) return;
 		if (serverConflict.runName)
-			startRun(serverConflict.runName, serverConflict.cwd, true);
+			startRun(
+				serverConflict.runName,
+				serverConflict.cwd,
+				true,
+				serverConflict.launchedFrom,
+			);
 		else if (serverConflict.sessionId)
 			retrySession(serverConflict.sessionId, true);
 		clearServerConflict();

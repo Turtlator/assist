@@ -111,6 +111,107 @@ describe("nestUnderBacklogRun", () => {
 		]);
 	});
 
+	it("nests a run launched from a clone-hosted card under that card", () => {
+		const sessions = [
+			run("run", "/git/assist"),
+			{ ...session("dev", "/git/assist"), launchedFrom: "run" },
+		];
+
+		expect(nestUnderBacklogRun(sessions)).toEqual([
+			{ session: sessions[0], children: [sessions[1]] },
+		]);
+	});
+
+	it("nests under the launching card even when it is not a backlog run", () => {
+		const sessions = [
+			session("review", "/git/assist"),
+			{ ...session("dev", "/git/assist"), launchedFrom: "review" },
+		];
+
+		expect(nestUnderBacklogRun(sessions)).toEqual([
+			{ session: sessions[0], children: [sessions[1]] },
+		]);
+	});
+
+	it("keeps an unrelated session sharing the clone cwd at the top level", () => {
+		const sessions = [
+			run("run", "/git/assist"),
+			{ ...session("dev", "/git/assist"), launchedFrom: "run" },
+			session("unrelated", "/git/assist"),
+		];
+
+		expect(nestUnderBacklogRun(sessions)).toEqual([
+			{ session: sessions[0], children: [sessions[1]] },
+			{ session: sessions[2], children: [] },
+		]);
+	});
+
+	it("keeps a run with no launchedFrom at the top level", () => {
+		const sessions = [run("run", "/git/assist"), session("dev", "/git/assist")];
+
+		expect(nestUnderBacklogRun(sessions)).toEqual([
+			{ session: sessions[0], children: [] },
+			{ session: sessions[1], children: [] },
+		]);
+	});
+
+	it("keeps a run whose launching card is gone at the top level", () => {
+		const sessions = [
+			{ ...session("dev", "/git/assist"), launchedFrom: "dismissed" },
+		];
+
+		expect(nestUnderBacklogRun(sessions)).toEqual([
+			{ session: sessions[0], children: [] },
+		]);
+	});
+
+	it("nests a launched run under a card listed after it", () => {
+		const sessions = [
+			{ ...session("dev", "/git/assist"), launchedFrom: "run" },
+			run("run", "/git/assist"),
+		];
+
+		expect(nestUnderBacklogRun(sessions)).toEqual([
+			{ session: sessions[1], children: [sessions[0]] },
+		]);
+	});
+
+	it("collapses a launch chain onto the root card's row", () => {
+		const sessions = [
+			run("run", "/git/assist"),
+			{ ...session("review", "/git/assist"), launchedFrom: "run" },
+			{ ...session("dev", "/git/assist"), launchedFrom: "review" },
+		];
+
+		expect(nestUnderBacklogRun(sessions)).toEqual([
+			{ session: sessions[0], children: [sessions[1], sessions[2]] },
+		]);
+	});
+
+	it("prefers the launching card over the run sharing the cwd", () => {
+		const sessions = [
+			run("run", "/git/assist-2"),
+			session("review", "/git/assist-2"),
+			{ ...session("dev", "/git/assist-2"), launchedFrom: "review" },
+		];
+
+		expect(nestUnderBacklogRun(sessions)).toEqual([
+			{ session: sessions[0], children: [sessions[1], sessions[2]] },
+		]);
+	});
+
+	it("keeps both sessions at the top level when launchedFrom forms a cycle", () => {
+		const sessions = [
+			{ ...session("a", "/git/assist"), launchedFrom: "b" },
+			{ ...session("b", "/git/assist"), launchedFrom: "a" },
+		];
+
+		expect(nestUnderBacklogRun(sessions)).toEqual([
+			{ session: sessions[0], children: [] },
+			{ session: sessions[1], children: [] },
+		]);
+	});
+
 	it("keeps sessions in sibling worktrees on separate rows", () => {
 		const sessions = [
 			run("run-a", "/git/assist-2"),

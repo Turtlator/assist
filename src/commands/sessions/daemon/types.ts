@@ -47,6 +47,7 @@ export type Session = {
 	stopping?: boolean;
 	closing?: boolean;
 	cwd?: string;
+	launchedFrom?: string;
 	claudeSessionId?: string;
 	initialPrompt?: string;
 	restored?: boolean;

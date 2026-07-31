@@ -60,13 +60,19 @@ function createPiSession(
 	};
 }
 
+export type RunSpawnRequest = {
+	runName: string;
+	runArgs: string[];
+	cwd?: string;
+	meta?: ServerRunMeta;
+	launchedFrom?: string;
+};
+
 export function createRunSession(
 	id: string,
-	runName: string,
-	runArgs: string[],
-	cwd?: string,
-	meta: ServerRunMeta = serverRunMeta(runName, cwd),
+	{ runName, runArgs, cwd, meta, launchedFrom }: RunSpawnRequest,
 ): Session {
+	const serverMeta = meta ?? serverRunMeta(runName, cwd);
 	return {
 		...sessionBase(id, "running"),
 		name: `run: ${runName}`,
@@ -75,8 +81,9 @@ export function createRunSession(
 		runName,
 		runArgs,
 		cwd,
-		server: meta.server || undefined,
-		serverPort: meta.port,
-		serverOrigin: meta.origin,
+		launchedFrom,
+		server: serverMeta.server || undefined,
+		serverPort: serverMeta.port,
+		serverOrigin: serverMeta.origin,
 	};
 }

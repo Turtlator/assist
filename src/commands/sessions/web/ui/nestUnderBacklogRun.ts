@@ -1,3 +1,4 @@
+import { launcherBySession } from "./launcherBySession";
 import type { SessionInfo } from "./types";
 
 export type NestedSessionRow = {
@@ -8,50 +9,40 @@ export type NestedSessionRow = {
 export function nestUnderBacklogRun(
 	sessions: SessionInfo[],
 ): NestedSessionRow[] {
-	const runByTree = new Map<string, SessionInfo>();
+	const launcherOf = launcherBySession(sessions);
+	const rootOf = new Map<SessionInfo, SessionInfo>();
 	for (const session of sessions) {
-		const tree = nestableTree(session);
-		if (!tree || !isBacklogRun(session) || runByTree.has(tree)) continue;
-		runByTree.set(tree, session);
+		const root = rootFor(session, launcherOf);
+		if (root) rootOf.set(session, root);
 	}
 
-	const rowByRun = new Map<SessionInfo, NestedSessionRow>();
-	for (const run of runByTree.values()) {
-		rowByRun.set(run, { session: run, children: [] });
-	}
-
+	const rowOf = new Map<SessionInfo, NestedSessionRow>();
 	const rows: NestedSessionRow[] = [];
 	for (const session of sessions) {
-		const ownRow = rowByRun.get(session);
-		if (ownRow) {
-			rows.push(ownRow);
-			continue;
-		}
-		const parentRow = isBacklogRun(session)
-			? undefined
-			: parentRowFor(session, runByTree, rowByRun);
-		if (parentRow) parentRow.children.push(session);
-		else rows.push({ session, children: [] });
+		if (rootOf.has(session)) continue;
+		const row: NestedSessionRow = { session, children: [] };
+		rowOf.set(session, row);
+		rows.push(row);
+	}
+	for (const session of sessions) {
+		const root = rootOf.get(session);
+		if (root) rowOf.get(root)?.children.push(session);
 	}
 	return rows;
 }
 
-function parentRowFor(
+function rootFor(
 	session: SessionInfo,
-	runByTree: Map<string, SessionInfo>,
-	rowByRun: Map<SessionInfo, NestedSessionRow>,
-): NestedSessionRow | undefined {
-	const tree = nestableTree(session);
-	const run = tree ? runByTree.get(tree) : undefined;
-	return run ? rowByRun.get(run) : undefined;
-}
-
-function isBacklogRun(session: SessionInfo): boolean {
-	return session.activity?.kind === "backlog";
-}
-
-function nestableTree(session: SessionInfo): string | undefined {
-	const { cwd, repoGroup } = session;
-	if (!cwd || !repoGroup || repoGroup.clone === cwd) return undefined;
-	return cwd;
+	launcherOf: Map<SessionInfo, SessionInfo>,
+): SessionInfo | undefined {
+	const seen = new Set([session]);
+	let current = launcherOf.get(session);
+	while (current) {
+		if (seen.has(current)) return undefined;
+		const next = launcherOf.get(current);
+		if (!next) return current;
+		seen.add(current);
+		current = next;
+	}
+	return undefined;
 }

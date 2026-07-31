@@ -2,7 +2,12 @@ import { createContext, useContext } from "react";
 
 type ServerActions = {
 	onStop: (id: string) => void;
-	onStart: (runName: string, cwd?: string, replace?: boolean) => void;
+	onStart: (
+		runName: string,
+		cwd?: string,
+		replace?: boolean,
+		launchedFrom?: string,
+	) => void;
 	onDiscard: (id: string) => void;
 };
 

@@ -76,8 +76,12 @@ export function stopSessionAction(send: SendFn) {
 }
 
 export function createRunAction(send: SendFn) {
-	return (runName: string, cwd?: string, replace?: boolean) =>
-		send({ type: "create-run", runName, cwd, replace });
+	return (
+		runName: string,
+		cwd?: string,
+		replace?: boolean,
+		launchedFrom?: string,
+	) => send({ type: "create-run", runName, cwd, replace, launchedFrom });
 }
 
 export function setAutoRunAction(send: SendFn) {

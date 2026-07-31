@@ -5,9 +5,11 @@ import { useServerActionsContext } from "./useServerActionsContext";
 export function StartServerButton({
 	runName,
 	cwd,
+	launchedFrom,
 }: {
 	runName: string;
 	cwd?: string;
+	launchedFrom?: string;
 }) {
 	const { onStart } = useServerActionsContext();
 	return (
@@ -18,7 +20,7 @@ export function StartServerButton({
 			icon={<PlayArrowIcon sx={{ fontSize: 16 }} />}
 			onClick={(e) => {
 				e.stopPropagation();
-				onStart(runName, cwd);
+				onStart(runName, cwd, undefined, launchedFrom);
 			}}
 		/>
 	);
