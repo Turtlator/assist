@@ -1,11 +1,13 @@
 import type { Session } from "./createSession";
 import { spawnClaude } from "./spawnClaude";
+import { startOrHoldPty } from "./startOrHoldPty";
 
 export function resumeSession(
 	id: string,
 	sessionId: string,
 	cwd: string,
 	name?: string,
+	holdPty?: boolean,
 ): Session {
 	const startedAt = Date.now();
 	return {
@@ -17,7 +19,10 @@ export function resumeSession(
 		runningMs: 0,
 		runningSince: null,
 		waitingSince: startedAt,
-		pty: spawnClaude({ resumeSessionId: sessionId, cwd, sessionId: id }),
+		...startOrHoldPty(
+			() => spawnClaude({ resumeSessionId: sessionId, cwd, sessionId: id }),
+			holdPty,
+		),
 		scrollback: "",
 		cwd,
 		/* why: bind the card to the conversation it is resuming so a daemon restart

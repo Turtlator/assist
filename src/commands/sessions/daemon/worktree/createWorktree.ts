@@ -13,19 +13,20 @@ export function createWorktree(
 	clone: string,
 	strategy: { root: string | undefined; trunk: boolean },
 	boundTreeRoots: Set<string>,
+	preferredPath?: string,
 ): string {
 	const base = strategy.root ? expandTilde(strategy.root) : dirname(clone);
 	const registered = new Set(listWorktreePaths(clone));
 	const branches = new Set(listLocalBranches(clone));
-	const path = nextWorktreePath(
-		clone,
-		base,
-		(candidate) =>
-			registered.has(candidate) ||
-			existsSync(candidate) ||
-			boundTreeRoots.has(candidate) ||
-			branches.has(basename(candidate)),
-	);
+	const isTaken = (candidate: string) =>
+		registered.has(candidate) ||
+		existsSync(candidate) ||
+		boundTreeRoots.has(candidate) ||
+		branches.has(basename(candidate));
+	const path =
+		preferredPath && !isTaken(preferredPath)
+			? preferredPath
+			: nextWorktreePath(clone, base, isTaken);
 	const start = worktreeStartPoint(clone, strategy.trunk);
 	gitSync(clone, [
 		"worktree",

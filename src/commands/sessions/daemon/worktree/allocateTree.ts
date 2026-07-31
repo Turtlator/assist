@@ -4,6 +4,7 @@ import { createWorktree } from "./createWorktree";
 import { mainWorktree } from "./listWorktreePaths";
 import { reusesClone } from "./reusesClone";
 import { worktreeConfigFor } from "./worktreeConfigFor";
+import { forcedSpillReason } from "./forcedSpillReason";
 
 export type Allocation = {
 	cwd: string | undefined;
@@ -17,6 +18,7 @@ export type AllocateOptions = {
 	draftLike?: boolean;
 	inPlace?: boolean;
 	commits?: boolean;
+	replacesTree?: string;
 };
 
 export function allocateTree(
@@ -34,10 +36,8 @@ export function allocateTree(
 
 	const clone = mainWorktree(repoRoot) ?? repoRoot;
 	const reuse = { ...options, includeDrafts: cfg.includeDrafts };
-	if (mustLeaveTrunk(cfg.trunk, options))
-		daemonLog(
-			`committing session spilled out of the clone ${clone}: worktree.trunk is on, so a commit here would land on the local mainline`,
-		);
+	const forcedSpill = forcedSpillReason(clone, cfg.trunk, options);
+	if (forcedSpill) daemonLog(forcedSpill);
 	else if (reusesClone(clone, boundTreeRoots, reuse))
 		return { cwd: clone, kind: "primary", created: false, clone };
 
@@ -45,12 +45,9 @@ export function allocateTree(
 		clone,
 		{ root: cfg.root, trunk: cfg.trunk },
 		boundTreeRoots,
+		options.replacesTree,
 	);
 	return { cwd: path, kind: "worktree", created: true, clone };
-}
-
-function mustLeaveTrunk(trunk: boolean, options: AllocateOptions): boolean {
-	return trunk === true && options.commits === true;
 }
 
 function keptInPlace(cwd: string): Allocation {

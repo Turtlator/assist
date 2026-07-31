@@ -83,6 +83,40 @@ describe("createWorktree", () => {
 		);
 	});
 
+	describe("with a preferred path", () => {
+		it("reclaims it when nothing holds it", () => {
+			expect(
+				createWorktree(
+					"/git/repo",
+					{ root: undefined, trunk: false },
+					new Set(),
+					"/git/repo-7",
+				),
+			).toBe("/git/repo-7");
+
+			expect(worktreeAdd()).toEqual([
+				"worktree",
+				"add",
+				"--no-track",
+				"-b",
+				"repo-7",
+				"/git/repo-7",
+				"origin/main",
+			]);
+		});
+
+		it("falls back to the next free suffix when it is already held", () => {
+			expect(
+				createWorktree(
+					"/git/repo",
+					{ root: undefined, trunk: false },
+					new Set(["/git/repo-7"]),
+					"/git/repo-7",
+				),
+			).toBe("/git/repo-2");
+		});
+	});
+
 	it("falls back to the clone's HEAD when the remote branch is unknown", () => {
 		gitState({ verify: false });
 

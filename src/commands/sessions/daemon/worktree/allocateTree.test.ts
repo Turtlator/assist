@@ -78,6 +78,35 @@ describe("allocateTree", () => {
 				"/git/repo",
 				{ root: "~/git", trunk: true },
 				new Set(["/git/repo"]),
+				undefined,
+			);
+		});
+	});
+
+	describe("for a resume whose worktree was reaped", () => {
+		it("spills to a worktree even though the clone is free", () => {
+			expect(
+				allocateTree("/git/repo", new Set(), { replacesTree: "/git/repo-7" }),
+			).toEqual({
+				cwd: "/git/repo-2",
+				kind: "worktree",
+				created: true,
+				clone: "/git/repo",
+			});
+		});
+
+		it("offers the reaped path back to the allocator so it can be reclaimed", () => {
+			createMock.mockReturnValue("/git/repo-7");
+
+			expect(
+				allocateTree("/git/repo", new Set(), { replacesTree: "/git/repo-7" })
+					.cwd,
+			).toBe("/git/repo-7");
+			expect(createMock).toHaveBeenCalledWith(
+				"/git/repo",
+				{ root: undefined, trunk: false },
+				new Set(),
+				"/git/repo-7",
 			);
 		});
 	});
