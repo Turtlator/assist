@@ -2,10 +2,12 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 export function syncDesign(claudeDir: string, targetBase: string): void {
-	const systemPromptSource = path.join(claudeDir, "system-prompt.md");
-	const systemPromptTarget = path.join(targetBase, "system-prompt.md");
+	const systemPromptSource = path.join(claudeDir, "design-system-prompt.md");
+	const systemPromptTarget = path.join(targetBase, "design-system-prompt.md");
 	fs.copyFileSync(systemPromptSource, systemPromptTarget);
-	console.log("Copied system-prompt.md to ~/.claude/system-prompt.md");
+	console.log(
+		"Copied design-system-prompt.md to ~/.claude/design-system-prompt.md",
+	);
 
 	const skillsSource = path.join(claudeDir, "skills");
 	const skillsTarget = path.join(targetBase, "skills");

@@ -19,7 +19,7 @@ describe("syncDesign", () => {
 		vi.spyOn(console, "log").mockImplementation(() => {});
 		claudeDir = mkdtempSync(join(tmpdir(), "assist-design-source-"));
 		targetBase = mkdtempSync(join(tmpdir(), "assist-design-target-"));
-		writeFileSync(join(claudeDir, "system-prompt.md"), "DESIGN PROMPT");
+		writeFileSync(join(claudeDir, "design-system-prompt.md"), "DESIGN PROMPT");
 		mkdirSync(join(claudeDir, "skills"));
 		writeFileSync(join(claudeDir, "skills", "polish-pass.md"), "POLISH");
 		writeFileSync(join(claudeDir, "skills", "wireframe.md"), "WIRE");
@@ -34,9 +34,9 @@ describe("syncDesign", () => {
 	it("copies the design system prompt into the target base", () => {
 		syncDesign(claudeDir, targetBase);
 
-		expect(readFileSync(join(targetBase, "system-prompt.md"), "utf8")).toBe(
-			"DESIGN PROMPT",
-		);
+		expect(
+			readFileSync(join(targetBase, "design-system-prompt.md"), "utf8"),
+		).toBe("DESIGN PROMPT");
 	});
 
 	it("copies every design skill into the target skills directory", () => {
