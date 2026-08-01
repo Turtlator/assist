@@ -38,7 +38,9 @@ export function CardPrActions({ session }: { session: SessionInfo }) {
 		<>
 			{pr && cwd && <OpenPrButton pr={pr} />}
 			<Box sx={topBar ? stackedSx : inlineSx}>
-				{pr && cwd && <ReviewButton cwd={cwd} pr={pr} />}
+				{pr && cwd && (
+					<ReviewButton cwd={cwd} pr={pr} launchedFrom={session.id} />
+				)}
 				<ViewReviewButton session={session} />
 			</Box>
 		</>

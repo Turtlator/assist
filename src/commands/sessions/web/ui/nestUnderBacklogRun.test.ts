@@ -212,6 +212,20 @@ describe("nestUnderBacklogRun", () => {
 		]);
 	});
 
+	it("nests a review and its address-comments run under the clone-hosted PR card", () => {
+		const sessions = [
+			run("run", "/git/assist"),
+			{ ...session("review", "/git/assist"), launchedFrom: "run" },
+			{ ...session("comments", "/git/assist"), launchedFrom: "run" },
+			session("unrelated", "/git/assist"),
+		];
+
+		expect(nestUnderBacklogRun(sessions)).toEqual([
+			{ session: sessions[0], children: [sessions[1], sessions[2]] },
+			{ session: sessions[3], children: [] },
+		]);
+	});
+
 	it("keeps sessions in sibling worktrees on separate rows", () => {
 		const sessions = [
 			run("run-a", "/git/assist-2"),

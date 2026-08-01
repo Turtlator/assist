@@ -14,7 +14,7 @@ const pr: PrSummary = {
 	url: "https://github.com/org/repo/pull/42",
 };
 
-function renderButton(launchAssist: () => void) {
+function renderButton(launchAssist: () => void, launchedFrom?: string) {
 	render(
 		<SessionLaunchContext.Provider
 			value={{
@@ -23,7 +23,7 @@ function renderButton(launchAssist: () => void) {
 				armUpdateReload: () => {},
 			}}
 		>
-			<ReviewButton cwd="/git/repo" pr={pr} />
+			<ReviewButton cwd="/git/repo" pr={pr} launchedFrom={launchedFrom} />
 		</SessionLaunchContext.Provider>,
 	);
 	fireEvent.click(screen.getByRole("button", { name: "Review PR" }));
@@ -98,6 +98,45 @@ describe("ReviewButton", () => {
 			["review-pr-comments", "42"],
 			"/git/repo",
 			expect.objectContaining({ inPlace: true }),
+		);
+	});
+
+	it("tags a review with the card it was launched from", () => {
+		const launchAssist = vi.fn();
+		renderButton(launchAssist, "7");
+
+		fireEvent.click(screen.getByText(reviewButtonModes[0].label));
+
+		expect(launchAssist).toHaveBeenCalledWith(
+			expect.anything(),
+			"/git/repo",
+			expect.objectContaining({ launchedFrom: "7" }),
+		);
+	});
+
+	it("tags Address Comments with the card it was launched from", () => {
+		const launchAssist = vi.fn();
+		renderButton(launchAssist, "7");
+
+		fireEvent.click(screen.getByText("Address Comments"));
+
+		expect(launchAssist).toHaveBeenCalledWith(
+			["review-pr-comments", "42"],
+			"/git/repo",
+			expect.objectContaining({ launchedFrom: "7" }),
+		);
+	});
+
+	it("leaves the launcher unset when the button has no card behind it", () => {
+		const launchAssist = vi.fn();
+		renderButton(launchAssist);
+
+		fireEvent.click(screen.getByText("Address Comments"));
+
+		expect(launchAssist).toHaveBeenCalledWith(
+			["review-pr-comments", "42"],
+			"/git/repo",
+			expect.objectContaining({ launchedFrom: undefined }),
 		);
 	});
 });

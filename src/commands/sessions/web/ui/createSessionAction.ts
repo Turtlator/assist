@@ -20,6 +20,7 @@ export type AssistLaunchMeta = {
 	title?: string;
 	subtitle?: string;
 	inPlace?: boolean;
+	launchedFrom?: string;
 };
 
 export function createAssistSessionAction(send: SendFn) {

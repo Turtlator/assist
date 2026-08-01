@@ -9,9 +9,17 @@ import { reviewButtonModes } from "./reviewButtonModes";
 import { ReviewChainToggles } from "./ReviewChainToggles";
 import { useReviewLaunch } from "./useReviewLaunch";
 
-export function ReviewButton({ cwd, pr }: { cwd: string; pr: PrSummary }) {
+export function ReviewButton({
+	cwd,
+	pr,
+	launchedFrom,
+}: {
+	cwd: string;
+	pr: PrSummary;
+	launchedFrom?: string;
+}) {
 	const { chain, setChain, resetChain, launchMode, launchAddressComments } =
-		useReviewLaunch(cwd, pr);
+		useReviewLaunch(cwd, pr, launchedFrom);
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
 	const pick = (e: { stopPropagation: () => void }, run: () => void) => {

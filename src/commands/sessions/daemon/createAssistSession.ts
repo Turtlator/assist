@@ -6,6 +6,7 @@ export type AssistSessionMeta = {
 	title?: string;
 	subtitle?: string;
 	inPlace?: boolean;
+	launchedFrom?: string;
 };
 
 export function createAssistSession(
@@ -34,5 +35,6 @@ export function createAssistSession(
 		scrollback: "",
 		assistArgs,
 		cwd,
+		launchedFrom: meta?.launchedFrom,
 	};
 }

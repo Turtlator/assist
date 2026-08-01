@@ -160,6 +160,49 @@ describe("create handler", () => {
 	});
 });
 
+describe("create-assist handler", () => {
+	function assistManager() {
+		return {
+			windowsProxy: { route: vi.fn(() => false) },
+			spawnAssist: vi.fn(() => "9"),
+		} as unknown as SessionManager & { spawnAssist: ReturnType<typeof vi.fn> };
+	}
+
+	it("forwards the launching card so the review nests under it", () => {
+		const m = assistManager();
+
+		messageHandlers["create-assist"](fakeClient() as never, m, {
+			assistArgs: ["review", "42"],
+			cwd: "/git/repo",
+			title: "PR #42",
+			inPlace: true,
+			launchedFrom: "7",
+		});
+
+		expect(m.spawnAssist).toHaveBeenCalledWith(["review", "42"], "/git/repo", {
+			title: "PR #42",
+			subtitle: undefined,
+			inPlace: true,
+			launchedFrom: "7",
+		});
+	});
+
+	it("leaves the launcher unset when the payload carries none", () => {
+		const m = assistManager();
+
+		messageHandlers["create-assist"](fakeClient() as never, m, {
+			assistArgs: ["review", "42"],
+			cwd: "/git/repo",
+		});
+
+		expect(m.spawnAssist).toHaveBeenCalledWith(
+			["review", "42"],
+			"/git/repo",
+			expect.objectContaining({ launchedFrom: undefined }),
+		);
+	});
+});
+
 describe("restart handler", () => {
 	function restartManager(result: { ok: boolean; reason?: string }) {
 		return {

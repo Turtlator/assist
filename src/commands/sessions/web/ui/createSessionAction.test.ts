@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+	createAssistSessionAction,
 	dismissSessionAction,
 	outputAction,
 	restartSessionAction,
@@ -22,6 +23,42 @@ function terminalState() {
 	} as unknown as WsDispatch;
 	return { buffers, written, unsubscribe, dispatch };
 }
+
+describe("createAssistSessionAction", () => {
+	it("carries the launching card's id so the new session nests under it", () => {
+		const send = vi.fn();
+
+		createAssistSessionAction(send)(["review", "42"], "/git/repo", {
+			title: "PR #42",
+			inPlace: true,
+			launchedFrom: "7",
+		});
+
+		expect(send).toHaveBeenCalledWith({
+			type: "create-assist",
+			assistArgs: ["review", "42"],
+			cwd: "/git/repo",
+			title: "PR #42",
+			inPlace: true,
+			launchedFrom: "7",
+		});
+	});
+
+	it("sends no launcher when there is no launching card", () => {
+		const send = vi.fn();
+
+		createAssistSessionAction(send)(["review", "42"], "/git/repo", {
+			title: "PR #42",
+		});
+
+		expect(send).toHaveBeenCalledWith({
+			type: "create-assist",
+			assistArgs: ["review", "42"],
+			cwd: "/git/repo",
+			title: "PR #42",
+		});
+	});
+});
 
 describe("dismissSessionAction", () => {
 	it("keeps a refused dismiss subscribed so a restart redraws the pane", () => {

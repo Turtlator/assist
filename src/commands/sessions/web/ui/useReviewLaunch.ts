@@ -11,6 +11,7 @@ import { useSessionLaunchContext } from "./useSessionLaunchContext";
 export function useReviewLaunch(
 	cwd: string,
 	pr: PrSummary,
+	launchedFrom?: string,
 ): {
 	chain: ReviewChain;
 	setChain: (chain: ReviewChain) => void;
@@ -20,7 +21,7 @@ export function useReviewLaunch(
 } {
 	const { launchAssist } = useSessionLaunchContext();
 	const [chain, setChain] = useState(reviewChainDefaults);
-	const meta = { ...prLaunchMeta(pr), inPlace: true };
+	const meta = { ...prLaunchMeta(pr), inPlace: true, launchedFrom };
 	const launch = (args: string[]) => launchAssist(args, cwd, meta);
 
 	return {
