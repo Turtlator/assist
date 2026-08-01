@@ -23,6 +23,8 @@ const railSx = {
 
 const ringSx = {
 	position: "absolute",
+	inset: 0,
+	margin: "auto",
 	width: "14px",
 	height: "14px",
 	borderRadius: "50%",
