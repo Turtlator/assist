@@ -1,3 +1,10 @@
+## [0.528.2](https://github.com/staff0rd/assist/compare/v0.528.1...v0.528.2) (2026-08-01)
+
+
+### Bug Fixes
+
+* centre verify ring on the running dot ([199a62a](https://github.com/staff0rd/assist/commit/199a62aaad32842a65697fbde2f8c6397742c7ba))
+
 ## [0.528.1](https://github.com/staff0rd/assist/compare/v0.528.0...v0.528.1) (2026-08-01)
 
 
