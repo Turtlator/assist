@@ -17,6 +17,7 @@ export const diffFileTreeFileRowSx = {
 	display: "flex",
 	alignItems: "center",
 	minWidth: 0,
+	pr: 0.5,
 	borderRadius: 1,
 	"&:hover": { bgcolor: "action.hover" },
 	"&:hover .diff-tree-revert, &:focus-within .diff-tree-revert": {

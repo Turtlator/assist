@@ -15,7 +15,7 @@ const panelSx = {
 	maxHeight: `calc(100vh - ${DIFF_TOOLBAR_HEIGHT + 96}px)`,
 	overflow: "auto",
 	pt: 2,
-	pr: 1,
+	pr: 2,
 } as const;
 
 export function DiffFileTree({
