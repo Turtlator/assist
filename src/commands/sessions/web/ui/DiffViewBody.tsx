@@ -10,6 +10,7 @@ const columnsSx = { display: "flex", alignItems: "flex-start" } as const;
 export type DiffViewBodyProps = {
 	files: FileData[];
 	treeVisible: boolean;
+	activeFile?: string;
 	viewType: ViewType;
 	cwd: string;
 	isCollapsed: (path: string) => boolean;
@@ -21,6 +22,7 @@ export type DiffViewBodyProps = {
 export function DiffViewBody({
 	files,
 	treeVisible,
+	activeFile,
 	viewType,
 	cwd,
 	isCollapsed,
@@ -28,10 +30,19 @@ export function DiffViewBody({
 	onComment,
 	emptyMessage,
 }: DiffViewBodyProps) {
+	const onSelectFile = (fileKey: string) => {
+		if (isCollapsed(fileKey)) onToggleCollapsed(fileKey);
+		scrollToDiffFile(fileKey);
+	};
+
 	return (
 		<Box sx={columnsSx}>
 			{treeVisible && (
-				<DiffFileTree files={files} onSelectFile={scrollToDiffFile} />
+				<DiffFileTree
+					files={files}
+					activeFile={activeFile}
+					onSelectFile={onSelectFile}
+				/>
 			)}
 			<Box sx={{ flex: 1, minWidth: 0 }}>
 				<DiffFileList

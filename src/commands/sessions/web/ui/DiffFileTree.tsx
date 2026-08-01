@@ -1,9 +1,10 @@
 import Box from "@mui/material/Box";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FileData } from "react-diff-view";
 import { buildDiffFileTree } from "./buildDiffFileTree";
 import { DiffFileTreeRows } from "./DiffFileTreeRows";
 import { DIFF_TOOLBAR_HEIGHT } from "./DiffToolbar";
+import { expandAncestors } from "./expandAncestors";
 
 const panelSx = {
 	position: "sticky",
@@ -19,9 +20,11 @@ const panelSx = {
 
 export function DiffFileTree({
 	files,
+	activeFile,
 	onSelectFile,
 }: {
 	files: FileData[];
+	activeFile?: string;
 	onSelectFile: (fileKey: string) => void;
 }) {
 	const nodes = useMemo(() => buildDiffFileTree(files), [files]);
@@ -34,6 +37,10 @@ export function DiffFileTree({
 			return next;
 		});
 
+	useEffect(() => {
+		if (activeFile) setCollapsed((prev) => expandAncestors(prev, activeFile));
+	}, [activeFile]);
+
 	if (nodes.length === 0) return null;
 
 	return (
@@ -42,6 +49,7 @@ export function DiffFileTree({
 				nodes={nodes}
 				depth={0}
 				collapsed={collapsed}
+				activeFile={activeFile}
 				onToggleDir={onToggleDir}
 				onSelectFile={onSelectFile}
 			/>

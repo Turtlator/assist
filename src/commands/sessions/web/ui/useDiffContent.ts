@@ -2,6 +2,7 @@ import { diffEmptyMessage } from "./diffEmptyMessage";
 import { diffFileTotals } from "./diffFileTotals";
 import { filePath } from "./FileDiff";
 import type { SessionInfo } from "./types";
+import { useActiveDiffFile } from "./useActiveDiffFile";
 import { useCollapsedFiles } from "./useCollapsedFiles";
 import { useDiff } from "./useDiff";
 import { useDiffComments } from "./useDiffComments";
@@ -31,6 +32,9 @@ export function useDiffContent(
 	});
 
 	const visiblePaths = visibleFiles.map((file) => filePath(file));
+	const activeFile = useActiveDiffFile(
+		treePanel.treeVisible ? visiblePaths : [],
+	);
 	const allCollapsed =
 		visiblePaths.length > 0 &&
 		visiblePaths.every((path) => collapsedFiles.isCollapsed(path));
@@ -42,6 +46,7 @@ export function useDiffContent(
 		treePanel,
 		comments,
 		collapsedFiles,
+		activeFile,
 		collapseAll: {
 			allCollapsed,
 			onToggleCollapseAll: () =>

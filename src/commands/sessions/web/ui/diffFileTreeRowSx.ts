@@ -13,6 +13,11 @@ export const diffFileTreeRowSx = {
 	"&:hover": { bgcolor: "action.hover" },
 } as const;
 
+export const diffFileTreeActiveRowSx = {
+	bgcolor: "action.selected",
+	fontWeight: 600,
+} as const;
+
 export const diffFileTreeNameSx = {
 	fontFamily: "monospace",
 	fontSize: 12,

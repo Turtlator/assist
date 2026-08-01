@@ -46,6 +46,7 @@ export function DiffContent({
 				loading={diff.loading}
 				files={diff.visibleFiles}
 				treeVisible={diff.treePanel.treeVisible}
+				activeFile={diff.activeFile}
 				viewType={diff.filters.viewType}
 				cwd={cwd}
 				isCollapsed={diff.collapsedFiles.isCollapsed}

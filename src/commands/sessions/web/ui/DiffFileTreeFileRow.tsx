@@ -3,6 +3,7 @@ import Typography from "@mui/material/Typography";
 import { DiffFileTreeLineCounts } from "./DiffFileTreeLineCounts";
 import {
 	DIFF_TREE_CHEVRON_WIDTH,
+	diffFileTreeActiveRowSx,
 	diffFileTreeNameSx,
 	diffFileTreeRowSx,
 } from "./diffFileTreeRowSx";
@@ -14,6 +15,7 @@ export function DiffFileTreeFileRow({
 	added,
 	removed,
 	indent,
+	active,
 	onSelect,
 }: {
 	name: string;
@@ -21,13 +23,16 @@ export function DiffFileTreeFileRow({
 	added: number;
 	removed: number;
 	indent: string;
+	active: boolean;
 	onSelect: (fileKey: string) => void;
 }) {
 	return (
 		<ButtonBase
 			onClick={() => onSelect(fileKey)}
+			aria-current={active || undefined}
 			sx={{
 				...diffFileTreeRowSx,
+				...(active ? diffFileTreeActiveRowSx : {}),
 				pl: `calc(${indent} + ${DIFF_TREE_CHEVRON_WIDTH}px)`,
 			}}
 		>

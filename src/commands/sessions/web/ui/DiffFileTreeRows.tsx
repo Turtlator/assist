@@ -8,12 +8,14 @@ export function DiffFileTreeRows({
 	nodes,
 	depth,
 	collapsed,
+	activeFile,
 	onToggleDir,
 	onSelectFile,
 }: {
 	nodes: DiffFileTreeNode[];
 	depth: number;
 	collapsed: ReadonlySet<string>;
+	activeFile: string | undefined;
 	onToggleDir: (path: string) => void;
 	onSelectFile: (fileKey: string) => void;
 }) {
@@ -28,6 +30,7 @@ export function DiffFileTreeRows({
 				added={node.added}
 				removed={node.removed}
 				indent={indent}
+				active={node.fileKey === activeFile}
 				onSelect={onSelectFile}
 			/>
 		) : (
@@ -43,6 +46,7 @@ export function DiffFileTreeRows({
 						nodes={node.children}
 						depth={depth + 1}
 						collapsed={collapsed}
+						activeFile={activeFile}
 						onToggleDir={onToggleDir}
 						onSelectFile={onSelectFile}
 					/>

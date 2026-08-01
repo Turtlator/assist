@@ -71,6 +71,38 @@ describe("DiffFileTree", () => {
 		expect(screen.getByText("-1")).toBeTruthy();
 	});
 
+	it("marks the active file's row as current", () => {
+		render(
+			<DiffFileTree
+				files={[file("src/a.ts"), file("src/b.ts")]}
+				activeFile="src/b.ts"
+				onSelectFile={vi.fn()}
+			/>,
+		);
+
+		expect(screen.getByText("b.ts").closest("[aria-current]")).toBeTruthy();
+		expect(screen.getByText("a.ts").closest("[aria-current]")).toBeNull();
+	});
+
+	it("expands the active file's collapsed ancestors", () => {
+		const { rerender } = render(
+			<DiffFileTree files={[file("src/app.ts")]} onSelectFile={vi.fn()} />,
+		);
+
+		fireEvent.click(screen.getByText("src"));
+		expect(screen.queryByText("app.ts")).toBeNull();
+
+		rerender(
+			<DiffFileTree
+				files={[file("src/app.ts")]}
+				activeFile="src/app.ts"
+				onSelectFile={vi.fn()}
+			/>,
+		);
+
+		expect(screen.getByText("app.ts")).toBeTruthy();
+	});
+
 	it("renders nothing when no files are in the diff", () => {
 		const { container } = render(
 			<DiffFileTree files={[]} onSelectFile={vi.fn()} />,
