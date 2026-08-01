@@ -31,7 +31,7 @@ function renderChips(
 ) {
 	const utils = render(
 		<RepoSelectionContext.Provider
-			value={{ repos: [], selectedCwd: "", setSelectedCwd }}
+			value={{ repos: [], selectedCwd: "", worktreeCwd: "", setSelectedCwd }}
 		>
 			<SessionLaunchContext.Provider
 				value={{
@@ -133,7 +133,7 @@ describe("RepoSummaryChips clone-on-select", () => {
 		});
 		const provider = (sessions: SessionInfo[]) => (
 			<RepoSelectionContext.Provider
-				value={{ repos: [], selectedCwd: "", setSelectedCwd }}
+				value={{ repos: [], selectedCwd: "", worktreeCwd: "", setSelectedCwd }}
 			>
 				<SessionLaunchContext.Provider
 					value={{
@@ -171,7 +171,7 @@ describe("RepoSummaryChips clone-on-select", () => {
 
 		const provider = (sessions: SessionInfo[]) => (
 			<RepoSelectionContext.Provider
-				value={{ repos: [], selectedCwd: "", setSelectedCwd }}
+				value={{ repos: [], selectedCwd: "", worktreeCwd: "", setSelectedCwd }}
 			>
 				<SessionLaunchContext.Provider
 					value={{

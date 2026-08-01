@@ -11,14 +11,18 @@ import { useRepoSelectionContext } from "./useRepoSelectionContext";
 const paperSx = { mt: 6, alignSelf: "flex-start" } as const;
 
 export function FilePalette({ onClose }: { onClose: () => void }) {
-	const { selectedCwd } = useRepoSelectionContext();
+	const { worktreeCwd } = useRepoSelectionContext();
 	const [query, setQuery] = useState("");
-	const search = useFileSearch(selectedCwd, query);
+	const search = useFileSearch(worktreeCwd, query);
 	const navigate = useNavigate();
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	const openFile = (path: string) =>
-		navigate(`/file?path=${encodeURIComponent(path)}`);
+		navigate(
+			`/file?${new URLSearchParams(
+				worktreeCwd ? { path, cwd: worktreeCwd } : { path },
+			)}`,
+		);
 
 	const { highlight, setHighlight, onKeyDown } = useRepoKeyboardNav(
 		search.files,
@@ -52,7 +56,7 @@ export function FilePalette({ onClose }: { onClose: () => void }) {
 				placeholder="Search files by name..."
 			/>
 			<FilePaletteResults
-				message={filePaletteMessage(selectedCwd, query, search)}
+				message={filePaletteMessage(worktreeCwd, query, search)}
 				files={search.files}
 				highlight={highlight}
 				onHighlight={setHighlight}

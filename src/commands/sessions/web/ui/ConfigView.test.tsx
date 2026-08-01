@@ -132,7 +132,12 @@ function keyFilter() {
 function renderView(selectedCwd = "/repo") {
 	render(
 		<RepoSelectionContext.Provider
-			value={{ repos: [], selectedCwd, setSelectedCwd: vi.fn() }}
+			value={{
+				repos: [],
+				selectedCwd,
+				worktreeCwd: selectedCwd,
+				setSelectedCwd: vi.fn(),
+			}}
 		>
 			<ConfigView />
 		</RepoSelectionContext.Provider>,

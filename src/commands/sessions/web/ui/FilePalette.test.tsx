@@ -25,11 +25,16 @@ function CurrentLocation() {
 	return <div data-testid="location">{`${pathname}${search}`}</div>;
 }
 
-function renderPalette(onClose = vi.fn()) {
+function renderPalette(onClose = vi.fn(), worktreeCwd = "/repo") {
 	render(
 		<MemoryRouter initialEntries={["/sessions"]}>
 			<RepoSelectionContext.Provider
-				value={{ repos: [], selectedCwd: "/repo", setSelectedCwd: vi.fn() }}
+				value={{
+					repos: [],
+					selectedCwd: "/repo",
+					worktreeCwd,
+					setSelectedCwd: vi.fn(),
+				}}
 			>
 				<FilePalette onClose={onClose} />
 			</RepoSelectionContext.Provider>
@@ -71,9 +76,33 @@ describe("FilePalette", () => {
 		fireEvent.keyDown(input(), { key: "Enter" });
 
 		expect(screen.getByTestId("location").textContent).toBe(
-			"/file?path=src%2Fb.ts",
+			"/file?path=src%2Fb.ts&cwd=%2Frepo",
 		);
 		expect(onClose).toHaveBeenCalled();
+	});
+
+	it("opens the file in the active worktree, not the clone", async () => {
+		stubFiles(["src/a.ts"]);
+		renderPalette(vi.fn(), "/repo/.worktrees/feature");
+
+		fireEvent.change(input(), { target: { value: "a" } });
+		await screen.findByText("a.ts");
+		fireEvent.keyDown(input(), { key: "Enter" });
+
+		expect(screen.getByTestId("location").textContent).toBe(
+			"/file?path=src%2Fa.ts&cwd=%2Frepo%2F.worktrees%2Ffeature",
+		);
+	});
+
+	it("searches the active worktree, not the clone", async () => {
+		const fetch = stubFiles([]);
+		renderPalette(vi.fn(), "/repo/.worktrees/feature");
+
+		fireEvent.change(input(), { target: { value: "a" } });
+
+		expect(fetch).toHaveBeenLastCalledWith(
+			"/api/files?cwd=%2Frepo%2F.worktrees%2Ffeature&q=a",
+		);
 	});
 
 	it("closes on Escape without navigating", async () => {

@@ -29,7 +29,12 @@ function session(
 function renderList(sessions: HistoricalSession[], selectedCwd: string) {
 	render(
 		<RepoSelectionContext.Provider
-			value={{ repos: [], selectedCwd, setSelectedCwd: vi.fn() }}
+			value={{
+				repos: [],
+				selectedCwd,
+				worktreeCwd: selectedCwd,
+				setSelectedCwd: vi.fn(),
+			}}
 		>
 			<HistoryList sessions={sessions} onView={vi.fn()} onResume={vi.fn()} />
 		</RepoSelectionContext.Provider>,

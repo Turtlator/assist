@@ -16,18 +16,19 @@ import { useSaveHotkey } from "./useSaveHotkey";
 export function FileView() {
 	const [searchParams] = useSearchParams();
 	const path = searchParams.get("path") ?? "";
-	const { selectedCwd } = useRepoSelectionContext();
-	const state = useFileContent(selectedCwd, path);
-	const buffer = useFileBuffer(selectedCwd, path, state);
+	const { worktreeCwd } = useRepoSelectionContext();
+	const cwd = searchParams.get("cwd") || worktreeCwd;
+	const state = useFileContent(cwd, path);
+	const buffer = useFileBuffer(cwd, path, state);
 	const isMarkdown = languageForPath(path) === "markdown";
 	const [mode, setMode] = useState<FileViewMode>("raw");
 	useSaveHotkey(buffer.save);
 
 	return (
 		<PageShell
-			loading={state.status === "loading" && Boolean(selectedCwd && path)}
+			loading={state.status === "loading" && Boolean(cwd && path)}
 			isEmpty={state.status !== "ready"}
-			emptyMessage={fileViewMessage(state.status, path, selectedCwd)}
+			emptyMessage={fileViewMessage(state.status, path, cwd)}
 			maxWidth={false}
 		>
 			<FileViewHeader

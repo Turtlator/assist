@@ -2,11 +2,13 @@ import { findActiveSession } from "./findActiveSession";
 import { repoGroupCwd } from "./repoGroupKey";
 import type { HistoricalSession, SessionInfo } from "./types";
 
-export function deriveActiveCwd(
+export function deriveWorktreeCwd(
 	activeId: string | null,
 	sessions: SessionInfo[],
 	history: HistoricalSession[],
-): string | undefined {
+	selectedCwd: string,
+): string {
 	const active = findActiveSession(activeId, sessions, history);
-	return active && repoGroupCwd(active);
+	if (!active?.cwd) return selectedCwd;
+	return repoGroupCwd(active) === selectedCwd ? active.cwd : selectedCwd;
 }

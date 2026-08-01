@@ -66,14 +66,19 @@ function stubContent(content: string, save?: SaveResponse) {
 	return fetchMock;
 }
 
-function renderView(entry: string, selectedCwd = "/repo") {
+function renderView(entry: string, worktreeCwd = "/repo") {
 	const router = createMemoryRouter(
 		[
 			{
 				path: "*",
 				element: (
 					<RepoSelectionContext.Provider
-						value={{ repos: [], selectedCwd, setSelectedCwd: vi.fn() }}
+						value={{
+							repos: [],
+							selectedCwd: "/repo",
+							worktreeCwd,
+							setSelectedCwd: vi.fn(),
+						}}
 					>
 						<FileView />
 					</RepoSelectionContext.Provider>
@@ -390,6 +395,42 @@ describe("FileView", () => {
 		renderView("/file?path=src/a.ts", "");
 
 		expect(screen.getByText("Select a repo to view files.")).toBeTruthy();
+	});
+
+	it("reads the file from the active worktree, not the clone", async () => {
+		const fetchMock = stubContent("const a = 1;\n");
+
+		renderView("/file?path=src/a.ts", "/repo/.worktrees/feature");
+
+		await findEditor();
+		expect(fetchMock).toHaveBeenCalledWith(
+			"/api/file?cwd=%2Frepo%2F.worktrees%2Ffeature&path=src%2Fa.ts",
+		);
+	});
+
+	it("prefers the cwd pinned in the url over the current selection", async () => {
+		const fetchMock = stubContent("const a = 1;\n");
+
+		renderView("/file?path=src/a.ts&cwd=/repo/.worktrees/pinned", "/other");
+
+		await findEditor();
+		expect(fetchMock).toHaveBeenCalledWith(
+			"/api/file?cwd=%2Frepo%2F.worktrees%2Fpinned&path=src%2Fa.ts",
+		);
+	});
+
+	it("saves back to the cwd pinned in the url", async () => {
+		const fetchMock = stubContent("const a = 1;\n");
+		renderView("/file?path=src/a.ts&cwd=/repo/.worktrees/pinned", "/other");
+		const area = await findEditor();
+
+		fireEvent.change(area, { target: { value: "const a = 2;\n" } });
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() => postCall(fetchMock));
+		expect(postCall(fetchMock).url).toBe(
+			"/api/file?cwd=%2Frepo%2F.worktrees%2Fpinned&path=src%2Fa.ts",
+		);
 	});
 
 	it("reports a missing file", async () => {
