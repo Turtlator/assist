@@ -1,3 +1,10 @@
+# [0.528.0](https://github.com/staff0rd/assist/compare/v0.527.0...v0.528.0) (2026-08-01)
+
+
+### Features
+
+* nest review sessions under their launcher ([4e2919a](https://github.com/staff0rd/assist/commit/4e2919ac6a2fd4cb31a2af803fec9ca4fefb29da))
+
 # [0.527.0](https://github.com/staff0rd/assist/compare/v0.526.0...v0.527.0) (2026-08-01)
 
 
