@@ -1,3 +1,10 @@
+# [0.531.0](https://github.com/staff0rd/assist/compare/v0.530.1...v0.531.0) (2026-08-01)
+
+
+### Features
+
+* track active file in diff tree ([803d725](https://github.com/staff0rd/assist/commit/803d725c5f7904ad25e8762568677cc0177fa079))
+
 ## [0.530.1](https://github.com/staff0rd/assist/compare/v0.530.0...v0.530.1) (2026-08-01)
 
 
