@@ -1,3 +1,10 @@
+# [0.526.0](https://github.com/staff0rd/assist/compare/v0.525.0...v0.526.0) (2026-08-01)
+
+
+### Features
+
+* keep launcher nesting across daemon restart ([a1b23b7](https://github.com/staff0rd/assist/commit/a1b23b745d4e61d26b29b30c221c9c32925dd8fb))
+
 # [0.525.0](https://github.com/staff0rd/assist/compare/v0.524.0...v0.525.0) (2026-07-31)
 
 
