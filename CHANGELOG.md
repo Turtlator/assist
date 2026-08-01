@@ -1,3 +1,10 @@
+## [0.533.1](https://github.com/staff0rd/assist/compare/v0.533.0...v0.533.1) (2026-08-01)
+
+
+### Bug Fixes
+
+* revert button left of tree line counts ([d8d56b8](https://github.com/staff0rd/assist/commit/d8d56b83c3471523804c223908cd405595d154f4))
+
 # [0.533.0](https://github.com/staff0rd/assist/compare/v0.532.0...v0.533.0) (2026-08-01)
 
 
