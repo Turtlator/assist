@@ -1,3 +1,10 @@
+# [0.529.0](https://github.com/staff0rd/assist/compare/v0.528.3...v0.529.0) (2026-08-01)
+
+
+### Features
+
+* rename design prompt, add artifact ([c0eb835](https://github.com/staff0rd/assist/commit/c0eb835d49601a605dce6ee1c0a40f183318139a))
+
 ## [0.528.3](https://github.com/staff0rd/assist/compare/v0.528.2...v0.528.3) (2026-08-01)
 
 
