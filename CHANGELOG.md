@@ -1,3 +1,10 @@
+## [0.528.1](https://github.com/staff0rd/assist/compare/v0.528.0...v0.528.1) (2026-08-01)
+
+
+### Bug Fixes
+
+* match verify ring dot to status glyph ([fb2a329](https://github.com/staff0rd/assist/commit/fb2a329a6edeed5bdee47eb7880ca4d765c644ce))
+
 # [0.528.0](https://github.com/staff0rd/assist/compare/v0.527.0...v0.528.0) (2026-08-01)
 
 
