@@ -1,3 +1,11 @@
+## [0.528.3](https://github.com/staff0rd/assist/compare/v0.528.2...v0.528.3) (2026-08-01)
+
+
+### Bug Fixes
+
+* draw running dot and ring as svg ([cc2cc7f](https://github.com/staff0rd/assist/commit/cc2cc7fcce9e98397e1b14c5ac26001ffcdc7715))
+* write array config items per scope ([8992600](https://github.com/staff0rd/assist/commit/89926009e2402ad9bfd34f60b26cfa4a65e44d83))
+
 ## [0.528.2](https://github.com/staff0rd/assist/compare/v0.528.1...v0.528.2) (2026-08-01)
 
 
