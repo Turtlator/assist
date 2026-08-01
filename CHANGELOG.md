@@ -1,3 +1,10 @@
+# [0.533.0](https://github.com/staff0rd/assist/compare/v0.532.0...v0.533.0) (2026-08-01)
+
+
+### Features
+
+* move file revert into the diff tree ([8c11b64](https://github.com/staff0rd/assist/commit/8c11b6438c54bd6a4a5308b56e236307f78da174))
+
 # [0.532.0](https://github.com/staff0rd/assist/compare/v0.531.0...v0.532.0) (2026-08-01)
 
 
