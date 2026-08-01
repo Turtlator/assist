@@ -1,3 +1,10 @@
+## [0.533.2](https://github.com/staff0rd/assist/compare/v0.533.1...v0.533.2) (2026-08-01)
+
+
+### Bug Fixes
+
+* pad the right edge of the diff tree ([162a605](https://github.com/staff0rd/assist/commit/162a605f48544cf4d6a4819b00c0453494ec01ea))
+
 ## [0.533.1](https://github.com/staff0rd/assist/compare/v0.533.0...v0.533.1) (2026-08-01)
 
 
