@@ -1,3 +1,10 @@
+# [0.527.0](https://github.com/staff0rd/assist/compare/v0.526.0...v0.527.0) (2026-08-01)
+
+
+### Features
+
+* ring running cards while verifying ([ed1a5ea](https://github.com/staff0rd/assist/commit/ed1a5ea45741aae81fd5c04d96311c87ed5a1b84))
+
 # [0.526.0](https://github.com/staff0rd/assist/compare/v0.525.0...v0.526.0) (2026-08-01)
 
 
