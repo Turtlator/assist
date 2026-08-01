@@ -1,3 +1,11 @@
+# [0.530.0](https://github.com/staff0rd/assist/compare/v0.529.0...v0.530.0) (2026-08-01)
+
+
+### Features
+
+* ensure watcher on chained runs ([484e4c0](https://github.com/staff0rd/assist/commit/484e4c0daae5c2900afc2972fe0c887461ad8ed9))
+* ring the top bar while verifying ([47bcd2a](https://github.com/staff0rd/assist/commit/47bcd2a0bd93fcd9e258aba364d8d52c45767da7))
+
 # [0.529.0](https://github.com/staff0rd/assist/compare/v0.528.3...v0.529.0) (2026-08-01)
 
 
