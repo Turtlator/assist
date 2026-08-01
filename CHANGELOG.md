@@ -1,3 +1,10 @@
+# [0.532.0](https://github.com/staff0rd/assist/compare/v0.531.0...v0.532.0) (2026-08-01)
+
+
+### Features
+
+* revert a file's uncommitted changes ([d8e9f34](https://github.com/staff0rd/assist/commit/d8e9f34ff307be149a59bca8929247b1e1ade08c))
+
 # [0.531.0](https://github.com/staff0rd/assist/compare/v0.530.1...v0.531.0) (2026-08-01)
 
 
