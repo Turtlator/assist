@@ -501,6 +501,46 @@ describe("restoreSession", () => {
 		});
 	});
 
+	it("brings a watcher back flagged and starred in the clone, so the next run finds it", () => {
+		const persisted: PersistedSession = {
+			name: "repo/Session 1",
+			commandType: "claude",
+			status: "running",
+			cwd: "/home/user/repo",
+			startedAt: 123,
+			claudeSessionId: "watch-123",
+			initialPrompt: "/watch",
+			starred: true,
+			watcher: true,
+		};
+
+		const session = restoreSession("1", persisted);
+
+		expect(session.watcher).toBe(true);
+		expect(session.starred).toBe(true);
+		expect(session.cwd).toBe("/home/user/repo");
+		expect(session.status).toBe("running");
+	});
+
+	it("brings a stopped watcher back flagged but not live, so the next run replaces it", () => {
+		const persisted: PersistedSession = {
+			name: "repo/Session 1",
+			commandType: "claude",
+			status: "stopped",
+			cwd: "/home/user/repo",
+			startedAt: 123,
+			initialPrompt: "/watch",
+			starred: true,
+			watcher: true,
+		};
+
+		const session = restoreSession("1", persisted);
+
+		expect(session.watcher).toBe(true);
+		expect(session.status).toBe("stopped");
+		expect(session.pty).toBeNull();
+	});
+
 	it("returns a not-restored stub for a run session, keeping retry args", () => {
 		const persisted: PersistedSession = {
 			name: "repo/run: build",

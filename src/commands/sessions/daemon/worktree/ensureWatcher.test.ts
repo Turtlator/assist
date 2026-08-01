@@ -120,9 +120,14 @@ describe("ensureWatcher", () => {
 	it("replaces a watcher that has stopped or errored", () => {
 		for (const status of ["stopped", "error"] as const) {
 			vi.clearAllMocks();
+			config();
 			const ctx = context([watcherSession({ status })]);
 
 			expect(ensureWatcher(ctx, "/git/repo")).toBe("9");
+			expect(createWatcherSession).toHaveBeenCalledWith("9", "/git/repo");
+			expect(daemonLog).toHaveBeenCalledWith(
+				expect.stringContaining("spawned watcher session 9"),
+			);
 		}
 	});
 

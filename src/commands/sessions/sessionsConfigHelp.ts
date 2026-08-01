@@ -55,7 +55,7 @@ export const sessionsConfigHelp: ConfigHelpEntry[] = [
 	{
 		key: "worktree.watcher",
 		setter: "assist config set worktree.watcher true -g --repo",
-		note: "a backlog run also starts one starred claude session in the clone running /watch, so the built version stays current while the run works in its worktree; requires worktree.enabled and a /watch command in the repo (default off)",
+		note: "a backlog run also starts one starred claude session in the clone running /watch, so the built version stays current while the run works in its worktree; requires worktree.enabled, a /watch command in the repo and an auto-build run entry (default off)",
 	},
 	{
 		key: "worktree.trunk",

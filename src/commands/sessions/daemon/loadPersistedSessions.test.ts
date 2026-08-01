@@ -278,6 +278,57 @@ describe("persistLiveSessions", () => {
 		expect(restoreBase("1", parsed).starred).toBe(true);
 	});
 
+	it("round-trips the watcher flag and its star so a restart finds the watcher", () => {
+		const sessions = new Map<string, Session>([
+			[
+				"1",
+				fakeSession({
+					id: "1",
+					name: "Session 1",
+					claudeSessionId: "abc",
+					cwd: "/repo",
+					initialPrompt: "/watch",
+					watcher: true,
+					starred: true,
+				}),
+			],
+		]);
+
+		persistLiveSessions(sessions);
+
+		const [, persisted] = saveJsonMock.mock.lastCall as [
+			string,
+			PersistedSession[],
+		];
+		expect(persisted[0]).toMatchObject({ watcher: true, starred: true });
+
+		loadJsonMock.mockReturnValue(persisted);
+		const [parsed] = loadPersistedSessions();
+
+		expect(restoreBase("1", parsed)).toMatchObject({
+			watcher: true,
+			starred: true,
+			cwd: "/repo",
+		});
+	});
+
+	it("leaves an ordinary session unflagged as a watcher after restore", () => {
+		const sessions = new Map<string, Session>([
+			["1", fakeSession({ id: "1", claudeSessionId: "abc" })],
+		]);
+
+		persistLiveSessions(sessions);
+
+		const [, persisted] = saveJsonMock.mock.lastCall as [
+			string,
+			PersistedSession[],
+		];
+		loadJsonMock.mockReturnValue(persisted);
+		const [parsed] = loadPersistedSessions();
+
+		expect(restoreBase("1", parsed).watcher).toBeUndefined();
+	});
+
 	it("round-trips the auto-run, auto-advance and review-started toggles", () => {
 		const sessions = new Map<string, Session>([
 			[
