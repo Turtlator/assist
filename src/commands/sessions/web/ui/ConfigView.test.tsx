@@ -5,6 +5,7 @@ import {
 	render,
 	screen,
 	waitFor,
+	within,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { describeConfigNode } from "../../../../shared/describeConfigNode";
@@ -404,6 +405,7 @@ describe("ConfigView", () => {
 					value: [{ name: "build", command: "npm run build" }],
 					source: "repo",
 					sources: ["repo"],
+					layers: { repo: [{ name: "build", command: "npm run build" }] },
 					repoKey: "assist",
 					node: node("run"),
 				},
@@ -456,6 +458,7 @@ describe("ConfigView", () => {
 					value: [{ name: "build", command: "npm run build" }],
 					source: "repo",
 					sources: ["repo"],
+					layers: { repo: [{ name: "build", command: "npm run build" }] },
 					repoKey: "planner-assistant",
 					node: node("run"),
 				},
@@ -702,24 +705,26 @@ describe("ConfigView", () => {
 		);
 	});
 
-	it("reorders entries in an array of objects", async () => {
+	it("reorders entries within the layer that owns them", async () => {
+		const project = [
+			{ name: "build", command: "npm" },
+			{ name: "test", command: "vitest" },
+		];
 		const fetchMock = stubApi([
 			{
 				key: "run",
 				type: "array",
-				value: [
-					{ name: "build", command: "npm" },
-					{ name: "test", command: "vitest" },
-				],
+				value: [{ name: "lint", command: "oxlint" }, ...project],
 				source: "project",
+				sources: ["project", "global"],
+				layers: { project, global: [{ name: "lint", command: "oxlint" }] },
 				node: node("run"),
 			},
 		]);
 		renderView("/repo/one");
 
 		await waitFor(() => expect(screen.getByText("run")).toBeTruthy());
-		fireEvent.click(screen.getByRole("button", { name: "Move run[1] up" }));
-		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+		fireEvent.click(screen.getByRole("button", { name: "Move run[2] up" }));
 
 		await waitFor(() =>
 			expect(lastSetBody(fetchMock)).toEqual({
@@ -731,6 +736,126 @@ describe("ConfigView", () => {
 				cwd: "/repo/one",
 				scope: "project",
 			}),
+		);
+	});
+
+	it("cannot move a run command out of its own layer", async () => {
+		stubApi([
+			{
+				key: "run",
+				type: "array",
+				value: [
+					{ name: "lint", command: "oxlint" },
+					{ name: "build", command: "npm" },
+				],
+				source: "project",
+				sources: ["project", "global"],
+				layers: {
+					project: [{ name: "build", command: "npm" }],
+					global: [{ name: "lint", command: "oxlint" }],
+				},
+				node: node("run"),
+			},
+		]);
+		renderView("/repo/one");
+
+		await waitFor(() => expect(screen.getByText("run")).toBeTruthy());
+
+		expect(
+			screen
+				.getByRole("button", { name: "Move run[1] up" })
+				.hasAttribute("disabled"),
+		).toBe(true);
+		expect(
+			screen.getByLabelText(
+				"run[1] is the first entry in this repo's assist.yml — entries cannot move across scopes",
+			),
+		).toBeTruthy();
+	});
+
+	it("adds a run command at the repo scope without copying the project's commands", async () => {
+		const project = [
+			{ name: "build", command: "npm run build" },
+			{ name: "test", command: "vitest" },
+		];
+		const fetchMock = stubApi(
+			[
+				{
+					key: "run",
+					type: "array",
+					value: project,
+					source: "project",
+					sources: ["project"],
+					layers: { project },
+					repoKey: "assist",
+					node: node("run"),
+				},
+			],
+			{ ok: true, status: 200, body: { target: "repo", repoKey: "assist" } },
+		);
+		renderView("/repo/one");
+
+		await waitFor(() => expect(screen.getByText("run")).toBeTruthy());
+		fireEvent.click(screen.getByRole("button", { name: "Add run entry" }));
+		fireEvent.change(screen.getByLabelText("run[2].name"), {
+			target: { value: "deploy" },
+		});
+		fireEvent.change(screen.getByLabelText("run[2].command"), {
+			target: { value: "./deploy" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "This repo" }));
+		fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() =>
+			expect(lastSetBody(fetchMock)).toEqual({
+				key: "run",
+				value: [{ name: "deploy", command: "./deploy" }],
+				cwd: "/repo/one",
+				scope: "repo",
+			}),
+		);
+		expect(
+			fetchMock.mock.calls.filter(([url]) => String(url) === "/api/config/set")
+				.length,
+		).toBe(1);
+	});
+
+	it("shows each run command's scope and offers its own save controls", async () => {
+		stubApi([
+			{
+				key: "run",
+				type: "array",
+				value: [
+					{ name: "lint", command: "oxlint" },
+					{ name: "build", command: "npm" },
+				],
+				source: "project",
+				sources: ["project", "global"],
+				layers: {
+					project: [{ name: "build", command: "npm" }],
+					global: [{ name: "lint", command: "oxlint" }],
+				},
+				node: node("run"),
+			},
+		]);
+		renderView("/repo/one");
+
+		await waitFor(() => expect(screen.getByText("run")).toBeTruthy());
+		const rows = screen.getAllByTestId("config-array-item");
+		expect(within(rows[0] as HTMLElement).getByText("global")).toBeTruthy();
+		expect(within(rows[1] as HTMLElement).getByText("project")).toBeTruthy();
+		expect(screen.queryByRole("button", { name: "Save" })).toBeNull();
+
+		fireEvent.click(screen.getByRole("button", { name: "Edit run[0]" }));
+
+		expect(screen.getByRole("button", { name: "Save" })).toBeTruthy();
+		expect(
+			screen
+				.getByRole("button", { name: "Global" })
+				.getAttribute("aria-pressed"),
+		).toBe("true");
+		expect(screen.getByTestId("config-write-target").textContent).toBe(
+			"This save writes to ~/.assist.yml. Dots mark where the saved value lives now.",
 		);
 	});
 

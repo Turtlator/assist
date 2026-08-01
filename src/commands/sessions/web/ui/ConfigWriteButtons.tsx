@@ -2,10 +2,10 @@ import Button from "@mui/material/Button";
 
 type Props = {
 	saving: boolean;
-	canClear: boolean;
-	clearTitle: string;
+	canClear?: boolean;
+	clearTitle?: string;
 	onSave: () => void;
-	onClear: () => void;
+	onClear?: () => void;
 	onCancel: () => void;
 };
 
@@ -30,7 +30,7 @@ export function ConfigWriteButtons({
 			<Button size="small" disabled={saving} onClick={onCancel}>
 				Cancel
 			</Button>
-			{canClear && (
+			{canClear && onClear && (
 				<Button
 					size="small"
 					color="error"

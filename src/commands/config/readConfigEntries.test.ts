@@ -150,6 +150,59 @@ describe("readConfigEntries", () => {
 		expect(entryFor("worktree.trunk").sources).toEqual([]);
 	});
 
+	it("carries each layer's own raw array instead of only the merged value", () => {
+		writeFileSync(globalConfig, "run:\n  - name: build\n    command: g\n");
+		writeFileSync(repoConfig, "run:\n  - name: test\n    command: p\n");
+
+		const entry = entryFor("run");
+
+		expect(entry.layers).toEqual({
+			global: [{ name: "build", command: "g" }],
+			project: [{ name: "test", command: "p" }],
+		});
+		expect(entry.value).toHaveLength(2);
+	});
+
+	it("carries the repos override layer separately from the global layer", () => {
+		writeFileSync(
+			globalConfig,
+			`run:\n  - name: build\n    command: g\nrepos:\n  "${repoOriginKey}":\n    run:\n      - name: deploy\n        command: r\n`,
+		);
+
+		expect(entryFor("run").layers).toEqual({
+			global: [{ name: "build", command: "g" }],
+			repo: [{ name: "deploy", command: "r" }],
+		});
+	});
+
+	it("omits layers that do not set the key", () => {
+		writeFileSync(repoConfig, "commit:\n  push: true\n");
+
+		expect(entryFor("commit.push").layers).toEqual({ project: true });
+		expect(entryFor("worktree.trunk").layers).toEqual({});
+	});
+
+	it("withholds secrets from the per-layer raw values", () => {
+		writeFileSync(
+			globalConfig,
+			"sql:\n  connections:\n    - name: main\n      server: localhost\n      port: 1433\n      user: sa\n      password: hunter2\n      database: app\n",
+		);
+
+		const entry = entryFor("sql.connections");
+
+		expect(entry.layers?.global).toEqual([
+			{
+				name: "main",
+				server: "localhost",
+				port: 1433,
+				user: "sa",
+				password: REDACTED_SECRET,
+				database: "app",
+			},
+		]);
+		expect(JSON.stringify(entry)).not.toContain("hunter2");
+	});
+
 	it("withholds a secret scalar's value while keeping its source", () => {
 		writeFileSync(repoConfig, "database:\n  url: postgres://u:p@host/db\n");
 

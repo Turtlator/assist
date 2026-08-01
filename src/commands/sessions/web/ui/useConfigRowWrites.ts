@@ -8,21 +8,14 @@ import { unsetConfigValue } from "./unsetConfigValue";
 type Options = {
 	entry: ConfigEntry;
 	cwd: string;
-	scope: ConfigScope;
 	onSaved: () => void;
 	onError: (message: string) => void;
 };
 
-export function useConfigRowWrites({
-	entry,
-	cwd,
-	scope,
-	onSaved,
-	onError,
-}: Options) {
+export function useConfigRowWrites({ entry, cwd, onSaved, onError }: Options) {
 	const [saving, setSaving] = useState(false);
 
-	async function save(value: unknown): Promise<void> {
+	async function save(scope: ConfigScope, value: unknown): Promise<boolean> {
 		setSaving(true);
 		const { error } = await saveConfigValue({
 			key: entry.key,
@@ -31,11 +24,15 @@ export function useConfigRowWrites({
 			scope,
 		});
 		setSaving(false);
-		if (error) onError(error);
-		else onSaved();
+		if (error) {
+			onError(error);
+			return false;
+		}
+		onSaved();
+		return true;
 	}
 
-	async function clear(): Promise<void> {
+	async function clear(scope: ConfigScope): Promise<boolean> {
 		setSaving(true);
 		const { error, removed } = await unsetConfigValue({
 			key: entry.key,
@@ -43,9 +40,16 @@ export function useConfigRowWrites({
 			scope,
 		});
 		setSaving(false);
-		if (error) onError(error);
-		else if (removed === false) onError(nothingToClearMessage(entry, scope));
-		else onSaved();
+		if (error) {
+			onError(error);
+			return false;
+		}
+		if (removed === false) {
+			onError(nothingToClearMessage(entry, scope));
+			return false;
+		}
+		onSaved();
+		return true;
 	}
 
 	return { saving, save, clear };

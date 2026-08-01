@@ -4,6 +4,7 @@ import { configClearTitle } from "./configClearTitle";
 import { ConfigScopeToggle } from "./ConfigScopeToggle";
 import { configScopesWithValue } from "./configScopesWithValue";
 import { ConfigWriteButtons } from "./ConfigWriteButtons";
+import { ConfigWriteNote } from "./ConfigWriteNote";
 import { ConfigWriteTargetHint } from "./ConfigWriteTargetHint";
 import type { ConfigScope } from "./saveConfigValue";
 
@@ -12,10 +13,11 @@ type Props = {
 	scope: ConfigScope;
 	scopeLocked: boolean;
 	saving: boolean;
-	canClear: boolean;
+	canClear?: boolean;
+	note?: string;
 	onScopeChange: (scope: ConfigScope) => void;
 	onSave: () => void;
-	onClear: () => void;
+	onClear?: () => void;
 	onCancel: () => void;
 };
 
@@ -25,6 +27,7 @@ export function ConfigEditorActions({
 	scopeLocked,
 	saving,
 	canClear,
+	note,
 	onScopeChange,
 	onSave,
 	onClear,
@@ -55,6 +58,7 @@ export function ConfigEditorActions({
 				/>
 			</Stack>
 			<ConfigWriteTargetHint scope={scope} repoKey={entry.repoKey} />
+			<ConfigWriteNote note={note} />
 		</Stack>
 	);
 }

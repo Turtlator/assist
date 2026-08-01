@@ -35,7 +35,6 @@ export function useConfigRowEditor({ entry, cwd, onSaved, onError }: Options) {
 	const { saving, save, clear } = useConfigRowWrites({
 		entry,
 		cwd,
-		scope,
 		onSaved,
 		onError,
 	});
@@ -47,8 +46,8 @@ export function useConfigRowEditor({ entry, cwd, onSaved, onError }: Options) {
 		setScope: (next: ConfigScope) => setPicked({ signature, scope: next }),
 		scopeLocked,
 		saving,
-		save: () => save(value),
-		clear,
+		save: () => save(scope, value),
+		clear: () => clear(scope),
 		canClear: configScopesWithValue(entry).includes(scope),
 		dirty: JSON.stringify(value) !== JSON.stringify(saved),
 		reset: () => setValue(saved),
