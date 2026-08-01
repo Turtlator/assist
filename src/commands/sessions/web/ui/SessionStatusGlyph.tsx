@@ -1,5 +1,6 @@
 import { keyframes } from "@emotion/react";
 import Typography from "@mui/material/Typography";
+import { SessionRunningDot } from "./SessionRunningDot";
 import { statusColors } from "./statusColors";
 import { statusGlyph } from "./statusGlyph";
 import type { SessionStatus } from "./types";
@@ -23,13 +24,8 @@ const pulsingGlyphSx = {
 	"@media (prefers-reduced-motion: reduce)": { animation: "none" },
 } as const;
 
-export function SessionStatusGlyph({
-	status,
-	title,
-}: {
-	status: SessionStatus;
-	title?: string;
-}) {
+export function SessionStatusGlyph({ status }: { status: SessionStatus }) {
+	if (status === "running") return <SessionRunningDot />;
 	return (
 		<Typography
 			variant="caption"
@@ -37,7 +33,7 @@ export function SessionStatusGlyph({
 				...(status === "waiting" ? pulsingGlyphSx : glyphSx),
 				color: statusColors[status],
 			}}
-			title={title ?? status}
+			title={status}
 		>
 			{statusGlyph[status]}
 		</Typography>

@@ -79,7 +79,7 @@ describe("CardHeader loading", () => {
 		);
 
 		expect(screen.queryByRole("progressbar")).toBeNull();
-		expect(screen.getByTitle("running").textContent).toBe("●");
+		expect(screen.getByTitle("running")).toBeTruthy();
 	});
 
 	it("keeps the spinner for an assist session until its activity resolves", () => {
@@ -151,7 +151,7 @@ describe("CardHeader loading", () => {
 
 describe("CardHeader verify ring", () => {
 	function renderSession(overrides: Partial<SessionInfo>, loading = false) {
-		render(
+		return render(
 			<CardHeader
 				session={{ ...session, cwd: "/home/me/repo", ...overrides }}
 				loading={loading}
@@ -162,17 +162,28 @@ describe("CardHeader verify ring", () => {
 	}
 
 	it("rings the running dot while the session is verifying", () => {
-		renderSession({ verifying: true });
+		const { container } = renderSession({ verifying: true });
 
-		expect(screen.getByTitle("verifying").textContent).toBe("●");
-		expect(screen.queryByTitle("running")).toBeNull();
+		expect(screen.getByTitle("verifying")).toBeTruthy();
+		expect(container.querySelector(".verify-ring")).toBeTruthy();
+	});
+
+	it("draws the ring concentric with the dot it surrounds", () => {
+		const { container } = renderSession({ verifying: true });
+
+		const dot = container.querySelector("circle:not(.verify-ring)");
+		const ring = container.querySelector(".verify-ring");
+
+		expect(ring?.getAttribute("cx")).toBe(dot?.getAttribute("cx"));
+		expect(ring?.getAttribute("cy")).toBe(dot?.getAttribute("cy"));
 	});
 
 	it("reverts to the plain dot once verify finishes", () => {
-		renderSession({ verifying: false });
+		const { container } = renderSession({ verifying: false });
 
 		expect(screen.queryByTitle("verifying")).toBeNull();
-		expect(screen.getByTitle("running").textContent).toBe("●");
+		expect(screen.getByTitle("running")).toBeTruthy();
+		expect(container.querySelector(".verify-ring")).toBeNull();
 	});
 
 	it("leaves the waiting glyph in place for a session awaiting a pr preview", () => {
@@ -256,7 +267,7 @@ describe("CardHeader status glyph", () => {
 		renderHeader(true);
 
 		expect(screen.queryByText("● running")).toBeNull();
-		expect(screen.getByTitle("running").textContent).toBe("●");
+		expect(screen.getByTitle("running")).toBeTruthy();
 	});
 
 	it("leaves context and counts to the body", () => {
