@@ -39,6 +39,8 @@ export function DiffFileTreeFileRow({
 				aria-current={active || undefined}
 				sx={{
 					...diffFileTreeRowSx,
+					flex: 1,
+					"&:hover": { bgcolor: "transparent" },
 					pl: `calc(${indent} + ${DIFF_TREE_CHEVRON_WIDTH}px)`,
 				}}
 			>
@@ -46,7 +48,6 @@ export function DiffFileTreeFileRow({
 				<Typography component="span" sx={diffFileTreeNameSx}>
 					{file.name}
 				</Typography>
-				<DiffFileTreeLineCounts added={file.added} removed={file.removed} />
 			</ButtonBase>
 			{onRevert && (
 				<Box className="diff-tree-revert" sx={diffFileTreeRevertSx}>
@@ -57,6 +58,7 @@ export function DiffFileTreeFileRow({
 					/>
 				</Box>
 			)}
+			<DiffFileTreeLineCounts added={file.added} removed={file.removed} />
 		</Box>
 	);
 }
