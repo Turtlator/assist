@@ -253,3 +253,35 @@ describe("ui-status handler", () => {
 		);
 	});
 });
+
+describe("verify-started handler", () => {
+	function verifyManager(routeReturns: boolean) {
+		return {
+			windowsProxy: { route: vi.fn(() => routeReturns) },
+			verify: { start: vi.fn() },
+		} as unknown as SessionManager & {
+			windowsProxy: { route: ReturnType<typeof vi.fn> };
+			verify: { start: ReturnType<typeof vi.fn> };
+		};
+	}
+
+	it("flags the local session when the message is not routed away", () => {
+		const m = verifyManager(false);
+		const client = fakeClient();
+
+		messageHandlers["verify-started"](client as never, m, { sessionId: "42" });
+
+		expect(m.verify.start).toHaveBeenCalledWith(client, "42");
+	});
+
+	it("hands a windows-origin session to the windows daemon instead", () => {
+		const m = verifyManager(true);
+
+		messageHandlers["verify-started"](fakeClient() as never, m, {
+			sessionId: "win-3",
+		});
+
+		expect(m.windowsProxy.route).toHaveBeenCalled();
+		expect(m.verify.start).not.toHaveBeenCalled();
+	});
+});

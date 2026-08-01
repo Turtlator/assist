@@ -93,8 +93,9 @@ export const messageHandlers: Record<string, Handler> = {
 	"set-active": (_client, m, d) =>
 		m.active.set(d.cwd as string, d.sessionId as string),
 	"set-status": handleSetStatus,
-	"verify-started": (client, m, d) =>
+	"verify-started": routed((client, m, d) =>
 		m.verify.start(client, d.sessionId as string),
+	),
 	"pr-preview": (client, m, d) => m.prPreview.set(client, d),
 	"pr-decision": (_client, m, d) => m.prPreview.decide(d),
 	"ui-status": (_client, _m, d) =>

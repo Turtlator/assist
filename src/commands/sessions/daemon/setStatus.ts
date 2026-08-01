@@ -17,6 +17,10 @@ export function setStatus(
 	session.runningSince = newStatus === "running" ? now : null;
 	session.waitingSince = newStatus === "waiting" ? now : null;
 	session.status = newStatus;
+	if (newStatus !== "running" && session.verifying) {
+		session.verifying = false;
+		daemonLog(`session ${session.id} verifying cleared: status=${newStatus}`);
+	}
 	if (newStatus === "waiting") {
 		daemonLog(
 			`session ${session.id} waiting since ${new Date(now).toISOString()}`,
