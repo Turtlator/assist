@@ -23,6 +23,7 @@ import { openInCode } from "./openInCode";
 import { prList } from "./prList";
 import { prStatus } from "./prStatus";
 import { restartWeb } from "./restartWeb";
+import { revertDiffFile } from "./revertDiffFile";
 import { sessionLayout } from "./sessionLayout";
 import { sessionView } from "./sessionView";
 import { setConfig } from "./setConfig";
@@ -67,6 +68,7 @@ const routes: Record<string, Handler> = {
 	"GET /api/git-status": gitStatus,
 	"GET /api/diff": diff,
 	"GET /api/diff-scopes": diffScopes,
+	"POST /api/diff/revert": revertDiffFile,
 	"GET /api/file": fileContent,
 	"POST /api/file": writeFileContent,
 	"GET /api/files": listFiles,

@@ -1,3 +1,4 @@
+import { collapseAllState } from "./collapseAllState";
 import { diffEmptyMessage } from "./diffEmptyMessage";
 import { diffFileTotals } from "./diffFileTotals";
 import { filePath } from "./FileDiff";
@@ -8,6 +9,7 @@ import { useDiff } from "./useDiff";
 import { useDiffComments } from "./useDiffComments";
 import { useDiffFileData } from "./useDiffFileData";
 import { useDiffFilters } from "./useDiffFilters";
+import { useDiffRevert } from "./useDiffRevert";
 import { useDiffScopeState } from "./useDiffScopeState";
 import { useDiffTreePanel } from "./useDiffTreePanel";
 
@@ -19,7 +21,16 @@ export function useDiffContent(
 	sendInput: (sessionId: string, data: string) => void,
 ) {
 	const scopeState = useDiffScopeState(cwd, sessionId, scope);
-	const { diff, loading, error } = useDiff(cwd, sessionId, scopeState.scope);
+	const { diff, loading, error, refresh } = useDiff(
+		cwd,
+		sessionId,
+		scopeState.scope,
+	);
+	const revert = useDiffRevert(
+		cwd,
+		scopeState.scope === "uncommitted",
+		refresh,
+	);
 	const filters = useDiffFilters();
 	const treePanel = useDiffTreePanel();
 	const comments = useDiffComments(sessions, sessionId, sendInput);
@@ -35,10 +46,6 @@ export function useDiffContent(
 	const activeFile = useActiveDiffFile(
 		treePanel.treeVisible ? visiblePaths : [],
 	);
-	const allCollapsed =
-		visiblePaths.length > 0 &&
-		visiblePaths.every((path) => collapsedFiles.isCollapsed(path));
-
 	return {
 		scopeState,
 		loading,
@@ -47,11 +54,8 @@ export function useDiffContent(
 		comments,
 		collapsedFiles,
 		activeFile,
-		collapseAll: {
-			allCollapsed,
-			onToggleCollapseAll: () =>
-				collapsedFiles.setAll(visiblePaths, !allCollapsed),
-		},
+		revert,
+		collapseAll: collapseAllState(visiblePaths, collapsedFiles),
 		visibleFiles,
 		totals: diffFileTotals(visibleFiles),
 		emptyMessage: diffEmptyMessage(error, files.length),

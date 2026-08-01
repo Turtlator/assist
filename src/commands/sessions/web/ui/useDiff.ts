@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { diffQuery } from "./diffQuery";
 
 const POLL_INTERVAL_MS = 5000;
@@ -13,12 +13,13 @@ export function useDiff(
 	cwd: string,
 	sessionId?: string,
 	scope?: string,
-): DiffState {
+): DiffState & { refresh: () => void } {
 	const [state, setState] = useState<DiffState>({
 		diff: "",
 		loading: true,
 		error: false,
 	});
+	const pollRef = useRef<() => void>(() => {});
 
 	useEffect(() => {
 		if (!cwd) {
@@ -39,6 +40,7 @@ export function useDiff(
 				if (!cancelled) setState({ diff: "", loading: false, error: true });
 			}
 		};
+		pollRef.current = poll;
 		poll();
 		const id = setInterval(poll, POLL_INTERVAL_MS);
 		return () => {
@@ -47,5 +49,5 @@ export function useDiff(
 		};
 	}, [cwd, sessionId, scope]);
 
-	return state;
+	return { ...state, refresh: useCallback(() => pollRef.current(), []) };
 }

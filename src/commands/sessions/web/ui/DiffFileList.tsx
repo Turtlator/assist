@@ -5,6 +5,17 @@ import { diffSx } from "./diffSx";
 import { FileDiff, filePath } from "./FileDiff";
 import type { DiffComment } from "./formatDiffComment";
 
+export type DiffFileListProps = {
+	files: FileData[];
+	viewType: ViewType;
+	cwd: string;
+	isCollapsed: (path: string) => boolean;
+	onToggleCollapsed: (path: string) => void;
+	onComment?: (comment: DiffComment) => void;
+	onRevert?: (path: string) => void;
+	emptyMessage: string;
+};
+
 export function DiffFileList({
 	files,
 	viewType,
@@ -12,16 +23,9 @@ export function DiffFileList({
 	isCollapsed,
 	onToggleCollapsed,
 	onComment,
+	onRevert,
 	emptyMessage,
-}: {
-	files: FileData[];
-	viewType: ViewType;
-	cwd: string;
-	isCollapsed: (path: string) => boolean;
-	onToggleCollapsed: (path: string) => void;
-	onComment?: (comment: DiffComment) => void;
-	emptyMessage: string;
-}) {
+}: DiffFileListProps) {
 	if (files.length === 0)
 		return (
 			<Typography color="text.secondary" align="center" sx={{ py: 6 }}>
@@ -40,6 +44,7 @@ export function DiffFileList({
 					collapsed={isCollapsed(filePath(file))}
 					onToggle={() => onToggleCollapsed(filePath(file))}
 					onComment={onComment}
+					onRevert={onRevert}
 				/>
 			))}
 		</Box>

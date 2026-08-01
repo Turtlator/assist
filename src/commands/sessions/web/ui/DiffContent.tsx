@@ -1,5 +1,6 @@
-import { DiffCommentSnackbar } from "./DiffCommentSnackbar";
+import { diffBodyProps } from "./diffBodyProps";
 import { DiffContentBody } from "./DiffContentBody";
+import { DiffSnackbars } from "./DiffSnackbars";
 import { DiffToolbar } from "./DiffToolbar";
 import type { DiffPanelMode } from "./toggleDiffPanel";
 import type { SessionInfo } from "./types";
@@ -42,21 +43,12 @@ export function DiffContent({
 				onToggleMode={onToggleMode}
 				onClose={onClose}
 			/>
-			<DiffContentBody
-				loading={diff.loading}
-				files={diff.visibleFiles}
-				treeVisible={diff.treePanel.treeVisible}
-				activeFile={diff.activeFile}
-				viewType={diff.filters.viewType}
-				cwd={cwd}
-				isCollapsed={diff.collapsedFiles.isCollapsed}
-				onToggleCollapsed={diff.collapsedFiles.toggle}
-				onComment={diff.comments.onComment}
-				emptyMessage={diff.emptyMessage}
-			/>
-			<DiffCommentSnackbar
-				sessionName={diff.comments.sentTo}
-				onClose={diff.comments.clearSent}
+			<DiffContentBody {...diffBodyProps(diff, cwd)} />
+			<DiffSnackbars
+				sentTo={diff.comments.sentTo}
+				clearSent={diff.comments.clearSent}
+				revertError={diff.revert.error}
+				clearRevertError={diff.revert.clearError}
 			/>
 		</>
 	);
