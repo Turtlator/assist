@@ -25,6 +25,7 @@ import {
 	restartManagedSession,
 	type RestartResult,
 } from "./restartManagedSession";
+import { releaseClient } from "./releaseClient";
 import { restoreAllSessions } from "./restoreAllSessions";
 import type { ServerConflictInfo } from "./serverConflictInfo";
 import { runRetry } from "./runRetry";
@@ -33,6 +34,7 @@ import { reuseSessionForRun } from "./reuseSessionForRun";
 import { shutdownSessions } from "./shutdownSessions";
 import { toSessionInfo } from "./toSessionInfo";
 import { treeSpawnContext } from "./treeSpawnContext";
+import { VerifyTracker } from "./VerifyTracker";
 import { WindowsProxy } from "./WindowsProxy";
 import { addAgentToStream } from "./worktree/addAgentToStream";
 import {
@@ -50,6 +52,7 @@ export class SessionManager {
 	);
 	// why: dispatch calls active.set() on card click; broadcasts include active.toJSON()
 	readonly active = new ActiveSelection(() => this.notify());
+	readonly verify = new VerifyTracker(this.sessions, () => this.notify());
 	readonly clients = new ClientHub(persistUsagePeak);
 	private readonly idCounter = { next: 1 };
 	private shuttingDown = false;
@@ -67,9 +70,7 @@ export class SessionManager {
 	}
 
 	removeClient(client: SessionClient): void {
-		this.clients.delete(client);
-		this.clients.unsubscribeLogs(client);
-		this.prPreview.clearWaiter(client);
+		releaseClient(client, this.clients, this.prPreview, this.verify);
 		this.onIdleChange?.(this.isIdle());
 	}
 

@@ -67,6 +67,7 @@ export type Session = {
 	starred?: boolean;
 	watcher?: boolean;
 	design?: boolean;
+	verifying?: boolean;
 	reviewStarted?: boolean;
 	usageSeeded?: boolean;
 	pendingPrPreview?: PrPreview;

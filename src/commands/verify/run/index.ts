@@ -1,3 +1,4 @@
+import { signalVerifying } from "../../sessions/signalVerifying";
 import { filterByChangedFiles } from "./filterByChangedFiles";
 import { printMeasureTable } from "./printMeasureTable";
 import { resolveEntries } from "./resolveEntries";
@@ -29,9 +30,14 @@ export async function run(
 	}
 
 	printEntryList(entries);
-	const { results, totalMs } = await runAllEntries(entries);
-	if (options.measure) {
-		printMeasureTable(results, totalMs);
+	const releaseVerifying = signalVerifying();
+	try {
+		const { results, totalMs } = await runAllEntries(entries);
+		if (options.measure) {
+			printMeasureTable(results, totalMs);
+		}
+		handleResults(results, entries.length);
+	} finally {
+		releaseVerifying();
 	}
-	handleResults(results, entries.length);
 }

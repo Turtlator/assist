@@ -149,6 +149,55 @@ describe("CardHeader loading", () => {
 	});
 });
 
+describe("CardHeader verify ring", () => {
+	function renderSession(overrides: Partial<SessionInfo>, loading = false) {
+		render(
+			<CardHeader
+				session={{ ...session, cwd: "/home/me/repo", ...overrides }}
+				loading={loading}
+				onDismiss={() => {}}
+			/>,
+			{ wrapper: Stars },
+		);
+	}
+
+	it("rings the running dot while the session is verifying", () => {
+		renderSession({ verifying: true });
+
+		expect(screen.getByTitle("verifying").textContent).toBe("●");
+		expect(screen.queryByTitle("running")).toBeNull();
+	});
+
+	it("reverts to the plain dot once verify finishes", () => {
+		renderSession({ verifying: false });
+
+		expect(screen.queryByTitle("verifying")).toBeNull();
+		expect(screen.getByTitle("running").textContent).toBe("●");
+	});
+
+	it("leaves the waiting glyph in place for a session awaiting a pr preview", () => {
+		renderSession({
+			verifying: true,
+			pendingPrPreview: {
+				requestId: "r1",
+				title: "t",
+				body: "b",
+				prNumber: null,
+			},
+		});
+
+		expect(screen.queryByTitle("verifying")).toBeNull();
+		expect(screen.getByTitle("waiting").textContent).toBe("◆");
+	});
+
+	it("yields to the starting spinner", () => {
+		renderSession({ verifying: true }, true);
+
+		expect(screen.getByRole("progressbar")).toBeTruthy();
+		expect(screen.queryByTitle("verifying")).toBeNull();
+	});
+});
+
 describe("CardHeader busy caption", () => {
 	function renderBusy(overrides: Partial<SessionInfo> = {}) {
 		render(

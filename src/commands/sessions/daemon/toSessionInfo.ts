@@ -20,6 +20,7 @@ export function toSessionInfo(session: Session): SessionInfo {
 		starred,
 		watcher,
 		design,
+		verifying,
 		pendingPrPreview,
 		undurable,
 	} = session;
@@ -42,6 +43,7 @@ export function toSessionInfo(session: Session): SessionInfo {
 		starred,
 		watcher,
 		design,
+		verifying,
 		pendingPrPreview,
 		undurable,
 	};

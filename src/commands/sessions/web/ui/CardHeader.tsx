@@ -3,7 +3,9 @@ import Typography from "@mui/material/Typography";
 import { areChipsLoading } from "./areChipsLoading";
 import { CardHeaderActions } from "./CardHeaderActions";
 import { displayStatus } from "./displayStatus";
+import { isVerifying } from "./isVerifying";
 import { SessionStatusGlyph } from "./SessionStatusGlyph";
+import { SessionVerifyRing } from "./SessionVerifyRing";
 import { sessionTitle } from "./sessionTitle";
 import type { CardHeaderProps } from "./types";
 
@@ -23,6 +25,16 @@ const titleSx = {
 	whiteSpace: "nowrap",
 } as const;
 
+function StatusRail({
+	session,
+	loading,
+}: Pick<CardHeaderProps, "session" | "loading">) {
+	if (areChipsLoading(session, loading))
+		return <CircularProgress size={11} sx={spinnerSx} />;
+	if (isVerifying(session)) return <SessionVerifyRing />;
+	return <SessionStatusGlyph status={displayStatus(session)} />;
+}
+
 export function CardHeader({
 	session,
 	loading,
@@ -32,11 +44,7 @@ export function CardHeader({
 }: CardHeaderProps) {
 	return (
 		<>
-			{areChipsLoading(session, loading) ? (
-				<CircularProgress size={11} sx={spinnerSx} />
-			) : (
-				<SessionStatusGlyph status={displayStatus(session)} />
-			)}
+			<StatusRail session={session} loading={loading} />
 			<Typography variant="body2" sx={titleSx}>
 				{sessionTitle(session)}
 			</Typography>

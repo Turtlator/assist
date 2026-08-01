@@ -52,4 +52,5 @@ export type SessionInfoBase = {
 	pendingPrPreview?: PrPreview;
 	undurable?: { reason: string; removesTree?: boolean };
 	closing?: boolean;
+	verifying?: boolean;
 };
