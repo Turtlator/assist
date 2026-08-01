@@ -1,3 +1,11 @@
+## [0.530.1](https://github.com/staff0rd/assist/compare/v0.530.0...v0.530.1) (2026-08-01)
+
+
+### Bug Fixes
+
+* open files in the active worktree ([008d161](https://github.com/staff0rd/assist/commit/008d161fa412514d151d98b4a6bbc7832985d4ed))
+* serialise release runs on main ([caa9089](https://github.com/staff0rd/assist/commit/caa9089dce8eb47024ce626fe45316e355c7953f))
+
 # [0.530.0](https://github.com/staff0rd/assist/compare/v0.529.0...v0.530.0) (2026-08-01)
 
 
