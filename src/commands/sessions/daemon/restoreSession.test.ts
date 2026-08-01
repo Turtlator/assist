@@ -520,4 +520,20 @@ describe("restoreSession", () => {
 		expect(session.runArgs).toEqual(["--watch"]);
 		expect(session.startedAt).toBe(123);
 	});
+
+	it("carries the persisted launcher id onto a restored run session", () => {
+		const persisted: PersistedSession = {
+			name: "repo/run: start:dev",
+			commandType: "run",
+			cwd: "/home/user/repo",
+			startedAt: 123,
+			runName: "start:dev",
+			runArgs: [],
+			launchedFrom: "7",
+		};
+
+		const session = restoreSession("2", persisted);
+
+		expect(session.launchedFrom).toBe("7");
+	});
 });

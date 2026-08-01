@@ -25,6 +25,7 @@ export function toPersistedSession(session: Session): PersistedSession {
 		autoRun: session.autoRun,
 		autoAdvance: session.autoAdvance,
 		reviewStarted: session.reviewStarted,
+		launchedFrom: session.launchedFrom,
 		undurable: session.undurable,
 	};
 }

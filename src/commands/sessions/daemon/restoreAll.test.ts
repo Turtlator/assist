@@ -49,8 +49,13 @@ describe("restoreAll", () => {
 		vi.clearAllMocks();
 		maxLive.mockReturnValue(24);
 		restoreSessionMock.mockImplementation(
-			(id: string, p: { name: string }) =>
-				({ id, name: p.name, status: "running" }) as Session,
+			(id: string, p: { name: string; launchedFrom?: string }) =>
+				({
+					id,
+					name: p.name,
+					status: "running",
+					launchedFrom: p.launchedFrom,
+				}) as Session,
 		);
 	});
 
@@ -202,6 +207,70 @@ describe("restoreAll", () => {
 		expect(daemonLogMock).toHaveBeenCalledWith(
 			`dropped persisted session id=${entries[0].id} name=${JSON.stringify(entries[0].name)} cwd=${entries[0].cwd}: card refused`,
 		);
+	});
+
+	it("relinks a launched session to the new id of the card that launched it", () => {
+		loadPersistedMock.mockReturnValue([
+			persistedEntry(7),
+			{ ...persistedEntry(9), launchedFrom: "7" },
+		]);
+		const { sessions, spawner } = harness();
+
+		restoreAll(spawner, sessions);
+
+		expect(sessions.get("1")?.name).toBe("session 7");
+		expect(sessions.get("2")?.launchedFrom).toBe("1");
+	});
+
+	it("relinks a launched session restored before its launcher", () => {
+		loadPersistedMock.mockReturnValue([
+			{ ...persistedEntry(9), launchedFrom: "7" },
+			persistedEntry(7),
+		]);
+		const { sessions, spawner } = harness();
+
+		restoreAll(spawner, sessions);
+
+		expect(sessions.get("2")?.name).toBe("session 7");
+		expect(sessions.get("1")?.launchedFrom).toBe("2");
+	});
+
+	it("leaves a launched session at the top level when its launcher was not persisted", () => {
+		loadPersistedMock.mockReturnValue([
+			{ ...persistedEntry(9), launchedFrom: "7" },
+		]);
+		const { sessions, spawner } = harness();
+
+		restoreAll(spawner, sessions);
+
+		expect(sessions.get("1")?.launchedFrom).toBeUndefined();
+	});
+
+	it("does not attach a stale launchedFrom to the session that inherits that id", () => {
+		loadPersistedMock.mockReturnValue([
+			persistedEntry(5),
+			{ ...persistedEntry(6), launchedFrom: "1" },
+		]);
+		const { sessions, spawner } = harness();
+
+		restoreAll(spawner, sessions);
+
+		expect(sessions.get("1")?.name).toBe("session 5");
+		expect(sessions.get("2")?.launchedFrom).toBeUndefined();
+	});
+
+	it("leaves a launched session at the top level when its launcher was deferred past the cap", () => {
+		maxLive.mockReturnValue(1);
+		loadPersistedMock.mockReturnValue([
+			{ ...persistedEntry(9), launchedFrom: "7" },
+			persistedEntry(7),
+		]);
+		const { sessions, spawner } = harness();
+
+		restoreAll(spawner, sessions);
+
+		expect(sessions.get("2")?.status).toBe("stopped");
+		expect(sessions.get("1")?.launchedFrom).toBeUndefined();
 	});
 
 	it("logs a deferred session in full when even its card cannot be created", () => {

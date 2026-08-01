@@ -15,13 +15,15 @@ export function restoreOne(
 	persisted: PersistedSession,
 	spawner: SessionSpawner,
 	sessions: Map<string, Session>,
-): void {
+): string | undefined {
 	try {
 		const id = spawner.spawn((sid) => restoreSession(sid, persisted));
 		logUnresumable(persisted.name, id, sessions.get(id));
+		return id;
 	} catch (error) {
 		const reason = logRestoreError(persisted, error);
 		spawnErrorCard(persisted, spawner, reason);
+		return undefined;
 	}
 }
 

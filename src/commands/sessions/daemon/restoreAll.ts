@@ -8,6 +8,7 @@ import {
 } from "./loadPersistedSessions";
 import { logDroppedSession } from "./logDroppedSession";
 import type { SessionSpawner } from "./makeSessionSpawner";
+import { remapLaunchedFrom } from "./remapLaunchedFrom";
 import { restoreOne, type Spawn } from "./restoreOne";
 import { sessionLimits } from "./sessionLimits";
 
@@ -17,12 +18,15 @@ export function restoreAll(
 ): string[] {
 	const persisted = loadPersistedSessions();
 	const cap = sessionLimits.maxRestore();
+	const restoredIds = new Map<string, string>();
 	const names = persisted.slice(0, cap).map((entry) => {
-		restoreOne(entry, spawner, sessions);
+		const id = restoreOne(entry, spawner, sessions);
+		if (entry.id != null && id != null) restoredIds.set(entry.id, id);
 		return entry.name;
 	});
 	for (const over of persisted.slice(cap))
 		deferOne(over, spawner.recoveryCard, cap);
+	remapLaunchedFrom(sessions, restoredIds);
 	return names;
 }
 
