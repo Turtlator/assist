@@ -1,7 +1,7 @@
 import { keyframes } from "@emotion/react";
 import Box from "@mui/material/Box";
+import { SessionStatusGlyph } from "./SessionStatusGlyph";
 import { statusColors } from "./statusColors";
-import { statusGlyph } from "./statusGlyph";
 
 const spin = keyframes`
 	to { transform: rotate(360deg); }
@@ -18,8 +18,6 @@ const railSx = {
 	justifyContent: "center",
 	width: "14px",
 	height: "20px",
-	fontSize: "0.7rem",
-	lineHeight: "20px",
 	color: statusColors.running,
 } as const;
 
@@ -41,9 +39,9 @@ const ringSx = {
 
 export function SessionVerifyRing() {
 	return (
-		<Box sx={railSx} title="verifying">
+		<Box sx={railSx}>
 			<Box sx={ringSx} />
-			{statusGlyph.running}
+			<SessionStatusGlyph status="running" title="verifying" />
 		</Box>
 	);
 }

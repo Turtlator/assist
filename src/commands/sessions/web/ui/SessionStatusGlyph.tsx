@@ -23,7 +23,13 @@ const pulsingGlyphSx = {
 	"@media (prefers-reduced-motion: reduce)": { animation: "none" },
 } as const;
 
-export function SessionStatusGlyph({ status }: { status: SessionStatus }) {
+export function SessionStatusGlyph({
+	status,
+	title,
+}: {
+	status: SessionStatus;
+	title?: string;
+}) {
 	return (
 		<Typography
 			variant="caption"
@@ -31,7 +37,7 @@ export function SessionStatusGlyph({ status }: { status: SessionStatus }) {
 				...(status === "waiting" ? pulsingGlyphSx : glyphSx),
 				color: statusColors[status],
 			}}
-			title={status}
+			title={title ?? status}
 		>
 			{statusGlyph[status]}
 		</Typography>
