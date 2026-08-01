@@ -22,10 +22,12 @@ export function DiffFileTree({
 	files,
 	activeFile,
 	onSelectFile,
+	onRevert,
 }: {
 	files: FileData[];
 	activeFile?: string;
 	onSelectFile: (fileKey: string) => void;
+	onRevert?: (path: string) => void;
 }) {
 	const nodes = useMemo(() => buildDiffFileTree(files), [files]);
 	const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
@@ -52,6 +54,7 @@ export function DiffFileTree({
 				activeFile={activeFile}
 				onToggleDir={onToggleDir}
 				onSelectFile={onSelectFile}
+				onRevert={onRevert}
 			/>
 		</Box>
 	);

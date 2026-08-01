@@ -11,6 +11,7 @@ export function DiffFileTreeRows({
 	activeFile,
 	onToggleDir,
 	onSelectFile,
+	onRevert,
 }: {
 	nodes: DiffFileTreeNode[];
 	depth: number;
@@ -18,6 +19,7 @@ export function DiffFileTreeRows({
 	activeFile: string | undefined;
 	onToggleDir: (path: string) => void;
 	onSelectFile: (fileKey: string) => void;
+	onRevert?: (path: string) => void;
 }) {
 	const indent = `${depth * DIFF_TREE_INDENT}px`;
 
@@ -25,13 +27,11 @@ export function DiffFileTreeRows({
 		node.kind === "file" ? (
 			<DiffFileTreeFileRow
 				key={node.path}
-				name={node.name}
-				fileKey={node.fileKey}
-				added={node.added}
-				removed={node.removed}
+				file={node}
 				indent={indent}
 				active={node.fileKey === activeFile}
 				onSelect={onSelectFile}
+				onRevert={onRevert}
 			/>
 		) : (
 			<Box key={node.path} sx={{ minWidth: 0 }}>
@@ -49,6 +49,7 @@ export function DiffFileTreeRows({
 						activeFile={activeFile}
 						onToggleDir={onToggleDir}
 						onSelectFile={onSelectFile}
+						onRevert={onRevert}
 					/>
 				)}
 			</Box>

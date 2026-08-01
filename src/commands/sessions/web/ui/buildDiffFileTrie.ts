@@ -4,7 +4,13 @@ import { filePath } from "./FileDiff";
 
 export type DiffFileTrie = {
 	dirs: Map<string, DiffFileTrie>;
-	files: { name: string; fileKey: string; added: number; removed: number }[];
+	files: {
+		name: string;
+		fileKey: string;
+		isNew: boolean;
+		added: number;
+		removed: number;
+	}[];
 };
 
 const emptyTrie = (): DiffFileTrie => ({ dirs: new Map(), files: [] });
@@ -24,7 +30,12 @@ function insert(root: DiffFileTrie, file: FileData): void {
 		}
 		dir = next;
 	}
-	dir.files.push({ name: basename, fileKey, ...countDiffFileLines(file) });
+	dir.files.push({
+		name: basename,
+		fileKey,
+		isNew: file.type === "add",
+		...countDiffFileLines(file),
+	});
 }
 
 export function buildDiffFileTrie(files: FileData[]): DiffFileTrie {

@@ -11,7 +11,6 @@ describe("FileDiffHeader", () => {
 			<FileDiffHeader
 				path="src/index.ts"
 				collapsed={false}
-				added={false}
 				onToggle={vi.fn()}
 			/>,
 		);
@@ -27,7 +26,6 @@ describe("FileDiffHeader", () => {
 			<FileDiffHeader
 				path="README.md"
 				collapsed={false}
-				added={false}
 				onToggle={onToggle}
 				onPreview={onPreview}
 			/>,

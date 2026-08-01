@@ -11,7 +11,7 @@ function file(path: string): FileData {
 	} as unknown as FileData;
 }
 
-const noCounts = { added: 0, removed: 0 };
+const noCounts = { isNew: false, added: 0, removed: 0 };
 
 describe("buildDiffFileTree", () => {
 	it("nests files by directory", () => {
@@ -124,6 +124,7 @@ describe("buildDiffFileTree", () => {
 				name: "a.ts",
 				path: "a.ts",
 				fileKey: "a.ts",
+				isNew: false,
 				added: 2,
 				removed: 1,
 			},
@@ -166,6 +167,28 @@ describe("buildDiffFileTree", () => {
 				path: "gone.ts",
 				fileKey: "gone.ts",
 				...noCounts,
+			},
+		]);
+	});
+
+	it("marks an added file as new", () => {
+		const tree = buildDiffFileTree([
+			{
+				oldPath: "/dev/null",
+				newPath: "fresh.ts",
+				type: "add",
+			} as unknown as FileData,
+		]);
+
+		expect(tree).toEqual([
+			{
+				kind: "file",
+				name: "fresh.ts",
+				path: "fresh.ts",
+				fileKey: "fresh.ts",
+				isNew: true,
+				added: 0,
+				removed: 0,
 			},
 		]);
 	});

@@ -4,7 +4,6 @@ import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import { DiffFileRevertButton } from "./DiffFileRevertButton";
 import { DIFF_TOOLBAR_HEIGHT } from "./DiffToolbar";
 
 const headerSx = {
@@ -25,17 +24,13 @@ const headerSx = {
 export function FileDiffHeader({
 	path,
 	collapsed,
-	added,
 	onToggle,
 	onPreview,
-	onRevert,
 }: {
 	path: string;
 	collapsed: boolean;
-	added: boolean;
 	onToggle: () => void;
 	onPreview?: () => void;
-	onRevert?: (path: string) => void;
 }) {
 	return (
 		<Box sx={headerSx} onClick={onToggle}>
@@ -62,11 +57,6 @@ export function FileDiffHeader({
 				>
 					Preview
 				</Button>
-			)}
-			{onRevert && (
-				<Box sx={{ ml: "auto" }}>
-					<DiffFileRevertButton path={path} added={added} onRevert={onRevert} />
-				</Box>
 			)}
 		</Box>
 	);

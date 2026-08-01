@@ -13,6 +13,23 @@ export const diffFileTreeRowSx = {
 	"&:hover": { bgcolor: "action.hover" },
 } as const;
 
+export const diffFileTreeFileRowSx = {
+	display: "flex",
+	alignItems: "center",
+	minWidth: 0,
+	borderRadius: 1,
+	"&:hover .diff-tree-revert, &:focus-within .diff-tree-revert": {
+		opacity: 1,
+	},
+} as const;
+
+export const diffFileTreeRevertSx = {
+	opacity: 0,
+	flexShrink: 0,
+	display: "flex",
+	alignItems: "center",
+} as const;
+
 export const diffFileTreeActiveRowSx = {
 	bgcolor: "action.selected",
 	fontWeight: 600,

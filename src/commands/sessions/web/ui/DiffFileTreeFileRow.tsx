@@ -1,46 +1,62 @@
+import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
+import type { DiffFileTreeFile } from "./buildDiffFileTree";
+import { DiffFileRevertButton } from "./DiffFileRevertButton";
 import { DiffFileTreeLineCounts } from "./DiffFileTreeLineCounts";
 import {
 	DIFF_TREE_CHEVRON_WIDTH,
 	diffFileTreeActiveRowSx,
+	diffFileTreeFileRowSx,
 	diffFileTreeNameSx,
+	diffFileTreeRevertSx,
 	diffFileTreeRowSx,
 } from "./diffFileTreeRowSx";
 import { FileTypeIcon } from "./FileTypeIcon";
 
 export function DiffFileTreeFileRow({
-	name,
-	fileKey,
-	added,
-	removed,
+	file,
 	indent,
 	active,
 	onSelect,
+	onRevert,
 }: {
-	name: string;
-	fileKey: string;
-	added: number;
-	removed: number;
+	file: DiffFileTreeFile;
 	indent: string;
 	active: boolean;
 	onSelect: (fileKey: string) => void;
+	onRevert?: (path: string) => void;
 }) {
 	return (
-		<ButtonBase
-			onClick={() => onSelect(fileKey)}
-			aria-current={active || undefined}
+		<Box
 			sx={{
-				...diffFileTreeRowSx,
+				...diffFileTreeFileRowSx,
 				...(active ? diffFileTreeActiveRowSx : {}),
-				pl: `calc(${indent} + ${DIFF_TREE_CHEVRON_WIDTH}px)`,
 			}}
 		>
-			<FileTypeIcon path={fileKey} />
-			<Typography component="span" sx={diffFileTreeNameSx}>
-				{name}
-			</Typography>
-			<DiffFileTreeLineCounts added={added} removed={removed} />
-		</ButtonBase>
+			<ButtonBase
+				onClick={() => onSelect(file.fileKey)}
+				aria-current={active || undefined}
+				sx={{
+					...diffFileTreeRowSx,
+					pl: `calc(${indent} + ${DIFF_TREE_CHEVRON_WIDTH}px)`,
+				}}
+			>
+				<FileTypeIcon path={file.fileKey} />
+				<Typography component="span" sx={diffFileTreeNameSx}>
+					{file.name}
+				</Typography>
+				<DiffFileTreeLineCounts added={file.added} removed={file.removed} />
+			</ButtonBase>
+			{onRevert && (
+				<Box className="diff-tree-revert" sx={diffFileTreeRevertSx}>
+					<DiffFileRevertButton
+						path={file.fileKey}
+						added={file.isNew}
+						onRevert={onRevert}
+					/>
+				</Box>
+			)}
+		</Box>
 	);
 }

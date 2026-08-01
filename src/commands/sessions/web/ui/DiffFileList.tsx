@@ -12,7 +12,6 @@ export type DiffFileListProps = {
 	isCollapsed: (path: string) => boolean;
 	onToggleCollapsed: (path: string) => void;
 	onComment?: (comment: DiffComment) => void;
-	onRevert?: (path: string) => void;
 	emptyMessage: string;
 };
 
@@ -23,7 +22,6 @@ export function DiffFileList({
 	isCollapsed,
 	onToggleCollapsed,
 	onComment,
-	onRevert,
 	emptyMessage,
 }: DiffFileListProps) {
 	if (files.length === 0)
@@ -44,7 +42,6 @@ export function DiffFileList({
 					collapsed={isCollapsed(filePath(file))}
 					onToggle={() => onToggleCollapsed(filePath(file))}
 					onComment={onComment}
-					onRevert={onRevert}
 				/>
 			))}
 		</Box>

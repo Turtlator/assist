@@ -103,6 +103,30 @@ describe("DiffFileTree", () => {
 		expect(screen.getByText("app.ts")).toBeTruthy();
 	});
 
+	it("reverts a file from its row once the confirmation is accepted", () => {
+		const onRevert = vi.fn();
+		render(
+			<DiffFileTree
+				files={[file("src/app.ts")]}
+				onSelectFile={vi.fn()}
+				onRevert={onRevert}
+			/>,
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: "Revert file" }));
+		fireEvent.click(screen.getByRole("button", { name: "Revert" }));
+
+		expect(onRevert).toHaveBeenCalledWith("src/app.ts");
+	});
+
+	it("offers no revert control when reverting is unavailable", () => {
+		render(
+			<DiffFileTree files={[file("src/app.ts")]} onSelectFile={vi.fn()} />,
+		);
+
+		expect(screen.queryByRole("button", { name: "Revert file" })).toBeNull();
+	});
+
 	it("renders nothing when no files are in the diff", () => {
 		const { container } = render(
 			<DiffFileTree files={[]} onSelectFile={vi.fn()} />,

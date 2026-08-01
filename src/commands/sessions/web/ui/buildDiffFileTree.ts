@@ -1,11 +1,12 @@
 import type { FileData } from "react-diff-view";
 import { buildDiffFileTrie, type DiffFileTrie } from "./buildDiffFileTrie";
 
-type DiffFileTreeFile = {
+export type DiffFileTreeFile = {
 	kind: "file";
 	name: string;
 	path: string;
 	fileKey: string;
+	isNew: boolean;
 	added: number;
 	removed: number;
 };
