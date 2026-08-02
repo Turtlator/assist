@@ -9,6 +9,11 @@ const mockWriteFileSync = vi.fn();
 const mockMkdirSync = vi.fn();
 const mockCopyFileSync = vi.fn();
 const mockExistsSync = vi.fn();
+const mockPruneSkills = vi.fn();
+
+vi.mock("./pruneSkills", () => ({
+	pruneSkills: (...args: unknown[]) => mockPruneSkills(...args),
+}));
 
 vi.mock("../../shared/harnesses", async (importOriginal) => {
 	const actual = await importOriginal<typeof HarnessModule>();
@@ -83,6 +88,12 @@ describe("syncCodex", () => {
 				: "---\ndescription: Refine it\n---\nbody",
 		);
 		mockExistsSync.mockReturnValue(false);
+		mockPruneSkills.mockReturnValue({
+			orphans: [],
+			removed: [],
+			skipped: [],
+			unmanaged: [],
+		});
 	});
 
 	afterEach(() => {
@@ -91,10 +102,37 @@ describe("syncCodex", () => {
 
 	it("does nothing when codex is not available", () => {
 		mockIsHarnessAvailable.mockReturnValue(false);
-		syncCodex("/claude");
+		syncCodex("/claude", { prune: true, force: true });
 		expect(mockReaddirSync).not.toHaveBeenCalled();
 		expect(mockWriteFileSync).not.toHaveBeenCalled();
 		expect(mockCopyFileSync).not.toHaveBeenCalled();
+		expect(mockPruneSkills).not.toHaveBeenCalled();
+	});
+
+	it("does not prune without --prune", () => {
+		syncCodex("/claude");
+
+		expect(mockPruneSkills).not.toHaveBeenCalled();
+	});
+
+	it("prunes ~/.codex/skills against the synced command names", () => {
+		syncCodex("/claude", { prune: true });
+
+		expect(mockPruneSkills).toHaveBeenCalledWith(
+			path.join(harnesses.codex.homeDir, "skills"),
+			["refine"],
+			{ force: false },
+		);
+	});
+
+	it("forwards --force to the skills prune", () => {
+		syncCodex("/claude", { prune: true, force: true });
+
+		expect(mockPruneSkills).toHaveBeenCalledWith(
+			path.join(harnesses.codex.homeDir, "skills"),
+			["refine"],
+			{ force: true },
+		);
 	});
 
 	it("writes each command as skills/<name>/SKILL.md, skipping non-md files", () => {

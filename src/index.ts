@@ -41,6 +41,7 @@ import { registerReview } from "./commands/registerReview";
 import { registerSeq } from "./commands/registerSeq";
 import { registerSignal } from "./commands/registerSignal";
 import { registerSql } from "./commands/registerSql";
+import { registerSync } from "./commands/registerSync";
 import { registerTranscript } from "./commands/registerTranscript";
 import { registerVerify } from "./commands/registerVerify";
 import { registerVoice } from "./commands/registerVoice";
@@ -53,7 +54,6 @@ import { registerDaemon } from "./commands/sessions/daemon/registerDaemon";
 import { registerSessions } from "./commands/sessions/registerSessions";
 import { web as sessionsWeb } from "./commands/sessions/web";
 import { statusLine } from "./commands/statusLine";
-import { sync } from "./commands/sync";
 import { update } from "./commands/update";
 import { init as vscodeInit } from "./commands/vscode";
 import { reportCliError } from "./reportCliError";
@@ -69,15 +69,7 @@ program
 	.option("--no-open", "Do not open a browser on startup")
 	.action((options) => sessionsWeb({ port: "3100", open: options.open }));
 
-const syncCommand = program
-	.command("sync")
-	.description(
-		"Copy command files to ~/.claude/commands; when codex is detected, also install commands as ~/.codex/skills/<name>/SKILL.md, CLAUDE.md as ~/.codex/AGENTS.md, and register the assist codex-hook auto-approval hook in ~/.codex/config.toml; when pi is detected, also install commands as ~/.pi/agent/prompts/<name>.md, CLAUDE.md as ~/.pi/agent/AGENTS.md, and register the assist pi-hook permission-gate extension in ~/.pi/agent/extensions",
-	)
-	.option("-y, --yes", "Overwrite settings.json without prompting")
-	.action((options) => sync(options));
-
-configHelp(syncCommand, rootConfigHelp.sync);
+registerSync(program);
 
 program
 	.command("init")

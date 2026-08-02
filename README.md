@@ -97,7 +97,7 @@ Every command supports `--help` for full detail on its flags and behaviour.
 
 ### Git and GitHub
 
-- `assist sync` - Copy commands, settings, `CLAUDE.md` and design assets to `~/.claude` (plus `~/.codex` and `~/.pi` when those CLIs are on PATH)
+- `assist sync [--prune] [--force]` - Copy commands, settings, `CLAUDE.md` and design assets to `~/.claude` (plus `~/.codex` and `~/.pi` when those CLIs are on PATH). With `--prune`, also lists commands in the target dirs that sync did not write — anything whose name is not in the repo's `claude/commands/*.md` set — and adding `--force` removes them. `~/.codex/skills` and `~/.pi/agent/prompts` are only inspected when those CLIs are detected; an orphaned codex skill directory is removed only when `SKILL.md` is its sole content, and any other is left in place with a reason. Subdirectories and non-`.md` files are listed separately and never removed. `--force` without `--prune` is an error
 - `assist activity [--since <date>]` - Chart GitHub commit activity per day (defaults to last 30 days)
 - `assist commit status` - Show git status and diff
 - `assist commit <message> [files...]` - Stage files and create a git commit with validation

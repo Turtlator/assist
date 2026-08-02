@@ -1,6 +1,9 @@
 import * as path from "node:path";
 import { harnesses, isHarnessAvailable } from "../../shared/harnesses";
 import { installHarnessCommands } from "./installHarnessCommands";
+import { pruneSkills } from "./pruneSkills";
+import type { PruneOptions } from "./pruneTarget";
+import { reportPrune } from "./reportPrune";
 import { syncCodexHooks } from "./syncCodexHooks";
 
 function quoteYaml(value: string): string {
@@ -19,10 +22,10 @@ export function commandToSkill(name: string, content: string): string {
 	return header + body.replace(/^\r?\n+/, "");
 }
 
-export function syncCodex(claudeDir: string): void {
+export function syncCodex(claudeDir: string, options?: PruneOptions): void {
 	if (!isHarnessAvailable("codex")) return;
 
-	const { total } = installHarnessCommands(
+	const { total, names } = installHarnessCommands(
 		claudeDir,
 		harnesses.codex,
 		commandToSkill,
@@ -32,5 +35,15 @@ export function syncCodex(claudeDir: string): void {
 
 	console.log(
 		`Synced ${total} skill(s) to ~/.codex/skills and CLAUDE.md to ~/.codex/AGENTS.md`,
+	);
+
+	if (!options?.prune) return;
+
+	const force = options.force ?? false;
+
+	reportPrune(
+		"~/.codex/skills",
+		pruneSkills(path.join(harnesses.codex.homeDir, "skills"), names, { force }),
+		force,
 	);
 }

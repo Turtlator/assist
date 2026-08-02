@@ -1,6 +1,9 @@
 import * as path from "node:path";
 import { harnesses, isHarnessAvailable } from "../../shared/harnesses";
 import { installHarnessCommands } from "./installHarnessCommands";
+import { pruneCommands } from "./pruneCommands";
+import type { PruneOptions } from "./pruneTarget";
+import { reportPrune } from "./reportPrune";
 import { syncPiHooks } from "./syncPiHooks";
 
 function unquote(value: string): string {
@@ -28,10 +31,10 @@ export function commandToPrompt(name: string, content: string): string {
 	return header + body.replace(/^\r?\n+/, "");
 }
 
-export function syncPi(claudeDir: string): void {
+export function syncPi(claudeDir: string, options?: PruneOptions): void {
 	if (!isHarnessAvailable("pi")) return;
 
-	const { synced } = installHarnessCommands(
+	const { synced, names } = installHarnessCommands(
 		claudeDir,
 		harnesses.pi,
 		commandToPrompt,
@@ -41,5 +44,15 @@ export function syncPi(claudeDir: string): void {
 
 	console.log(
 		`Synced ${synced} prompt(s) to ~/.pi/agent/prompts and CLAUDE.md to ~/.pi/agent/AGENTS.md`,
+	);
+
+	if (!options?.prune) return;
+
+	const force = options.force ?? false;
+
+	reportPrune(
+		"~/.pi/agent/prompts",
+		pruneCommands(path.join(harnesses.pi.homeDir, "prompts"), names, { force }),
+		force,
 	);
 }

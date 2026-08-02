@@ -8,6 +8,11 @@ const mockReadFileSync = vi.fn();
 const mockWriteFileSync = vi.fn();
 const mockMkdirSync = vi.fn();
 const mockCopyFileSync = vi.fn();
+const mockPruneCommands = vi.fn();
+
+vi.mock("./pruneCommands", () => ({
+	pruneCommands: (...args: unknown[]) => mockPruneCommands(...args),
+}));
 
 vi.mock("../../shared/harnesses", async (importOriginal) => {
 	const actual = await importOriginal<typeof HarnessModule>();
@@ -85,6 +90,12 @@ describe("syncPi", () => {
 				: ["permission-gate.ts", "status-driver.ts"],
 		);
 		mockReadFileSync.mockReturnValue("---\ndescription: Refine it\n---\nbody");
+		mockPruneCommands.mockReturnValue({
+			orphans: [],
+			removed: [],
+			skipped: [],
+			unmanaged: [],
+		});
 	});
 
 	afterEach(() => {
@@ -93,10 +104,37 @@ describe("syncPi", () => {
 
 	it("does nothing when pi is not available", () => {
 		mockIsHarnessAvailable.mockReturnValue(false);
-		syncPi("/claude");
+		syncPi("/claude", { prune: true, force: true });
 		expect(mockReaddirSync).not.toHaveBeenCalled();
 		expect(mockWriteFileSync).not.toHaveBeenCalled();
 		expect(mockCopyFileSync).not.toHaveBeenCalled();
+		expect(mockPruneCommands).not.toHaveBeenCalled();
+	});
+
+	it("does not prune without --prune", () => {
+		syncPi("/claude");
+
+		expect(mockPruneCommands).not.toHaveBeenCalled();
+	});
+
+	it("prunes ~/.pi/agent/prompts against the synced command names", () => {
+		syncPi("/claude", { prune: true });
+
+		expect(mockPruneCommands).toHaveBeenCalledWith(
+			path.join(harnesses.pi.homeDir, "prompts"),
+			["refine"],
+			{ force: false },
+		);
+	});
+
+	it("forwards --force to the prompts prune", () => {
+		syncPi("/claude", { prune: true, force: true });
+
+		expect(mockPruneCommands).toHaveBeenCalledWith(
+			path.join(harnesses.pi.homeDir, "prompts"),
+			["refine"],
+			{ force: true },
+		);
 	});
 
 	it("writes each command as prompts/<name>.md, skipping non-md files", () => {

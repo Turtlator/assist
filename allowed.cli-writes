@@ -22,3 +22,4 @@ assist handover
 assist notify
 assist signal next
 assist sync
+assist sync --prune
