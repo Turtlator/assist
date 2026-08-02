@@ -1,10 +1,10 @@
 import ButtonBase from "@mui/material/ButtonBase";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import { useEffect, useRef, useState } from "react";
 import type { HarnessKind } from "../../../../shared/harnesses";
 import { harnessLabel } from "../../../../shared/harnessLabel";
 import { StopCardActivation } from "./StopCardActivation";
+import { useCopyFeedback } from "./useCopyFeedback";
 
 export function SessionIdCaption({
 	sessionId,
@@ -13,18 +13,11 @@ export function SessionIdCaption({
 	sessionId: string;
 	harness?: HarnessKind;
 }) {
-	const [copied, setCopied] = useState(false);
-	const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+	const { copied, copy } = useCopyFeedback(sessionId);
 
-	useEffect(() => () => clearTimeout(timer.current), []);
-
-	const copy = (e: React.MouseEvent) => {
+	const onClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		void navigator.clipboard.writeText(sessionId).then(() => {
-			setCopied(true);
-			clearTimeout(timer.current);
-			timer.current = setTimeout(() => setCopied(false), 1200);
-		});
+		copy();
 	};
 
 	return (
@@ -33,7 +26,7 @@ export function SessionIdCaption({
 				title={copied ? "Copied!" : `Copy ${harnessLabel(harness)} session id`}
 				open={copied || undefined}
 			>
-				<ButtonBase onClick={copy} sx={{ borderRadius: 0.5, px: 0.25 }}>
+				<ButtonBase onClick={onClick} sx={{ borderRadius: 0.5, px: 0.25 }}>
 					<Typography
 						variant="caption"
 						color="text.disabled"

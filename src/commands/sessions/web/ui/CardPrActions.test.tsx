@@ -3,7 +3,6 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CardPrActions } from "./CardPrActions";
 import type { SessionInfo } from "./types";
-import { TopBarLayoutContext } from "./useTopBarLayoutContext";
 
 afterEach(() => {
 	cleanup();
@@ -52,12 +51,8 @@ function stubFetch({ pr, synthesis }: { pr: boolean; synthesis: boolean }) {
 	);
 }
 
-function renderActions(topBar: boolean, s: SessionInfo = session()) {
-	render(
-		<TopBarLayoutContext.Provider value={topBar}>
-			<CardPrActions session={s} />
-		</TopBarLayoutContext.Provider>,
-	);
+function renderActions(s: SessionInfo = session()) {
+	render(<CardPrActions session={s} />);
 }
 
 const reviewButton = () => screen.findByRole("button", { name: "Review PR" });
@@ -65,48 +60,33 @@ const findingsButton = () =>
 	screen.findByRole("button", { name: "View review findings" });
 
 describe("CardPrActions review pairing", () => {
-	it("stacks the findings button under the review button in the top bar", async () => {
+	it("leaves the PR actions as siblings so the bar can wrap them", async () => {
 		stubFetch({ pr: true, synthesis: true });
-		renderActions(true);
+		renderActions();
 
+		const open = await screen.findByRole("button", { name: "Open PR" });
 		const review = await reviewButton();
 		const findings = await findingsButton();
 
-		expect(findings.parentElement).toBe(review.parentElement);
-		const style = getComputedStyle(review.parentElement as Element);
-		expect(style.flexDirection).toBe("column");
-		expect(style.borderTopStyle).toBe("none");
-		expect(style.gap).toBe("");
-	});
-
-	it("keeps the pair inline in the card header row", async () => {
-		stubFetch({ pr: true, synthesis: true });
-		renderActions(false);
-
-		const review = await reviewButton();
-		await findingsButton();
-
-		expect(
-			getComputedStyle(review.parentElement as Element).flexDirection,
-		).toBe("row");
+		expect(review.parentElement).toBe(open.parentElement);
+		expect(findings.parentElement).toBe(open.parentElement);
 	});
 
 	it("leaves the review button alone when there are no findings", async () => {
 		stubFetch({ pr: true, synthesis: false });
-		renderActions(true);
+		renderActions();
 
-		const review = await reviewButton();
+		await reviewButton();
 
 		await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
 		expect(
 			screen.queryByRole("button", { name: "View review findings" }),
 		).toBeNull();
-		expect(review.parentElement?.childElementCount).toBe(1);
 	});
 
 	it("still shows the findings button when the session has no PR", async () => {
 		stubFetch({ pr: false, synthesis: true });
-		renderActions(true);
+		renderActions();
 
 		expect(await findingsButton()).toBeTruthy();
 		expect(screen.queryByRole("button", { name: "Review PR" })).toBeNull();

@@ -53,6 +53,14 @@ export type SessionListHandlers = SessionLifecycleHandlers & {
 	onSetAutoAdvance: (id: string, enabled: boolean) => void;
 };
 
+export type SessionControlHandlers = {
+	onRetry?: () => void;
+	onRestart?: () => void;
+	onDismiss: () => void;
+	onSetAutoRun: (enabled: boolean) => void;
+	onSetAutoAdvance: (enabled: boolean) => void;
+};
+
 export type HistoricalSession = {
 	sessionId: string;
 	name: string;

@@ -14,6 +14,8 @@ const dotSx = {
 	lineHeight: 0.6,
 } as const;
 
+const labelSx = { flexShrink: 0, whiteSpace: "nowrap" } as const;
+
 const pulsingDotSx = {
 	...dotSx,
 	animation: `${pulse} 1.4s ease-in-out infinite`,
@@ -29,7 +31,10 @@ export function SessionStatusDot({
 }) {
 	if (label)
 		return (
-			<Typography variant="caption" sx={{ color: statusColors[status] }}>
+			<Typography
+				variant="caption"
+				sx={{ ...labelSx, color: statusColors[status] }}
+			>
 				● {status}
 			</Typography>
 		);

@@ -3,7 +3,7 @@ import { CardBody } from "./CardBody";
 import { CardHeader } from "./CardHeader";
 import { displayStatus } from "./displayStatus";
 import { sessionCardSx } from "./sessionCardSx";
-import type { SessionInfo } from "./types";
+import type { SessionControlHandlers, SessionInfo } from "./types";
 
 export function SessionCard({
 	session,
@@ -20,12 +20,7 @@ export function SessionCard({
 	active: boolean;
 	loading: boolean;
 	onClick: () => void;
-	onRetry?: () => void;
-	onRestart?: () => void;
-	onDismiss: () => void;
-	onSetAutoRun: (enabled: boolean) => void;
-	onSetAutoAdvance: (enabled: boolean) => void;
-}) {
+} & SessionControlHandlers) {
 	return (
 		<ButtonBase
 			onClick={onClick}

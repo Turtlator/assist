@@ -1,14 +1,9 @@
 import Box from "@mui/material/Box";
-import { useRef } from "react";
-import { SessionActionButtons } from "./SessionActionButtons";
+import { useRef, useState } from "react";
 import { SessionTopBarCaptions } from "./SessionTopBarCaptions";
-import { SessionTopBarDiff } from "./SessionTopBarDiff";
-import { SessionTopBarDismiss } from "./SessionTopBarDismiss";
-import { SessionTopBarElapsed } from "./SessionTopBarElapsed";
-import { SessionTopBarToggles } from "./SessionTopBarToggles";
-import type { SessionInfo } from "./types";
+import { SessionTopBarControls } from "./SessionTopBarControls";
+import type { SessionControlHandlers, SessionInfo } from "./types";
 import { useElementWidth } from "./useElementWidth";
-import { LabelledActionsContext } from "./useLabelledActionsContext";
 
 const barSx = {
 	position: "sticky",
@@ -25,7 +20,9 @@ const barSx = {
 	overflow: "hidden",
 } as const;
 
-const labelledMinWidth = 560;
+const labelledMinRemaining = 560;
+const controlsReserve = 48;
+const identityShare = 0.5;
 
 export function SessionTopBar({
 	session,
@@ -34,37 +31,33 @@ export function SessionTopBar({
 	onDismiss,
 	onSetAutoRun,
 	onSetAutoAdvance,
-}: {
-	session: SessionInfo;
-	onRetry?: () => void;
-	onRestart?: () => void;
-	onDismiss: () => void;
-	onSetAutoRun: (enabled: boolean) => void;
-	onSetAutoAdvance: (enabled: boolean) => void;
-}) {
+}: { session: SessionInfo } & SessionControlHandlers) {
 	const barRef = useRef<HTMLDivElement>(null);
 	const width = useElementWidth(barRef);
-	const labelled = width === null || width >= labelledMinWidth;
+	const [identityWidth, setIdentityWidth] = useState(0);
+	const floor =
+		width === null
+			? identityWidth
+			: Math.min(identityWidth, Math.max(width - controlsReserve, 0));
+	const labelled = width === null || width - floor >= labelledMinRemaining;
 
 	return (
 		<Box ref={barRef} sx={barSx}>
-			<SessionTopBarCaptions session={session} />
-			<SessionTopBarDiff session={session} />
-			<SessionTopBarElapsed session={session} />
-			<SessionTopBarToggles
+			<SessionTopBarCaptions
 				session={session}
+				minWidth={floor}
+				budget={width === null ? null : width * identityShare}
+				onIdentityWidth={setIdentityWidth}
+			/>
+			<SessionTopBarControls
+				session={session}
+				labelled={labelled}
+				onRetry={onRetry}
+				onRestart={onRestart}
+				onDismiss={onDismiss}
 				onSetAutoRun={onSetAutoRun}
 				onSetAutoAdvance={onSetAutoAdvance}
 			/>
-			<LabelledActionsContext.Provider value={labelled}>
-				<SessionActionButtons
-					session={session}
-					onRetry={onRetry}
-					onRestart={onRestart}
-					onDismiss={onDismiss}
-				/>
-			</LabelledActionsContext.Provider>
-			<SessionTopBarDismiss session={session} onDismiss={onDismiss} />
 		</Box>
 	);
 }

@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { formatItemId } from "../../../backlog/formatItemId";
 import { itemDetailPath } from "../../../backlog/web/ui/itemDetailPath";
 
-const chipSx = { height: 18, fontSize: "0.65rem" };
+const chipSx = { height: 18, fontSize: "0.65rem", flexShrink: 0 };
 
 export function BacklogItemChip({
 	itemId,

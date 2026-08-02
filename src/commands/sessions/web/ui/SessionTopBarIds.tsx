@@ -1,24 +1,18 @@
 import Typography from "@mui/material/Typography";
 import { isRepoScoped } from "./isRepoScoped";
 import { repoLabel } from "./repoLabel";
+import { SessionTopBarConversationId } from "./SessionTopBarConversationId";
 import { sessionType } from "./sessionType";
+import { topBarIdSx } from "./topBarIdSx";
 import type { SessionInfo } from "./types";
 
-const idSx = {
-	color: "text.disabled",
-	fontFamily: "monospace",
-	fontSize: "0.8125rem",
-	whiteSpace: "nowrap",
-	userSelect: "all",
-} as const;
-
-const clampSx = {
-	minWidth: 0,
-	overflow: "hidden",
-	textOverflow: "ellipsis",
-} as const;
-
-export function SessionTopBarIds({ session }: { session: SessionInfo }) {
+export function SessionTopBarIds({
+	session,
+	collapsed,
+}: {
+	session: SessionInfo;
+	collapsed: boolean;
+}) {
 	const { id, claudeSessionId } = session;
 	const repo = isRepoScoped(sessionType(session)) ? repoLabel(session.cwd) : "";
 
@@ -26,25 +20,23 @@ export function SessionTopBarIds({ session }: { session: SessionInfo }) {
 		<>
 			{repo && (
 				<Typography
-					sx={{ ...idSx, ...clampSx, color: "text.secondary" }}
+					sx={{ ...topBarIdSx, color: "text.secondary" }}
 					title={session.cwd}
 				>
 					{repo}
 				</Typography>
 			)}
 			<Typography
-				sx={{ ...idSx, flexShrink: 0 }}
+				sx={{ ...topBarIdSx, userSelect: "all" }}
 				title={`assist session ${id}`}
 			>
 				{`#${id}`}
 			</Typography>
 			{claudeSessionId && (
-				<Typography
-					sx={{ ...idSx, ...clampSx }}
-					title={`Claude Code conversation ${claudeSessionId}`}
-				>
-					{claudeSessionId}
-				</Typography>
+				<SessionTopBarConversationId
+					conversationId={claudeSessionId}
+					collapsed={collapsed}
+				/>
 			)}
 		</>
 	);

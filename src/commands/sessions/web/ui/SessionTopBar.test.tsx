@@ -13,6 +13,7 @@ import type { SessionInfo } from "./types";
 import { StarredSessionsProvider } from "./useStarredSessions";
 
 let panelWidth = 1200;
+let identityWidth = 0;
 
 class TestResizeObserver {
 	constructor(private readonly callback: ResizeObserverCallback) {}
@@ -28,14 +29,21 @@ class TestResizeObserver {
 
 beforeEach(() => {
 	panelWidth = 1200;
+	identityWidth = 0;
 	globalThis.ResizeObserver =
 		TestResizeObserver as unknown as typeof ResizeObserver;
+	Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+		configurable: true,
+		get: () => identityWidth,
+	});
 });
 
 afterEach(() => {
 	cleanup();
 	vi.unstubAllGlobals();
 	Reflect.deleteProperty(globalThis, "ResizeObserver");
+	Reflect.deleteProperty(HTMLElement.prototype, "scrollWidth");
+	Reflect.deleteProperty(navigator, "clipboard");
 });
 
 function session(overrides: Partial<SessionInfo> = {}): SessionInfo {
@@ -277,6 +285,142 @@ describe("SessionTopBar", () => {
 	});
 });
 
+describe("SessionTopBar identity", () => {
+	const conversationId = "2f1c0b8e-dead-beef-cafe-000000000001";
+
+	function stubClipboard() {
+		const writeText = vi.fn(async () => {});
+		Object.defineProperty(navigator, "clipboard", {
+			configurable: true,
+			value: { writeText },
+		});
+		return writeText;
+	}
+
+	it("never truncates the worktree name, however narrow the panel", () => {
+		panelWidth = 320;
+		identityWidth = 900;
+		renderTopBar(session({ cwd: "/home/me/a-long-worktree-name" }));
+
+		const style = getComputedStyle(screen.getByText("a-long-worktree-name"));
+		expect(style.whiteSpace).toBe("nowrap");
+		expect(style.flexShrink).toBe("0");
+		expect(style.textOverflow).not.toBe("ellipsis");
+		expect(style.overflow).not.toBe("hidden");
+	});
+
+	it("floors the identity column at the width the id line needs", () => {
+		panelWidth = 1200;
+		identityWidth = 420;
+		renderTopBar(session({ id: "7", cwd: "/git/repo" }));
+
+		const column = screen.getByText("#7").parentElement?.parentElement;
+		expect(getComputedStyle(column as Element).minWidth).toBe("420px");
+	});
+
+	it("asks the flex algorithm for the floor and nothing more", () => {
+		panelWidth = 1200;
+		identityWidth = 420;
+		renderTopBar(
+			session({
+				id: "7",
+				title:
+					"A story name long enough that its max-content width would dwarf the controls",
+			}),
+		);
+
+		const column = screen.getByText("#7").parentElement?.parentElement;
+		const style = getComputedStyle(column as Element);
+		expect(style.flexBasis).toBe("0px");
+		expect(style.minWidth).toBe("420px");
+	});
+
+	it("keeps the conversation id whole while identity has the room", () => {
+		panelWidth = 1200;
+		identityWidth = 420;
+		renderTopBar(session({ claudeSessionId: conversationId }));
+
+		expect(screen.getByText(conversationId)).toBeTruthy();
+	});
+
+	it("collapses the conversation id to a copy affordance when space is tight", () => {
+		panelWidth = 420;
+		identityWidth = 900;
+		renderTopBar(session({ claudeSessionId: conversationId }));
+
+		expect(screen.queryByText(conversationId)).toBeNull();
+		const collapsed = screen.getByText("2f1c0b8e");
+		expect(collapsed.getAttribute("title")).toBe(
+			`Click to copy the full conversation id ${conversationId}`,
+		);
+		expect(getComputedStyle(collapsed).textOverflow).not.toBe("ellipsis");
+	});
+
+	it("copies the full conversation id when the collapsed form is clicked", async () => {
+		panelWidth = 420;
+		identityWidth = 900;
+		const writeText = stubClipboard();
+		renderTopBar(session({ claudeSessionId: conversationId }));
+
+		fireEvent.click(screen.getByText("2f1c0b8e"));
+
+		expect(writeText).toHaveBeenCalledWith(conversationId);
+		expect(
+			await screen.findByTitle("Copied the full conversation id"),
+		).toBeTruthy();
+	});
+});
+
+describe("SessionTopBar control cluster", () => {
+	it("wraps its controls rather than shrinking identity", () => {
+		panelWidth = 700;
+		identityWidth = 900;
+		renderTopBar(session({ cwd: "/git/repo" }), {
+			onRestart: () => {},
+			onRetry: () => {},
+		});
+
+		const controls =
+			screen.getByTitle("Dismiss session 1").parentElement?.parentElement;
+		const style = getComputedStyle(controls as Element);
+		expect(style.flexWrap).toBe("wrap");
+		expect(style.justifyContent).toBe("flex-end");
+		expect(style.minWidth).toBe("0px");
+		expect(style.flexBasis).toBe("auto");
+		expect(style.flexShrink).toBe("1");
+	});
+
+	it("keeps every control clickable once the cluster has wrapped", () => {
+		panelWidth = 700;
+		identityWidth = 900;
+		const onRetry = vi.fn();
+		renderTopBar(session({ cwd: "/git/repo" }), {
+			onRestart: () => {},
+			onRetry,
+		});
+
+		expect(screen.getByTitle("Restart session 1")).toBeTruthy();
+		expect(screen.getByLabelText("Star")).toBeTruthy();
+		expect(screen.getAllByLabelText("Open in VS Code").length).toBeGreaterThan(
+			0,
+		);
+
+		fireEvent.click(screen.getByTitle("Retry session 1"));
+
+		expect(onRetry).toHaveBeenCalled();
+	});
+
+	it("never lets the bar scroll sideways", () => {
+		panelWidth = 320;
+		identityWidth = 900;
+		renderTopBar(session({ cwd: "/git/repo" }));
+
+		const bar =
+			screen.getByText("#1").parentElement?.parentElement?.parentElement;
+		expect(getComputedStyle(bar as Element).overflow).toBe("hidden");
+	});
+});
+
 describe("SessionTopBar actions", () => {
 	it("carries the session's actions", () => {
 		renderTopBar(session({ cwd: "/git/repo" }), {
@@ -453,6 +597,29 @@ describe("SessionTopBar action labels", () => {
 		expect(screen.queryByText("Retry")).toBeNull();
 		expect(screen.queryByText("Star")).toBeNull();
 		expect(screen.queryByText("VS Code")).toBeNull();
+	});
+
+	it("collapses on the space left after identity, not the bar width", () => {
+		panelWidth = 900;
+		identityWidth = 500;
+		renderTopBar(session({ cwd: "/git/repo" }), {
+			onRestart: () => {},
+			onRetry: () => {},
+		});
+
+		expect(screen.queryByText("Restart")).toBeNull();
+		expect(screen.getByTitle("Restart session 1")).toBeTruthy();
+	});
+
+	it("keeps its labels at that same bar width when identity is short", () => {
+		panelWidth = 900;
+		identityWidth = 200;
+		renderTopBar(session({ cwd: "/git/repo" }), {
+			onRestart: () => {},
+			onRetry: () => {},
+		});
+
+		expect(screen.getByText("Restart")).toBeTruthy();
 	});
 
 	it("keeps every action reachable once collapsed", () => {
