@@ -1,3 +1,10 @@
+## [0.533.3](https://github.com/staff0rd/assist/compare/v0.533.2...v0.533.3) (2026-08-02)
+
+
+### Bug Fixes
+
+* stop top bar truncating identity ([bafad78](https://github.com/staff0rd/assist/commit/bafad784bd4ee7f12f2b7bbb8471369165119110))
+
 ## [0.533.2](https://github.com/staff0rd/assist/compare/v0.533.1...v0.533.2) (2026-08-01)
 
 
