@@ -1,3 +1,10 @@
+# [0.534.0](https://github.com/staff0rd/assist/compare/v0.533.3...v0.534.0) (2026-08-02)
+
+
+### Features
+
+* prune stale commands on sync ([8da6925](https://github.com/staff0rd/assist/commit/8da692510f667c58f69dc1ebe202612d9866623a))
+
 ## [0.533.3](https://github.com/staff0rd/assist/compare/v0.533.2...v0.533.3) (2026-08-02)
 
 
