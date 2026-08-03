@@ -38,7 +38,7 @@ export function AppToolbar({
 			<TopNavActions
 				onCreate={socket.createSession}
 				onCreateDesign={socket.createDesignSession}
-				onCreatePi={socket.createPiSession}
+				onCreateHarness={socket.createHarnessSession}
 				onCreateAssist={socket.createAssistSession}
 				onStartRun={socket.startRun}
 			/>

@@ -29,6 +29,6 @@ export function syncCodexHooks(sourcePath: string): void {
 	fs.mkdirSync(path.dirname(configPath), { recursive: true });
 	fs.writeFileSync(configPath, upsertManagedBlock(existing, body));
 	console.log(
-		"Registered assist codex-hook in ~/.codex/config.toml (PreToolUse, PermissionRequest)",
+		"Registered assist codex-hook in ~/.codex/config.toml (UserPromptSubmit, PreToolUse, PostToolUse, PermissionRequest, Stop)",
 	);
 }

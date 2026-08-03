@@ -5,9 +5,7 @@ export function registerCodexHook(program: Command): void {
 	program
 		.command("codex-hook")
 		.description(
-			"Codex PreToolUse/PermissionRequest hook for auto-approving read-only CLI commands",
+			"Codex hook: auto-approves read-only CLI commands (PreToolUse/PermissionRequest) and reports session status (running/waiting) to the sessions daemon",
 		)
-		.action(() => {
-			codexHook();
-		});
+		.action(() => codexHook());
 }

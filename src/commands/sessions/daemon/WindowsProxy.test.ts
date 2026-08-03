@@ -129,6 +129,28 @@ describe("WindowsProxy", () => {
 		expect(c.sent[0]).toEqual({ type: "created", sessionId: "w-3" });
 	});
 
+	it("forwards the requested harness so the windows daemon spawns it", async () => {
+		expect(
+			proxy.route(client(), {
+				type: "create",
+				cwd: "C:\\repo",
+				prompt: "go",
+				harness: "codex",
+			}),
+		).toBe(true);
+
+		await waitFor(() => daemon.received.some((l) => l.includes('"create"')));
+		const create = daemon.received
+			.map((l) => JSON.parse(l))
+			.find((m) => m.type === "create");
+		expect(create).toEqual({
+			type: "create",
+			cwd: "C:\\repo",
+			prompt: "go",
+			harness: "codex",
+		});
+	});
+
 	it("namespaces session ids in the merged list", async () => {
 		await createWindowsSession();
 		daemon.send({

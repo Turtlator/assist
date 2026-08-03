@@ -1,59 +1,25 @@
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
 import { useState } from "react";
+import type { HarnessKind } from "../../../../shared/harnesses";
 import { DropdownWrapper } from "./DropdownWrapper";
 import { FreePromptForm } from "./FreePromptForm";
+import { harnessChoices } from "./harnessChoices";
+import { HarnessRadio } from "./HarnessRadio";
 import { useHarnessCapabilities } from "./useHarnessCapabilities";
-
-type Launcher = (prompt: string, cwd: string) => void;
-type Harness = "claude" | "pi";
-
-const labelSx = { "& .MuiFormControlLabel-label": { fontSize: 12 } } as const;
-
-function HarnessRadio({
-	value,
-	onChange,
-}: {
-	value: Harness;
-	onChange: (harness: Harness) => void;
-}) {
-	return (
-		<RadioGroup
-			row
-			value={value}
-			onChange={(e) => onChange(e.target.value as Harness)}
-		>
-			<FormControlLabel
-				value="claude"
-				control={<Radio size="small" />}
-				label="claude"
-				sx={labelSx}
-			/>
-			<FormControlLabel
-				value="pi"
-				control={<Radio size="small" />}
-				label="pi"
-				sx={labelSx}
-			/>
-		</RadioGroup>
-	);
-}
 
 export function PromptLaunchButton({
 	cwd,
 	disabled,
 	onCreate,
-	onCreatePi,
+	onCreateHarness,
 }: {
 	cwd: string;
 	disabled: boolean;
-	onCreate: Launcher;
-	onCreatePi: Launcher;
+	onCreate: (prompt: string, cwd: string) => void;
+	onCreateHarness: (harness: string, prompt: string, cwd: string) => void;
 }) {
-	const { exposePiActions } = useHarnessCapabilities();
+	const choices = harnessChoices(useHarnessCapabilities());
 	const [prompt, setPrompt] = useState("");
-	const [harness, setHarness] = useState<Harness>("claude");
+	const [harness, setHarness] = useState<HarnessKind>("claude");
 
 	return (
 		<DropdownWrapper label="prompt" disabled={disabled}>
@@ -62,12 +28,17 @@ export function PromptLaunchButton({
 					value={prompt}
 					onChange={setPrompt}
 					header={
-						exposePiActions ? (
-							<HarnessRadio value={harness} onChange={setHarness} />
+						choices.length > 1 ? (
+							<HarnessRadio
+								choices={choices}
+								value={harness}
+								onChange={setHarness}
+							/>
 						) : undefined
 					}
 					onSubmit={() => {
-						(harness === "pi" ? onCreatePi : onCreate)(prompt, cwd);
+						if (harness === "claude") onCreate(prompt, cwd);
+						else onCreateHarness(harness, prompt, cwd);
 						setPrompt("");
 						setHarness("claude");
 						close();

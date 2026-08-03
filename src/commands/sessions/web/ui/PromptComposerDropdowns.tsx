@@ -6,13 +6,13 @@ export function PromptComposerDropdowns({
 	disabled,
 	onCreate,
 	onCreateDesign,
-	onCreatePi,
+	onCreateHarness,
 }: {
 	cwd: string;
 	disabled: boolean;
 	onCreate: (prompt: string, cwd: string) => void;
 	onCreateDesign: (prompt: string, cwd: string) => void;
-	onCreatePi: (prompt: string, cwd: string) => void;
+	onCreateHarness: (harness: string, prompt: string, cwd: string) => void;
 }) {
 	return (
 		<>
@@ -20,7 +20,7 @@ export function PromptComposerDropdowns({
 				cwd={cwd}
 				disabled={disabled}
 				onCreate={onCreate}
-				onCreatePi={onCreatePi}
+				onCreateHarness={onCreateHarness}
 			/>
 			<FreePromptDropdown
 				label="design"

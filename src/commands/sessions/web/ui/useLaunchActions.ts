@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import {
 	createAssistSessionAction,
 	createDesignSessionAction,
-	createPiSessionAction,
+	createHarnessSessionAction,
 	createSessionAction,
 	resumeSessionAction,
 } from "./createSessionAction";
@@ -18,7 +18,10 @@ export function useLaunchActions(send: SendFn) {
 			[send],
 		),
 		createDesignSession: useMemo(() => createDesignSessionAction(send), [send]),
-		createPiSession: useMemo(() => createPiSessionAction(send), [send]),
+		createHarnessSession: useMemo(
+			() => createHarnessSessionAction(send),
+			[send],
+		),
 		createAssistSession: useMemo(() => createAssistSessionAction(send), [send]),
 		resumeSession: useMemo(() => resumeSessionAction(send), [send]),
 	};

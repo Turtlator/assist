@@ -1,14 +1,29 @@
 # Managed by `assist sync`: merged into ~/.codex/config.toml when the codex CLI
-# is detected. Registers the assist codex-hook read-only auto-approval hook.
+# is detected. Registers the assist codex-hook, which auto-approves read-only
+# commands and reports running/waiting status for daemon-tracked sessions.
 # Codex still requires this hook to be trusted once per machine on first run.
 
+[[hooks.UserPromptSubmit]]
+[[hooks.UserPromptSubmit.hooks]]
+type = "command"
+command = "assist codex-hook"
+
 [[hooks.PreToolUse]]
-matcher = "Bash"
 [[hooks.PreToolUse.hooks]]
+type = "command"
+command = "assist codex-hook"
+
+[[hooks.PostToolUse]]
+[[hooks.PostToolUse.hooks]]
 type = "command"
 command = "assist codex-hook"
 
 [[hooks.PermissionRequest]]
 [[hooks.PermissionRequest.hooks]]
+type = "command"
+command = "assist codex-hook"
+
+[[hooks.Stop]]
+[[hooks.Stop.hooks]]
 type = "command"
 command = "assist codex-hook"

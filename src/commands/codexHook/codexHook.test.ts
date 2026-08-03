@@ -4,9 +4,15 @@ const mockReadStdin = vi.fn<() => Promise<string>>();
 const mockMatchesConfigDeny = vi.fn();
 const mockMatchesDeny = vi.fn();
 const mockIsApprovedRead = vi.fn();
+const mockReportCodexStatus = vi.fn();
 
 vi.mock("../../lib/readStdin", () => ({
 	readStdin: () => mockReadStdin(),
+}));
+
+vi.mock("./reportCodexStatus", () => ({
+	reportCodexStatus: (event: string, autoDecided: boolean) =>
+		mockReportCodexStatus(event, autoDecided),
 }));
 
 vi.mock("../../shared/matchesConfigDeny", () => ({
@@ -171,6 +177,64 @@ describe("codexHook input handling", () => {
 		await codexHook();
 
 		expect(spy).not.toHaveBeenCalled();
+		expect(mockReportCodexStatus).not.toHaveBeenCalled();
+		spy.mockRestore();
+	});
+});
+
+describe("codexHook status reporting", () => {
+	it("reports a status-only event that carries no tool payload", async () => {
+		const spy = captureOutput();
+		mockReadStdin.mockResolvedValue(
+			JSON.stringify({ hook_event_name: "Stop", session_id: "abc" }),
+		);
+
+		await codexHook();
+
+		expect(spy).not.toHaveBeenCalled();
+		expect(mockReportCodexStatus).toHaveBeenCalledWith("Stop", false);
+		spy.mockRestore();
+	});
+
+	it("tells the status driver when it auto-decided a permission request", async () => {
+		const spy = captureOutput();
+		mockReadStdin.mockResolvedValue(
+			makeInput("assist backlog view a1", { event: "PermissionRequest" }),
+		);
+		mockIsApprovedRead.mockReturnValue("assist read verb");
+
+		await codexHook();
+
+		expect(mockReportCodexStatus).toHaveBeenCalledWith(
+			"PermissionRequest",
+			true,
+		);
+		spy.mockRestore();
+	});
+
+	it("tells the status driver when a permission request falls through to the user", async () => {
+		const spy = captureOutput();
+		mockReadStdin.mockResolvedValue(
+			makeInput("some-unknown-binary", { event: "PermissionRequest" }),
+		);
+
+		await codexHook();
+
+		expect(spy).not.toHaveBeenCalled();
+		expect(mockReportCodexStatus).toHaveBeenCalledWith(
+			"PermissionRequest",
+			false,
+		);
+		spy.mockRestore();
+	});
+
+	it("reports a tool call the allowlist does not recognise as running", async () => {
+		const spy = captureOutput();
+		mockReadStdin.mockResolvedValue(makeInput("some-unknown-binary"));
+
+		await codexHook();
+
+		expect(mockReportCodexStatus).toHaveBeenCalledWith("PreToolUse", false);
 		spy.mockRestore();
 	});
 });

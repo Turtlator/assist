@@ -48,6 +48,40 @@ Route 1 is what the daemon's Codex resume path is built on: resolve the id after
 spawn, record it like any other conversation id, then `codex resume <id> "<nudge>"`
 for restart and restore.
 
+## Session status (running / waiting)
+
+Claude drives session status from the daemon's own `--settings` hook file
+(`ensureHooksSettings.ts`), which is per-launch and never touches the user's
+config. Codex has no `--settings` equivalent, so status rides the same
+user-level hook that already does auto-approval: `assist codex-hook`, registered
+from `codex/config.toml` and merged into `~/.codex/config.toml` by `assist sync`.
+One command handles every event, so no extra hook (and no extra trust prompt) is
+needed.
+
+Event → status, mirroring the Claude mapping:
+
+| Codex event                        | Reported status                           |
+| ---------------------------------- | ----------------------------------------- |
+| `UserPromptSubmit`                 | `running` (source `prompt`)               |
+| `PreToolUse` / `PostToolUse`       | `running` (source `pretool` / `posttool`) |
+| `PermissionRequest` we auto-decide | `running` (source `permission`)           |
+| `PermissionRequest` we pass on     | `waiting`, ack'd (source `permission`)    |
+| `Stop`                             | `waiting`, ack'd (source `stop`)          |
+
+The undecided-`PermissionRequest` split is more precise than the Claude mapping,
+which reports `waiting` for every permission request: under Codex we only report
+waiting when the request actually falls through to the user. `done`/`error` still
+come from pty exit, as they do for Claude — `wirePtyEvents` never infers status
+from output for any harness.
+
+Codex 0.145.0 has no `Notification` event (Claude does), so the only
+waiting-without-a-stop signal is the permission fall-through above.
+`set-status` is a no-op without `ASSIST_SESSION_ID`, so a Codex run in a plain
+terminal reports nothing.
+
+Caveat: the hook must be trusted once per machine (see the table above), and an
+existing install needs `assist sync` to pick up the added events.
+
 ## Hook wire contract (for reference)
 
 Verified against the current Codex hook contract. `assist codex-hook` emits
@@ -56,6 +90,7 @@ these shapes:
 - **PreToolUse** — allow: no output, so Codex continues to its permission flow; deny: `{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"…"}}`.
 - **PermissionRequest** — `{"hookSpecificOutput":{"hookEventName":"PermissionRequest","decision":{"behavior":"allow"|"deny","message":"…"}}}`.
 - Unrecognised command → no output, so Codex falls through to its normal approval flow.
+- Status-only events (`UserPromptSubmit`, `PostToolUse`, `Stop`) → no output; the hook only pushes the session status.
 
 Codex mirrors Claude's hook input schema (`hook_event_name`, `tool_name`,
 `tool_input.command`, `tool_use_id`), which is why the same allowlist logic

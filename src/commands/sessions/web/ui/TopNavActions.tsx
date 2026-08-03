@@ -11,13 +11,13 @@ import { useRepoSelectionContext } from "./useRepoSelectionContext";
 export function TopNavActions({
 	onCreate,
 	onCreateDesign,
-	onCreatePi,
+	onCreateHarness,
 	onCreateAssist,
 	onStartRun,
 }: {
 	onCreate: (prompt: string, cwd: string) => void;
 	onCreateDesign: (prompt: string, cwd: string) => void;
-	onCreatePi: (prompt: string, cwd: string) => void;
+	onCreateHarness: (harness: string, prompt: string, cwd: string) => void;
 	onCreateAssist: (
 		args: string[],
 		cwd?: string,
@@ -41,7 +41,7 @@ export function TopNavActions({
 					disabled={disabled}
 					onCreate={onCreate}
 					onCreateDesign={onCreateDesign}
-					onCreatePi={onCreatePi}
+					onCreateHarness={onCreateHarness}
 				/>
 				<ReviewDropdown
 					cwd={selectedCwd}

@@ -232,7 +232,7 @@ The Config tab of the sessions web dashboard never receives secret values: `GET 
 - `assist cli-hook deny` - List all deny rules
 - `assist cli-hook deny add <pattern> <message>` - Add a deny rule for a command pattern
 - `assist cli-hook deny remove <pattern>` - Remove a deny rule by pattern
-- `assist codex-hook` - Codex `PreToolUse`/`PermissionRequest` hook reusing the `cli-hook` allowlist; installed by `assist sync` when `codex` is on PATH
+- `assist codex-hook` - Codex hook that auto-approves read-only commands (`PreToolUse`/`PermissionRequest`) reusing the `cli-hook` allowlist, and reports session status to the sessions daemon (`UserPromptSubmit`/`PreToolUse`/`PostToolUse` → running, `Stop` and an undecided `PermissionRequest` → waiting) so a Codex session card shows live running/waiting; installed by `assist sync` when `codex` is on PATH
 - `assist pi-hook` - pi permission-gate adapter reusing the `cli-hook` allowlist, emitting `allow` / `deny` / `gate`; installed by `assist sync` when `pi` is on PATH
 - `assist edit-hook` - PreToolUse hook that blocks `Edit`/`Write`/`MultiEdit` calls from adding, changing, or removing a `// assist-maintainability-override` marker, or from introducing a code comment (use `code-comment set`/`confirm` for the rare comment that belongs)
 - `assist code-comment set <file> <line> <text>` - Validate a comment (max 50 chars, single-line) and issue a pin authorising its insertion

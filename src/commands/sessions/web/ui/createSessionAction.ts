@@ -11,9 +11,9 @@ export function createDesignSessionAction(send: SendFn) {
 		send({ type: "create", prompt: prompt || undefined, cwd, design: true });
 }
 
-export function createPiSessionAction(send: SendFn) {
-	return (prompt: string, cwd?: string) =>
-		send({ type: "create", prompt: prompt || undefined, cwd, harness: "pi" });
+export function createHarnessSessionAction(send: SendFn) {
+	return (harness: string, prompt: string, cwd?: string) =>
+		send({ type: "create", prompt: prompt || undefined, cwd, harness });
 }
 
 export type AssistLaunchMeta = {
