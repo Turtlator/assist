@@ -1,3 +1,10 @@
+# [0.537.0](https://github.com/staff0rd/assist/compare/v0.536.0...v0.537.0) (2026-08-03)
+
+
+### Features
+
+* stamp launcher at spawn ([00d6dc1](https://github.com/staff0rd/assist/commit/00d6dc10b5f515ea9e0b68251ca91c01a8d9a548))
+
 # [0.536.0](https://github.com/staff0rd/assist/compare/v0.535.1...v0.536.0) (2026-08-03)
 
 
