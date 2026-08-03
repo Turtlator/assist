@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { type FileData, parseDiff } from "react-diff-view";
 import { type DiffChangeType, filterDiffFiles } from "./filterDiffFiles";
+import { orderFilesByTree } from "./orderFilesByTree";
 
 export function useDiffFileData({
 	diff,
@@ -18,7 +19,8 @@ export function useDiffFileData({
 		[diff, error],
 	);
 	const visibleFiles = useMemo(
-		() => filterDiffFiles(files, { query: search, changeType }),
+		() =>
+			orderFilesByTree(filterDiffFiles(files, { query: search, changeType })),
 		[files, search, changeType],
 	);
 
