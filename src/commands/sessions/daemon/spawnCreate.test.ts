@@ -21,11 +21,14 @@ describe("spawnCreate", () => {
 		expect(spawnCreate(m, { prompt: "go", cwd: "/git/repo" })).toBe("9");
 		expect(m.addAgent).not.toHaveBeenCalled();
 		expect(m.spawn).toHaveBeenCalledWith(
-			"go",
-			"/git/repo",
-			false,
-			undefined,
-			false,
+			{
+				prompt: "go",
+				cwd: "/git/repo",
+				design: false,
+				harness: undefined,
+				inPlace: false,
+			},
+			{ launchedFrom: undefined },
 		);
 	});
 
@@ -43,18 +46,15 @@ describe("spawnCreate", () => {
 		expect(m.spawn).not.toHaveBeenCalled();
 	});
 
-	it("falls back to a fresh session when the stream can no longer take one", () => {
+	it("nests the fallback session under the stream it could not join", () => {
 		const m = manager(undefined);
 
 		expect(
 			spawnCreate(m, { prompt: "go", cwd: "/git/repo-2", joinSessionId: "3" }),
 		).toBe("9");
 		expect(m.spawn).toHaveBeenCalledWith(
-			"go",
-			"/git/repo-2",
-			false,
-			undefined,
-			false,
+			expect.objectContaining({ prompt: "go", cwd: "/git/repo-2" }),
+			{ launchedFrom: "3" },
 		);
 	});
 });

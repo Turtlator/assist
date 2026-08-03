@@ -10,8 +10,10 @@ export function spawnIntoStream(
 	harness: HarnessKind | undefined,
 ): string {
 	const holdUntilSeeded = target.pendingStart !== undefined;
-	const id = ctx.spawnWith((sid) =>
-		createSession(sid, prompt, target.cwd, false, harness, holdUntilSeeded),
+	const id = ctx.spawnWith(
+		(sid) =>
+			createSession(sid, prompt, target.cwd, false, harness, holdUntilSeeded),
+		{ launchedFrom: target.id },
 	);
 	const joined = ctx.sessions.get(id);
 	if (joined && target.worktree) joined.worktree = { ...target.worktree };

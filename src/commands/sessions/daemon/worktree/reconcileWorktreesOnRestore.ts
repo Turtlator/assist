@@ -8,10 +8,10 @@ import { describeHeldWork } from "./describeHeldWork";
 import { readWorktreeRegistry } from "./readWorktreeRegistry";
 import { reapWorktree } from "./reapWorktree";
 import { reclaimVanishedWorktrees } from "./reclaimVanishedWorktrees";
+import type { SpawnSession } from "../types";
 import {
 	type OrphanedWorktree,
 	resurfaceOrphanedWorktree,
-	type SpawnSession,
 } from "./resurfaceOrphanedWorktree";
 import { checkDurability } from "./treeDurability";
 import { logVanishedTree } from "./logVanishedTree";

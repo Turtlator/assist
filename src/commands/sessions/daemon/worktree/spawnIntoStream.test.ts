@@ -59,8 +59,10 @@ function context(existing: Session[]): {
 		notify,
 		ctx: {
 			sessions,
-			spawnWith: (create) => {
+			spawnWith: (create, spawnContext) => {
 				const session = create("4");
+				if (spawnContext?.launchedFrom)
+					session.launchedFrom = spawnContext.launchedFrom;
 				sessions.set(session.id, session);
 				return session.id;
 			},
@@ -84,6 +86,15 @@ describe("spawnIntoStream", () => {
 			clone: "/git/repo",
 		});
 		expect(notify).toHaveBeenCalled();
+	});
+
+	it("nests the added agent under the card it was added to", () => {
+		const stream = target({ cwd: "/git/repo", worktree: undefined });
+		const { ctx } = context([stream]);
+
+		const id = spawnIntoStream(ctx, stream, "go", undefined);
+
+		expect(ctx.sessions.get(id)?.launchedFrom).toBe("3");
 	});
 
 	it("starts the added agent straight away when the workspace is ready", () => {

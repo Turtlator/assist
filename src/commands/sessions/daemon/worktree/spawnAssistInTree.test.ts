@@ -34,7 +34,21 @@ describe("spawnAssistInTree", () => {
 		);
 
 		expect(id).toBe("4");
-		expect(ensureWatcher).toHaveBeenCalledWith(ctx, "/git/repo");
+		expect(ensureWatcher).toHaveBeenCalledWith(ctx, "/git/repo", "4");
+	});
+
+	it("forwards the launching card to the spawn choke point", () => {
+		spawnAssistInTree(context(), ["review", "42"], "/git/repo", undefined, {
+			launchedFrom: "2",
+		});
+
+		expect(allocateAndBind).toHaveBeenCalledWith(
+			expect.anything(),
+			"/git/repo",
+			expect.any(Function),
+			expect.anything(),
+			{ launchedFrom: "2" },
+		);
 	});
 
 	it("ensures no watcher for a command that is not a backlog run", () => {

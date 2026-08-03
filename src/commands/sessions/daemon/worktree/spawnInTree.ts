@@ -6,6 +6,7 @@ import {
 } from "../createAssistSession";
 import { createSession } from "../createSession";
 import { daemonLog } from "../daemonLog";
+import type { SpawnContext } from "../types";
 import { isDraftCommand } from "../../shared/isDraftCommand";
 import { resumeSession } from "../resumeSession";
 import { allocateAndBind, type TreeSpawnContext } from "./allocateAndBind";
@@ -18,13 +19,18 @@ import { resumeInReplacementTree } from "./resumeInReplacementTree";
 
 export type { TreeSpawnContext };
 
+export type CreateSpawnRequest = {
+	prompt?: string;
+	cwd?: string;
+	design?: boolean;
+	harness?: HarnessKind;
+	inPlace?: boolean;
+};
+
 export function spawnInTree(
 	ctx: TreeSpawnContext,
-	prompt: string | undefined,
-	cwd: string | undefined,
-	design: boolean | undefined,
-	harness: HarnessKind | undefined,
-	inPlace?: boolean,
+	{ prompt, cwd, design, harness, inPlace }: CreateSpawnRequest,
+	context?: SpawnContext,
 ): string {
 	return allocateAndBind(
 		ctx,
@@ -32,6 +38,7 @@ export function spawnInTree(
 		(sid, resolvedCwd, holdUntilSeeded) =>
 			createSession(sid, prompt, resolvedCwd, design, harness, holdUntilSeeded),
 		{ inPlace },
+		context,
 	);
 }
 
@@ -40,6 +47,7 @@ export function spawnAssistInTree(
 	assistArgs: string[],
 	cwd: string | undefined,
 	meta: AssistSessionMeta | undefined,
+	context?: SpawnContext,
 ): string {
 	const id = allocateAndBind(
 		ctx,
@@ -52,8 +60,9 @@ export function spawnAssistInTree(
 			draftLike: isDraftCommand(assistArgs[0]),
 			inPlace: meta?.inPlace,
 		},
+		context,
 	);
-	if (isBacklogRunArgs(assistArgs)) ensureWatcher(ctx, cwd);
+	if (isBacklogRunArgs(assistArgs)) ensureWatcher(ctx, cwd, id);
 	return id;
 }
 

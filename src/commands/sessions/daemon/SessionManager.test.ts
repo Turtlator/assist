@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { releaseLock } from "../../backlog/acquireLock";
 import { createAssistSession } from "./createAssistSession";
-import { createSession, type Session } from "./createSession";
+import { createRunSession, createSession, type Session } from "./createSession";
 import { daemonLog } from "./daemonLog";
 import {
 	loadPersistedSessions,
@@ -257,6 +257,48 @@ describe("SessionManager", () => {
 				Map<string, Session>,
 			];
 			expect([...sessions.values()].map((s) => s.name)).toEqual(["new"]);
+		});
+
+		it("stamps the launching card onto a claude session", () => {
+			createSessionMock.mockReturnValue(fakeSession({ name: "new" }));
+			const manager = new SessionManager();
+
+			manager.spawn({ prompt: "go" }, { launchedFrom: "2" });
+
+			expect(manager.listSessions()[0].launchedFrom).toBe("2");
+		});
+
+		it("stamps the launching card onto a run", () => {
+			vi.mocked(createRunSession).mockReturnValue(
+				fakeSession({ name: "run: dev", commandType: "run" }),
+			);
+			const manager = new SessionManager();
+
+			manager.spawnRun({ runName: "dev", runArgs: [] }, { launchedFrom: "2" });
+
+			expect(manager.listSessions()[0].launchedFrom).toBe("2");
+		});
+
+		it("stamps the launching card onto an assist session", () => {
+			createAssistMock.mockReturnValue(
+				fakeSession({ name: "assist review 42", commandType: "assist" }),
+			);
+			const manager = new SessionManager();
+
+			manager.spawnAssist(["review", "42"], undefined, undefined, {
+				launchedFrom: "2",
+			});
+
+			expect(manager.listSessions()[0].launchedFrom).toBe("2");
+		});
+
+		it("leaves a session with no launching card top-level", () => {
+			createSessionMock.mockReturnValue(fakeSession({ name: "new" }));
+			const manager = new SessionManager();
+
+			manager.spawn({ prompt: "go" }, { launchedFrom: undefined });
+
+			expect(manager.listSessions()[0].launchedFrom).toBeUndefined();
 		});
 
 		it("refuses to spawn past the configured live-session ceiling", () => {
@@ -593,6 +635,11 @@ describe("SessionManager", () => {
 			expect(draft.name).toBe("assist backlog run 42");
 			expect(draft.status).toBe("running");
 			expect(createAssistMock).toHaveBeenCalledTimes(1);
+		});
+
+		it("drops the launcher the reused card inherited from its last occupant", () => {
+			const draft = drive({ launchedFrom: "2" });
+			expect(draft.launchedFrom).toBeUndefined();
 		});
 
 		it("reuses a refine card to run 'backlog run <id>' when it exits cleanly", () => {

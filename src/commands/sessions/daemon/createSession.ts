@@ -49,12 +49,11 @@ export type RunSpawnRequest = {
 	runArgs: string[];
 	cwd?: string;
 	meta?: ServerRunMeta;
-	launchedFrom?: string;
 };
 
 export function createRunSession(
 	id: string,
-	{ runName, runArgs, cwd, meta, launchedFrom }: RunSpawnRequest,
+	{ runName, runArgs, cwd, meta }: RunSpawnRequest,
 ): Session {
 	const serverMeta = meta ?? serverRunMeta(runName, cwd);
 	return {
@@ -65,7 +64,6 @@ export function createRunSession(
 		runName,
 		runArgs,
 		cwd,
-		launchedFrom,
 		server: serverMeta.server || undefined,
 		serverPort: serverMeta.port,
 		serverOrigin: serverMeta.origin,

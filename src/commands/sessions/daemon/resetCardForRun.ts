@@ -19,4 +19,5 @@ export function resetCardForRun(session: Session, assistArgs: string[]): void {
 	session.usageSeeded = false;
 	setStatus(session, "running");
 	session.restored = undefined;
+	session.launchedFrom = undefined;
 }

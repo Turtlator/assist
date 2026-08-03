@@ -3,6 +3,7 @@ import { daemonLog } from "./daemonLog";
 import { serverConflictInfo } from "./serverConflictInfo";
 import { serverRunMeta } from "./serverRunMeta";
 import type { SessionManager } from "./SessionManager";
+import { spawnContextFrom } from "./spawnContextFrom";
 
 export function handleCreateRun(
 	client: SessionClient,
@@ -13,7 +14,7 @@ export function handleCreateRun(
 	const runName = d.runName as string;
 	const cwd = d.cwd as string | undefined;
 	const runArgs = (d.runArgs as string[]) ?? [];
-	const launchedFrom = d.launchedFrom as string | undefined;
+	const context = spawnContextFrom(d);
 	const meta = serverRunMeta(runName, cwd);
 	if (meta.server && meta.origin) {
 		const existing = m.liveServerRun(meta.origin);
@@ -25,7 +26,7 @@ export function handleCreateRun(
 				type: "run-conflict",
 				runName,
 				cwd,
-				launchedFrom,
+				launchedFrom: context.launchedFrom,
 				existing: serverConflictInfo(existing),
 			});
 			return;
@@ -39,7 +40,7 @@ export function handleCreateRun(
 	}
 	sendTo(client, {
 		type: "created",
-		sessionId: m.spawnRun({ runName, runArgs, cwd, meta, launchedFrom }),
+		sessionId: m.spawnRun({ runName, runArgs, cwd, meta }, context),
 		isNew: true,
 	});
 }

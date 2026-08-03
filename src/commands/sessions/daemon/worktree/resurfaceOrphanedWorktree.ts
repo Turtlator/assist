@@ -2,6 +2,7 @@ import { basename } from "node:path";
 import type { Session } from "../createSession";
 import { daemonLog } from "../daemonLog";
 import { sessionBase } from "../sessionBase";
+import type { SpawnSession } from "../types";
 import type { HeldWork } from "./describeHeldWork";
 import { armStoppedSession } from "./rearmStoppedSessions";
 
@@ -12,8 +13,6 @@ type RecoveredWorkspace = {
 	reason: string;
 	held: HeldWork;
 };
-
-export type SpawnSession = (create: (id: string) => Session) => string;
 
 export function resurfaceOrphanedWorktree(
 	sessions: Map<string, Session>,

@@ -22,6 +22,13 @@ export type OnStatusChange = (
 	exitCode?: number,
 ) => void;
 
+export type SpawnContext = { launchedFrom?: string };
+
+export type SpawnSession = (
+	create: (id: string) => Session,
+	context?: SpawnContext,
+) => string;
+
 export type Session = {
 	id: string;
 	name: string;

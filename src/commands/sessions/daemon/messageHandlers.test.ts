@@ -110,11 +110,12 @@ describe("create handler", () => {
 		});
 
 		expect(m.spawn).toHaveBeenCalledWith(
-			"make it pop",
-			"/repo",
-			true,
-			undefined,
-			false,
+			expect.objectContaining({
+				prompt: "make it pop",
+				cwd: "/repo",
+				design: true,
+			}),
+			{ launchedFrom: undefined },
 		);
 		expect(daemonLogMock).toHaveBeenCalledWith(
 			"create: design session (cwd=/repo)",
@@ -134,11 +135,8 @@ describe("create handler", () => {
 		});
 
 		expect(m.spawn).toHaveBeenCalledWith(
-			"hello",
-			"/repo",
-			false,
-			undefined,
-			false,
+			expect.objectContaining({ prompt: "hello", cwd: "/repo", design: false }),
+			{ launchedFrom: undefined },
 		);
 		expect(daemonLogMock).not.toHaveBeenCalled();
 	});
@@ -153,7 +151,10 @@ describe("create handler", () => {
 			harness: "pi",
 		});
 
-		expect(m.spawn).toHaveBeenCalledWith("hello", "/repo", false, "pi", false);
+		expect(m.spawn).toHaveBeenCalledWith(
+			expect.objectContaining({ harness: "pi" }),
+			{ launchedFrom: undefined },
+		);
 		expect(daemonLogMock).toHaveBeenCalledWith(
 			"create: pi session (cwd=/repo)",
 		);
@@ -179,12 +180,12 @@ describe("create-assist handler", () => {
 			launchedFrom: "7",
 		});
 
-		expect(m.spawnAssist).toHaveBeenCalledWith(["review", "42"], "/git/repo", {
-			title: "PR #42",
-			subtitle: undefined,
-			inPlace: true,
-			launchedFrom: "7",
-		});
+		expect(m.spawnAssist).toHaveBeenCalledWith(
+			["review", "42"],
+			"/git/repo",
+			{ title: "PR #42", subtitle: undefined, inPlace: true },
+			{ launchedFrom: "7" },
+		);
 	});
 
 	it("leaves the launcher unset when the payload carries none", () => {
@@ -198,7 +199,8 @@ describe("create-assist handler", () => {
 		expect(m.spawnAssist).toHaveBeenCalledWith(
 			["review", "42"],
 			"/git/repo",
-			expect.objectContaining({ launchedFrom: undefined }),
+			expect.anything(),
+			{ launchedFrom: undefined },
 		);
 	});
 });

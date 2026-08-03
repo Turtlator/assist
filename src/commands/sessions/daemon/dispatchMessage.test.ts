@@ -62,11 +62,12 @@ describe("dispatchMessage", () => {
 				inPlace: true,
 			});
 
-			expect(spawnAssist).toHaveBeenCalledWith(["review", "42"], "/git/repo", {
-				title: undefined,
-				subtitle: undefined,
-				inPlace: true,
-			});
+			expect(spawnAssist).toHaveBeenCalledWith(
+				["review", "42"],
+				"/git/repo",
+				{ title: undefined, subtitle: undefined, inPlace: true },
+				{ launchedFrom: undefined },
+			);
 		});
 
 		it("forwards the in-place flag from a create", () => {
@@ -85,11 +86,14 @@ describe("dispatchMessage", () => {
 			});
 
 			expect(spawn).toHaveBeenCalledWith(
-				"/prs-slack 42 --no-confirm",
-				"/git/repo",
-				false,
-				undefined,
-				true,
+				{
+					prompt: "/prs-slack 42 --no-confirm",
+					cwd: "/git/repo",
+					design: false,
+					harness: undefined,
+					inPlace: true,
+				},
+				{ launchedFrom: undefined },
 			);
 		});
 

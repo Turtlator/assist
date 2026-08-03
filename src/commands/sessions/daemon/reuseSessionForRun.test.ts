@@ -243,7 +243,7 @@ describe("reuseSessionForRun", () => {
 
 			reuseSessionForRun(session, 42, new Set(), vi.fn(), tree);
 
-			expect(ensureWatcher).toHaveBeenCalledWith(tree, "/home/user/repo");
+			expect(ensureWatcher).toHaveBeenCalledWith(tree, "/home/user/repo", "7");
 		});
 
 		it("resolves the clone from where the session sat, not the workspace it moved to", () => {
@@ -260,6 +260,7 @@ describe("reuseSessionForRun", () => {
 			expect(ensureWatcher).toHaveBeenCalledWith(
 				expect.anything(),
 				"/home/user/repo",
+				"7",
 			);
 		});
 

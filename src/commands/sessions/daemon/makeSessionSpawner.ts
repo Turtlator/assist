@@ -1,11 +1,12 @@
 import type { SessionClient } from "./broadcast";
 import { registerSpawnedSession } from "./registerSpawnedSession";
 import { sessionLimits } from "./sessionLimits";
-import type { OnStatusChange, Session } from "./types";
+import type { OnStatusChange, Session, SpawnSession } from "./types";
 
-type Spawn = (create: (id: string) => Session) => string;
-
-export type SessionSpawner = { spawn: Spawn; recoveryCard: Spawn };
+export type SessionSpawner = {
+	spawn: SpawnSession;
+	recoveryCard: SpawnSession;
+};
 
 export function makeSessionSpawner(
 	sessions: Map<string, Session>,
@@ -15,14 +16,15 @@ export function makeSessionSpawner(
 	notify: () => void,
 ): SessionSpawner {
 	const register =
-		(allocateId: () => string): Spawn =>
-		(create) =>
+		(allocateId: () => string): SpawnSession =>
+		(create, context) =>
 			registerSpawnedSession(
 				create(allocateId()),
 				sessions,
 				clients,
 				onStatusChange(),
 				notify,
+				context,
 			);
 	return {
 		spawn: register(() => sessionLimits.nextId(sessions.size, counter)),

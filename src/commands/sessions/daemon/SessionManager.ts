@@ -36,8 +36,10 @@ import { toSessionInfo } from "./toSessionInfo";
 import { treeSpawnContext } from "./treeSpawnContext";
 import { VerifyTracker } from "./VerifyTracker";
 import { WindowsProxy } from "./WindowsProxy";
+import type { SpawnContext } from "./types";
 import { addAgentToStream } from "./worktree/addAgentToStream";
 import {
+	type CreateSpawnRequest,
 	resumeInTree,
 	spawnAssistInTree,
 	spawnInTree,
@@ -113,22 +115,16 @@ export class SessionManager {
 		);
 	}
 
-	spawn(
-		prompt?: string,
-		cwd?: string,
-		design?: boolean,
-		harness?: HarnessKind,
-		inPlace?: boolean,
-	): string {
-		return spawnInTree(this.treeCtx(), prompt, cwd, design, harness, inPlace);
+	spawn(request: CreateSpawnRequest = {}, context?: SpawnContext): string {
+		return spawnInTree(this.treeCtx(), request, context);
 	}
 
 	addAgent(targetId: string, prompt?: string, harness?: HarnessKind) {
 		return addAgentToStream(this.treeCtx(), targetId, prompt, harness);
 	}
 
-	spawnRun(request: RunSpawnRequest): string {
-		return this.spawnWith((id) => createRunSession(id, request));
+	spawnRun(request: RunSpawnRequest, context?: SpawnContext): string {
+		return this.spawnWith((id) => createRunSession(id, request), context);
 	}
 
 	liveServerRun(origin: string, excludeId?: string): Session | undefined {
@@ -139,8 +135,9 @@ export class SessionManager {
 		assistArgs: string[],
 		cwd?: string,
 		meta?: AssistSessionMeta,
+		context?: SpawnContext,
 	): string {
-		return spawnAssistInTree(this.treeCtx(), assistArgs, cwd, meta);
+		return spawnAssistInTree(this.treeCtx(), assistArgs, cwd, meta, context);
 	}
 
 	resume(sessionId: string, cwd: string, name?: string): string {

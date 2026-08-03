@@ -66,13 +66,15 @@ describe("handleCreateRun", () => {
 		});
 
 		expect(m.dismissSession).toHaveBeenCalledWith("1");
-		expect(m.spawnRun).toHaveBeenCalledWith({
-			runName: "dev",
-			runArgs: [],
-			cwd: "/b",
-			meta: { server: true, origin: "gh/o/r" },
-			launchedFrom: undefined,
-		});
+		expect(m.spawnRun).toHaveBeenCalledWith(
+			{
+				runName: "dev",
+				runArgs: [],
+				cwd: "/b",
+				meta: { server: true, origin: "gh/o/r" },
+			},
+			{ launchedFrom: undefined },
+		);
 		expect(c.send).toHaveBeenCalledWith(
 			JSON.stringify({ type: "created", sessionId: "9", isNew: true }),
 		);
@@ -103,13 +105,15 @@ describe("handleCreateRun", () => {
 			launchedFrom: "7",
 		});
 
-		expect(m.spawnRun).toHaveBeenCalledWith({
-			runName: "dev",
-			runArgs: [],
-			cwd: "/b",
-			meta: { server: true, origin: "gh/o/r" },
-			launchedFrom: "7",
-		});
+		expect(m.spawnRun).toHaveBeenCalledWith(
+			{
+				runName: "dev",
+				runArgs: [],
+				cwd: "/b",
+				meta: { server: true, origin: "gh/o/r" },
+			},
+			{ launchedFrom: "7" },
+		);
 	});
 
 	it("echoes the launching session id back on a run-conflict", () => {

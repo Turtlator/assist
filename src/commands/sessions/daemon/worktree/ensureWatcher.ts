@@ -9,6 +9,7 @@ import { worktreeConfigFor } from "./worktreeConfigFor";
 export function ensureWatcher(
 	ctx: TreeSpawnContext,
 	cwd: string | undefined,
+	launchedFrom?: string,
 ): string | undefined {
 	if (!cwd) return undefined;
 	const repoRoot = findRepoRoot(cwd) ?? cwd;
@@ -27,6 +28,7 @@ export function ensureWatcher(
 		clone,
 		(sid, resolvedCwd) => createWatcherSession(sid, resolvedCwd ?? clone),
 		{ inPlace: true },
+		{ launchedFrom },
 	);
 	daemonLog(
 		`spawned watcher session ${id} running /watch in the clone ${clone}`,

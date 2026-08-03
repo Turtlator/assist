@@ -74,8 +74,10 @@ function context(existing: Session[] = []): TreeSpawnContext {
 	const sessions = new Map(existing.map((s) => [s.id, s]));
 	return {
 		sessions,
-		spawnWith: (create) => {
+		spawnWith: (create, spawnContext) => {
 			const session = create("9");
+			if (spawnContext?.launchedFrom)
+				session.launchedFrom = spawnContext.launchedFrom;
 			sessions.set(session.id, session);
 			return session.id;
 		},
@@ -105,6 +107,22 @@ describe("ensureWatcher", () => {
 		expect(daemonLog).toHaveBeenCalledWith(
 			expect.stringContaining("spawned watcher session 9"),
 		);
+	});
+
+	it("nests the watcher under the backlog run that triggered it", () => {
+		const ctx = context();
+
+		ensureWatcher(ctx, "/git/repo-2", "3");
+
+		expect(ctx.sessions.get("9")?.launchedFrom).toBe("3");
+	});
+
+	it("leaves the watcher top-level when nothing triggered it", () => {
+		const ctx = context();
+
+		ensureWatcher(ctx, "/git/repo-2");
+
+		expect(ctx.sessions.get("9")?.launchedFrom).toBeUndefined();
 	});
 
 	it("spawns nothing when a live watcher already holds the clone", () => {

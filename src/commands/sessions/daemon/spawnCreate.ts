@@ -1,6 +1,7 @@
 import type { HarnessKind } from "../../../shared/harnesses";
 import { daemonLog } from "./daemonLog";
 import type { SessionManager } from "./SessionManager";
+import { spawnContextFrom } from "./spawnContextFrom";
 
 export function spawnCreate(
 	m: SessionManager,
@@ -24,10 +25,13 @@ export function spawnCreate(
 		);
 	}
 	return m.spawn(
-		prompt,
-		d.cwd as string | undefined,
-		design,
-		harness,
-		d.inPlace === true,
+		{
+			prompt,
+			cwd: d.cwd as string | undefined,
+			design,
+			harness,
+			inPlace: d.inPlace === true,
+		},
+		spawnContextFrom(d),
 	);
 }

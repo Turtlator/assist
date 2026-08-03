@@ -52,7 +52,7 @@ export async function forwardWindowsCreate(
  * w-w-w-3, ... — so strip the prefix before forwarding, as the I/O path does. */
 function stripOutboundSessionId(data: Msg): Msg {
 	const stripped = { ...data };
-	for (const key of ["sessionId", "joinSessionId"])
+	for (const key of ["sessionId", "joinSessionId", "launchedFrom"])
 		if (typeof stripped[key] === "string")
 			stripped[key] = stripWindowsSessionId(stripped[key] as string);
 	return stripped;

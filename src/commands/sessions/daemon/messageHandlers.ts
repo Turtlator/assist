@@ -7,6 +7,7 @@ import { handleCreateRun } from "./handleCreateRun";
 import { handleSetStatus } from "./handleSetStatus";
 import { lifecycleHandlers } from "./lifecycleHandlers";
 import type { SessionManager } from "./SessionManager";
+import { spawnContextFrom } from "./spawnContextFrom";
 import { spawnCreate } from "./spawnCreate";
 
 export type Msg = Record<string, unknown>;
@@ -38,8 +39,8 @@ export const messageHandlers: Record<string, Handler> = {
 				title: d.title as string | undefined,
 				subtitle: d.subtitle as string | undefined,
 				inPlace: d.inPlace === true,
-				launchedFrom: d.launchedFrom as string | undefined,
 			},
+			spawnContextFrom(d),
 		),
 	),
 	resume: creator(false, (m, d) =>
