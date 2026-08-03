@@ -1,3 +1,10 @@
+## [0.535.1](https://github.com/staff0rd/assist/compare/v0.535.0...v0.535.1) (2026-08-03)
+
+
+### Bug Fixes
+
+* order diff files to match the tree ([bd9efcb](https://github.com/staff0rd/assist/commit/bd9efcb1b9430974a868d491fc46ee3f5fe19e70))
+
 # [0.535.0](https://github.com/staff0rd/assist/compare/v0.534.0...v0.535.0) (2026-08-03)
 
 
