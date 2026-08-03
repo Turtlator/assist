@@ -2,6 +2,8 @@ import CheckIcon from "@mui/icons-material/Check";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
+import type { HarnessKind } from "../../../../shared/harnesses";
+import { harnessProductLabel } from "../../../../shared/harnessLabel";
 import { topBarIdSx } from "./topBarIdSx";
 import { useCopyFeedback } from "./useCopyFeedback";
 
@@ -24,9 +26,11 @@ function stem(conversationId: string): string {
 export function SessionTopBarConversationId({
 	conversationId,
 	collapsed,
+	harness,
 }: {
 	conversationId: string;
 	collapsed: boolean;
+	harness?: HarnessKind;
 }) {
 	const { copied, copy } = useCopyFeedback(conversationId);
 
@@ -34,7 +38,7 @@ export function SessionTopBarConversationId({
 		return (
 			<Typography
 				sx={{ ...topBarIdSx, userSelect: "all" }}
-				title={`Claude Code conversation ${conversationId}`}
+				title={`${harnessProductLabel(harness)} conversation ${conversationId}`}
 			>
 				{conversationId}
 			</Typography>

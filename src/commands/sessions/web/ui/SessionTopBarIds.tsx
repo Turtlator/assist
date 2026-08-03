@@ -36,6 +36,7 @@ export function SessionTopBarIds({
 				<SessionTopBarConversationId
 					conversationId={claudeSessionId}
 					collapsed={collapsed}
+					harness={session.harness}
 				/>
 			)}
 		</>

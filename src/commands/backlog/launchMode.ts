@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { awaitClaude, CLAUDE_SPAWN_FAILED } from "../../shared/awaitClaude";
-import { emitActivity } from "../../shared/emitActivity";
 import type { HarnessKind } from "../../shared/harnesses";
 import { pullIfConfigured } from "../../shared/pullIfConfigured";
 import { spawnHarness } from "../../shared/spawnHarness";
 import { handleLaunchSignal } from "./handleLaunchSignal";
+import { reportLaunchActivity } from "./reportLaunchActivity";
 import { resumeNudge } from "./resumeNudge";
 import { stopWatching, watchForMarker } from "./watchForMarker";
 
@@ -37,17 +37,12 @@ export async function launchMode(
 	 * poller guessing the newest unclaimed .jsonl and racing concurrent draft/bug
 	 * sessions in the same repo (#413). Mirrors the backlog-run path (executePhase). */
 	const claudeSessionId = resumeSessionId ?? randomUUID();
-	emitActivity({
-		kind: "command",
-		name: slashCommand,
-		itemId: options?.itemId,
-		itemName: options?.itemName,
-		claudeSessionId,
-	});
+	const harness = options?.harness ?? "claude";
+	reportLaunchActivity(slashCommand, claudeSessionId, harness, options);
 	const prompt = resumeSessionId
 		? resumeNudge()
 		: buildSlashCommand(slashCommand, options?.description);
-	const { child, done } = spawnHarness(options?.harness ?? "claude", prompt, {
+	const { child, done } = spawnHarness(harness, prompt, {
 		sessionId: claudeSessionId,
 		resumeSessionId,
 		cwd: process.cwd(),

@@ -33,10 +33,12 @@ vi.mock("./watchForMarker", () => ({
 	stopWatching: vi.fn(),
 }));
 
+import { emitActivity } from "../../shared/emitActivity";
 import { spawnHarness } from "../../shared/spawnHarness";
 import { launchMode } from "./launchMode";
 import { watchForMarker } from "./watchForMarker";
 
+const mockEmitActivity = emitActivity as unknown as MockInstance;
 const mockSpawnHarness = spawnHarness as unknown as MockInstance;
 const mockWatchForMarker = watchForMarker as unknown as MockInstance;
 
@@ -67,5 +69,35 @@ describe("launchMode harness dispatch", () => {
 			"/refine a279",
 			expect.objectContaining({ sessionId: "generated-uuid" }),
 		);
+	});
+
+	it("reports the harness in its activity so the card badges the session", async () => {
+		await launchMode("refine a279", { harness: "codex", itemId: 279 });
+
+		expect(mockEmitActivity).toHaveBeenCalledWith({
+			kind: "command",
+			name: "refine a279",
+			itemId: 279,
+			itemName: undefined,
+			harness: "codex",
+		});
+	});
+
+	it("withholds the claude conversation id for a non-claude harness", async () => {
+		await launchMode("refine a279", { harness: "codex" });
+
+		expect(mockEmitActivity.mock.calls[0][0].claudeSessionId).toBeUndefined();
+	});
+
+	it("still reports the claude conversation id and no harness for claude", async () => {
+		await launchMode("refine a279");
+
+		expect(mockEmitActivity).toHaveBeenCalledWith({
+			kind: "command",
+			name: "refine a279",
+			itemId: undefined,
+			itemName: undefined,
+			claudeSessionId: "generated-uuid",
+		});
 	});
 });

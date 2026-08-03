@@ -19,4 +19,24 @@ describe("RestartButton", () => {
 
 		expect(screen.getByRole("heading").textContent).toBe("Restart session 54");
 	});
+
+	it("says a claude session resumes its conversation", () => {
+		render(<RestartButton id="54" onRestart={() => {}} />);
+
+		fireEvent.click(screen.getByRole("button"));
+
+		expect(
+			screen.getByText(/Restart this Claude session/).textContent,
+		).toContain("resumes the conversation");
+	});
+
+	it("says a codex session relaunches from the start", () => {
+		render(<RestartButton id="54" onRestart={() => {}} harness="codex" />);
+
+		fireEvent.click(screen.getByRole("button"));
+
+		expect(
+			screen.getByText(/Restart this Codex session/).textContent,
+		).toContain("relaunches it from the start");
+	});
 });

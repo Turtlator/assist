@@ -187,6 +187,34 @@ describe("watchActivity", () => {
 		});
 	});
 
+	describe("when the launched command reports a non-claude harness", () => {
+		it("copies the harness onto the session so the card badges it", () => {
+			mockReadActivity.mockReturnValue({
+				kind: "command",
+				name: "refine a279",
+				harness: "codex",
+				startedAt: 5,
+			});
+			const session = fakeSession();
+
+			triggerRead(session);
+
+			expect(session.harness).toBe("codex");
+			expect(session.claudeSessionId).toBeUndefined();
+		});
+	});
+
+	describe("when the activity reports no harness", () => {
+		it("leaves the harness absent so consumers fall back to claude", () => {
+			mockReadActivity.mockReturnValue(backlogActivity);
+			const session = fakeSession();
+
+			triggerRead(session);
+
+			expect(session.harness).toBeUndefined();
+		});
+	});
+
 	describe("when the session was restored", () => {
 		it("reconciles the reused id's activity file with the session's own activity", () => {
 			const session = fakeSession({
@@ -222,6 +250,20 @@ describe("refreshActivity", () => {
 
 		expect(session.claudeSessionId).toBe("phase-2-id");
 		expect(session.activity).toEqual(backlogActivity);
+	});
+
+	it("loads the reported harness synchronously", () => {
+		mockReadActivity.mockReturnValue({
+			kind: "command",
+			name: "refine a279",
+			harness: "codex",
+			startedAt: 5,
+		});
+		const session = fakeSession();
+
+		refreshActivity(session);
+
+		expect(session.harness).toBe("codex");
 	});
 
 	it("leaves the session untouched when there is no activity", () => {

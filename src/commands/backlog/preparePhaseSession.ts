@@ -22,7 +22,14 @@ export async function preparePhaseSession(
 	) {
 		return undefined;
 	}
-	reportPhaseActivity(item, phaseNumber, totalPhases, phase, claudeSessionId);
+	reportPhaseActivity(
+		item,
+		phaseNumber,
+		totalPhases,
+		phase,
+		claudeSessionId,
+		spawnOptions?.harness,
+	);
 	if (!resumeSessionId) {
 		await persistPhaseSessionId(item.id, phaseIndex, claudeSessionId);
 	}

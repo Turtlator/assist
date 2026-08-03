@@ -48,3 +48,27 @@ describe("HistoryCard ripple", () => {
 		expect(await cardRipple(container)).toBeNull();
 	});
 });
+
+describe("HistoryCard harness", () => {
+	function renderCard(harness?: HistoricalSession["harness"]) {
+		return render(
+			<HistoryCard
+				session={{ ...session, harness }}
+				onView={() => {}}
+				onResume={() => {}}
+			/>,
+		);
+	}
+
+	it("badges a non-claude session", () => {
+		renderCard("codex");
+
+		expect(screen.getByText("Codex")).toBeDefined();
+	});
+
+	it("badges nothing for a claude session", () => {
+		renderCard();
+
+		expect(screen.queryByText("Claude")).toBeNull();
+	});
+});

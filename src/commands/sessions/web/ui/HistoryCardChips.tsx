@@ -1,6 +1,7 @@
 import Chip from "@mui/material/Chip";
 import { ItemTrackerLink } from "../../../backlog/web/ui/components/ItemTrackerLink";
 import { BacklogItemChip } from "./BacklogItemChip";
+import { HarnessBadge } from "./HarnessBadge";
 import { isRepoScoped } from "./isRepoScoped";
 import { repoLabel } from "./repoLabel";
 import type { HistoricalSession } from "./types";
@@ -15,6 +16,7 @@ export function HistoryCardChips({ session }: { session: HistoricalSession }) {
 	return (
 		<>
 			{repo && <Chip label={repo} size="small" sx={chipSx} />}
+			<HarnessBadge harness={session.harness} />
 			{session.origin === "windows" && <WindowsBadge />}
 			{session.sessionType && session.sessionType !== "next" && (
 				<Chip

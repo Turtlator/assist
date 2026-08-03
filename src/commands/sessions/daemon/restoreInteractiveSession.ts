@@ -1,3 +1,5 @@
+import { harnessLabel } from "../../../shared/harnessLabel";
+import { harnessResumesConversation } from "../../../shared/harnessResumesConversation";
 import { buildResumePrompt } from "../../backlog/buildResumePrompt";
 import type { Session } from "./createSession";
 import { errorSession } from "./errorSession";
@@ -19,7 +21,11 @@ export function restoreInteractiveSession(
 	 * sessions resume via their discovered sessionId. Pass the same restart nudge
 	 * backlog runs use so the reattached conversation continues the interrupted
 	 * work instead of sitting idle waiting for input (#404). */
-	if (persisted.commandType !== "run" && persisted.claudeSessionId) {
+	if (
+		persisted.commandType !== "run" &&
+		persisted.claudeSessionId &&
+		harnessResumesConversation(persisted.harness)
+	) {
 		return resumeViaClaude(id, persisted, base, idle);
 	}
 
@@ -63,11 +69,13 @@ function resumeViaClaude(
 }
 
 function unrecoverableClaude(id: string, persisted: PersistedSession): Session {
-	return errorSession(
-		id,
-		persisted,
-		"no claude session id was recorded before the daemon stopped, so the conversation cannot be resumed",
-	);
+	return errorSession(id, persisted, unresumableReason(persisted.harness));
+}
+
+function unresumableReason(harness: PersistedSession["harness"]): string {
+	return harnessResumesConversation(harness)
+		? "no claude session id was recorded before the daemon stopped, so the conversation cannot be resumed"
+		: `${harnessLabel(harness)} sessions cannot be resumed yet, so the conversation cannot be restored`;
 }
 
 function notRestoredStub(

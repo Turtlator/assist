@@ -6,6 +6,7 @@ import {
 	reconcileActivity,
 } from "../../../shared/emitActivity";
 import type { Session } from "./createSession";
+import { applyActivityToSession } from "./applyActivityToSession";
 import { applyReviewPause } from "./applyReviewPause";
 import { seedRunningMsFromUsage } from "./seedRunningMsFromUsage";
 
@@ -38,13 +39,10 @@ export function watchActivity(
 		timer = null;
 		const activity = readActivity(path);
 		if (!activity) return;
-		session.activity = activity;
+		applyActivityToSession(session, activity);
 		/* why: a backlog run reports its current phase's Claude session id here, so
 		 * the daemon persists the latest phase's id and can resume it on restart. */
-		if (activity.claudeSessionId) {
-			session.claudeSessionId = activity.claudeSessionId;
-			onClaudeSessionId?.(session);
-		}
+		if (activity.claudeSessionId) onClaudeSessionId?.(session);
 		applyReviewPause(session, activity);
 		void seedRunningMsFromUsage(session, notify);
 		notify();
@@ -70,7 +68,5 @@ export function refreshActivity(session: Session): void {
 	if (session.commandType !== "assist" || !session.cwd) return;
 	const activity = readActivity(activityPath(session.id));
 	if (!activity) return;
-	session.activity = activity;
-	if (activity.claudeSessionId)
-		session.claudeSessionId = activity.claudeSessionId;
+	applyActivityToSession(session, activity);
 }

@@ -1,36 +1,25 @@
-import { randomUUID } from "node:crypto";
+import { harnessResumesConversation } from "../../../shared/harnessResumesConversation";
 import { assistResumeArgs } from "./assistResumeArgs";
 import type { Session } from "./createSession";
-import { spawnClaude } from "./spawnClaude";
+import {
+	interactiveRespawnPlan,
+	type RespawnPlan,
+} from "./interactiveRespawnPlan";
 import { spawnPty } from "./spawnPty";
 
-type RespawnPlan = { spawn: () => Session["pty"]; status: Session["status"] };
-
 export function respawnPlan(session: Session): RespawnPlan | null {
-	const { commandType, claudeSessionId, cwd, assistArgs, initialPrompt } =
-		session;
-	if (commandType === "claude") {
-		if (claudeSessionId)
-			return {
-				spawn: () =>
-					spawnClaude({
-						resumeSessionId: claudeSessionId,
-						cwd,
-						sessionId: session.id,
-					}),
-				status: "waiting",
-			};
-		if (initialPrompt) return freshClaudePlan(session, initialPrompt, cwd);
-		if (cwd && session.harness !== "pi")
-			return freshClaudePlan(session, undefined, cwd);
-		return null;
-	}
+	const { commandType, claudeSessionId, cwd, assistArgs } = session;
+	const resumes = harnessResumesConversation(session.harness);
+	if (commandType === "claude") return interactiveRespawnPlan(session, resumes);
 	if (commandType === "assist" && assistArgs) {
 		const idle = session.status === "waiting";
 		return {
 			spawn: () =>
 				spawnPty(
-					assistResumeArgs({ assistArgs, claudeSessionId }),
+					assistResumeArgs({
+						assistArgs,
+						claudeSessionId: resumes ? claudeSessionId : undefined,
+					}),
 					cwd,
 					session.id,
 					idle ? { ASSIST_RESUME_IDLE: "1" } : undefined,
@@ -39,24 +28,4 @@ export function respawnPlan(session: Session): RespawnPlan | null {
 		};
 	}
 	return null;
-}
-
-function freshClaudePlan(
-	session: Session,
-	prompt: string | undefined,
-	cwd: string | undefined,
-): RespawnPlan {
-	const claudeSessionId = randomUUID();
-	return {
-		spawn: () => {
-			session.claudeSessionId = claudeSessionId;
-			return spawnClaude({
-				prompt,
-				cwd,
-				sessionId: session.id,
-				claudeSessionId,
-			});
-		},
-		status: prompt ? "running" : "waiting",
-	};
 }
