@@ -1,3 +1,10 @@
+# [0.535.0](https://github.com/staff0rd/assist/compare/v0.534.0...v0.535.0) (2026-08-03)
+
+
+### Features
+
+* thread the harness through sessions and UI ([f756454](https://github.com/staff0rd/assist/commit/f756454c8d9012e69e54fd203ff5369e4edcc610))
+
 # [0.534.0](https://github.com/staff0rd/assist/compare/v0.533.3...v0.534.0) (2026-08-02)
 
 
