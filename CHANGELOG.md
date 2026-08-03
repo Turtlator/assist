@@ -1,3 +1,10 @@
+# [0.536.0](https://github.com/staff0rd/assist/compare/v0.535.1...v0.536.0) (2026-08-03)
+
+
+### Features
+
+* track codex session status ([6dc33c0](https://github.com/staff0rd/assist/commit/6dc33c0c9074aa90e5bc801267c852d7775084b4))
+
 ## [0.535.1](https://github.com/staff0rd/assist/compare/v0.535.0...v0.535.1) (2026-08-03)
 
 
