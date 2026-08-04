@@ -65,7 +65,7 @@ describe("RateLimitsTooltip", () => {
 		expect(colorOf("35%")).toBe(levelColor("warn"));
 		expect(colorOf("30%")).toBe(levelColor("ok"));
 		expect(colorOf("40%")).toBe(levelColor("over"));
-		expect(rowText("7d")).toBe("7d←30%35%→40%green in 11h 12m");
+		expect(rowText("7d")).toBe("7d30%←35%→40%green in 11h 12m");
 	});
 
 	it("reports a yellow window at or over 75% as unrecoverable before reset", () => {
@@ -81,7 +81,7 @@ describe("RateLimitsTooltip", () => {
 
 		expect(colorOf("45%")).toBe(levelColor("over"));
 		expect(colorOf("40%")).toBe(levelColor("warn"));
-		expect(rowText("5h")).toBe("5h←40%45%under in 15m");
+		expect(rowText("5h")).toBe("5h40%←45%under in 15m");
 		expect(screen.queryByText("→")).toBeNull();
 	});
 

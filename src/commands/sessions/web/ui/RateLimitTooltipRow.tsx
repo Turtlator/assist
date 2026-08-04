@@ -26,7 +26,10 @@ export function RateLimitTooltipRow({
 			<Box component="span" sx={{ minWidth: "2ch" }}>
 				{label}
 			</Box>
-			<RateLimitThresholdSlot arrow="←" threshold={projected?.recovery} />
+			<RateLimitThresholdSlot
+				direction="back"
+				threshold={projected?.recovery}
+			/>
 			<Box
 				component="span"
 				sx={{
@@ -37,7 +40,10 @@ export function RateLimitTooltipRow({
 			>
 				{Math.round(pct)}%
 			</Box>
-			<RateLimitThresholdSlot arrow="→" threshold={projected?.worse} />
+			<RateLimitThresholdSlot
+				direction="forward"
+				threshold={projected?.worse}
+			/>
 			<Box component="span" sx={{ opacity: 0.6 }}>
 				{projected
 					? projected.recovery && rateLimitRecoveryNote(projected.recovery, now)
