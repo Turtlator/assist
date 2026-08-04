@@ -34,6 +34,10 @@ function colorOf(text: string): string {
 	return getComputedStyle(screen.getByText(text)).color;
 }
 
+function rowText(label: string): string {
+	return screen.getByText(label).parentElement?.textContent ?? "";
+}
+
 function usageWindow(pct: number, elapsed: number, windowSeconds: number) {
 	return {
 		used_percentage: pct,
@@ -61,9 +65,7 @@ describe("RateLimitsTooltip", () => {
 		expect(colorOf("35%")).toBe(levelColor("warn"));
 		expect(colorOf("30%")).toBe(levelColor("ok"));
 		expect(colorOf("40%")).toBe(levelColor("over"));
-		expect(screen.getByText("←")).toBeTruthy();
-		expect(screen.getByText("→")).toBeTruthy();
-		expect(screen.getByText("green in 11h 12m")).toBeTruthy();
+		expect(rowText("7d")).toBe("7d←30%35%→40%green in 11h 12m");
 	});
 
 	it("reports a yellow window at or over 75% as unrecoverable before reset", () => {
@@ -78,11 +80,9 @@ describe("RateLimitsTooltip", () => {
 		renderTooltip({ five_hour: usageWindow(45, 0.4, FIVE_HOUR_SECONDS) });
 
 		expect(colorOf("45%")).toBe(levelColor("over"));
-		expect(screen.getByText("←")).toBeTruthy();
 		expect(colorOf("40%")).toBe(levelColor("warn"));
-		expect(screen.getByText("under in 15m")).toBeTruthy();
+		expect(rowText("5h")).toBe("5h←40%45%under in 15m");
 		expect(screen.queryByText("→")).toBeNull();
-		expect(screen.queryByText("already over")).toBeNull();
 	});
 
 	it("reports a red window at or over 100% as unrecoverable before reset", () => {

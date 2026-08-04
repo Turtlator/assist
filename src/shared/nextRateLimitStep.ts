@@ -8,10 +8,12 @@ import {
 
 type RateLimitBoundary = { level: RateLimitLevel; pct: number };
 
+export type RateLimitRecovery = RateLimitBoundary & { at: number | undefined };
+
 type NextRateLimitStep =
 	| {
 			kind: "projected";
-			recovery: (RateLimitBoundary & { at: number | undefined }) | undefined;
+			recovery: RateLimitRecovery | undefined;
 			worse: RateLimitBoundary | undefined;
 	  }
 	| { kind: "unprojectable" };
