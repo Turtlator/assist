@@ -1,3 +1,10 @@
+## [0.540.2](https://github.com/staff0rd/assist/compare/v0.540.1...v0.540.2) (2026-08-04)
+
+
+### Bug Fixes
+
+* point limit row arrows at thresholds ([39be618](https://github.com/staff0rd/assist/commit/39be618c0432ca70446389fcde796404c3949686))
+
 ## [0.540.1](https://github.com/staff0rd/assist/compare/v0.540.0...v0.540.1) (2026-08-04)
 
 
