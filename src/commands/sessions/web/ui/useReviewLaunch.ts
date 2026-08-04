@@ -2,10 +2,10 @@ import { useState } from "react";
 import type { PrSummary } from "../prList";
 import { prLaunchMeta } from "./prLaunchMeta";
 import {
-	type ReviewChain,
-	reviewChainArgs,
-	reviewChainDefaults,
-} from "./ReviewChainToggles";
+	type ReviewOptions,
+	reviewOptionArgs,
+	reviewOptionDefaults,
+} from "./ReviewOptionToggles";
 import { useSessionLaunchContext } from "./useSessionLaunchContext";
 
 export function useReviewLaunch(
@@ -13,23 +13,23 @@ export function useReviewLaunch(
 	pr: PrSummary,
 	launchedFrom?: string,
 ): {
-	chain: ReviewChain;
-	setChain: (chain: ReviewChain) => void;
-	resetChain: () => void;
+	options: ReviewOptions;
+	setOptions: (options: ReviewOptions) => void;
+	resetOptions: () => void;
 	launchMode: (modeArgs: string[]) => void;
 	launchAddressComments: () => void;
 } {
 	const { launchAssist } = useSessionLaunchContext();
-	const [chain, setChain] = useState(reviewChainDefaults);
+	const [options, setOptions] = useState(reviewOptionDefaults);
 	const meta = { ...prLaunchMeta(pr), inPlace: true, launchedFrom };
 	const launch = (args: string[]) => launchAssist(args, cwd, meta);
 
 	return {
-		chain,
-		setChain,
-		resetChain: () => setChain(reviewChainDefaults),
+		options,
+		setOptions,
+		resetOptions: () => setOptions(reviewOptionDefaults),
 		launchMode: (modeArgs) =>
-			launch([...modeArgs, String(pr.number), ...reviewChainArgs(chain)]),
+			launch([...modeArgs, String(pr.number), ...reviewOptionArgs(options)]),
 		launchAddressComments: () =>
 			launch(["review-pr-comments", String(pr.number)]),
 	};

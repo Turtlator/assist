@@ -52,46 +52,76 @@ describe("ReviewButton", () => {
 		},
 	);
 
-	it("defaults both chain toggles off", () => {
+	it("defaults every option toggle off", () => {
 		renderButton(vi.fn());
 
+		expect(checkbox("Force re-run").checked).toBe(false);
 		expect(checkbox("Address comments after").checked).toBe(false);
 		expect(checkbox("Announce to Slack after").checked).toBe(false);
 	});
 
 	it.each(reviewButtonModes)(
-		"appends the enabled chain flags to $label",
+		"appends the enabled option flags to $label",
 		({ label, args }) => {
 			const launchAssist = vi.fn();
 			renderButton(launchAssist);
 
+			fireEvent.click(checkbox("Force re-run"));
 			fireEvent.click(checkbox("Address comments after"));
 			fireEvent.click(checkbox("Announce to Slack after"));
 			fireEvent.click(screen.getByText(label));
 
 			expect(launchAssist).toHaveBeenCalledWith(
-				[...args, "42", "--address-comments", "--announce"],
+				[...args, "42", "--force", "--address-comments", "--announce"],
 				"/git/repo",
 				expect.objectContaining({ inPlace: true }),
 			);
 		},
 	);
 
-	it("resets the chain toggles to off when the menu is reopened", () => {
+	it.each(reviewButtonModes)(
+		"forces a re-run of $label on its own",
+		({ label, args }) => {
+			const launchAssist = vi.fn();
+			renderButton(launchAssist);
+
+			fireEvent.click(checkbox("Force re-run"));
+			fireEvent.click(screen.getByText(label));
+
+			expect(launchAssist).toHaveBeenCalledWith(
+				[...args, "42", "--force"],
+				"/git/repo",
+				expect.objectContaining({ inPlace: true }),
+			);
+		},
+	);
+
+	it("resets the option toggles to off when the menu is reopened", () => {
 		const launchAssist = vi.fn();
 		renderButton(launchAssist);
 
+		fireEvent.click(checkbox("Force re-run"));
 		fireEvent.click(checkbox("Announce to Slack after"));
 		fireEvent.click(screen.getByText("Review"));
 		fireEvent.click(screen.getByRole("button", { name: "Review PR" }));
 
+		expect(checkbox("Force re-run").checked).toBe(false);
 		expect(checkbox("Announce to Slack after").checked).toBe(false);
+	});
+
+	it("omits the force re-run mode entry", () => {
+		renderButton(vi.fn());
+
+		expect(screen.queryByText("Review (force re-run)")).toBeNull();
 	});
 
 	it("launches Address Comments against the PR shown on the card", () => {
 		const launchAssist = vi.fn();
 		renderButton(launchAssist);
 
+		fireEvent.click(checkbox("Force re-run"));
+		fireEvent.click(checkbox("Address comments after"));
+		fireEvent.click(checkbox("Announce to Slack after"));
 		fireEvent.click(screen.getByText("Address Comments"));
 
 		expect(launchAssist).toHaveBeenCalledWith(

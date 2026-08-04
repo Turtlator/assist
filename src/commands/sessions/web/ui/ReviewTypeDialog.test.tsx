@@ -20,11 +20,30 @@ function checkbox(label: string): HTMLInputElement {
 afterEach(cleanup);
 
 describe("ReviewTypeDialog", () => {
-	it("defaults both chain toggles off", () => {
+	it("defaults every option toggle off", () => {
 		render(<ReviewTypeDialog pr={pr} onSelect={vi.fn()} onCancel={vi.fn()} />);
 
+		expect(checkbox("Force re-run").checked).toBe(false);
 		expect(checkbox("Address comments after").checked).toBe(false);
 		expect(checkbox("Announce to Slack after").checked).toBe(false);
+	});
+
+	it("defaults the option toggles off again when the dialog is reopened", () => {
+		const { unmount } = render(
+			<ReviewTypeDialog pr={pr} onSelect={vi.fn()} onCancel={vi.fn()} />,
+		);
+		fireEvent.click(checkbox("Force re-run"));
+		unmount();
+
+		render(<ReviewTypeDialog pr={pr} onSelect={vi.fn()} onCancel={vi.fn()} />);
+
+		expect(checkbox("Force re-run").checked).toBe(false);
+	});
+
+	it("omits the force re-run mode entry", () => {
+		render(<ReviewTypeDialog pr={pr} onSelect={vi.fn()} onCancel={vi.fn()} />);
+
+		expect(screen.queryByText("Review (force re-run)")).toBeNull();
 	});
 
 	it.each(reviewButtonModes)(
@@ -42,22 +61,50 @@ describe("ReviewTypeDialog", () => {
 	);
 
 	it.each(reviewButtonModes)(
-		"appends the enabled chain flags to $label",
+		"appends the enabled option flags to $label",
 		({ label, args }) => {
 			const onSelect = vi.fn();
 			render(
 				<ReviewTypeDialog pr={pr} onSelect={onSelect} onCancel={vi.fn()} />,
 			);
 
+			fireEvent.click(checkbox("Force re-run"));
 			fireEvent.click(checkbox("Address comments after"));
 			fireEvent.click(checkbox("Announce to Slack after"));
 			fireEvent.click(screen.getByText(label));
 
 			expect(onSelect).toHaveBeenCalledWith([
 				...args,
+				"--force",
 				"--address-comments",
 				"--announce",
 			]);
 		},
 	);
+
+	it.each(reviewButtonModes)(
+		"forces a re-run of $label on its own",
+		({ label, args }) => {
+			const onSelect = vi.fn();
+			render(
+				<ReviewTypeDialog pr={pr} onSelect={onSelect} onCancel={vi.fn()} />,
+			);
+
+			fireEvent.click(checkbox("Force re-run"));
+			fireEvent.click(screen.getByText(label));
+
+			expect(onSelect).toHaveBeenCalledWith([...args, "--force"]);
+		},
+	);
+
+	it("selects Address Comments with no option flags", () => {
+		const onSelect = vi.fn();
+		render(<ReviewTypeDialog pr={pr} onSelect={onSelect} onCancel={vi.fn()} />);
+
+		fireEvent.click(checkbox("Force re-run"));
+		fireEvent.click(checkbox("Announce to Slack after"));
+		fireEvent.click(screen.getByText("Address Comments"));
+
+		expect(onSelect).toHaveBeenCalledWith(["review-pr-comments"]);
+	});
 });

@@ -12,10 +12,10 @@ import { useState } from "react";
 import type { PrSummary } from "../prList";
 import { reviewButtonModes } from "./reviewButtonModes";
 import {
-	reviewChainArgs,
-	reviewChainDefaults,
-	ReviewChainToggles,
-} from "./ReviewChainToggles";
+	reviewOptionArgs,
+	reviewOptionDefaults,
+	ReviewOptionToggles,
+} from "./ReviewOptionToggles";
 
 export function ReviewTypeDialog({
 	pr,
@@ -26,7 +26,7 @@ export function ReviewTypeDialog({
 	onSelect: (args: string[]) => void;
 	onCancel: () => void;
 }) {
-	const [chain, setChain] = useState(reviewChainDefaults);
+	const [options, setOptions] = useState(reviewOptionDefaults);
 
 	return (
 		<Dialog open onClose={onCancel} maxWidth="xs" fullWidth>
@@ -38,13 +38,13 @@ export function ReviewTypeDialog({
 					{reviewButtonModes.map(({ label, args }) => (
 						<MenuItem
 							key={label}
-							onClick={() => onSelect([...args, ...reviewChainArgs(chain)])}
+							onClick={() => onSelect([...args, ...reviewOptionArgs(options)])}
 						>
 							{label}
 						</MenuItem>
 					))}
 					<Divider />
-					<ReviewChainToggles value={chain} onChange={setChain} />
+					<ReviewOptionToggles value={options} onChange={setOptions} />
 					<Divider />
 					<MenuItem onClick={() => onSelect(["review-pr-comments"])}>
 						Address Comments
