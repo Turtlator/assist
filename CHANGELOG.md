@@ -1,3 +1,10 @@
+# [0.540.0](https://github.com/staff0rd/assist/compare/v0.539.0...v0.540.0) (2026-08-04)
+
+
+### Features
+
+* yellow rows show recovery to green ([ba17f4b](https://github.com/staff0rd/assist/commit/ba17f4b0dafa1935ed639932f08f58290e0a2d51))
+
 # [0.539.0](https://github.com/staff0rd/assist/compare/v0.538.0...v0.539.0) (2026-08-04)
 
 
