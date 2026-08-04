@@ -1,3 +1,10 @@
+# [0.538.0](https://github.com/staff0rd/assist/compare/v0.537.0...v0.538.0) (2026-08-04)
+
+
+### Features
+
+* show recovery on over limit rows ([7dbc796](https://github.com/staff0rd/assist/commit/7dbc796bc3465406728b6b81c238bd9ab0fa88a6))
+
 # [0.537.0](https://github.com/staff0rd/assist/compare/v0.536.0...v0.537.0) (2026-08-03)
 
 
