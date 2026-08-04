@@ -21,10 +21,20 @@ describe("nextRateLimitStep", () => {
 		).toEqual({ kind: "step", level: "over", pct: 40 });
 	});
 
-	it("reports a window projected over as already over", () => {
+	it("steps a red window back to yellow at 100 x elapsed", () => {
 		expect(
 			nextRateLimitStep(45, resetsAtElapsed(0.4), FIVE_HOUR_SECONDS, NOW),
-		).toEqual({ kind: "over" });
+		).toEqual({
+			kind: "over",
+			pct: 40,
+			recoversAt: NOW + FIVE_HOUR_SECONDS * (0.45 - 0.4),
+		});
+	});
+
+	it("leaves a red window at or over 100% without a recovery moment", () => {
+		expect(
+			nextRateLimitStep(120, resetsAtElapsed(0.4), FIVE_HOUR_SECONDS, NOW),
+		).toEqual({ kind: "over", pct: 40, recoversAt: undefined });
 	});
 
 	it("reports a window below 5% elapsed as unprojectable", () => {
