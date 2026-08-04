@@ -1,3 +1,10 @@
+## [0.540.1](https://github.com/staff0rd/assist/compare/v0.540.0...v0.540.1) (2026-08-04)
+
+
+### Bug Fixes
+
+* order limit row thresholds by level ([ed22703](https://github.com/staff0rd/assist/commit/ed227033c6d652a00c70ce3cb1803de507d108c5))
+
 # [0.540.0](https://github.com/staff0rd/assist/compare/v0.539.0...v0.540.0) (2026-08-04)
 
 
