@@ -1,3 +1,10 @@
+# [0.541.0](https://github.com/staff0rd/assist/compare/v0.540.2...v0.541.0) (2026-08-04)
+
+
+### Features
+
+* allow npx vitest run in cli-writes ([d740dbd](https://github.com/staff0rd/assist/commit/d740dbd7173cc265b68cddfb3ccd2836fb415c24))
+
 ## [0.540.2](https://github.com/staff0rd/assist/compare/v0.540.1...v0.540.2) (2026-08-04)
 
 
