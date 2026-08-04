@@ -1,3 +1,10 @@
+# [0.539.0](https://github.com/staff0rd/assist/compare/v0.538.0...v0.539.0) (2026-08-04)
+
+
+### Features
+
+* force re-run review option toggle ([e9e95c7](https://github.com/staff0rd/assist/commit/e9e95c7f5d88615b41f2725f9d24763d9c14f363))
+
 # [0.538.0](https://github.com/staff0rd/assist/compare/v0.537.0...v0.538.0) (2026-08-04)
 
 
