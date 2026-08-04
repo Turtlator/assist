@@ -54,12 +54,24 @@ describe("RateLimitsTooltip", () => {
 		expect(colorOf("30%")).toBe(levelColor("warn"));
 	});
 
-	it("steps a yellow window to its red threshold", () => {
+	it("steps a yellow window back to green and on to its red threshold", () => {
 		renderTooltip({ seven_day: usageWindow(35, 0.4, SEVEN_DAY_SECONDS) });
 
 		expect(screen.getByText("7d")).toBeTruthy();
 		expect(colorOf("35%")).toBe(levelColor("warn"));
+		expect(colorOf("30%")).toBe(levelColor("ok"));
 		expect(colorOf("40%")).toBe(levelColor("over"));
+		expect(screen.getByText("←")).toBeTruthy();
+		expect(screen.getByText("→")).toBeTruthy();
+		expect(screen.getByText("green in 11h 12m")).toBeTruthy();
+	});
+
+	it("reports a yellow window at or over 75% as unrecoverable before reset", () => {
+		renderTooltip({ five_hour: usageWindow(80, 0.9, FIVE_HOUR_SECONDS) });
+
+		expect(colorOf("80%")).toBe(levelColor("warn"));
+		expect(screen.getByText("not before reset")).toBeTruthy();
+		expect(screen.queryByText(/green in/)).toBeNull();
 	});
 
 	it("steps a red window back to its yellow threshold", () => {

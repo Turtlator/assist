@@ -1,6 +1,9 @@
 export const FIVE_HOUR_SECONDS = 5 * 3600;
 export const SEVEN_DAY_SECONDS = 7 * 86400;
 
+export const RATE_LIMIT_WARN_PCT = 75;
+export const RATE_LIMIT_OVER_PCT = 100;
+
 export type RateLimitLevel = "ok" | "warn" | "over";
 
 export function rateLimitElapsedFraction(
@@ -46,7 +49,7 @@ export function rateLimitLevel(
 ): RateLimitLevel {
 	const projected = projectUsage(pct, resetsAt, windowSeconds, now);
 	if (projected == null) return "ok";
-	if (projected > 100) return "over";
-	if (projected > 75) return "warn";
+	if (projected > RATE_LIMIT_OVER_PCT) return "over";
+	if (projected > RATE_LIMIT_WARN_PCT) return "warn";
 	return "ok";
 }

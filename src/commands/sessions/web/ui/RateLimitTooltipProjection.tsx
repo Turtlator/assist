@@ -1,7 +1,31 @@
 import Box from "@mui/material/Box";
 import { nextRateLimitStep } from "../../../../shared/nextRateLimitStep";
-import { formatRateLimitTimeLeft } from "../../../../shared/rateLimitLevel";
+import {
+	formatRateLimitTimeLeft,
+	type RateLimitLevel,
+} from "../../../../shared/rateLimitLevel";
 import { limitLevelColor } from "./limitLevelColor";
+
+function Threshold({
+	arrow,
+	level,
+	pct,
+}: {
+	arrow: string;
+	level: RateLimitLevel;
+	pct: number;
+}) {
+	return (
+		<>
+			<Box component="span" sx={{ opacity: 0.6 }}>
+				{arrow}
+			</Box>
+			<Box component="span" sx={{ color: limitLevelColor(level) }}>
+				{Math.round(pct)}%
+			</Box>
+		</>
+	);
+}
 
 export function RateLimitTooltipProjection({
 	pct,
@@ -21,24 +45,20 @@ export function RateLimitTooltipProjection({
 				no projection yet
 			</Box>
 		);
+	const { recovery, worse } = next;
 	return (
 		<>
-			<Box component="span" sx={{ opacity: 0.6 }}>
-				{next.kind === "over" ? "←" : "→"}
-			</Box>
-			<Box
-				component="span"
-				sx={{
-					color: limitLevelColor(next.kind === "over" ? "warn" : next.level),
-				}}
-			>
-				{Math.round(next.pct)}%
-			</Box>
-			{next.kind === "over" ? (
+			{recovery ? (
+				<Threshold arrow="←" level={recovery.level} pct={recovery.pct} />
+			) : null}
+			{worse ? (
+				<Threshold arrow="→" level={worse.level} pct={worse.pct} />
+			) : null}
+			{recovery ? (
 				<Box component="span" sx={{ opacity: 0.6 }}>
-					{next.recoversAt == null
+					{recovery.at == null
 						? "not before reset"
-						: `under in ${formatRateLimitTimeLeft(next.recoversAt, now)}`}
+						: `${recovery.level === "ok" ? "green" : "under"} in ${formatRateLimitTimeLeft(recovery.at, now)}`}
 				</Box>
 			) : null}
 		</>
