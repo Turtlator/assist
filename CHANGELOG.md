@@ -1,3 +1,10 @@
+## [0.546.1](https://github.com/staff0rd/assist/compare/v0.546.0...v0.546.1) (2026-08-05)
+
+
+### Bug Fixes
+
+* stop pr comments output inviting yaml parsing ([be82be1](https://github.com/staff0rd/assist/commit/be82be1753cb0677d70a268697817ffe04bc6de6))
+
 # [0.546.0](https://github.com/staff0rd/assist/compare/v0.545.1...v0.546.0) (2026-08-05)
 
 
