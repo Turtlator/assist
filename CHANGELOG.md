@@ -1,3 +1,10 @@
+## [0.548.1](https://github.com/staff0rd/assist/compare/v0.548.0...v0.548.1) (2026-08-05)
+
+
+### Bug Fixes
+
+* keep watcher card at top level ([9d8d95b](https://github.com/staff0rd/assist/commit/9d8d95b3cb8562539eff4311325b839c1d41cf88))
+
 # [0.548.0](https://github.com/staff0rd/assist/compare/v0.547.1...v0.548.0) (2026-08-05)
 
 
