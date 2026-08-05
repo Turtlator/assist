@@ -1,3 +1,10 @@
+# [0.548.0](https://github.com/staff0rd/assist/compare/v0.547.1...v0.548.0) (2026-08-05)
+
+
+### Features
+
+* default PR draft state from config ([757a712](https://github.com/staff0rd/assist/commit/757a7128c773f3d0ce7f861978afb14bac050526))
+
 ## [0.547.1](https://github.com/staff0rd/assist/compare/v0.547.0...v0.547.1) (2026-08-05)
 
 
