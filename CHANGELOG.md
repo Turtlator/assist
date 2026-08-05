@@ -1,3 +1,10 @@
+# [0.542.0](https://github.com/staff0rd/assist/compare/v0.541.1...v0.542.0) (2026-08-05)
+
+
+### Features
+
+* add fix-conflict, prs dropdown label ([bae3911](https://github.com/staff0rd/assist/commit/bae3911859e7dcd0c404aa7d6fa0052e93b9ad86))
+
 ## [0.541.1](https://github.com/staff0rd/assist/compare/v0.541.0...v0.541.1) (2026-08-05)
 
 
