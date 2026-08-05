@@ -1,3 +1,10 @@
+# [0.546.0](https://github.com/staff0rd/assist/compare/v0.545.1...v0.546.0) (2026-08-05)
+
+
+### Features
+
+* print comment ids in pr threads ([dab5c9c](https://github.com/staff0rd/assist/commit/dab5c9cdb8f922a9ddd207f9ae210b5e205d6a34))
+
 ## [0.545.1](https://github.com/staff0rd/assist/compare/v0.545.0...v0.545.1) (2026-08-05)
 
 
