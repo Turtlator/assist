@@ -33,7 +33,12 @@ function launchingCard(
 	const launcher = session.launchedFrom
 		? byId.get(session.launchedFrom)
 		: undefined;
-	return launcher === session ? undefined : launcher;
+	if (!launcher || launcher === session) return undefined;
+	return sharesPath(session, launcher) ? launcher : undefined;
+}
+
+function sharesPath(session: SessionInfo, launcher: SessionInfo): boolean {
+	return session.cwd !== undefined && session.cwd === launcher.cwd;
 }
 
 function runSharingTree(

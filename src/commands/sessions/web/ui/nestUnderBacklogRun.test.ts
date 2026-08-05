@@ -226,6 +226,28 @@ describe("nestUnderBacklogRun", () => {
 		]);
 	});
 
+	it("keeps a watcher in the clone at the top level when a worktree run launched it", () => {
+		const sessions = [
+			run("run", "/git/assist-2"),
+			{ ...session("watch", "/git/assist"), launchedFrom: "run" },
+		];
+
+		expect(nestUnderBacklogRun(sessions)).toEqual([
+			{ session: sessions[0], children: [] },
+			{ session: sessions[1], children: [] },
+		]);
+	});
+
+	it("keeps the watcher in place once the run that launched it is gone", () => {
+		const sessions = [
+			{ ...session("watch", "/git/assist"), launchedFrom: "run" },
+		];
+
+		expect(nestUnderBacklogRun(sessions)).toEqual([
+			{ session: sessions[0], children: [] },
+		]);
+	});
+
 	it("keeps sessions in sibling worktrees on separate rows", () => {
 		const sessions = [
 			run("run-a", "/git/assist-2"),

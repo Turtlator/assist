@@ -62,7 +62,7 @@ export function spawnAssistInTree(
 		},
 		context,
 	);
-	if (isBacklogRunArgs(assistArgs)) ensureWatcher(ctx, cwd, id);
+	if (isBacklogRunArgs(assistArgs)) ensureWatcher(ctx, cwd);
 	return id;
 }
 

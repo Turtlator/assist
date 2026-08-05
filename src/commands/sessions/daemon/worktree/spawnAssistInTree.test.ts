@@ -34,7 +34,7 @@ describe("spawnAssistInTree", () => {
 		);
 
 		expect(id).toBe("4");
-		expect(ensureWatcher).toHaveBeenCalledWith(ctx, "/git/repo", "4");
+		expect(ensureWatcher).toHaveBeenCalledWith(ctx, "/git/repo");
 	});
 
 	it("forwards the launching card to the spawn choke point", () => {

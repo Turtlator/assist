@@ -41,7 +41,7 @@ export function reuseSessionForRun(
 		onStatusChange,
 	);
 	if (!started) return;
-	if (tree) ensureWatcher(tree, originCwd, session.id);
+	if (tree) ensureWatcher(tree, originCwd);
 	attachReusedRun(session, alloc, clients, onStatusChange, tree);
 	daemonLog(
 		`session ${session.id} reused for backlog run ${itemId}: ${session.name}`,

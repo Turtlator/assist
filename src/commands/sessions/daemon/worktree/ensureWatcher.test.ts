@@ -109,15 +109,7 @@ describe("ensureWatcher", () => {
 		);
 	});
 
-	it("nests the watcher under the backlog run that triggered it", () => {
-		const ctx = context();
-
-		ensureWatcher(ctx, "/git/repo-2", "3");
-
-		expect(ctx.sessions.get("9")?.launchedFrom).toBe("3");
-	});
-
-	it("leaves the watcher top-level when nothing triggered it", () => {
+	it("leaves the watcher top-level, not nested under the run that triggered it", () => {
 		const ctx = context();
 
 		ensureWatcher(ctx, "/git/repo-2");
