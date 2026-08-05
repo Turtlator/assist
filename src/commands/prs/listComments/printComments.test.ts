@@ -54,6 +54,15 @@ describe("printComments", () => {
 			expect(printed()).toContain("alice");
 		});
 
+		it("should print each comment's id so it can be passed to fixed/wontfix", () => {
+			printComments({
+				comments: [lineComment({ id: 4242 })],
+				cachePath: null,
+			});
+
+			expect(printed()).toContain("id 4242");
+		});
+
 		it("should not colour the output", () => {
 			printComments({ comments: [lineComment({})], cachePath: null });
 
@@ -167,6 +176,47 @@ describe("printComments", () => {
 			});
 
 			expect(printed()).not.toContain("Thread on");
+		});
+
+		it("should render one line per thread, not per comment", () => {
+			printComments({
+				comments: [
+					lineComment({ id: 1, threadId: "T1", resolved: true }),
+					lineComment({ id: 2, threadId: "T1", resolved: true }),
+					lineComment({
+						id: 3,
+						threadId: "T2",
+						resolved: true,
+						path: "src/bar.ts",
+					}),
+				],
+				cachePath: null,
+			});
+
+			expect(printed()).toContain("Resolved threads (2)");
+			expect(printed()).toContain("(2 comments)");
+		});
+
+		it("should keep unresolved threads in full alongside the resolved index", () => {
+			printComments({
+				comments: [
+					lineComment({ id: 1, threadId: "T1", body: "Still open." }),
+					lineComment({
+						id: 2,
+						threadId: "T2",
+						resolved: true,
+						body: "Already done.",
+					}),
+				],
+				cachePath: null,
+			});
+
+			const text = printed();
+			expect(text).toContain("Unresolved threads (1)");
+			expect(text).toContain("Still open.");
+			expect(text.indexOf("Unresolved threads")).toBeLessThan(
+				text.indexOf("Resolved threads"),
+			);
 		});
 	});
 

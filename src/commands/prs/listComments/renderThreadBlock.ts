@@ -23,7 +23,7 @@ export function renderThreadBlock(thread: Thread, style: Style): string {
 		lines.push(
 			indent(
 				[
-					`${style.bold(comment.user)} ${style.dim(comment.html_url)}`,
+					`${style.bold(comment.user)} ${style.dim(`id ${comment.id}`)} ${style.dim(comment.html_url)}`,
 					comment.body,
 					"",
 				].join("\n"),

@@ -6,15 +6,20 @@ Process review comments for the current branch's pull request.
 
 ## Fetching Comments
 
-Fetch all review comments using `assist prs list-comments`. This returns both review-level and line-level comments, each with a `type` field ("review" or "line"). Comments are also cached to `~/.assist/pr-comments/{org}/{repo}/pr-{prNumber}-comments.yaml` for use by reply and resolve commands.
+Fetch all review comments using `assist prs list-comments`. The output is already grouped and filtered — read it directly, and do not parse the YAML cache:
 
-**Note:** Line comments include a `resolved` field - only process comments where `resolved: false`. Resolved comments are included for reference when addressing subsequent comments.
+- **Review comments** print first, in full.
+- **Unresolved threads** print next, one block per thread, each headed `Thread on <path>:<line>` and listing every comment in the thread with its author, `id` and `html_url`, followed by the body. These are the threads to process.
+- **Resolved threads** print below as a one-line-per-thread index, for reference only — do not process them.
+- The closing summary reports the unresolved and resolved thread counts.
+
+Comments are also cached to `~/.assist/pr-comments/{org}/{repo}/pr-{prNumber}-comments.yaml` for use by the reply and resolve commands.
 
 ## Processing Comments
 
-**Thread grouping:** Comments share a `threadId` field. Group comments by thread and process each thread as a single unit — never merge different threads, even when they are on the same file. Present follow-up comments (e.g., a reviewer endorsing a bot suggestion) as context alongside the primary actionable comment. Only call `fixed`/`wontfix` once per thread, using the comment ID of the primary actionable comment.
+**Threads:** each unresolved thread block is one unit of work — never merge different threads, even when they are on the same file. Within a block, present follow-up comments (e.g., a reviewer endorsing a bot suggestion) as context alongside the primary actionable comment. Only call `fixed`/`wontfix` once per thread, using the `id` of the primary actionable comment.
 
-Create a task for each **thread** (not each comment). For each thread:
+Create a task for each unresolved **thread** (not each comment). For each thread:
 
 1. **Display the comment** to the user:
    - Show the reviewer, file/line (if applicable), and the comment text
