@@ -19,7 +19,10 @@ const session: SessionInfo = {
 	joinable: true,
 };
 
-function renderButton(launchAgentInStream: (...args: never[]) => void) {
+function renderButton(
+	launchAgentInStream: (...args: never[]) => void,
+	overrides: Partial<SessionInfo> = {},
+) {
 	render(
 		<SessionLaunchContext.Provider
 			value={{
@@ -32,7 +35,7 @@ function renderButton(launchAgentInStream: (...args: never[]) => void) {
 				armUpdateReload: () => {},
 			}}
 		>
-			<AddAgentButton session={session} />
+			<AddAgentButton session={{ ...session, ...overrides }} />
 		</SessionLaunchContext.Provider>,
 	);
 }
@@ -75,5 +78,28 @@ describe("AddAgentButton", () => {
 
 		expect(launch).toHaveBeenCalledWith("3", "", "/git/repo-2");
 		expect(screen.queryByRole("textbox")).toBeNull();
+	});
+
+	it("spawns into the workspace of an errored session", () => {
+		const launch = vi.fn();
+		renderButton(launch, { status: "error" });
+
+		fireEvent.click(screen.getByLabelText("add agent"));
+		fireEvent.change(screen.getByRole("textbox"), {
+			target: { value: "pick up where it died" },
+		});
+		fireEvent.click(screen.getByRole("button", { name: "Start" }));
+
+		expect(launch).toHaveBeenCalledWith(
+			"3",
+			"pick up where it died",
+			"/git/repo-2",
+		);
+	});
+
+	it("withholds the button once the daemon refuses the join", () => {
+		renderButton(vi.fn(), { status: "error", joinable: false });
+
+		expect(screen.queryByLabelText("add agent")).toBeNull();
 	});
 });
