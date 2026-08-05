@@ -7,7 +7,8 @@ export function sessionType(session: SessionInfo): SessionType {
 	switch (session.commandType) {
 		case "assist": {
 			const cmd = session.assistArgs?.[0];
-			if (cmd === "review-pr-comments") return "review";
+			if (cmd === "review-pr-comments" || cmd === "fix-conflict")
+				return "review";
 			if (
 				cmd === "draft" ||
 				cmd === "bug" ||

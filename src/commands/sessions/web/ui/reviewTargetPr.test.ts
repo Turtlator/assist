@@ -45,6 +45,17 @@ describe("reviewTargetPr", () => {
 		expect(reviewTargetPr(session)).toBe(122);
 	});
 
+	it("handles fix-conflict sessions", () => {
+		expect(
+			reviewTargetPr(makeSession({ assistArgs: ["fix-conflict", "122"] })),
+		).toBe(122);
+		expect(
+			reviewTargetPr(
+				makeSession({ assistArgs: ["fix-conflict", "--rebase", "122"] }),
+			),
+		).toBe(122);
+	});
+
 	it("returns undefined for non-review sessions", () => {
 		expect(
 			reviewTargetPr(makeSession({ assistArgs: ["next"], subtitle: "#5" })),

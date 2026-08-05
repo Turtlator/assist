@@ -47,7 +47,7 @@ After installation, the `assist` command will be available globally. You can als
 - `/commit` - Commit only relevant files from the session
 - `/devlog` - Generate devlog entry for the next unversioned day
 - `/draft` - Draft a new backlog item with LLM-assisted questioning
-- `/fix-conflict` - Resolve the current PR branch's merge conflicts against the remote default, verify, commit and push
+- `/fix-conflict [--rebase]` - Resolve the current PR branch's conflicts against the remote default, verify, then push; merges by default, `--rebase` replays the branch and pushes with `--force-with-lease`
 - `/forward-comments` - Split a coarse PR comment into per-line review comments, attributed to the original reviewer
 - `/handover` - Write a session handover note for the next conversation
 - `/pr` - Raise a PR with a concise description, then watch CI in the background
@@ -344,7 +344,7 @@ The Config tab of the sessions web dashboard never receives secret values: `GET 
 - `assist bug [description] [--once]` - Launch Claude in `/bug` mode, chain into next on `/next` signal
 - `assist refine [id] [--once] [--harness <claude|codex|pi>]` - Launch a coding harness in `/refine` mode; `--harness` picks the engine, defaulting to the configured `harness.engine` (Claude)
 - `assist review-pr-comments [number] [--announce]` - Launch Claude in `/review-pr-comments` mode; a PR number is checked out first via `gh pr checkout`. `--announce` (requires a number) announces the PR in Slack via `/prs-slack <number> --no-confirm` once every comment thread has been processed
-- `assist fix-conflict [number]` - Launch Claude in `/fix-conflict` mode to resolve the branch's conflicts against the remote default; a PR number is checked out first via `gh pr checkout`
+- `assist fix-conflict [number] [--rebase]` - Launch Claude in `/fix-conflict` mode to resolve the branch's conflicts against the remote default; a PR number is checked out first via `gh pr checkout`. `--rebase` rebases onto the remote default instead of merging it in
 - `assist signal next [id]` - Write a next signal to chain into `assist next`
 - `assist signal done [id]` - Write a done signal marking the session's initial task complete; an optional `id` surfaces the backlog item the session created onto its card
 

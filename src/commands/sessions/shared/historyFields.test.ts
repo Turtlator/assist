@@ -11,6 +11,15 @@ describe("deriveHistoryFields", () => {
 		expect(deriveHistoryFields("update", "", "").sessionType).toBe("update");
 	});
 
+	it("maps PR-scoped command names to the review type", () => {
+		expect(deriveHistoryFields("review-pr-comments", "", "").sessionType).toBe(
+			"review",
+		);
+		expect(deriveHistoryFields("fix-conflict", "", "").sessionType).toBe(
+			"review",
+		);
+	});
+
 	it("treats an unknown command or a bare prompt as 'prompt'", () => {
 		expect(deriveHistoryFields("compact", "", "").sessionType).toBe("prompt");
 		expect(deriveHistoryFields("", "", "fix the thing").sessionType).toBe(

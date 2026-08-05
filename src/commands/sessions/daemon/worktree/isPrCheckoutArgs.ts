@@ -1,4 +1,8 @@
-const CHECKOUT_COMMANDS = new Set(["review", "review-pr-comments"]);
+const CHECKOUT_COMMANDS = new Set([
+	"review",
+	"review-pr-comments",
+	"fix-conflict",
+]);
 
 export function isPrCheckoutArgs(args: string[]): boolean {
 	const [command, ...rest] = args;

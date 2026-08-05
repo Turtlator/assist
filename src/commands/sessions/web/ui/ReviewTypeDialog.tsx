@@ -52,6 +52,9 @@ export function ReviewTypeDialog({
 					<MenuItem onClick={() => onSelect(["fix-conflict"])}>
 						Fix conflicts (merge)
 					</MenuItem>
+					<MenuItem onClick={() => onSelect(["fix-conflict", "--rebase"])}>
+						Fix conflicts (rebase)
+					</MenuItem>
 				</MenuList>
 			</DialogContent>
 			<DialogActions>

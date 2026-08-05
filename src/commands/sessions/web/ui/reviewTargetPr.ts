@@ -1,6 +1,6 @@
 import type { SessionInfo } from "./types";
 
-const REVIEW_COMMANDS = ["review", "review-pr-comments"];
+const REVIEW_COMMANDS = ["review", "review-pr-comments", "fix-conflict"];
 
 export function reviewTargetPr(session: SessionInfo): number | undefined {
 	const command = session.assistArgs?.[0];

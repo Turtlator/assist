@@ -53,7 +53,8 @@ function deriveSessionType(
 	commandName: string,
 	name: string,
 ): SessionType | undefined {
-	if (commandName === "review-pr-comments") return "review";
+	if (commandName === "review-pr-comments" || commandName === "fix-conflict")
+		return "review";
 	if (KNOWN.includes(commandName as SessionType))
 		return commandName as SessionType;
 	if (commandName || name) return "prompt";

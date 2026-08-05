@@ -1,0 +1,70 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const mockCheckoutPr = vi.fn();
+const mockSpawnClaude = vi.fn(() => ({ done: Promise.resolve(0) }));
+const calls: string[] = [];
+
+vi.mock("./review/checkoutPr", () => ({
+	checkoutPr: (number: string) => {
+		calls.push("checkout");
+		return mockCheckoutPr(number);
+	},
+}));
+
+vi.mock("../shared/spawnClaude", () => ({
+	spawnClaude: (...args: unknown[]) => {
+		calls.push("claude");
+		return mockSpawnClaude(...(args as []));
+	},
+}));
+
+vi.mock("../shared/emitActivity", () => ({ emitActivity: vi.fn() }));
+
+import { fixConflict } from "./fixConflict";
+
+beforeEach(() => {
+	vi.clearAllMocks();
+	calls.length = 0;
+});
+
+describe("fixConflict", () => {
+	describe("when a PR number is given", () => {
+		it("should check the PR out before launching the session", async () => {
+			await fixConflict("123");
+
+			expect(mockCheckoutPr).toHaveBeenCalledWith("123");
+			expect(calls).toEqual(["checkout", "claude"]);
+		});
+	});
+
+	describe("when no PR number is given", () => {
+		it("should run in the tree it was invoked in", async () => {
+			await fixConflict();
+
+			expect(mockCheckoutPr).not.toHaveBeenCalled();
+			expect(mockSpawnClaude).toHaveBeenCalled();
+		});
+	});
+
+	describe("without --rebase", () => {
+		it("should ask for the merge strategy", async () => {
+			await fixConflict("123");
+
+			expect(mockSpawnClaude).toHaveBeenCalledWith(
+				"/fix-conflict",
+				expect.anything(),
+			);
+		});
+	});
+
+	describe("with --rebase", () => {
+		it("should pass the rebase strategy through to the prompt", async () => {
+			await fixConflict("123", { rebase: true });
+
+			expect(mockSpawnClaude).toHaveBeenCalledWith(
+				"/fix-conflict --rebase",
+				expect.anything(),
+			);
+		});
+	});
+});

@@ -10,6 +10,11 @@ describe("isPrCheckoutArgs", () => {
 		expect(isPrCheckoutArgs(["review-pr-comments", "123"])).toBe(true);
 	});
 
+	it("recognises a conflict fix on a numbered PR", () => {
+		expect(isPrCheckoutArgs(["fix-conflict", "123"])).toBe(true);
+		expect(isPrCheckoutArgs(["fix-conflict", "--rebase", "123"])).toBe(true);
+	});
+
 	it("recognises a number that follows a flag", () => {
 		expect(isPrCheckoutArgs(["review", "--force", "123"])).toBe(true);
 	});
@@ -18,6 +23,7 @@ describe("isPrCheckoutArgs", () => {
 		expect(isPrCheckoutArgs(["review"])).toBe(false);
 		expect(isPrCheckoutArgs(["review", "--refine"])).toBe(false);
 		expect(isPrCheckoutArgs(["review-pr-comments"])).toBe(false);
+		expect(isPrCheckoutArgs(["fix-conflict", "--rebase"])).toBe(false);
 	});
 
 	it("ignores other commands and empty args", () => {

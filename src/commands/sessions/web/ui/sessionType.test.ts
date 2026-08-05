@@ -39,6 +39,14 @@ describe("sessionType", () => {
 		expect(sessionType(session)).toBe("review");
 	});
 
+	it("maps fix-conflict to the review type", () => {
+		const session = makeSession({
+			commandType: "assist",
+			assistArgs: ["fix-conflict", "123"],
+		});
+		expect(sessionType(session)).toBe("review");
+	});
+
 	it("treats a free claude session as a prompt", () => {
 		expect(sessionType(makeSession({ commandType: "claude" }))).toBe("prompt");
 	});

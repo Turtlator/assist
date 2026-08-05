@@ -84,6 +84,21 @@ describe("CardPrActions review pairing", () => {
 		).toBeNull();
 	});
 
+	it("gives a fix-conflict session the same PR-scoped actions", async () => {
+		stubFetch({ pr: true, synthesis: true });
+		renderActions(
+			session({
+				name: "assist fix-conflict 12",
+				assistArgs: ["fix-conflict", "12"],
+				subtitle: "#12 · someone · 2h ago",
+			}),
+		);
+
+		expect(await screen.findByRole("button", { name: "Open PR" })).toBeTruthy();
+		expect(await reviewButton()).toBeTruthy();
+		expect(await findingsButton()).toBeTruthy();
+	});
+
 	it("still shows the findings button when the session has no PR", async () => {
 		stubFetch({ pr: false, synthesis: true });
 		renderActions();

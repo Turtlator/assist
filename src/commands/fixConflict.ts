@@ -3,7 +3,14 @@ import { emitActivity } from "../shared/emitActivity";
 import { spawnClaude } from "../shared/spawnClaude";
 import { checkoutPr } from "./review/checkoutPr";
 
-export async function fixConflict(number?: string): Promise<void> {
+type FixConflictOptions = {
+	rebase?: boolean;
+};
+
+export async function fixConflict(
+	number?: string,
+	options: FixConflictOptions = {},
+): Promise<void> {
 	if (number) await checkoutPr(number);
 	const claudeSessionId = randomUUID();
 	emitActivity({
@@ -11,9 +18,12 @@ export async function fixConflict(number?: string): Promise<void> {
 		name: "fix-conflict",
 		claudeSessionId,
 	});
-	const { done } = spawnClaude("/fix-conflict", {
-		permissionMode: "auto",
-		sessionId: claudeSessionId,
-	});
+	const { done } = spawnClaude(
+		options.rebase === true ? "/fix-conflict --rebase" : "/fix-conflict",
+		{
+			permissionMode: "auto",
+			sessionId: claudeSessionId,
+		},
+	);
 	await done;
 }
