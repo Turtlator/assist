@@ -1,3 +1,10 @@
+## [0.541.1](https://github.com/staff0rd/assist/compare/v0.541.0...v0.541.1) (2026-08-05)
+
+
+### Bug Fixes
+
+* allow adding an agent with no prompt ([5f8c759](https://github.com/staff0rd/assist/commit/5f8c759959bfadaec9c109052b192d832929eac8))
+
 # [0.541.0](https://github.com/staff0rd/assist/compare/v0.540.2...v0.541.0) (2026-08-04)
 
 
