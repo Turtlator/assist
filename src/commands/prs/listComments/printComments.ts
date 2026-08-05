@@ -1,4 +1,5 @@
 import type { LineComment, PrComment, ReviewComment } from "../types";
+import { agentFooter } from "./agentFooter";
 import { commentStyle } from "./commentStyle";
 import { groupThreads } from "./groupThreads";
 import { renderResolvedIndex } from "./renderResolvedIndex";
@@ -40,6 +41,10 @@ export function printComments(result: ListCommentsResult): void {
 		console.log(renderResolvedIndex(resolved, style));
 	}
 	console.log(summarise(reviews.length, unresolved, resolved));
+	if (style.agent) {
+		console.log(agentFooter(unresolved.length));
+		return;
+	}
 	if (cachePath) {
 		console.log(`Saved to ${cachePath}`);
 	}

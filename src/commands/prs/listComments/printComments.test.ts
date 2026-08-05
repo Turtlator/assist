@@ -253,11 +253,32 @@ describe("printComments", () => {
 				"Found 1 review comment, 1 unresolved and 0 resolved threads.",
 			);
 		});
+	});
 
-		it("should still report the cache path", () => {
+	describe("the closing footer under Claude Code", () => {
+		it("should not point at the yaml cache", () => {
 			printComments({ comments: [lineComment({})], cachePath: "/cache.yaml" });
 
-			expect(printed()).toContain("Saved to /cache.yaml");
+			expect(printed()).not.toContain("Saved to /cache.yaml");
+			expect(printed()).not.toContain("/cache.yaml");
+		});
+
+		it("should say the unresolved threads are printed above, so a tail sees it", () => {
+			printComments({ comments: [lineComment({})], cachePath: "/cache.yaml" });
+
+			const lastLines = output.slice(-2).join("\n");
+			expect(lastLines).toContain("printed in full above");
+			expect(lastLines).toContain("do not read or parse the YAML cache");
+		});
+
+		it("should say there is nothing to process when no thread is unresolved", () => {
+			printComments({
+				comments: [lineComment({ resolved: true })],
+				cachePath: "/cache.yaml",
+			});
+
+			expect(printed()).toContain("No unresolved threads to process.");
+			expect(printed()).not.toContain("printed in full above");
 		});
 	});
 
@@ -281,6 +302,12 @@ describe("printComments", () => {
 			});
 
 			expect(printed()).toContain("SENTINEL");
+		});
+
+		it("should still report the cache path", () => {
+			printComments({ comments: [lineComment({})], cachePath: "/cache.yaml" });
+
+			expect(printed()).toContain("Saved to /cache.yaml");
 		});
 
 		it("should print the same grouped structure", () => {

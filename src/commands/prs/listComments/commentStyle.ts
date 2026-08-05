@@ -7,6 +7,7 @@ export type Style = {
 	dim: (text: string) => string;
 	state: (state: string) => string;
 	diffHunk: boolean;
+	agent: boolean;
 };
 
 const plain = (text: string) => text;
@@ -26,6 +27,7 @@ export function commentStyle(): Style {
 			dim: plain,
 			state: (state) => `[${state}]`,
 			diffHunk: false,
+			agent: true,
 		};
 	}
 	return {
@@ -34,5 +36,6 @@ export function commentStyle(): Style {
 		dim: chalk.dim,
 		state: colouredState,
 		diffHunk: true,
+		agent: false,
 	};
 }
