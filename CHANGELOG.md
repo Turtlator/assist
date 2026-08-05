@@ -1,3 +1,10 @@
+## [0.543.1](https://github.com/staff0rd/assist/compare/v0.543.0...v0.543.1) (2026-08-05)
+
+
+### Bug Fixes
+
+* resume-session flag on respawn ([25270f3](https://github.com/staff0rd/assist/commit/25270f3c2bd6f2d2a8d783c74c47c5659b99aa10))
+
 # [0.543.0](https://github.com/staff0rd/assist/compare/v0.542.1...v0.543.0) (2026-08-05)
 
 
