@@ -1,3 +1,10 @@
+# [0.543.0](https://github.com/staff0rd/assist/compare/v0.542.1...v0.543.0) (2026-08-05)
+
+
+### Features
+
+* add fix-conflict rebase strategy ([34860d3](https://github.com/staff0rd/assist/commit/34860d33ad1ffeabdfbcc05879cccfdb5a4eab70))
+
 ## [0.542.1](https://github.com/staff0rd/assist/compare/v0.542.0...v0.542.1) (2026-08-05)
 
 
