@@ -3,6 +3,7 @@ import { next as backlogNext } from "./backlog";
 import { launchMode } from "./backlog/launchMode";
 import { registerRefineLaunch } from "./backlog/registerRefineLaunch";
 import { reviewPrComments } from "./reviewPrComments";
+import { registerFixConflict } from "./registerFixConflict";
 
 type LaunchOpts = { once?: boolean; resumeSession?: string };
 
@@ -76,5 +77,6 @@ export function registerLaunch(program: Command): void {
 		"Launch Claude in /bug mode, chain into next on /next signal",
 	);
 	registerReviewPrComments(program);
+	registerFixConflict(program);
 	registerRefineLaunch(program, RESUME_SESSION_FLAG);
 }

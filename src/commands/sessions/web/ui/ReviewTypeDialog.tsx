@@ -49,6 +49,9 @@ export function ReviewTypeDialog({
 					<MenuItem onClick={() => onSelect(["review-pr-comments"])}>
 						Address Comments
 					</MenuItem>
+					<MenuItem onClick={() => onSelect(["fix-conflict"])}>
+						Fix conflicts (merge)
+					</MenuItem>
 				</MenuList>
 			</DialogContent>
 			<DialogActions>

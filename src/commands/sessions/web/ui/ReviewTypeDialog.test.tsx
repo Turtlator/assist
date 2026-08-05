@@ -107,4 +107,26 @@ describe("ReviewTypeDialog", () => {
 
 		expect(onSelect).toHaveBeenCalledWith(["review-pr-comments"]);
 	});
+
+	it("selects Fix conflicts (merge) with no option flags", () => {
+		const onSelect = vi.fn();
+		render(<ReviewTypeDialog pr={pr} onSelect={onSelect} onCancel={vi.fn()} />);
+
+		fireEvent.click(checkbox("Force re-run"));
+		fireEvent.click(checkbox("Announce to Slack after"));
+		fireEvent.click(screen.getByText("Fix conflicts (merge)"));
+
+		expect(onSelect).toHaveBeenCalledWith(["fix-conflict"]);
+	});
+
+	it("lists Fix conflicts (merge) after Address Comments", () => {
+		render(<ReviewTypeDialog pr={pr} onSelect={vi.fn()} onCancel={vi.fn()} />);
+
+		const items = screen
+			.getAllByRole("menuitem")
+			.map((item) => item.textContent);
+
+		expect(items.at(-1)).toBe("Fix conflicts (merge)");
+		expect(items.at(-2)).toBe("Address Comments");
+	});
 });

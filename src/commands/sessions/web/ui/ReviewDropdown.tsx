@@ -23,7 +23,7 @@ export function ReviewDropdown({
 
 	return (
 		<>
-			<DropdownWrapper label="review" disabled={disabled}>
+			<DropdownWrapper label="prs" disabled={disabled}>
 				{(close) => (
 					<ReviewDropdownContent
 						cwd={cwd}
