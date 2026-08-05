@@ -70,6 +70,18 @@ describe("reviewPrComments", () => {
 		});
 	});
 
+	describe("when resuming an interrupted session", () => {
+		it("should resume the recorded conversation instead of checking the PR out again", async () => {
+			await reviewPrComments("123", { resumeSessionId: "conv-1" });
+
+			expect(mockCheckoutPr).not.toHaveBeenCalled();
+			expect(mockSpawnClaude).toHaveBeenCalledWith(
+				expect.stringContaining("Continue from where you left off"),
+				expect.objectContaining({ resumeSessionId: "conv-1" }),
+			);
+		});
+	});
+
 	describe("without --announce", () => {
 		it("should run the plain pass", async () => {
 			await reviewPrComments("123");

@@ -56,8 +56,12 @@ function registerReviewPrComments(program: Command): void {
 			"--announce",
 			"After every comment thread is processed, announce the PR in Slack via /prs-slack <number> --no-confirm (requires a PR number)",
 		)
-		.action((number, opts: { announce?: boolean }) =>
-			reviewPrComments(number, opts),
+		.option("--resume-session <id>", RESUME_SESSION_FLAG)
+		.action((number, opts: { announce?: boolean; resumeSession?: string }) =>
+			reviewPrComments(number, {
+				announce: opts.announce,
+				resumeSessionId: opts.resumeSession,
+			}),
 		);
 }
 
@@ -77,6 +81,6 @@ export function registerLaunch(program: Command): void {
 		"Launch Claude in /bug mode, chain into next on /next signal",
 	);
 	registerReviewPrComments(program);
-	registerFixConflict(program);
+	registerFixConflict(program, RESUME_SESSION_FLAG);
 	registerRefineLaunch(program, RESUME_SESSION_FLAG);
 }

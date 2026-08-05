@@ -343,12 +343,12 @@ The Config tab of the sessions web dashboard never receives secret values: `GET 
 - `assist draft [description] [--once]` (alias: `feat`) - Launch Claude in `/draft` mode, chain into next on `/next` signal
 - `assist bug [description] [--once]` - Launch Claude in `/bug` mode, chain into next on `/next` signal
 - `assist refine [id] [--once] [--harness <claude|codex|pi>]` - Launch a coding harness in `/refine` mode; `--harness` picks the engine, defaulting to the configured `harness.engine` (Claude)
-- `assist review-pr-comments [number] [--announce]` - Launch Claude in `/review-pr-comments` mode; a PR number is checked out first via `gh pr checkout`. `--announce` (requires a number) announces the PR in Slack via `/prs-slack <number> --no-confirm` once every comment thread has been processed
-- `assist fix-conflict [number] [--rebase]` - Launch Claude in `/fix-conflict` mode to resolve the branch's conflicts against the remote default; a PR number is checked out first via `gh pr checkout`. `--rebase` rebases onto the remote default instead of merging it in
+- `assist review-pr-comments [number] [--announce] [--resume-session <id>]` - Launch Claude in `/review-pr-comments` mode; a PR number is checked out first via `gh pr checkout`. `--announce` (requires a number) announces the PR in Slack via `/prs-slack <number> --no-confirm` once every comment thread has been processed
+- `assist fix-conflict [number] [--rebase] [--resume-session <id>]` - Launch Claude in `/fix-conflict` mode to resolve the branch's conflicts against the remote default; a PR number is checked out first via `gh pr checkout`. `--rebase` rebases onto the remote default instead of merging it in
 - `assist signal next [id]` - Write a next signal to chain into `assist next`
 - `assist signal done [id]` - Write a done signal marking the session's initial task complete; an optional `id` surfaces the backlog item the session created onto its card
 
-Each launcher accepts `--resume-session <id>` to resume an interrupted Claude session (used by the daemon when it restarts a running item).
+`draft`, `bug`, `refine`, `review-pr-comments`, `fix-conflict` and `backlog run` accept `--resume-session <id>` to resume an interrupted Claude session (used by the daemon when it restarts or restores a running item). Launchers without the flag — `next` among them — are respawned without it rather than being handed an option they would reject.
 
 ## Sessions dashboard
 

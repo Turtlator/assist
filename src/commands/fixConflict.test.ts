@@ -25,6 +25,7 @@ import { fixConflict } from "./fixConflict";
 beforeEach(() => {
 	vi.clearAllMocks();
 	calls.length = 0;
+	delete process.env.ASSIST_RESUME_IDLE;
 });
 
 describe("fixConflict", () => {
@@ -64,6 +65,29 @@ describe("fixConflict", () => {
 			expect(mockSpawnClaude).toHaveBeenCalledWith(
 				"/fix-conflict --rebase",
 				expect.anything(),
+			);
+		});
+	});
+
+	describe("when resuming an interrupted session", () => {
+		it("should resume the recorded conversation instead of checking the PR out again", async () => {
+			await fixConflict("123", { resumeSessionId: "conv-1" });
+
+			expect(mockCheckoutPr).not.toHaveBeenCalled();
+			expect(mockSpawnClaude).toHaveBeenCalledWith(
+				expect.stringContaining("Continue from where you left off"),
+				expect.objectContaining({ resumeSessionId: "conv-1" }),
+			);
+		});
+
+		it("should reattach without a nudge when the conversation was idle", async () => {
+			process.env.ASSIST_RESUME_IDLE = "1";
+
+			await fixConflict("123", { resumeSessionId: "conv-1" });
+
+			expect(mockSpawnClaude).toHaveBeenCalledWith(
+				"",
+				expect.objectContaining({ resumeSessionId: "conv-1" }),
 			);
 		});
 	});
