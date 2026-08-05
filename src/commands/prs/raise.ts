@@ -2,6 +2,7 @@ import type { CreateOptions } from "./buildCreateArgs";
 import { buildValidatedBody } from "./buildValidatedBody";
 import { placePr } from "./placePr";
 import { previewAndPlace } from "./previewAndPlace";
+import { type DraftOptionSource, resolveDraftState } from "./resolveDraftState";
 import { findCurrentPrNumber } from "./shared";
 
 type RaiseOptions = Omit<CreateOptions, "body"> & {
@@ -15,8 +16,12 @@ type RaiseOptions = Omit<CreateOptions, "body"> & {
 const USAGE =
 	"Usage: assist prs raise --title <title> --what <what> --why <why> [--how <how>] [--resolves <key>] [--force]";
 
-export async function raise(options: RaiseOptions): Promise<void> {
+export async function raise(
+	options: RaiseOptions,
+	command?: DraftOptionSource,
+): Promise<void> {
 	const { title, body } = buildValidatedBody(options, USAGE);
+	const resolved = { ...options, draft: resolveDraftState(options, command) };
 	const existing = findCurrentPrNumber();
 	const sessionId = process.env.ASSIST_SESSION_ID;
 
@@ -26,7 +31,7 @@ export async function raise(options: RaiseOptions): Promise<void> {
 			title,
 			body,
 			prNumber: existing,
-			options,
+			options: resolved,
 		});
 		return;
 	}
@@ -38,5 +43,5 @@ export async function raise(options: RaiseOptions): Promise<void> {
 		process.exit(1);
 	}
 
-	await placePr(existing, title, body, options);
+	await placePr(existing, title, body, resolved);
 }

@@ -18,6 +18,7 @@ export async function previewAndPlace(args: {
 		title: args.title,
 		body: args.body,
 		prNumber: args.prNumber,
+		draft: args.options.draft === true,
 	});
 
 	const body = appendScreenshots(args.body, decision.screenshots ?? []);

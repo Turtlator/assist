@@ -53,6 +53,26 @@ describe("previewAndPlace", () => {
 		expect(placePrMock).toHaveBeenCalledWith(null, "t", "## What\n\nx", {});
 	});
 
+	it("sends the resolved draft state to the preview pane", async () => {
+		requestPrDecisionMock.mockResolvedValue({ decision: "approve" });
+
+		await previewAndPlace({ ...args, options: { draft: true } });
+
+		expect(requestPrDecisionMock).toHaveBeenCalledWith(
+			expect.objectContaining({ draft: true }),
+		);
+	});
+
+	it("sends a false draft state when the PR will be raised ready", async () => {
+		requestPrDecisionMock.mockResolvedValue({ decision: "approve" });
+
+		await previewAndPlace(args);
+
+		expect(requestPrDecisionMock).toHaveBeenCalledWith(
+			expect.objectContaining({ draft: false }),
+		);
+	});
+
 	describe("chaining after the PR is placed", () => {
 		it("hands the reviewer's toggles to the chain once the PR exists", async () => {
 			requestPrDecisionMock.mockResolvedValue({

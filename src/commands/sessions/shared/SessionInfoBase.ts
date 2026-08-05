@@ -20,6 +20,7 @@ export type PrPreview = {
 	prNumber: number | null;
 	kind?: PreviewKind;
 	itemType?: PreviewItemType;
+	draft?: boolean;
 };
 
 export type SessionInfoBase = {

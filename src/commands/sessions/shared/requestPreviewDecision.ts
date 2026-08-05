@@ -14,6 +14,7 @@ export type PreviewRequest = {
 	prNumber: number | null;
 	kind?: PreviewKind;
 	itemType?: PreviewItemType;
+	draft?: boolean;
 };
 
 export function requestPreviewDecision(

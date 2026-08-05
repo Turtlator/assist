@@ -1,5 +1,7 @@
 import type { Command } from "commander";
+import { configHelp } from "../shared/configHelp";
 import { raise as prsRaise } from "./prs/index";
+import { prsRaiseConfigHelp } from "./prs/prsConfigHelp";
 import { raiseHelpText } from "./prs/raiseHelpText";
 
 function collect(value: string, previous: string[]): string[] {
@@ -7,7 +9,7 @@ function collect(value: string, previous: string[]): string[] {
 }
 
 export function registerPrsRaise(prsCommand: Command): void {
-	prsCommand
+	const raiseCommand = prsCommand
 		.command("raise")
 		.description(
 			"Raise a pull request, assembling the body from discrete sections",
@@ -29,6 +31,10 @@ export function registerPrsRaise(prsCommand: Command): void {
 		.option("-B, --base <branch>", "Branch into which the pull request merges")
 		.option("-H, --head <branch>", "Branch that contains the commits")
 		.option("-d, --draft", "Mark the pull request as a draft")
+		.option(
+			"--no-draft",
+			"Create a ready-for-review pull request, overriding prs.draft",
+		)
 		.option("-w, --web", "Open the browser to create the pull request")
 		.option("-l, --label <label>", "Add a label (repeatable)", collect, [])
 		.option(
@@ -46,4 +52,6 @@ export function registerPrsRaise(prsCommand: Command): void {
 		.option("-m, --milestone <name>", "Add the pull request to a milestone")
 		.addHelpText("after", () => raiseHelpText())
 		.action(prsRaise);
+
+	configHelp(raiseCommand, prsRaiseConfigHelp);
 }

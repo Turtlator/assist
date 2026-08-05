@@ -12,10 +12,19 @@ const RESOLVES_NO_PROMPT = `  --resolves <key>  Jira issue key resolved by this 
                     key is known from the session or supplied by the user; omit
                     it otherwise.`;
 
-function guidance(promptJira: boolean): string {
+const DRAFT_DEFAULT_ON = `This repo has prs.draft set, so a raise creates a draft pull request unless
+--no-draft is passed.`;
+
+const DRAFT_DEFAULT_OFF = `This repo leaves prs.draft off, so a raise creates a ready-for-review pull
+request unless --draft is passed.`;
+
+function guidance(promptJira: boolean, draft: boolean): string {
 	const resolves = promptJira ? RESOLVES_WITH_PROMPT : RESOLVES_NO_PROMPT;
+	const draftDefault = draft ? DRAFT_DEFAULT_ON : DRAFT_DEFAULT_OFF;
 	return `Raise a pull request for the current branch. Use a concise description with no
 headers, and do not reference Claude or any AI assistance in the title or body.
+
+${draftDefault}
 
 The body is assembled from discrete section options; supply at minimum --title,
 --what, and --why:
@@ -80,9 +89,11 @@ approval these are appended to the PR body under a ## Screenshots section
 automatically (they are discarded on rejection), so you never author that section
 yourself. Just compose the sections and run the command.`;
 
-export function raiseHelpText(promptJira?: boolean): string {
-	const prompt = promptJira ?? loadConfig().prs?.promptJira ?? false;
+export function raiseHelpText(promptJira?: boolean, draft?: boolean): string {
+	const config = loadConfig().prs;
+	const prompt = promptJira ?? config?.promptJira ?? false;
+	const draftDefault = draft ?? config?.draft ?? false;
 	const confirm =
 		process.env.ASSIST_SESSION === "1" ? WEB_CONFIRM : TERMINAL_CONFIRM;
-	return `\n${guidance(prompt)}\n\n${confirm}\n`;
+	return `\n${guidance(prompt, draftDefault)}\n\n${confirm}\n`;
 }

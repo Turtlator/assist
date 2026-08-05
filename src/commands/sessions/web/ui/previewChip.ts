@@ -8,7 +8,10 @@ export function previewChip(preview: PrPreview): ChipSpec {
 			? { label: "Bug", color: "warning" }
 			: { label: "Story", color: "info" };
 
-	return preview.prNumber === null
-		? { label: "New PR", color: "success" }
-		: { label: `Update #${preview.prNumber}`, color: "info" };
+	if (preview.prNumber !== null)
+		return { label: `Update #${preview.prNumber}`, color: "info" };
+
+	return preview.draft
+		? { label: "New draft PR", color: "success" }
+		: { label: "New PR", color: "success" };
 }

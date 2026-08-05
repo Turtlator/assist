@@ -16,6 +16,18 @@ describe("raiseHelpText", () => {
 		expect(help).not.toContain("ask the user whether this PR");
 	});
 
+	it("states that raises are drafts when prs.draft is true", () => {
+		const help = raiseHelpText(false, true);
+		expect(help).toContain("prs.draft set");
+		expect(help).toContain("--no-draft is passed");
+	});
+
+	it("states that raises are ready for review when prs.draft is false", () => {
+		const help = raiseHelpText(false, false);
+		expect(help).toContain("prs.draft off");
+		expect(help).toContain("--draft is passed");
+	});
+
 	it("demands a terse register, not just a sentence count", () => {
 		const help = raiseHelpText(false);
 		expect(help).toContain("Terse technical register");

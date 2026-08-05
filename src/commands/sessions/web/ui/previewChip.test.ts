@@ -1,0 +1,62 @@
+import { describe, expect, it } from "vitest";
+import type { PrPreview } from "../../shared/SessionInfoBase";
+import { previewChip } from "./previewChip";
+
+function preview(overrides: Partial<PrPreview> = {}): PrPreview {
+	return {
+		requestId: "req-1",
+		title: "Add feature",
+		body: "## What\n\nstuff",
+		prNumber: null,
+		...overrides,
+	};
+}
+
+describe("previewChip", () => {
+	it("labels a backlog bug", () => {
+		expect(
+			previewChip(preview({ kind: "backlog-item", itemType: "bug" })),
+		).toEqual({ label: "Bug", color: "warning" });
+	});
+
+	it("labels a backlog story", () => {
+		expect(
+			previewChip(preview({ kind: "backlog-item", itemType: "story" })),
+		).toEqual({ label: "Story", color: "info" });
+	});
+
+	it("labels an update to an existing PR", () => {
+		expect(previewChip(preview({ prNumber: 42 }))).toEqual({
+			label: "Update #42",
+			color: "info",
+		});
+	});
+
+	it("labels a new PR that is not a draft", () => {
+		expect(previewChip(preview({ draft: false }))).toEqual({
+			label: "New PR",
+			color: "success",
+		});
+	});
+
+	it("labels a new PR with no draft state as a plain new PR", () => {
+		expect(previewChip(preview())).toEqual({
+			label: "New PR",
+			color: "success",
+		});
+	});
+
+	it("labels a new draft PR as a draft", () => {
+		expect(previewChip(preview({ draft: true }))).toEqual({
+			label: "New draft PR",
+			color: "success",
+		});
+	});
+
+	it("ignores draft state on an update", () => {
+		expect(previewChip(preview({ prNumber: 7, draft: true }))).toEqual({
+			label: "Update #7",
+			color: "info",
+		});
+	});
+});

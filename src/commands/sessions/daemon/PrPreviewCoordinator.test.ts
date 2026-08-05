@@ -39,6 +39,28 @@ describe("PrPreviewCoordinator", () => {
 		expect(notify).toHaveBeenCalled();
 	});
 
+	it("carries the resolved draft state onto a new-PR preview", () => {
+		const sessions = makeSessions("1");
+		const coord = new PrPreviewCoordinator(sessions, vi.fn());
+
+		coord.set(makeClient(), { ...previewMsg("1", "r1"), draft: true });
+
+		expect(sessions.get("1")?.pendingPrPreview?.draft).toBe(true);
+	});
+
+	it("leaves the draft state off an update to an existing PR", () => {
+		const sessions = makeSessions("1");
+		const coord = new PrPreviewCoordinator(sessions, vi.fn());
+
+		coord.set(makeClient(), {
+			...previewMsg("1", "r1"),
+			prNumber: 42,
+			draft: true,
+		});
+
+		expect(sessions.get("1")?.pendingPrPreview?.draft).toBeUndefined();
+	});
+
 	it("replies with an error for an unknown session", () => {
 		const client = makeClient();
 		const coord = new PrPreviewCoordinator(makeSessions(), vi.fn());

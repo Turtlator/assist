@@ -16,6 +16,11 @@ vi.mock("../../shared/loadJson", () => ({
 
 vi.mock("./recordPrActivity", () => ({ recordPrActivity: vi.fn() }));
 
+const mockLoadConfig = vi.fn();
+vi.mock("../../shared/loadConfig", () => ({
+	loadConfig: () => mockLoadConfig(),
+}));
+
 const mockRequestPrDecision = vi.fn();
 vi.mock("../sessions/shared/requestPreviewDecision", () => ({
 	requestPreviewDecision: (...args: unknown[]) =>
@@ -32,9 +37,13 @@ beforeEach(() => {
 	vi.clearAllMocks();
 	mockExecFileSync.mockReset();
 	mockFindCurrentPrNumber.mockReturnValue(null);
+	mockLoadConfig.mockReturnValue({});
 	delete process.env.ASSIST_SESSION;
 	delete process.env.ASSIST_SESSION_ID;
 });
+
+const CLI = { getOptionValueSource: () => "cli" };
+const DEFAULTED = { getOptionValueSource: () => "default" };
 
 describe("raise", () => {
 	describe("when required sections are missing", () => {
@@ -113,6 +122,66 @@ describe("raise", () => {
 						"Resolves https://example.atlassian.net/browse/BAD-671",
 					),
 				]),
+				{ stdio: "inherit" },
+			);
+		});
+	});
+
+	describe("draft state", () => {
+		function ghArgs(): string[] {
+			const call = mockExecFileSync.mock.calls.find(
+				([bin, args]) => bin === "gh" && (args as string[])[1] === "create",
+			);
+			return (call?.[1] as string[]) ?? [];
+		}
+
+		it("passes --draft when prs.draft is true and no flag is given", () => {
+			mockLoadConfig.mockReturnValue({ prs: { draft: true } });
+
+			raise({ title: "t", what: "w", why: "y" }, DEFAULTED);
+
+			expect(ghArgs()).toContain("--draft");
+		});
+
+		it("omits --draft when prs.draft is unset and no flag is given", () => {
+			raise({ title: "t", what: "w", why: "y" }, DEFAULTED);
+
+			expect(ghArgs()).not.toContain("--draft");
+		});
+
+		it("passes --draft when the flag is given and prs.draft is false", () => {
+			mockLoadConfig.mockReturnValue({ prs: { draft: false } });
+
+			raise({ title: "t", what: "w", why: "y", draft: true }, CLI);
+
+			expect(ghArgs()).toContain("--draft");
+		});
+
+		it("omits --draft for --no-draft even when prs.draft is true", () => {
+			mockLoadConfig.mockReturnValue({ prs: { draft: true } });
+
+			raise({ title: "t", what: "w", why: "y", draft: false }, CLI);
+
+			expect(ghArgs()).not.toContain("--draft");
+		});
+
+		it("never sends a draft flag when updating an existing PR", () => {
+			mockLoadConfig.mockReturnValue({ prs: { draft: true } });
+			mockFindCurrentPrNumber.mockReturnValue(42);
+
+			raise({ title: "t", what: "w", why: "y", force: true }, DEFAULTED);
+
+			expect(mockExecFileSync).toHaveBeenCalledWith(
+				"gh",
+				[
+					"pr",
+					"edit",
+					"42",
+					"--title",
+					"t",
+					"--body",
+					"## What\n\nw\n\n## Why\n\ny",
+				],
 				{ stdio: "inherit" },
 			);
 		});
