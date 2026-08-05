@@ -1,3 +1,10 @@
+# [0.545.0](https://github.com/staff0rd/assist/compare/v0.544.0...v0.545.0) (2026-08-05)
+
+
+### Features
+
+* group pr comments by thread ([9c09e94](https://github.com/staff0rd/assist/commit/9c09e94ce9e795baac7cc9bbc09a7ad6dcc2079a))
+
 # [0.544.0](https://github.com/staff0rd/assist/compare/v0.543.1...v0.544.0) (2026-08-05)
 
 
