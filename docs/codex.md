@@ -65,8 +65,18 @@ Event → status, mirroring the Claude mapping:
 | `UserPromptSubmit`                 | `running` (source `prompt`)               |
 | `PreToolUse` / `PostToolUse`       | `running` (source `pretool` / `posttool`) |
 | `PermissionRequest` we auto-decide | `running` (source `permission`)           |
-| `PermissionRequest` we pass on     | `waiting`, ack'd (source `permission`)    |
-| `Stop`                             | `waiting`, ack'd (source `stop`)          |
+| `PermissionRequest` we pass on     | `waiting` (source `permission`)           |
+| `Stop`                             | `waiting` (source `stop`)                 |
+
+Every report uses `set-status --ack` (the retrying, acknowledged delivery path),
+unlike Claude, which only acks its waiting transitions. Best-effort delivery from
+a short-lived hook process is unreliable: the client writes one line and
+immediately half-closes, which races the daemon's greeting write on the same
+connection, and the queued line is dropped when that write errors. Measured from
+the built CLI: 0 of 10 best-effort sends reached the daemon, 10 of 10 ack'd sends
+did. Claude survives this because a turn fires many `pretool`/`posttool` hooks, so
+some land; Codex fires roughly three status events per turn, so losing them left
+the card stuck on `waiting`.
 
 The undecided-`PermissionRequest` split is more precise than the Claude mapping,
 which reports `waiting` for every permission request: under Codex we only report

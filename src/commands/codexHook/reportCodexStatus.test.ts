@@ -14,12 +14,12 @@ beforeEach(() => {
 });
 
 describe("reportCodexStatus", () => {
-	it("pushes running on a prompt submission", async () => {
+	it("pushes an ack'd running on a prompt submission", async () => {
 		await reportCodexStatus("UserPromptSubmit", false);
 
 		expect(mockSetSessionStatus).toHaveBeenCalledWith("running", {
 			source: "prompt",
-			ack: undefined,
+			ack: true,
 		});
 	});
 

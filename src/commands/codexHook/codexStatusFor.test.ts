@@ -20,11 +20,10 @@ describe("codexStatusFor", () => {
 		});
 	});
 
-	it("reports waiting when the turn stops, waiting for the daemon to ack", () => {
+	it("reports waiting when the turn stops", () => {
 		expect(codexStatusFor("Stop", false)).toEqual({
 			status: "waiting",
 			source: "stop",
-			ack: true,
 		});
 	});
 
@@ -32,7 +31,6 @@ describe("codexStatusFor", () => {
 		expect(codexStatusFor("PermissionRequest", false)).toEqual({
 			status: "waiting",
 			source: "permission",
-			ack: true,
 		});
 	});
 
