@@ -1,3 +1,10 @@
+# [0.544.0](https://github.com/staff0rd/assist/compare/v0.543.1...v0.544.0) (2026-08-05)
+
+
+### Features
+
+* add agent to finished sessions ([d736966](https://github.com/staff0rd/assist/commit/d7369667693d8412c401e2fb1896c42bdf1ca5a7))
+
 ## [0.543.1](https://github.com/staff0rd/assist/compare/v0.543.0...v0.543.1) (2026-08-05)
 
 
