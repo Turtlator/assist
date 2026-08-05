@@ -51,6 +51,7 @@ export type SessionInfoBase = {
 	design?: boolean;
 	pendingPrPreview?: PrPreview;
 	undurable?: { reason: string; removesTree?: boolean };
+	joinable?: boolean;
 	closing?: boolean;
 	verifying?: boolean;
 };

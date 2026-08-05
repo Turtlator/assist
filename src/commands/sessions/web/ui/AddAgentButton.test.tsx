@@ -16,6 +16,7 @@ const session: SessionInfo = {
 	runningMs: 0,
 	runningSince: null,
 	cwd: "/git/repo-2",
+	joinable: true,
 };
 
 function renderButton(launchAgentInStream: (...args: never[]) => void) {

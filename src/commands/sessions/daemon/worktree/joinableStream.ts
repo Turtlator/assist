@@ -1,4 +1,5 @@
 import type { Session } from "../createSession";
+import { joinRefusal } from "./joinRefusal";
 
 export function joinableStream(
 	sessions: Map<string, Session>,
@@ -6,9 +7,6 @@ export function joinableStream(
 ): { session: Session } | { reason: string } {
 	const target = sessions.get(targetId);
 	if (!target) return { reason: "no such session" };
-	if (target.commandType === "run")
-		return { reason: "a server run has no agent stream" };
-	if (target.closing === true) return { reason: "the session is closing" };
-	if (!target.cwd) return { reason: "the session has no working directory" };
-	return { session: target };
+	const reason = joinRefusal(target);
+	return reason ? { reason } : { session: target };
 }

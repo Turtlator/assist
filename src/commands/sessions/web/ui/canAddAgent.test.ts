@@ -12,34 +12,34 @@ function card(overrides: Partial<SessionInfo> = {}): SessionInfo {
 		runningMs: 0,
 		runningSince: 1,
 		cwd: "/git/repo-2",
+		joinable: true,
 		...overrides,
 	};
 }
 
 describe("canAddAgent", () => {
-	it("is offered on a session working in a repo", () => {
+	it("is offered on a card the daemon reports as joinable", () => {
 		expect(canAddAgent(card())).toBe(true);
 	});
 
-	it("is offered on a session awaiting input", () => {
-		expect(canAddAgent(card({ status: "waiting" }))).toBe(true);
-	});
-
-	it("is withheld from a server run", () => {
-		expect(canAddAgent(card({ commandType: "run" }))).toBe(false);
-	});
-
-	it("is withheld while a workspace is being torn down", () => {
-		expect(canAddAgent(card({ closing: true }))).toBe(false);
-	});
-
-	it("is offered on a finished, errored or stopped card", () => {
+	it("is offered on a finished, errored or stopped joinable card", () => {
 		expect(canAddAgent(card({ status: "done" }))).toBe(true);
 		expect(canAddAgent(card({ status: "error" }))).toBe(true);
 		expect(canAddAgent(card({ status: "stopped" }))).toBe(true);
 	});
 
-	it("is withheld with no working directory to share", () => {
-		expect(canAddAgent(card({ cwd: undefined }))).toBe(false);
+	it("is withheld from a card the daemon refuses to join", () => {
+		expect(canAddAgent(card({ joinable: false }))).toBe(false);
+	});
+
+	it("is withheld from a card carrying no verdict", () => {
+		expect(canAddAgent(card({ joinable: undefined }))).toBe(false);
+	});
+
+	it("follows the verdict rather than re-deriving it from the card", () => {
+		expect(canAddAgent(card({ commandType: "run" }))).toBe(true);
+		expect(canAddAgent(card({ joinable: false, cwd: "/git/repo-2" }))).toBe(
+			false,
+		);
 	});
 });

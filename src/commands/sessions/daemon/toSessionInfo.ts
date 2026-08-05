@@ -1,6 +1,7 @@
 import type { Session, SessionInfo } from "./createSession";
 import { repoGroupForCwd } from "./repoGroupForCwd";
 import { toSessionRunInfo } from "./toSessionRunInfo";
+import { joinRefusal } from "./worktree/joinRefusal";
 
 export function toSessionInfo(session: Session): SessionInfo {
 	const {
@@ -46,5 +47,6 @@ export function toSessionInfo(session: Session): SessionInfo {
 		verifying,
 		pendingPrPreview,
 		undurable,
+		joinable: joinRefusal(session) === undefined,
 	};
 }

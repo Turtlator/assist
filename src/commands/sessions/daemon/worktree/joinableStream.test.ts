@@ -1,6 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { existsSync } from "node:fs";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Session } from "../createSession";
 import { joinableStream } from "./joinableStream";
+
+vi.mock("node:fs", () => ({ existsSync: vi.fn(() => true) }));
+
+const exists = vi.mocked(existsSync);
 
 function session(overrides: Partial<Session> = {}): Session {
 	return {
@@ -26,31 +31,15 @@ function ask(target: Session | undefined, id = "3") {
 	return joinableStream(sessions, id);
 }
 
+beforeEach(() => {
+	exists.mockReset();
+	exists.mockReturnValue(true);
+});
+
 describe("joinableStream", () => {
 	it("takes another agent into a working session", () => {
 		const target = session();
 		expect(ask(target)).toEqual({ session: target });
-	});
-
-	it("takes another agent into a session awaiting input", () => {
-		const target = session({ status: "waiting" });
-		expect(ask(target)).toEqual({ session: target });
-	});
-
-	it("refuses a session that is gone", () => {
-		expect(ask(undefined)).toEqual({ reason: "no such session" });
-	});
-
-	it("refuses a server run", () => {
-		expect(ask(session({ commandType: "run" }))).toEqual({
-			reason: "a server run has no agent stream",
-		});
-	});
-
-	it("refuses a session whose workspace is being torn down", () => {
-		expect(ask(session({ closing: true }))).toEqual({
-			reason: "the session is closing",
-		});
 	});
 
 	it("takes another agent into a finished, errored or stopped session", () => {
@@ -60,9 +49,17 @@ describe("joinableStream", () => {
 		}
 	});
 
-	it("refuses a session with no working directory", () => {
-		expect(ask(session({ cwd: undefined, worktree: undefined }))).toEqual({
-			reason: "the session has no working directory",
+	it("refuses a session that is gone", () => {
+		expect(ask(undefined)).toEqual({ reason: "no such session" });
+	});
+
+	it("hands back the reason a found session cannot be joined", () => {
+		expect(ask(session({ commandType: "run" }))).toEqual({
+			reason: "a server run has no agent stream",
+		});
+		exists.mockReturnValue(false);
+		expect(ask(session())).toEqual({
+			reason: "the session's workspace no longer exists",
 		});
 	});
 });
