@@ -1,3 +1,10 @@
+## [0.545.1](https://github.com/staff0rd/assist/compare/v0.545.0...v0.545.1) (2026-08-05)
+
+
+### Bug Fixes
+
+* report refused add-agent joins ([60c21bd](https://github.com/staff0rd/assist/commit/60c21bdde7dd1f6347777485a2b8e7727c37624e))
+
 # [0.545.0](https://github.com/staff0rd/assist/compare/v0.544.0...v0.545.0) (2026-08-05)
 
 
