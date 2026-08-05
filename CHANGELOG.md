@@ -1,3 +1,10 @@
+## [0.547.1](https://github.com/staff0rd/assist/compare/v0.547.0...v0.547.1) (2026-08-05)
+
+
+### Bug Fixes
+
+* deliver codex status reliably ([940ed85](https://github.com/staff0rd/assist/commit/940ed85171863191571ee016337efbc57ede2716))
+
 # [0.547.0](https://github.com/staff0rd/assist/compare/v0.546.1...v0.547.0) (2026-08-05)
 
 
