@@ -1,43 +1,15 @@
-import chalk from "chalk";
-import { isClaudeCode } from "../../../lib/isClaudeCode";
-import type { PrComment } from "../types";
+import type { LineComment, PrComment, ReviewComment } from "../types";
+import { commentStyle } from "./commentStyle";
+import { groupThreads } from "./groupThreads";
+import { renderResolvedIndex } from "./renderResolvedIndex";
+import { renderThreadBlock } from "./renderThreadBlock";
+import { renderReview } from "./renderReview";
+import { summarise } from "./summarise";
 
 export type ListCommentsResult = {
 	comments: PrComment[];
 	cachePath: string | null;
 };
-
-function formatForHuman(comment: PrComment): string {
-	if (comment.type === "review") {
-		const stateColor =
-			comment.state === "APPROVED"
-				? chalk.green
-				: comment.state === "CHANGES_REQUESTED"
-					? chalk.red
-					: chalk.yellow;
-		return [
-			`${chalk.cyan("Review")} by ${chalk.bold(comment.user)} ${stateColor(`[${comment.state}]`)}`,
-			comment.body,
-			"",
-		].join("\n");
-	}
-	const location = comment.line ? `:${comment.line}` : "";
-	return [
-		`${chalk.cyan("Line comment")} by ${chalk.bold(comment.user)} on ${chalk.dim(`${comment.path}${location}`)}`,
-		chalk.dim(comment.diff_hunk.split("\n").slice(-3).join("\n")),
-		comment.body,
-		"",
-	].join("\n");
-}
-
-function summarise(comments: PrComment[]): string {
-	const lineCount = comments.filter((c) => c.type === "line").length;
-	const reviewCount = comments.filter((c) => c.type === "review").length;
-	const parts: string[] = [];
-	if (lineCount > 0) parts.push(`${lineCount} line`);
-	if (reviewCount > 0) parts.push(`${reviewCount} review`);
-	return `Found ${parts.join(" and ")} comment${comments.length === 1 ? "" : "s"}.`;
-}
 
 export function printComments(result: ListCommentsResult): void {
 	const { comments, cachePath } = result;
@@ -45,12 +17,29 @@ export function printComments(result: ListCommentsResult): void {
 		console.log("No comments found.");
 		return;
 	}
-	if (!isClaudeCode()) {
-		for (const comment of comments) {
-			console.log(formatForHuman(comment));
+	const style = commentStyle();
+	const reviews = comments.filter(
+		(c): c is ReviewComment => c.type === "review",
+	);
+	const threads = groupThreads(
+		comments.filter((c): c is LineComment => c.type === "line"),
+	);
+	const unresolved = threads.filter((t) => !t.resolved);
+	const resolved = threads.filter((t) => t.resolved);
+
+	for (const review of reviews) {
+		console.log(renderReview(review, style));
+	}
+	if (unresolved.length > 0) {
+		console.log(`${style.cyan(`Unresolved threads (${unresolved.length})`)}\n`);
+		for (const thread of unresolved) {
+			console.log(renderThreadBlock(thread, style));
 		}
 	}
-	console.log(summarise(comments));
+	if (resolved.length > 0) {
+		console.log(renderResolvedIndex(resolved, style));
+	}
+	console.log(summarise(reviews.length, unresolved, resolved));
 	if (cachePath) {
 		console.log(`Saved to ${cachePath}`);
 	}

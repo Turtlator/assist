@@ -10,7 +10,7 @@ export type PullRequest = {
 	changedFiles: number;
 };
 
-type LineComment = {
+export type LineComment = {
 	type: "line";
 	id: number;
 	threadId: string;
@@ -23,7 +23,7 @@ type LineComment = {
 	resolved: boolean;
 };
 
-type ReviewComment = {
+export type ReviewComment = {
 	type: "review";
 	id: number;
 	user: string;
