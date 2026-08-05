@@ -12,7 +12,7 @@ export async function fixConflict(number?: string): Promise<void> {
 		claudeSessionId,
 	});
 	const { done } = spawnClaude("/fix-conflict", {
-		permissionMode: "acceptEdits",
+		permissionMode: "auto",
 		sessionId: claudeSessionId,
 	});
 	await done;
