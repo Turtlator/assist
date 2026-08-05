@@ -54,23 +54,25 @@ describe("AddAgentButton", () => {
 		);
 	});
 
-	it("does nothing without a prompt to give the added agent", () => {
+	it("spawns an agent with no prompt when Start is clicked while empty", () => {
 		const launch = vi.fn();
 		renderButton(launch);
 
 		fireEvent.click(screen.getByLabelText("add agent"));
 		fireEvent.click(screen.getByRole("button", { name: "Start" }));
 
-		expect(launch).not.toHaveBeenCalled();
+		expect(launch).toHaveBeenCalledWith("3", "", "/git/repo-2");
+		expect(screen.queryByRole("textbox")).toBeNull();
 	});
 
-	it("does nothing on Enter without a prompt", () => {
+	it("spawns an agent with no prompt on Enter while empty", () => {
 		const launch = vi.fn();
 		renderButton(launch);
 
 		fireEvent.click(screen.getByLabelText("add agent"));
 		fireEvent.keyDown(screen.getByRole("textbox"), { key: "Enter" });
 
-		expect(launch).not.toHaveBeenCalled();
+		expect(launch).toHaveBeenCalledWith("3", "", "/git/repo-2");
+		expect(screen.queryByRole("textbox")).toBeNull();
 	});
 });

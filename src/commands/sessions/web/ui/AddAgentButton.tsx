@@ -38,7 +38,6 @@ export function AddAgentButton({ session }: { session: SessionInfo }) {
 					value={prompt}
 					onChange={setPrompt}
 					onSubmit={() => {
-						if (!prompt.trim()) return;
 						launchAgentInStream(session.id, prompt, session.cwd);
 						setPrompt("");
 						setAnchorEl(null);
