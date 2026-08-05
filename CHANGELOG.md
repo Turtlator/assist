@@ -1,3 +1,10 @@
+# [0.547.0](https://github.com/staff0rd/assist/compare/v0.546.1...v0.547.0) (2026-08-05)
+
+
+### Features
+
+* gate add agent on daemon verdict ([20fe611](https://github.com/staff0rd/assist/commit/20fe61183b16099ad9087c8281fb078bbb58d056))
+
 ## [0.546.1](https://github.com/staff0rd/assist/compare/v0.546.0...v0.546.1) (2026-08-05)
 
 
