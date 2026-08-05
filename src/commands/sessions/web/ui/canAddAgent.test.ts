@@ -33,9 +33,10 @@ describe("canAddAgent", () => {
 		expect(canAddAgent(card({ closing: true }))).toBe(false);
 	});
 
-	it("is withheld from a finished or stopped card", () => {
-		expect(canAddAgent(card({ status: "done" }))).toBe(false);
-		expect(canAddAgent(card({ status: "stopped" }))).toBe(false);
+	it("is offered on a finished, errored or stopped card", () => {
+		expect(canAddAgent(card({ status: "done" }))).toBe(true);
+		expect(canAddAgent(card({ status: "error" }))).toBe(true);
+		expect(canAddAgent(card({ status: "stopped" }))).toBe(true);
 	});
 
 	it("is withheld with no working directory to share", () => {

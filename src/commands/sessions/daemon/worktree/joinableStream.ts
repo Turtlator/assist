@@ -9,8 +9,6 @@ export function joinableStream(
 	if (target.commandType === "run")
 		return { reason: "a server run has no agent stream" };
 	if (target.closing === true) return { reason: "the session is closing" };
-	if (target.status !== "running" && target.status !== "waiting")
-		return { reason: `the session is ${target.status}` };
 	if (!target.cwd) return { reason: "the session has no working directory" };
 	return { session: target };
 }

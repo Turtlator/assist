@@ -53,13 +53,11 @@ describe("joinableStream", () => {
 		});
 	});
 
-	it("refuses a finished or stopped session", () => {
-		expect(ask(session({ status: "done" }))).toEqual({
-			reason: "the session is done",
-		});
-		expect(ask(session({ status: "stopped" }))).toEqual({
-			reason: "the session is stopped",
-		});
+	it("takes another agent into a finished, errored or stopped session", () => {
+		for (const status of ["done", "error", "stopped"] as const) {
+			const target = session({ status });
+			expect(ask(target)).toEqual({ session: target });
+		}
 	});
 
 	it("refuses a session with no working directory", () => {
