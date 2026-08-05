@@ -4,7 +4,7 @@ import { spawnCreate } from "./spawnCreate";
 
 vi.mock("./daemonLog", () => ({ daemonLog: vi.fn() }));
 
-function manager(joined: string | undefined) {
+function manager(joined: { sessionId: string } | { reason: string }) {
 	return {
 		spawn: vi.fn(() => "9"),
 		addAgent: vi.fn(() => joined),
@@ -16,7 +16,7 @@ function manager(joined: string | undefined) {
 
 describe("spawnCreate", () => {
 	it("starts a fresh isolated session by default", () => {
-		const m = manager(undefined);
+		const m = manager({ reason: "no such session" });
 
 		expect(spawnCreate(m, { prompt: "go", cwd: "/git/repo" })).toBe("9");
 		expect(m.addAgent).not.toHaveBeenCalled();
@@ -33,7 +33,7 @@ describe("spawnCreate", () => {
 	});
 
 	it("adds an agent to the named stream instead of allocating a workspace", () => {
-		const m = manager("4");
+		const m = manager({ sessionId: "4" });
 
 		const id = spawnCreate(m, {
 			prompt: "go",
@@ -46,15 +46,23 @@ describe("spawnCreate", () => {
 		expect(m.spawn).not.toHaveBeenCalled();
 	});
 
-	it("nests the fallback session under the stream it could not join", () => {
-		const m = manager(undefined);
+	it("reports a refused join instead of spawning somewhere else", () => {
+		const m = manager({ reason: "the session's workspace no longer exists" });
 
 		expect(
 			spawnCreate(m, { prompt: "go", cwd: "/git/repo-2", joinSessionId: "3" }),
+		).toEqual({
+			error: "Can't add an agent: the session's workspace no longer exists.",
+		});
+		expect(m.spawn).not.toHaveBeenCalled();
+	});
+
+	it("ignores the join target for a design session", () => {
+		const m = manager({ reason: "no such session" });
+
+		expect(
+			spawnCreate(m, { cwd: "/git/repo", joinSessionId: "3", design: true }),
 		).toBe("9");
-		expect(m.spawn).toHaveBeenCalledWith(
-			expect.objectContaining({ prompt: "go", cwd: "/git/repo-2" }),
-			{ launchedFrom: "3" },
-		);
+		expect(m.addAgent).not.toHaveBeenCalled();
 	});
 });

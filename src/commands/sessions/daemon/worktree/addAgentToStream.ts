@@ -9,13 +9,15 @@ export function addAgentToStream(
 	targetId: string,
 	prompt: string | undefined,
 	harness: HarnessKind | undefined,
-): string | undefined {
+): { sessionId: string } | { reason: string } {
 	const joinable = joinableStream(ctx.sessions, targetId);
 	if ("reason" in joinable) {
 		daemonLog(
 			`create: cannot add an agent to session ${targetId}: ${joinable.reason}`,
 		);
-		return undefined;
+		return joinable;
 	}
-	return spawnIntoStream(ctx, joinable.session, prompt, harness);
+	return {
+		sessionId: spawnIntoStream(ctx, joinable.session, prompt, harness),
+	};
 }

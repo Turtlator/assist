@@ -10,10 +10,15 @@ type Handler = (
 
 export function creator(
 	isNew: boolean,
-	spawn: (m: SessionManager, d: Msg) => string,
+	spawn: (m: SessionManager, d: Msg) => string | { error: string },
 ): Handler {
 	return (client, m, d) => {
 		if (m.windowsProxy.route(client, d)) return;
-		sendTo(client, { type: "created", sessionId: spawn(m, d), isNew });
+		const result = spawn(m, d);
+		if (typeof result !== "string") {
+			sendTo(client, { type: "error", message: result.error });
+			return;
+		}
+		sendTo(client, { type: "created", sessionId: result, isNew });
 	};
 }

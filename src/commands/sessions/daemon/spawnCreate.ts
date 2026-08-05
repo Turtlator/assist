@@ -6,7 +6,7 @@ import { spawnContextFrom } from "./spawnContextFrom";
 export function spawnCreate(
 	m: SessionManager,
 	d: Record<string, unknown>,
-): string {
+): string | { error: string } {
 	const design = d.design === true;
 	const harness = d.harness as HarnessKind | undefined;
 	const prompt = d.prompt as string | undefined;
@@ -19,10 +19,8 @@ export function spawnCreate(
 		: (d.joinSessionId as string | undefined);
 	if (joinSessionId) {
 		const joined = m.addAgent(joinSessionId, prompt, harness);
-		if (joined) return joined;
-		daemonLog(
-			`create: falling back to a fresh isolated session (cwd=${(d.cwd as string) ?? ""})`,
-		);
+		if ("sessionId" in joined) return joined.sessionId;
+		return { error: `Can't add an agent: ${joined.reason}.` };
 	}
 	return m.spawn(
 		{
