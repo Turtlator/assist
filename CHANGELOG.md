@@ -1,3 +1,10 @@
+## [0.542.1](https://github.com/staff0rd/assist/compare/v0.542.0...v0.542.1) (2026-08-05)
+
+
+### Bug Fixes
+
+* launch fix-conflict in auto mode ([83b1cbd](https://github.com/staff0rd/assist/commit/83b1cbda76d6de81a6e9214235958817218ab982))
+
 # [0.542.0](https://github.com/staff0rd/assist/compare/v0.541.1...v0.542.0) (2026-08-05)
 
 
