@@ -15,6 +15,11 @@ const mockCloseSync = closeSync as unknown as ReturnType<typeof vi.fn>;
 
 const JIRA_URL = "https://centium.atlassian.net/browse/PA-556";
 
+const ISSUE_BODY =
+	'The bullet list under the "## Nonsense" heading in README.md is in ' +
+	"arbitrary order and has become hard to scan as it grows. Reorder the five " +
+	"bullets so they read alphabetically by their first word.";
+
 const AGENT_SUMMARY =
 	"PA-556 reports that saving a client record silently drops the contact " +
 	"email when the form is submitted twice. The fix likely belongs in the " +
@@ -34,12 +39,15 @@ function assistantLine(text: string): string {
 	});
 }
 
-function toolResultLine(): string {
+function toolResultLine(
+	content: unknown = "a very long tool payload",
+	isError = false,
+): string {
 	return JSON.stringify({
 		type: "user",
 		message: {
 			role: "user",
-			content: [{ type: "tool_result", content: "a very long tool payload" }],
+			content: [{ type: "tool_result", content, is_error: isError }],
 		},
 	});
 }
@@ -103,8 +111,39 @@ describe("extractContextAfterReference", () => {
 
 		const context = extractContextAfterReference("/s.jsonl");
 
-		expect(context).toBe(AGENT_SUMMARY);
+		expect(context).toContain(AGENT_SUMMARY);
 		expect(context).not.toContain(JIRA_URL);
+	});
+
+	it("counts the fetched reference even when it only lands in a tool result", () => {
+		mockFileContent([
+			userLine(JIRA_URL),
+			assistantLine("I'll fetch that."),
+			toolUseLine(),
+			toolResultLine(ISSUE_BODY),
+		]);
+
+		expect(extractContextAfterReference("/s.jsonl")).toContain(ISSUE_BODY);
+	});
+
+	it("reads a tool result delivered as content blocks", () => {
+		mockFileContent([
+			userLine(JIRA_URL),
+			toolUseLine(),
+			toolResultLine([{ type: "text", text: ISSUE_BODY }]),
+		]);
+
+		expect(extractContextAfterReference("/s.jsonl")).toContain(ISSUE_BODY);
+	});
+
+	it("ignores failed tool calls", () => {
+		mockFileContent([
+			userLine(JIRA_URL),
+			toolUseLine(),
+			toolResultLine(`${ISSUE_BODY} but it failed`, true),
+		]);
+
+		expect(extractContextAfterReference("/s.jsonl")).toBeUndefined();
 	});
 
 	it("keeps prose that shares the opening message with a reference", () => {
@@ -171,6 +210,43 @@ describe("extractContextAfterReference", () => {
 		mockFileContent([userLine(JIRA_URL), assistantLine("z".repeat(2000))]);
 
 		expect(extractContextAfterReference("/s.jsonl")).toHaveLength(800);
+	});
+
+	it("titles a draft card that has only fetched its github issue", () => {
+		const skillPrompt =
+			"You are helping the user create a backlog item with a phased implementation plan. ".repeat(
+				20,
+			);
+		mockFileContent([
+			userLine(
+				"<command-message>draft</command-message>\n" +
+					"<command-name>/draft</command-name>\n" +
+					"<command-args>https://github.com/staff0rd/sandbox/issues/8</command-args>",
+			),
+			JSON.stringify({
+				type: "user",
+				isMeta: true,
+				message: {
+					role: "user",
+					content: [{ type: "text", text: skillPrompt }],
+				},
+			}),
+			assistantLine("I'll start by fetching the GitHub issue."),
+			toolUseLine(),
+			toolResultLine(
+				JSON.stringify({
+					body: ISSUE_BODY,
+					number: 8,
+					title: "Sort the Nonsense bullet list alphabetically",
+				}),
+			),
+		]);
+
+		const context = extractContextAfterReference("/s.jsonl");
+
+		expect(context).toContain("Reorder the five bullets");
+		expect(context).toContain("Sort the Nonsense bullet list alphabetically");
+		expect(context).not.toContain("phased implementation plan");
 	});
 
 	it("closes the file descriptor", () => {

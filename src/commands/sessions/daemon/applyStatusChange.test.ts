@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { applyStatusChange } from "./applyStatusChange";
 import type { Session } from "./createSession";
+import { startTranscriptTitleGeneration } from "./startTranscriptTitleGeneration";
 import { resolveCloseDurability } from "./worktree/resolveCloseDurability";
 
 vi.mock("./daemonLog", () => ({ daemonLog: vi.fn() }));
@@ -10,8 +11,14 @@ vi.mock("./flushPhaseActiveMs", () => ({
 vi.mock("./worktree/resolveCloseDurability", () => ({
 	resolveCloseDurability: vi.fn(() => Promise.resolve()),
 }));
+vi.mock("./startTranscriptTitleGeneration", () => ({
+	startTranscriptTitleGeneration: vi.fn(),
+}));
 
 const resolveMock = resolveCloseDurability as unknown as ReturnType<
+	typeof vi.fn
+>;
+const titleMock = startTranscriptTitleGeneration as unknown as ReturnType<
 	typeof vi.fn
 >;
 
@@ -178,5 +185,22 @@ describe("applyStatusChange undurable hold reason", () => {
 		applyStatusChange(session, "waiting", undefined, vi.fn(), vi.fn(), vi.fn());
 
 		expect(session.undurable).toBeUndefined();
+	});
+
+	it("retries the transcript title when a card parks at waiting", () => {
+		const session = backlogRun({ status: "running" });
+		const notify = vi.fn();
+
+		applyStatusChange(session, "waiting", undefined, vi.fn(), notify, vi.fn());
+
+		expect(titleMock).toHaveBeenCalledWith(session, notify);
+	});
+
+	it("leaves the transcript title alone while the card is still running", () => {
+		const session = backlogRun({ status: "waiting" });
+
+		applyStatusChange(session, "running", undefined, vi.fn(), vi.fn(), vi.fn());
+
+		expect(titleMock).not.toHaveBeenCalled();
 	});
 });
