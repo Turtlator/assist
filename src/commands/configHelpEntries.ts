@@ -5,6 +5,7 @@ import { backupConfigHelp } from "./backup/backupConfigHelp";
 import { branchConfigHelp } from "./branch/branchConfigHelp";
 import { cliHookConfigHelp } from "./cliHook/cliHookConfigHelp";
 import { complexityConfigHelp } from "./complexity/complexityConfigHelp";
+import { configConfigHelp } from "./config/configConfigHelp";
 import { denyConfigHelp } from "./deny/denyConfigHelp";
 import { devlogConfigHelp } from "./devlog/devlogConfigHelp";
 import { dotnetConfigHelp } from "./dotnet/dotnetConfigHelp";
@@ -30,6 +31,7 @@ export const configHelpEntries: ConfigHelpEntry[] = [
 	...branchConfigHelp,
 	...cliHookConfigHelp,
 	...complexityConfigHelp,
+	...configConfigHelp,
 	...denyConfigHelp,
 	...devlogConfigHelp,
 	...dotnetConfigHelp,

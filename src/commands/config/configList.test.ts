@@ -50,4 +50,13 @@ describe("configList", () => {
 
 		expect(output(configList)).not.toContain(SECRET_MASK);
 	});
+
+	it("says it shows only what is set and points at config keys", () => {
+		mockConfig.mockReturnValue({ commit: { push: true } });
+
+		const text = output(configList);
+
+		expect(text).toContain("# Only the keys that are set");
+		expect(text).toContain("assist config keys");
+	});
 });

@@ -1,13 +1,20 @@
 import type { Command } from "commander";
+import { configHelp } from "../shared/configHelp";
 import { configList } from "./config";
+import { configConfigHelp } from "./config/configConfigHelp";
 import { configGet } from "./config/configGet";
+import { configKeys } from "./config/configKeys";
 import { configSet } from "./config/configSet";
 import { configUnset } from "./config/configUnset";
 
 export function registerConfig(program: Command): void {
-	const configCommand = program
-		.command("config")
-		.description("View and modify assist.yml configuration");
+	const configCommand = configHelp(
+		program
+			.command("config")
+			.description("View and modify assist.yml configuration"),
+		configConfigHelp,
+		"Run 'assist config keys [filter]' to list every config key with its default,\nwhat it does, and the command that sets it.",
+	);
 
 	configCommand
 		.command("set <key> [value]")
@@ -37,6 +44,15 @@ export function registerConfig(program: Command): void {
 
 	configCommand
 		.command("list")
-		.description("List all config values (secrets print as <hidden>)")
+		.description(
+			"List the config values that are set (secrets print as <hidden>); see 'config keys' for every key",
+		)
 		.action(configList);
+
+	configCommand
+		.command("keys [filter]")
+		.description(
+			"List every config key with its default, note and setter (filter narrows by key substring)",
+		)
+		.action((filter) => configKeys(filter));
 }

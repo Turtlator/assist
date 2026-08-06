@@ -58,15 +58,60 @@ describe("configGet", () => {
 
 	it("reports an unset secret as not set", () => {
 		mockConfig.mockReturnValue({ database: {} });
-		const error = vi.spyOn(console, "error").mockImplementation(() => {});
-		const exit = vi.spyOn(process, "exit").mockImplementation((() => {
-			throw new Error("exit");
-		}) as never);
 
-		expect(() => configGet("database.url")).toThrow("exit");
-		expect(error.mock.calls.join(" ")).toContain('"database.url" is not set');
+		expect(errorOutput(() => configGet("database.url"))).toContain(
+			'"database.url" is not set',
+		);
+	});
 
-		error.mockRestore();
-		exit.mockRestore();
+	it("reports the schema default and note for a valid unset key", () => {
+		mockConfig.mockReturnValue({});
+
+		const text = errorOutput(() => configGet("worktree.enabled"));
+
+		expect(text).toContain('Key "worktree.enabled" is not set');
+		expect(text).toContain("the schema default is false");
+		expect(text).toContain("spill concurrent sessions");
+		expect(text).toContain("assist config set worktree.enabled true");
+	});
+
+	it("says a valid unset key has no default when the schema gives none", () => {
+		mockConfig.mockReturnValue({});
+
+		expect(errorOutput(() => configGet("worktree.root"))).toContain(
+			'Key "worktree.root" is not set and has no schema default',
+		);
+	});
+
+	it("reports an unknown key as not set with no default", () => {
+		mockConfig.mockReturnValue({});
+
+		const text = errorOutput(() => configGet("nope.nope"));
+
+		expect(text).toContain('Key "nope.nope" is not set');
+		expect(text).not.toContain("schema default");
+	});
+
+	it("still prints an explicitly set falsy value instead of the default", () => {
+		mockConfig.mockReturnValue({ worktree: { enabled: false } });
+
+		expect(output(() => configGet("worktree.enabled"))).toBe("false");
 	});
 });
+
+function errorOutput(run: () => void): string {
+	const lines: string[] = [];
+	const error = vi.spyOn(console, "error").mockImplementation((line) => {
+		lines.push(String(line));
+	});
+	const exit = vi.spyOn(process, "exit").mockImplementation((() => {
+		throw new Error("exit");
+	}) as never);
+	try {
+		expect(run).toThrow("exit");
+	} finally {
+		error.mockRestore();
+		exit.mockRestore();
+	}
+	return lines.join("\n");
+}

@@ -1,5 +1,9 @@
 import chalk from "chalk";
+import { describeConfigLeaves } from "../../shared/describeConfigLeaves";
 import { loadConfig } from "../../shared/loadConfig";
+import { assistConfigSchema } from "../../shared/types";
+import { configHelpForKey } from "./configHelpForKey";
+import { formatConfigDefault } from "./formatConfigDefault";
 import { getNestedValue } from "./getNestedValue";
 import { maskConfigKeySecrets } from "./maskConfigKeySecrets";
 
@@ -31,6 +35,24 @@ function requireNestedValue(
 }
 
 function exitKeyNotSet(key: string): never {
-	console.error(chalk.red(`Key "${key}" is not set`));
+	for (const line of unsetLines(key)) console.error(line);
 	process.exit(1);
+}
+
+function unsetLines(key: string): string[] {
+	const leaf = describeConfigLeaves(assistConfigSchema).find(
+		(candidate) => candidate.key === key,
+	);
+	if (!leaf) return [chalk.red(`Key "${key}" is not set`)];
+
+	const lines = [
+		chalk.red(
+			leaf.defaultValue === undefined
+				? `Key "${key}" is not set and has no schema default`
+				: `Key "${key}" is not set; the schema default is ${formatConfigDefault(leaf)}`,
+		),
+	];
+	const help = configHelpForKey(key);
+	if (help) lines.push(help.note, chalk.green(help.setter));
+	return lines;
 }

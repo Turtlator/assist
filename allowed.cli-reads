@@ -30,6 +30,7 @@ assist backup schedule status
 assist cli-hook
 assist complexity
 assist config get
+assist config keys
 assist config list
 assist coverage
 assist daemon status

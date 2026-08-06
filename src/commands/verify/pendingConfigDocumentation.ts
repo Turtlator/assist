@@ -1,1 +1,1 @@
-export const pendingConfigDocumentation = new Set<string>(["repos"]);
+export const pendingConfigDocumentation = new Set<string>();
