@@ -6,30 +6,20 @@ import {
 	isShellFile,
 } from "../../../shared/isHashCommentFile";
 import { isBicepFile } from "../../../shared/isBicepFile";
+import { isCsharpFile } from "../../../shared/isCsharpFile";
+import { isGeneratedCsharpFile } from "../../../shared/isGeneratedCsharpFile";
+import { isRazorFile } from "../../../shared/isRazorFile";
+import { extractRazorComments } from "../../../shared/extractRazorComments";
 import { isYamlFile } from "../../../shared/isYamlFile";
 import type { CommentFinding } from "./types";
 import { collectBicepComments } from "./collectBicepComments";
+import { collectCsharpComments } from "./collectCsharpComments";
 import { collectHashComments } from "./collectHashComments";
 import { collectSourceFindings } from "./collectSourceFindings";
 import { collectYamlComments } from "./collectYamlComments";
-import { isCommentExempt } from "./isCommentExempt";
+import { toFindings } from "./toFindings";
 
 export type { CommentFinding } from "./types";
-
-function toFindings(
-	file: string,
-	lines: Set<number>,
-	raw: { line: number; text: string }[],
-	exempt: boolean,
-): CommentFinding[] {
-	const findings: CommentFinding[] = [];
-	for (const { line, text } of raw) {
-		if (!lines.has(line)) continue;
-		if (exempt && isCommentExempt(text)) continue;
-		findings.push({ file, line, text: text.replace(/\s+/g, " ").trim() });
-	}
-	return findings;
-}
 
 export function collectFileComments(
 	file: string,
@@ -51,6 +41,15 @@ export function collectFileComments(
 
 	if (isBicepFile(file))
 		return toFindings(file, lines, collectBicepComments(read()), true);
+
+	if (isCsharpFile(file)) {
+		const content = read();
+		if (isGeneratedCsharpFile(file, content)) return [];
+		return toFindings(file, lines, collectCsharpComments(content), true);
+	}
+
+	if (isRazorFile(file))
+		return toFindings(file, lines, extractRazorComments(read()), true);
 
 	return collectSourceFindings(file, lines, project);
 }

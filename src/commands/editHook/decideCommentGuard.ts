@@ -1,9 +1,8 @@
-import { isHashCommentFile, isShellFile } from "../../shared/isHashCommentFile";
+import { isGeneratedCsharpFile } from "../../shared/isGeneratedCsharpFile";
 import { type EditHookInput } from "./decideOverrideGuard";
-import { extractComments, isSourceFile } from "./extractComments";
-import { extractShellComments } from "./extractShellComments";
-import { extractYamlComments } from "./extractYamlComments";
 import { introducedComments } from "./introducedComments";
+import { partitionStrings } from "./partitionStrings";
+import { selectCommentExtractor } from "./selectCommentExtractor";
 
 function denyReason(marker: string): string {
 	const blockClause = marker === "//" ? ", no block comments" : "";
@@ -18,55 +17,20 @@ function denyReason(marker: string): string {
 	);
 }
 
-function defined(values: (string | undefined)[]): string[] {
-	return values.filter((value): value is string => value != null);
-}
-
-function partitionStrings(
-	input: EditHookInput,
-	existingContent: string | undefined,
-): { added: string[]; removed: string[] } {
-	const { tool_name, tool_input } = input;
-	switch (tool_name) {
-		case "Edit":
-			return {
-				added: defined([tool_input.new_string]),
-				removed: defined([tool_input.old_string]),
-			};
-		case "MultiEdit": {
-			const edits = tool_input.edits ?? [];
-			return {
-				added: defined(edits.map((e) => e.new_string)),
-				removed: defined(edits.map((e) => e.old_string)),
-			};
-		}
-		case "Write":
-			return {
-				added: defined([tool_input.content]),
-				removed: defined([existingContent]),
-			};
-		default:
-			return { added: [], removed: [] };
-	}
-}
-
 export function decideCommentGuard(
 	input: EditHookInput,
 	existingContent?: string,
 ): string | undefined {
-	const filePath = input.tool_input.file_path;
-	const hash = isHashCommentFile(filePath);
-	if (!isSourceFile(filePath) && !hash) return undefined;
+	const { file_path, content } = input.tool_input;
+	if (isGeneratedCsharpFile(file_path, content)) return undefined;
 
-	const extract = hash
-		? isShellFile(filePath)
-			? extractShellComments
-			: extractYamlComments
-		: extractComments;
+	const gate = selectCommentExtractor(file_path);
+	if (!gate) return undefined;
+
 	const { added, removed } = partitionStrings(input, existingContent);
 	const introduced = introducedComments(
-		added.flatMap(extract),
-		removed.flatMap(extract),
+		added.flatMap(gate.extract),
+		removed.flatMap(gate.extract),
 	);
-	return introduced.length > 0 ? denyReason(hash ? "#" : "//") : undefined;
+	return introduced.length > 0 ? denyReason(gate.marker) : undefined;
 }

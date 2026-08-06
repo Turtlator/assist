@@ -89,6 +89,14 @@ describe("codeCommentConfirm", () => {
 		expect(writtenContent()).toContain("  // documents the sku choice");
 	});
 
+	it("inserts a // comment for a .cs pin", () => {
+		primePin("src/Program.cs", 2, "guards a nullable edge case");
+
+		codeCommentConfirm("123");
+
+		expect(writtenContent()).toContain("  // guards a nullable edge case");
+	});
+
 	it("inserts a # comment for a below-header .sh pin", () => {
 		primePin("deploy.sh", 2, "retry accounts for eventual consistency");
 

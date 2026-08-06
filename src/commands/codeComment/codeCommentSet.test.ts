@@ -92,6 +92,12 @@ describe("codeCommentSet", () => {
 		expect(stdout()).toContain('insert "# retry for eventual consistency"');
 	});
 
+	it("describes a // marker insertion for a .cs file", () => {
+		codeCommentSet("src/Program.cs", "12", "guards a nullable edge case");
+
+		expect(stdout()).toContain('insert "// guards a nullable edge case"');
+	});
+
 	it("does not issue a pin or notify when the comment text is invalid", () => {
 		codeCommentSet("src/foo.ts", "10", "/* not allowed */");
 
