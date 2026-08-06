@@ -1,3 +1,10 @@
+## [0.550.1](https://github.com/staff0rd/assist/compare/v0.550.0...v0.550.1) (2026-08-06)
+
+
+### Bug Fixes
+
+* title cards from fetched reference ([09b175c](https://github.com/staff0rd/assist/commit/09b175c5d193efe922711c172cfa00614f1b7bef))
+
 # [0.550.0](https://github.com/staff0rd/assist/compare/v0.549.1...v0.550.0) (2026-08-06)
 
 
