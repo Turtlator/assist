@@ -1,3 +1,10 @@
+## [0.549.1](https://github.com/staff0rd/assist/compare/v0.549.0...v0.549.1) (2026-08-06)
+
+
+### Bug Fixes
+
+* read PR reply bodies from stdin ([a0494af](https://github.com/staff0rd/assist/commit/a0494af9ce25e559080686e83820e737c106bd54))
+
 # [0.549.0](https://github.com/staff0rd/assist/compare/v0.548.1...v0.549.0) (2026-08-06)
 
 
