@@ -1,3 +1,10 @@
+# [0.551.0](https://github.com/staff0rd/assist/compare/v0.550.1...v0.551.0) (2026-08-06)
+
+
+### Features
+
+* commit before phase end ([24be796](https://github.com/staff0rd/assist/commit/24be796c0b259392d717143c04d328f45d533488))
+
 ## [0.550.1](https://github.com/staff0rd/assist/compare/v0.550.0...v0.550.1) (2026-08-06)
 
 
