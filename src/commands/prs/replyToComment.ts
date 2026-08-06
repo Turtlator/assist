@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 
 export function replyToComment(
 	org: string,
@@ -7,8 +7,18 @@ export function replyToComment(
 	commentId: number,
 	message: string,
 ): void {
-	execSync(
-		`gh api repos/${org}/${repo}/pulls/${prNumber}/comments -f body="${message.replace(/"/g, String.raw`\"`)}" -F in_reply_to=${commentId}`,
-		{ stdio: ["inherit", "pipe", "inherit"] },
+	const result = spawnSync(
+		"gh",
+		[
+			"api",
+			`repos/${org}/${repo}/pulls/${prNumber}/comments`,
+			"-f",
+			`body=${message}`,
+			"-F",
+			`in_reply_to=${commentId}`,
+		],
+		{ encoding: "utf8", windowsHide: true },
 	);
+	if (result.error) throw result.error;
+	if (result.status !== 0) throw new Error(result.stderr || result.stdout);
 }

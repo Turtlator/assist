@@ -110,9 +110,16 @@ Every command supports `--help` for full detail on its flags and behaviour.
 - `assist prs edit [--title <t>] [--what <w>] [--why <y>] [--how <h>] [--resolves <key>]` - Update only the supplied sections of the current PR's body. In a web session the resulting title and body are previewed for approve/reject first (with inline comments and pasted screenshots, as for `raise`); on approval the edit is applied with any screenshots appended, on rejection the reviewer's comments are printed and nothing is changed. Outside a session the edit applies directly
 - `assist prs list-comments` - List all comments on the current branch's pull request
 - `assist prs fixed <comment-id> <sha>` - Reply with commit link and resolve thread
-- `assist prs wontfix <comment-id> <reason>` - Reply with reason and resolve thread
-- `assist prs reply <comment-id> <body>` - Reply to a comment thread without resolving it
-- `assist prs comment <path> <line> <body>` - Add a line comment to the pending review
+- `assist prs wontfix <comment-id> <reason>` - Reply with reason and resolve thread. Pass `-` as the reason to read it from stdin. A body containing markdown — backticks around identifiers, `$(...)`, `$VAR` — must be piped in rather than passed as an argument, or the calling shell expands it before assist sees it:
+
+  ```bash
+  assist prs wontfix 3718677497 - <<'EOF'
+  Deferring to #197, which renames `query_duckdb` to `query_data`.
+  EOF
+  ```
+
+- `assist prs reply <comment-id> <body>` - Reply to a comment thread without resolving it. Pass `-` as the body to read it from stdin
+- `assist prs comment <path> <line> <body>` - Add a line comment to the pending review. Pass `-` as the body to read it from stdin
 - `assist review [number]` - Run Claude and Codex in parallel to review the current branch's PR, then post line-bound comments. The diff comes from GitHub, so stale local base branches don't pollute the review; cached `claude.md` / `codex.md` / `synthesis.md` are reused when present
   - `[number]` - `gh pr checkout <number>` first, placed by the worktree allocator on a repo with parallel work enabled (see [docs/parallel-work.md](docs/parallel-work.md))
   - `--no-prompt` - Skip all confirmations

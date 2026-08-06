@@ -1,15 +1,8 @@
 import type { Command } from "commander";
 import { configHelp } from "../shared/configHelp";
-import {
-	prs,
-	comment as prsComment,
-	fixed as prsFixed,
-	listComments as prsListComments,
-	printComments as prsPrintComments,
-	reply as prsReply,
-	wontfix as prsWontfix,
-} from "./prs/index";
+import { prs } from "./prs/index";
 import { prsConfigHelp } from "./prs/prsConfigHelp";
+import { registerPrsComments } from "./registerPrsComments";
 import { registerPrsEdit } from "./registerPrsEdit";
 import { registerPrsRaise } from "./registerPrsRaise";
 
@@ -23,41 +16,7 @@ export function registerPrs(program: Command): void {
 
 	registerPrsRaise(prsCommand);
 	registerPrsEdit(prsCommand);
-
-	prsCommand
-		.command("list-comments")
-		.description("List all comments on the current branch's pull request")
-		.action(() => {
-			prsListComments().then(prsPrintComments);
-		});
-
-	prsCommand
-		.command("fixed <comment-id> <sha>")
-		.description("Reply with commit link and resolve thread")
-		.action((commentId: string, sha: string) => {
-			prsFixed(Number.parseInt(commentId, 10), sha);
-		});
-
-	prsCommand
-		.command("wontfix <comment-id> <reason>")
-		.description("Reply with reason and resolve thread")
-		.action((commentId: string, reason: string) => {
-			prsWontfix(Number.parseInt(commentId, 10), reason);
-		});
-
-	prsCommand
-		.command("reply <comment-id> <body>")
-		.description("Reply to a comment thread without resolving it")
-		.action((commentId: string, body: string) => {
-			prsReply(Number.parseInt(commentId, 10), body);
-		});
-
-	prsCommand
-		.command("comment <path> <line> <body>")
-		.description("Add a line comment to the pending review")
-		.action((path: string, line: string, body: string) => {
-			prsComment(path, Number.parseInt(line, 10), body);
-		});
+	registerPrsComments(prsCommand);
 
 	configHelp(prsCommand, prsConfigHelp);
 }

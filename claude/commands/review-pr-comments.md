@@ -43,12 +43,24 @@ Create a task for each unresolved **thread** (not each comment). For each thread
      3. Run `assist prs fixed <comment-id> <sha>` to reply with commit link and resolve the thread
    - If not addressing:
      1. Write a **1-sentence** summary of why, max 15 words (must not contain "claude" or "opus")
-     2. Run `assist prs wontfix <comment-id> "<reason>"` to reply and resolve the thread
+     2. Run `assist prs wontfix <comment-id> "<reason>"` to reply and resolve the thread — or, if the reason contains backticks, `$(...)` or `$VAR`, use the stdin form below so your shell cannot expand it
    - If skipping:
      1. Do nothing — move on to the next comment immediately
    - **Commit references**: Always use full markdown links (e.g., `[abc1234](https://github.com/owner/repo/commit/abc1234)`), never bare SHAs
 
 5. **Repeat** until all comments have been processed
+
+## Bodies containing markdown
+
+Reply bodies routinely contain backticks around identifiers, and a double-quoted argument lets your shell expand backticks, `$(...)` and `$VAR` before assist ever sees the body — it posts mangled and resolves the thread with no error. Whenever the body contains any of those, pass `-` as the body and pipe it in on stdin, with the heredoc at the left margin so `EOF` terminates it:
+
+```bash
+assist prs wontfix <comment-id> - <<'EOF'
+Deferring to #197, which renames `query_duckdb` to `query_data`.
+EOF
+```
+
+The same `-` form works for `assist prs reply <comment-id> -` and `assist prs comment <path> <line> -`.
 
 ## Announcing when done
 
@@ -62,4 +74,4 @@ If `$ARGUMENTS` contains `--announce <number>`, then once every thread has been 
 - If a comment is unclear, note this in your analysis
 - Reply messages must not contain "claude" or "opus" (case-insensitive) - the command will reject them
 - When referencing previous comments, use markdown link syntax: `[previous comment](url)`
-- Use backticks to wrap inline code or keywords (e.g., `functionName`, `variable`)
+- Use backticks to wrap inline code or keywords (e.g., `functionName`, `variable`) — and because that puts shell metacharacters in the body, use the stdin form from [Bodies containing markdown](#bodies-containing-markdown) whenever the body contains markdown
