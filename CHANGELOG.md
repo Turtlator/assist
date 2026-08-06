@@ -1,3 +1,10 @@
+# [0.550.0](https://github.com/staff0rd/assist/compare/v0.549.1...v0.550.0) (2026-08-06)
+
+
+### Features
+
+* add assist config keys ([7e3392c](https://github.com/staff0rd/assist/commit/7e3392cde782421f588b7b07206fc7bb57386f4b))
+
 ## [0.549.1](https://github.com/staff0rd/assist/compare/v0.549.0...v0.549.1) (2026-08-06)
 
 
