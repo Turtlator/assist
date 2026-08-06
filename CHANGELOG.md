@@ -1,3 +1,10 @@
+# [0.549.0](https://github.com/staff0rd/assist/compare/v0.548.1...v0.549.0) (2026-08-06)
+
+
+### Features
+
+* gate comments in C# and Razor ([59054ee](https://github.com/staff0rd/assist/commit/59054ee7e3b1682370981493f1f9119f6702eb0f))
+
 ## [0.548.1](https://github.com/staff0rd/assist/compare/v0.548.0...v0.548.1) (2026-08-05)
 
 
