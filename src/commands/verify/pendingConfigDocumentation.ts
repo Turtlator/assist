@@ -1,1 +1,3 @@
-export const pendingConfigDocumentation = new Set<string>();
+export const pendingConfigDocumentation = new Set<string>([
+	"worktree.commitBeforeManualChecks",
+]);

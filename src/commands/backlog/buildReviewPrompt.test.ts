@@ -15,10 +15,10 @@ function makeItem(overrides: Partial<BacklogItem> = {}): BacklogItem {
 }
 
 describe("buildReviewPrompt", () => {
-	describe("commitBeforeManualChecks", () => {
+	describe("commitBeforePhaseEnd", () => {
 		it("leaves the prompt unchanged when the flag is off", () => {
 			const prompt = buildReviewPrompt(makeItem(), 3, {
-				commitBeforeManualChecks: false,
+				commitBeforePhaseEnd: false,
 			});
 
 			expect(prompt).toBe(buildReviewPrompt(makeItem(), 3));
@@ -29,7 +29,7 @@ describe("buildReviewPrompt", () => {
 
 		it("instructs the agent to commit before the manual check confirmation when the flag is on", () => {
 			const prompt = buildReviewPrompt(makeItem(), 3, {
-				commitBeforeManualChecks: true,
+				commitBeforePhaseEnd: true,
 			});
 
 			expect(prompt).toContain(
@@ -44,7 +44,7 @@ describe("buildReviewPrompt", () => {
 
 		it("keeps the post-confirmation commit step when the flag is on", () => {
 			const prompt = buildReviewPrompt(makeItem(), 3, {
-				commitBeforeManualChecks: true,
+				commitBeforePhaseEnd: true,
 			});
 
 			expect(prompt).toContain("1. Run: /commit");

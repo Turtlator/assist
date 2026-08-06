@@ -5,8 +5,8 @@ import type { BacklogItem } from "./types";
 export function buildReviewPrompt(
 	item: BacklogItem,
 	phaseNumber: number,
-	options: { commitBeforeManualChecks: boolean } = {
-		commitBeforeManualChecks: false,
+	options: { commitBeforePhaseEnd: boolean } = {
+		commitBeforePhaseEnd: false,
 	},
 ): string {
 	const acLines = item.acceptanceCriteria
@@ -32,7 +32,7 @@ export function buildReviewPrompt(
 		"",
 		`Post concise comments for any notable findings or changes using \`assist backlog comment ${itemId} "<text>"\`.`,
 		"",
-		...(options.commitBeforeManualChecks
+		...(options.commitBeforePhaseEnd
 			? [
 					"Before asking the user to confirm manual checks, run /commit to commit the work (it is fine if there is nothing new to commit).",
 					"",

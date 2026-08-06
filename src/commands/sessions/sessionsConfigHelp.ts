@@ -78,10 +78,9 @@ export const sessionsConfigHelp: ConfigHelpEntry[] = [
 		note: "per-worktree dep install: true auto-detects the package manager, or give an explicit command; false to skip",
 	},
 	{
-		key: "worktree.commitBeforeManualChecks",
-		setter:
-			"assist config set worktree.commitBeforeManualChecks true -g --repo",
-		note: "phase prompts run /commit before asking the user to perform manual checks, so work is not left uncommitted in a reapable worktree (default off)",
+		key: "worktree.commitBeforePhaseEnd",
+		setter: "assist config set worktree.commitBeforePhaseEnd true -g --repo",
+		note: "phase prompts run /commit once verify passes — before asking the user to perform manual checks, or before phase-done when the phase has none — so work is not left uncommitted in a reapable worktree (default off)",
 	},
 	{
 		key: "worktree.copy",

@@ -46,7 +46,7 @@ describe("buildAuthoredPhasePrompt", () => {
 		expect(prompt).not.toContain("/jira started");
 	});
 
-	describe("commitBeforeManualChecks", () => {
+	describe("commitBeforePhaseEnd", () => {
 		const phaseWithChecks: PlanPhase = {
 			name: "Phase 1",
 			tasks: [{ task: "do it" }],
@@ -55,7 +55,7 @@ describe("buildAuthoredPhasePrompt", () => {
 
 		it("leaves the prompt unchanged when the flag is off", () => {
 			const prompt = buildAuthoredPhasePrompt(makeItem(), 1, phaseWithChecks, {
-				commitBeforeManualChecks: false,
+				commitBeforePhaseEnd: false,
 			});
 
 			expect(prompt).not.toContain("/commit");
@@ -64,9 +64,18 @@ describe("buildAuthoredPhasePrompt", () => {
 			);
 		});
 
+		it("leaves a phase without manual checks unchanged when the flag is off", () => {
+			const prompt = buildAuthoredPhasePrompt(makeItem(), 1, phase, {
+				commitBeforePhaseEnd: false,
+			});
+
+			expect(prompt).not.toContain("/commit");
+			expect(prompt).toBe(buildAuthoredPhasePrompt(makeItem(), 1, phase));
+		});
+
 		it("instructs the agent to commit before the manual checks when the flag is on", () => {
 			const prompt = buildAuthoredPhasePrompt(makeItem(), 1, phaseWithChecks, {
-				commitBeforeManualChecks: true,
+				commitBeforePhaseEnd: true,
 			});
 
 			expect(prompt).toContain(
@@ -79,12 +88,29 @@ describe("buildAuthoredPhasePrompt", () => {
 			);
 		});
 
-		it("adds no commit instruction when the phase has no manual checks", () => {
+		it("instructs the agent to commit before phase-done when the phase has no manual checks", () => {
 			const prompt = buildAuthoredPhasePrompt(makeItem(), 1, phase, {
-				commitBeforeManualChecks: true,
+				commitBeforePhaseEnd: true,
 			});
 
-			expect(prompt).not.toContain("/commit");
+			expect(prompt).toContain(
+				"Once verify passes, run /commit to commit the work before marking this phase as done.",
+			);
+			expect(prompt.indexOf("/verify")).toBeLessThan(prompt.indexOf("/commit"));
+			expect(prompt.indexOf("/commit")).toBeLessThan(
+				prompt.indexOf("assist backlog phase-done"),
+			);
+		});
+
+		it("emits a single commit instruction when the phase has manual checks", () => {
+			const prompt = buildAuthoredPhasePrompt(makeItem(), 1, phaseWithChecks, {
+				commitBeforePhaseEnd: true,
+			});
+
+			expect(prompt.match(/\/commit/g)).toHaveLength(1);
+			expect(prompt).not.toContain(
+				"Once verify passes, run /commit to commit the work before marking this phase as done.",
+			);
 		});
 	});
 });

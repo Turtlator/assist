@@ -100,6 +100,7 @@ const assistConfigShape = {
 			root: z.string().optional(),
 			install: z.union([z.boolean(), z.string()]).default(true),
 			commitBeforeManualChecks: z.boolean().default(false),
+			commitBeforePhaseEnd: z.boolean().optional(),
 			copy: z
 				.array(z.string())
 				.default([

@@ -7,8 +7,8 @@ export function buildAuthoredPhasePrompt(
 	item: BacklogItem,
 	phaseNumber: number,
 	phase: PlanPhase,
-	options: { commitBeforeManualChecks: boolean } = {
-		commitBeforeManualChecks: false,
+	options: { commitBeforePhaseEnd: boolean } = {
+		commitBeforePhaseEnd: false,
 	},
 ): string {
 	const manualChecks = phase.manualChecks ?? [];
@@ -22,7 +22,7 @@ export function buildAuthoredPhasePrompt(
 		"Focus ONLY on this phase. Do not work on other phases.",
 		"If you need to modify backlog items, run `assist backlog --help` to discover available commands.",
 		"When you have completed all tasks for this phase, run /verify to check your work.",
-		...buildManualCheckLines(manualChecks, options.commitBeforeManualChecks),
+		...buildManualCheckLines(manualChecks, options.commitBeforePhaseEnd),
 		"",
 		`Post concise comments for any notable findings or changes using \`assist backlog comment ${formatItemId(item.id)} "<text>"\`.`,
 		"",

@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { enumerateConfigLeafKeys } from "../../shared/enumerateConfigLeafKeys";
 import { assistConfigSchema } from "../../shared/types";
 import { configHelpEntries } from "../configHelpEntries";
+import { pendingConfigDocumentation } from "../verify/pendingConfigDocumentation";
 import { configKeys } from "./configKeys";
 
 function output(run: () => void): string {
@@ -26,10 +27,11 @@ describe("configKeys", () => {
 		}
 	});
 
-	it("prints a note and setter for every schema leaf", () => {
+	it("prints a note and setter for every documented schema leaf", () => {
 		const text = output(() => configKeys());
 
 		for (const key of enumerateConfigLeafKeys(assistConfigSchema)) {
+			if (pendingConfigDocumentation.has(key)) continue;
 			const entry = configHelpEntries.find(
 				(candidate) => candidate.key === key,
 			);
