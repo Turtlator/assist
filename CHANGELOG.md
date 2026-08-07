@@ -1,3 +1,10 @@
+# [0.556.0](https://github.com/staff0rd/assist/compare/v0.555.0...v0.556.0) (2026-08-07)
+
+
+### Features
+
+* expand last message on hover or click ([b8d2194](https://github.com/staff0rd/assist/commit/b8d21946bccf092572ea2f052f99c3ff88e5ec1d))
+
 # [0.555.0](https://github.com/staff0rd/assist/compare/v0.554.2...v0.555.0) (2026-08-07)
 
 
