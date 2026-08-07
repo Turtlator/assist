@@ -1,3 +1,10 @@
+# [0.553.0](https://github.com/staff0rd/assist/compare/v0.552.0...v0.553.0) (2026-08-07)
+
+
+### Features
+
+* add revert-all button to diff tree header ([7cac270](https://github.com/staff0rd/assist/commit/7cac270588544e496118ab9d4d779e8a40c3c035))
+
 # [0.552.0](https://github.com/staff0rd/assist/compare/v0.551.0...v0.552.0) (2026-08-07)
 
 
