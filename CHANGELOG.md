@@ -1,3 +1,10 @@
+## [0.554.2](https://github.com/staff0rd/assist/compare/v0.554.1...v0.554.2) (2026-08-07)
+
+
+### Bug Fixes
+
+* enlarge last message readout text ([12c296f](https://github.com/staff0rd/assist/commit/12c296f344abe15fea5e5452e4e324207403ae06))
+
 ## [0.554.1](https://github.com/staff0rd/assist/compare/v0.554.0...v0.554.1) (2026-08-07)
 
 
