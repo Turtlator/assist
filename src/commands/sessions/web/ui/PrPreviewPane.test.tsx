@@ -271,6 +271,53 @@ describe("PrPreviewPane inline comments", () => {
 			expect(toggle("Post").checked).toBe(true);
 		});
 
+		it("prunes a chain older than the 24h TTL and falls back to the defaults", () => {
+			const key = "assist:pr-preview-chain:s1";
+			const dayAgo = Date.now() - 25 * 60 * 60 * 1000;
+			localStorage.setItem(
+				key,
+				JSON.stringify({
+					savedAt: dayAgo,
+					items: [{ reviewAfter: false, announceAfter: false }],
+				}),
+			);
+			localStorage.setItem(
+				"assist:pr-preview-chain:stale-other",
+				JSON.stringify({
+					savedAt: dayAgo,
+					items: [{ reviewAfter: false, announceAfter: false }],
+				}),
+			);
+
+			render(
+				<PrPreviewPane preview={preview} sessionId="s1" onDecision={vi.fn()} />,
+			);
+
+			expect(toggle("Review").checked).toBe(true);
+			expect(toggle("Post").checked).toBe(true);
+			expect(localStorage.getItem(key)).toBeNull();
+			expect(
+				localStorage.getItem("assist:pr-preview-chain:stale-other"),
+			).toBeNull();
+		});
+
+		it("keeps a chain saved within the TTL", () => {
+			localStorage.setItem(
+				"assist:pr-preview-chain:s1",
+				JSON.stringify({
+					savedAt: Date.now() - 60 * 60 * 1000,
+					items: [{ reviewAfter: false, announceAfter: true }],
+				}),
+			);
+
+			render(
+				<PrPreviewPane preview={preview} sessionId="s1" onDecision={vi.fn()} />,
+			);
+
+			expect(toggle("Review").checked).toBe(false);
+			expect(toggle("Post").checked).toBe(true);
+		});
+
 		it("clears the remembered choice once the preview is approved", () => {
 			const first = render(
 				<PrPreviewPane preview={preview} sessionId="s1" onDecision={vi.fn()} />,
