@@ -1,3 +1,10 @@
+# [0.554.0](https://github.com/staff0rd/assist/compare/v0.553.0...v0.554.0) (2026-08-07)
+
+
+### Features
+
+* remember PR chain toggles per session ([2dfc899](https://github.com/staff0rd/assist/commit/2dfc8997b9b04109a615ac97096518028266f4de))
+
 # [0.553.0](https://github.com/staff0rd/assist/compare/v0.552.0...v0.553.0) (2026-08-07)
 
 
