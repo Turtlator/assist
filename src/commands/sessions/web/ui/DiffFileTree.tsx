@@ -1,10 +1,12 @@
 import Box from "@mui/material/Box";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { FileData } from "react-diff-view";
 import { buildDiffFileTree } from "./buildDiffFileTree";
+import { DiffFileTreeHeader } from "./DiffFileTreeHeader";
 import { DiffFileTreeRows } from "./DiffFileTreeRows";
 import { DIFF_TOOLBAR_HEIGHT } from "./DiffToolbar";
-import { expandAncestors } from "./expandAncestors";
+import { treeFileKeys } from "./treeFileKeys";
+import { useCollapsedDirs } from "./useCollapsedDirs";
 
 const panelSx = {
 	position: "sticky",
@@ -23,30 +25,27 @@ export function DiffFileTree({
 	activeFile,
 	onSelectFile,
 	onRevert,
+	onRevertPaths,
 }: {
 	files: FileData[];
 	activeFile?: string;
 	onSelectFile: (fileKey: string) => void;
 	onRevert?: (path: string) => void;
+	onRevertPaths?: (paths: string[]) => void;
 }) {
 	const nodes = useMemo(() => buildDiffFileTree(files), [files]);
-	const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
-
-	const onToggleDir = (path: string) =>
-		setCollapsed((prev) => {
-			const next = new Set(prev);
-			if (!next.delete(path)) next.add(path);
-			return next;
-		});
-
-	useEffect(() => {
-		if (activeFile) setCollapsed((prev) => expandAncestors(prev, activeFile));
-	}, [activeFile]);
+	const { collapsed, onToggleDir } = useCollapsedDirs(activeFile);
 
 	if (nodes.length === 0) return null;
 
 	return (
 		<Box sx={panelSx} aria-label="Changed files">
+			{onRevertPaths && (
+				<DiffFileTreeHeader
+					paths={treeFileKeys(nodes)}
+					onRevertPaths={onRevertPaths}
+				/>
+			)}
 			<DiffFileTreeRows
 				nodes={nodes}
 				depth={0}

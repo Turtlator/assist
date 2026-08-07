@@ -16,6 +16,7 @@ export function diffBodyProps(
 		onToggleCollapsed: diff.collapsedFiles.toggle,
 		onComment: diff.comments.onComment,
 		onRevert: diff.revert.onRevert,
+		onRevertPaths: diff.revert.onRevertPaths,
 		emptyMessage: diff.emptyMessage,
 	};
 }

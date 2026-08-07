@@ -13,6 +13,12 @@ export const diffFileTreeRowSx = {
 	"&:hover": { bgcolor: "action.hover" },
 } as const;
 
+const revealRevertSx = {
+	"&:hover .diff-tree-revert, &:focus-within .diff-tree-revert": {
+		opacity: 1,
+	},
+} as const;
+
 export const diffFileTreeFileRowSx = {
 	display: "flex",
 	alignItems: "center",
@@ -20,9 +26,17 @@ export const diffFileTreeFileRowSx = {
 	pr: 0.5,
 	borderRadius: 1,
 	"&:hover": { bgcolor: "action.hover" },
-	"&:hover .diff-tree-revert, &:focus-within .diff-tree-revert": {
-		opacity: 1,
-	},
+	...revealRevertSx,
+} as const;
+
+export const diffFileTreeHeaderSx = {
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "space-between",
+	minWidth: 0,
+	py: 0.25,
+	pr: 0.5,
+	...revealRevertSx,
 } as const;
 
 export const diffFileTreeRevertSx = {

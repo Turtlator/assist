@@ -24,6 +24,7 @@ import { prList } from "./prList";
 import { prStatus } from "./prStatus";
 import { restartWeb } from "./restartWeb";
 import { revertDiffFile } from "./revertDiffFile";
+import { revertDiffPaths } from "./revertDiffPaths";
 import { sessionLayout } from "./sessionLayout";
 import { sessionView } from "./sessionView";
 import { setConfig } from "./setConfig";
@@ -69,6 +70,7 @@ const routes: Record<string, Handler> = {
 	"GET /api/diff": diff,
 	"GET /api/diff-scopes": diffScopes,
 	"POST /api/diff/revert": revertDiffFile,
+	"POST /api/diff/revert-all": revertDiffPaths,
 	"GET /api/file": fileContent,
 	"POST /api/file": writeFileContent,
 	"GET /api/files": listFiles,

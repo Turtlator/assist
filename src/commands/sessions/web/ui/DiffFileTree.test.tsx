@@ -119,6 +119,51 @@ describe("DiffFileTree", () => {
 		expect(onRevert).toHaveBeenCalledWith("src/app.ts");
 	});
 
+	it("reverts every visible file once the header confirmation is accepted", () => {
+		const onRevertPaths = vi.fn();
+		render(
+			<DiffFileTree
+				files={[file("src/app.ts"), file("src/web/ui.ts")]}
+				onSelectFile={vi.fn()}
+				onRevertPaths={onRevertPaths}
+			/>,
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: "Revert all files" }));
+		expect(
+			screen.getByText(/discards all uncommitted changes to 2 files/),
+		).toBeTruthy();
+		fireEvent.click(screen.getByRole("button", { name: "Revert" }));
+
+		expect(onRevertPaths).toHaveBeenCalledWith(["src/web/ui.ts", "src/app.ts"]);
+	});
+
+	it("reverts nothing when the header confirmation is cancelled", () => {
+		const onRevertPaths = vi.fn();
+		render(
+			<DiffFileTree
+				files={[file("src/app.ts")]}
+				onSelectFile={vi.fn()}
+				onRevertPaths={onRevertPaths}
+			/>,
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: "Revert all files" }));
+		fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+		expect(onRevertPaths).not.toHaveBeenCalled();
+	});
+
+	it("offers no revert-all control when reverting is unavailable", () => {
+		render(
+			<DiffFileTree files={[file("src/app.ts")]} onSelectFile={vi.fn()} />,
+		);
+
+		expect(
+			screen.queryByRole("button", { name: "Revert all files" }),
+		).toBeNull();
+	});
+
 	it("offers no revert control when reverting is unavailable", () => {
 		render(
 			<DiffFileTree files={[file("src/app.ts")]} onSelectFile={vi.fn()} />,

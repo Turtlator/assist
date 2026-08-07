@@ -9,12 +9,14 @@ export type DiffViewBodyProps = DiffFileListProps & {
 	treeVisible: boolean;
 	activeFile?: string;
 	onRevert?: (path: string) => void;
+	onRevertPaths?: (paths: string[]) => void;
 };
 
 export function DiffViewBody({
 	treeVisible,
 	activeFile,
 	onRevert,
+	onRevertPaths,
 	...list
 }: DiffViewBodyProps) {
 	const onSelectFile = (fileKey: string) => {
@@ -30,6 +32,7 @@ export function DiffViewBody({
 					activeFile={activeFile}
 					onSelectFile={onSelectFile}
 					onRevert={onRevert}
+					onRevertPaths={onRevertPaths}
 				/>
 			)}
 			<Box sx={{ flex: 1, minWidth: 0 }}>
