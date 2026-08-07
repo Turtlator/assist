@@ -1,3 +1,10 @@
+# [0.552.0](https://github.com/staff0rd/assist/compare/v0.551.0...v0.552.0) (2026-08-07)
+
+
+### Features
+
+* show last agent prompt above the terminal ([32d7b17](https://github.com/staff0rd/assist/commit/32d7b179e94111cf160afb8d0c4b5e590a72a674))
+
 # [0.551.0](https://github.com/staff0rd/assist/compare/v0.550.1...v0.551.0) (2026-08-06)
 
 
