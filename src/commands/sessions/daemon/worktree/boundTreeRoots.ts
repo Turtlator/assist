@@ -1,6 +1,7 @@
 import { findRepoRoot } from "../../../../shared/findRepoRoot";
 import type { Session } from "../createSession";
 import { daemonLog } from "../daemonLog";
+import { canonicalTreePath } from "./canonicalTreePath";
 import { checkDurabilitySync, type Durability } from "./treeDurability";
 import { worktreeConfigFor } from "./worktreeConfigFor";
 
@@ -19,7 +20,7 @@ export function boundTreeRoots(
 
 function treeRootOf(session: Session): string | undefined {
 	if (!session.cwd) return undefined;
-	return findRepoRoot(session.cwd) ?? session.cwd;
+	return canonicalTreePath(findRepoRoot(session.cwd) ?? session.cwd);
 }
 
 function holdsTree(session: Session, root: string): boolean {

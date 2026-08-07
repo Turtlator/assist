@@ -19,8 +19,23 @@ export function reusesClone(
 		);
 		return true;
 	}
-	if (planAllocation(clone, boundTreeRoots) !== "primary") return false;
-	return !wouldDisturbWorkInProgress(clone, options.forCheckout === true);
+	if (planAllocation(clone, boundTreeRoots) !== "primary") {
+		daemonLog(
+			`clone ${clone} is held by a live session — spilling to a worktree`,
+		);
+		return false;
+	}
+	if (wouldDisturbWorkInProgress(clone, options.forCheckout === true))
+		return false;
+	daemonLog(
+		`session kept in the clone ${clone}: no live session holds it${describeHolders(boundTreeRoots)}`,
+	);
+	return true;
+}
+
+function describeHolders(boundTreeRoots: Set<string>): string {
+	if (boundTreeRoots.size === 0) return " and no tree is bound";
+	return ` (bound trees: ${[...boundTreeRoots].join(", ")})`;
 }
 
 function wouldDisturbWorkInProgress(

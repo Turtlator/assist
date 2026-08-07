@@ -1,6 +1,8 @@
 import { findRepoRoot } from "../../../../shared/findRepoRoot";
 import { daemonLog } from "../daemonLog";
+import { canonicalTreePath } from "./canonicalTreePath";
 import { createWorktree } from "./createWorktree";
+import { keptInTree } from "./keptInTree";
 import { mainWorktree } from "./listWorktreePaths";
 import { reusesClone } from "./reusesClone";
 import { worktreeConfigFor } from "./worktreeConfigFor";
@@ -28,13 +30,22 @@ export function allocateTree(
 ): Allocation {
 	if (!requestedCwd)
 		return { cwd: requestedCwd, kind: "primary", created: false };
-	if (options.inPlace === true) return keptInPlace(requestedCwd);
-	const repoRoot = findRepoRoot(requestedCwd) ?? requestedCwd;
+	if (options.inPlace === true)
+		return keptInTree(
+			requestedCwd,
+			"launched against work already checked out there",
+		);
+	const repoRoot = canonicalTreePath(
+		findRepoRoot(requestedCwd) ?? requestedCwd,
+	);
 	const cfg = worktreeConfigFor(repoRoot);
 	if (!cfg.enabled)
-		return { cwd: requestedCwd, kind: "primary", created: false };
+		return keptInTree(
+			requestedCwd,
+			`worktree.enabled is off for ${repoRoot}, so every session shares this tree`,
+		);
 
-	const clone = mainWorktree(repoRoot) ?? repoRoot;
+	const clone = canonicalTreePath(mainWorktree(repoRoot) ?? repoRoot);
 	const reuse = { ...options, includeDrafts: cfg.includeDrafts };
 	const forcedSpill = forcedSpillReason(clone, cfg.trunk, options);
 	if (forcedSpill) daemonLog(forcedSpill);
@@ -48,11 +59,4 @@ export function allocateTree(
 		options.replacesTree,
 	);
 	return { cwd: path, kind: "worktree", created: true, clone };
-}
-
-function keptInPlace(cwd: string): Allocation {
-	daemonLog(
-		`session kept in ${cwd}: launched against work already checked out there`,
-	);
-	return { cwd, kind: "primary", created: false };
 }

@@ -3,6 +3,7 @@ import { createWatcherSession } from "../createWatcherSession";
 import { daemonLog } from "../daemonLog";
 import type { Session } from "../types";
 import { allocateAndBind, type TreeSpawnContext } from "./allocateAndBind";
+import { canonicalTreePath } from "./canonicalTreePath";
 import { mainWorktree } from "./listWorktreePaths";
 import { worktreeConfigFor } from "./worktreeConfigFor";
 
@@ -14,7 +15,7 @@ export function ensureWatcher(
 	const repoRoot = findRepoRoot(cwd) ?? cwd;
 	const cfg = worktreeConfigFor(repoRoot);
 	if (!cfg.enabled || cfg.watcher !== true) return undefined;
-	const clone = mainWorktree(repoRoot) ?? repoRoot;
+	const clone = canonicalTreePath(mainWorktree(repoRoot) ?? repoRoot);
 	const live = liveWatcherFor(ctx.sessions, clone);
 	if (live) {
 		daemonLog(
@@ -41,7 +42,8 @@ function liveWatcherFor(
 	for (const session of sessions.values())
 		if (
 			session.watcher === true &&
-			session.cwd === clone &&
+			session.cwd !== undefined &&
+			canonicalTreePath(session.cwd) === clone &&
 			session.status !== "stopped" &&
 			session.status !== "error"
 		)
