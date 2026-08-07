@@ -1,3 +1,10 @@
+## [0.554.1](https://github.com/staff0rd/assist/compare/v0.554.0...v0.554.1) (2026-08-07)
+
+
+### Bug Fixes
+
+* canonical tree identity for allocation ([7e64f05](https://github.com/staff0rd/assist/commit/7e64f0537b1d8721abd2363eeacadeb8cdc3a192))
+
 # [0.554.0](https://github.com/staff0rd/assist/compare/v0.553.0...v0.554.0) (2026-08-07)
 
 
