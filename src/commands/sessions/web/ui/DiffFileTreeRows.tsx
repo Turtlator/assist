@@ -1,26 +1,12 @@
 import Box from "@mui/material/Box";
-import type { DiffFileTreeNode } from "./buildDiffFileTree";
 import { DiffFileTreeDirRow } from "./DiffFileTreeDirRow";
 import { DiffFileTreeFileRow } from "./DiffFileTreeFileRow";
 import { DIFF_TREE_INDENT } from "./diffFileTreeRowSx";
+import type { DiffFileTreeRowsProps } from "./DiffFileTreeRowsProps";
+import { treeFileKeys } from "./treeFileKeys";
 
-export function DiffFileTreeRows({
-	nodes,
-	depth,
-	collapsed,
-	activeFile,
-	onToggleDir,
-	onSelectFile,
-	onRevert,
-}: {
-	nodes: DiffFileTreeNode[];
-	depth: number;
-	collapsed: ReadonlySet<string>;
-	activeFile: string | undefined;
-	onToggleDir: (path: string) => void;
-	onSelectFile: (fileKey: string) => void;
-	onRevert?: (path: string) => void;
-}) {
+export function DiffFileTreeRows(props: DiffFileTreeRowsProps) {
+	const { nodes, depth, collapsed, activeFile, onSelectFile, onRevert } = props;
 	const indent = `${depth * DIFF_TREE_INDENT}px`;
 
 	return nodes.map((node) =>
@@ -37,19 +23,18 @@ export function DiffFileTreeRows({
 			<Box key={node.path} sx={{ minWidth: 0 }}>
 				<DiffFileTreeDirRow
 					name={node.name}
+					path={node.path}
+					paths={treeFileKeys(node.children)}
 					collapsed={collapsed.has(node.path)}
 					indent={indent}
-					onToggle={() => onToggleDir(node.path)}
+					onToggle={() => props.onToggleDir(node.path)}
+					onRevertPaths={props.onRevertPaths}
 				/>
 				{!collapsed.has(node.path) && (
 					<DiffFileTreeRows
+						{...props}
 						nodes={node.children}
 						depth={depth + 1}
-						collapsed={collapsed}
-						activeFile={activeFile}
-						onToggleDir={onToggleDir}
-						onSelectFile={onSelectFile}
-						onRevert={onRevert}
 					/>
 				)}
 			</Box>

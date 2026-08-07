@@ -54,6 +54,7 @@ export function DiffFileTree({
 				onToggleDir={onToggleDir}
 				onSelectFile={onSelectFile}
 				onRevert={onRevert}
+				onRevertPaths={onRevertPaths}
 			/>
 		</Box>
 	);

@@ -154,6 +154,83 @@ describe("DiffFileTree", () => {
 		expect(onRevertPaths).not.toHaveBeenCalled();
 	});
 
+	it("reverts only a folder's own subtree from its row", () => {
+		const onRevertPaths = vi.fn();
+		render(
+			<DiffFileTree
+				files={[
+					file("src/web/a.ts"),
+					file("src/web/nested/b.ts"),
+					file("docs/c.md"),
+				]}
+				onSelectFile={vi.fn()}
+				onRevertPaths={onRevertPaths}
+			/>,
+		);
+
+		fireEvent.click(
+			screen.getByRole("button", { name: "Revert folder src/web" }),
+		);
+		expect(
+			screen.getByText(
+				/discards all uncommitted changes to 2 files in src\/web/,
+			),
+		).toBeTruthy();
+		fireEvent.click(screen.getByRole("button", { name: "Revert" }));
+
+		expect(onRevertPaths).toHaveBeenCalledWith([
+			"src/web/nested/b.ts",
+			"src/web/a.ts",
+		]);
+	});
+
+	it("reverts a nested folder without touching its siblings", () => {
+		const onRevertPaths = vi.fn();
+		render(
+			<DiffFileTree
+				files={[file("src/web/a.ts"), file("src/web/nested/b.ts")]}
+				onSelectFile={vi.fn()}
+				onRevertPaths={onRevertPaths}
+			/>,
+		);
+
+		fireEvent.click(
+			screen.getByRole("button", { name: "Revert folder src/web/nested" }),
+		);
+		fireEvent.click(screen.getByRole("button", { name: "Revert" }));
+
+		expect(onRevertPaths).toHaveBeenCalledWith(["src/web/nested/b.ts"]);
+	});
+
+	it("reverts a collapsed folder's files while its rows are hidden", () => {
+		const onRevertPaths = vi.fn();
+		render(
+			<DiffFileTree
+				files={[file("src/a.ts"), file("src/b.ts")]}
+				onSelectFile={vi.fn()}
+				onRevertPaths={onRevertPaths}
+			/>,
+		);
+
+		fireEvent.click(screen.getByText("src"));
+		expect(screen.queryByText("a.ts")).toBeNull();
+
+		fireEvent.click(screen.getByRole("button", { name: "Revert folder src" }));
+		fireEvent.click(screen.getByRole("button", { name: "Revert" }));
+
+		expect(onRevertPaths).toHaveBeenCalledWith(["src/a.ts", "src/b.ts"]);
+	});
+
+	it("offers no folder revert control when reverting is unavailable", () => {
+		render(
+			<DiffFileTree files={[file("src/app.ts")]} onSelectFile={vi.fn()} />,
+		);
+
+		expect(
+			screen.queryByRole("button", { name: "Revert folder src" }),
+		).toBeNull();
+	});
+
 	it("offers no revert-all control when reverting is unavailable", () => {
 		render(
 			<DiffFileTree files={[file("src/app.ts")]} onSelectFile={vi.fn()} />,
