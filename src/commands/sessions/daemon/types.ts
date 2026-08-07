@@ -68,6 +68,7 @@ export type Session = {
 	undurable?: { reason: string; removesTree?: boolean };
 	transcriptPath?: string;
 	transcriptFingerprint?: string;
+	lastUserMessage?: string;
 	permissionActive?: boolean;
 	autoRun?: boolean;
 	autoAdvance?: boolean;

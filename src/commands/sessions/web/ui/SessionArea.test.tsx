@@ -291,6 +291,48 @@ describe("SessionArea top bar", () => {
 	});
 });
 
+describe("SessionArea last message", () => {
+	it("shows the active session's last prompt beside the bar", () => {
+		renderWithTopBar(
+			true,
+			[barSession({ lastUserMessage: "fix the failing test" })],
+			"1",
+		);
+
+		expect(screen.getByTestId("session-last-message").textContent).toBe(
+			"fix the failing test",
+		);
+	});
+
+	it("collapses a multi-line prompt onto one line", () => {
+		renderWithTopBar(
+			true,
+			[barSession({ lastUserMessage: "first line\n\nsecond line" })],
+			"1",
+		);
+
+		expect(screen.getByTestId("session-last-message").textContent).toBe(
+			"first line second line",
+		);
+	});
+
+	it("renders nothing when the session has no prompt yet", () => {
+		renderWithTopBar(true, [barSession()], "1");
+
+		expect(screen.queryByTestId("session-last-message")).toBeNull();
+	});
+
+	it("renders nothing when the top bar is hidden", () => {
+		renderWithTopBar(
+			false,
+			[barSession({ lastUserMessage: "fix the failing test" })],
+			"1",
+		);
+
+		expect(screen.queryByTestId("session-last-message")).toBeNull();
+	});
+});
+
 describe("SessionArea top bar actions", () => {
 	it("restarts the active session", () => {
 		const onRestart = vi.fn();

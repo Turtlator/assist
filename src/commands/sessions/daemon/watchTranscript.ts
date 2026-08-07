@@ -31,7 +31,7 @@ export function watchTranscript(
 	let timer: ReturnType<typeof setTimeout> | null = null;
 	const run = () => {
 		timer = null;
-		void reconcileTranscriptStatus(session, onStatusChange);
+		void reconcileTranscriptStatus(session, onStatusChange, notify);
 		startTranscriptTitleGeneration(session, notify);
 	};
 

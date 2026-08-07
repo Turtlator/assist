@@ -24,6 +24,7 @@ export function toSessionInfo(session: Session): SessionInfo {
 		verifying,
 		pendingPrPreview,
 		undurable,
+		lastUserMessage,
 	} = session;
 	return {
 		...toSessionRunInfo(session),
@@ -47,6 +48,7 @@ export function toSessionInfo(session: Session): SessionInfo {
 		verifying,
 		pendingPrPreview,
 		undurable,
+		lastUserMessage,
 		joinable: joinRefusal(session) === undefined,
 	};
 }

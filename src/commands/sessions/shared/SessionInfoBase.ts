@@ -55,4 +55,5 @@ export type SessionInfoBase = {
 	joinable?: boolean;
 	closing?: boolean;
 	verifying?: boolean;
+	lastUserMessage?: string;
 };

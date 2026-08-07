@@ -166,7 +166,6 @@ describe("reconcileTranscriptStatus", () => {
 			onStatusChange,
 		);
 
-		expect(readMock).not.toHaveBeenCalled();
 		expect(onStatusChange).not.toHaveBeenCalled();
 	});
 
@@ -179,7 +178,46 @@ describe("reconcileTranscriptStatus", () => {
 			onStatusChange,
 		);
 
-		expect(readMock).not.toHaveBeenCalled();
 		expect(onStatusChange).not.toHaveBeenCalled();
+	});
+});
+
+describe("reconcileTranscriptStatus last user message", () => {
+	beforeEach(() => vi.clearAllMocks());
+
+	it("stores the newest prompt and notifies", async () => {
+		readMock.mockResolvedValue(endTurn());
+		const notify = vi.fn();
+		const s = session({ status: "running" });
+
+		await reconcileTranscriptStatus(s, vi.fn(), notify);
+
+		expect(s.lastUserMessage).toBe("hi");
+		expect(notify).toHaveBeenCalledTimes(1);
+	});
+
+	it("keeps extracting for a finished card", async () => {
+		readMock.mockResolvedValue(endTurn());
+		const notify = vi.fn();
+		const s = session({ status: "done" });
+
+		await reconcileTranscriptStatus(s, vi.fn(), notify);
+
+		expect(s.lastUserMessage).toBe("hi");
+		expect(notify).toHaveBeenCalledTimes(1);
+	});
+
+	it("does not notify when the prompt is unchanged", async () => {
+		readMock.mockResolvedValue(resolvedBash("u-result"));
+		const notify = vi.fn();
+		const s = session({ status: "waiting" });
+
+		await reconcileTranscriptStatus(s, vi.fn(), notify);
+		notify.mockClear();
+		readMock.mockResolvedValue(resolvedBash("u-result-2"));
+		await reconcileTranscriptStatus(s, vi.fn(), notify);
+
+		expect(s.lastUserMessage).toBe("run");
+		expect(notify).not.toHaveBeenCalled();
 	});
 });

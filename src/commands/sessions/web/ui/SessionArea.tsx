@@ -5,6 +5,7 @@ import {
 	SessionPreviewSplit,
 } from "./SessionPreviewSplit";
 import { SessionDiffSplit } from "./SessionDiffSplit";
+import { SessionLastMessage } from "./SessionLastMessage";
 import { TerminalArea, type TerminalAreaProps } from "./TerminalArea";
 import { TranscriptArea } from "./TranscriptArea";
 import type { SessionListHandlers, Transcript } from "./types";
@@ -16,6 +17,8 @@ const areaSx = {
 	display: "flex",
 	flexDirection: "column",
 } as const;
+
+const topBarAnchorSx = { position: "relative", flexShrink: 0 } as const;
 
 export function SessionArea({
 	viewingTranscriptSessionId,
@@ -46,7 +49,10 @@ export function SessionArea({
 	return (
 		<Box sx={areaSx}>
 			{topBar && activeSession !== undefined && (
-				<ActiveSessionTopBar session={activeSession} lifecycle={lifecycle} />
+				<Box sx={topBarAnchorSx}>
+					<ActiveSessionTopBar session={activeSession} lifecycle={lifecycle} />
+					<SessionLastMessage message={activeSession.lastUserMessage} />
+				</Box>
 			)}
 			<SessionDiffSplit
 				sessionId={terminal.activeId}
