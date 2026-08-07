@@ -1,3 +1,10 @@
+# [0.555.0](https://github.com/staff0rd/assist/compare/v0.554.2...v0.555.0) (2026-08-07)
+
+
+### Features
+
+* add per-folder revert to diff tree ([645d841](https://github.com/staff0rd/assist/commit/645d84155a36a8055e9c195e4bdc960ea58d3898))
+
 ## [0.554.2](https://github.com/staff0rd/assist/compare/v0.554.1...v0.554.2) (2026-08-07)
 
 
