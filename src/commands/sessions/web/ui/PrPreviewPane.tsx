@@ -19,10 +19,12 @@ const paneSx = {
 
 export function PrPreviewPane({
 	preview,
+	sessionId,
 	cwd,
 	onDecision,
 }: {
 	preview: PrPreview;
+	sessionId?: string;
 	cwd?: string;
 	onDecision: (
 		decision: "approve" | "reject",
@@ -30,7 +32,7 @@ export function PrPreviewPane({
 	) => void;
 }) {
 	const isPr = preview.kind !== "backlog-item";
-	const pane = usePrPane(preview.requestId, cwd, onDecision, isPr);
+	const pane = usePrPane(preview.requestId, sessionId, cwd, onDecision, isPr);
 
 	return (
 		<Box sx={paneSx} onDrop={pane.onDrop} onDragOver={pane.onDragOver}>

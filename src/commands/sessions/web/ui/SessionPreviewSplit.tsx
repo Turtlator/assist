@@ -22,6 +22,7 @@ export function SessionPreviewSplit({
 	return (
 		<PrPreviewSplit
 			preview={session?.pendingPrPreview ?? null}
+			sessionId={session?.id}
 			cwd={session?.cwd}
 			onDecision={(requestId, decision, details) => {
 				if (session) sendPrDecision(session.id, requestId, decision, details);

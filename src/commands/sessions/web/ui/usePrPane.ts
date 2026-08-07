@@ -13,6 +13,7 @@ type OnDecision = (
 
 export function usePrPane(
 	requestId: string,
+	sessionId: string | undefined,
 	cwd: string | undefined,
 	onDecision: OnDecision,
 	isPr: boolean,
@@ -21,7 +22,7 @@ export function usePrPane(
 		usePreviewSelection();
 	const { comments, add, remove } = usePrComments(requestId);
 	const shots = usePaneScreenshots(cwd, isPr);
-	const decision = usePrDecision(requestId, onDecision, isPr, () =>
+	const decision = usePrDecision(requestId, sessionId, onDecision, isPr, () =>
 		shots.screenshots.map((s) => s.markdown),
 	);
 

@@ -3,18 +3,18 @@ import type { TransitionEvent } from "react";
 import type { PrPreview } from "../../shared/SessionInfoBase";
 import type { PrDecisionDetails } from "./PrDecisionDetails";
 import { PrPreviewPane } from "./PrPreviewPane";
-
-export const SPLIT_MS = 280;
-export const SPLIT_EASE = "cubic-bezier(0.4, 0, 0.2, 1)";
+import { slideInSx } from "./slideInSx";
 
 export function PrPreviewSlideIn({
 	rendered,
+	sessionId,
 	cwd,
 	open,
 	onExited,
 	onDecision,
 }: {
 	rendered: PrPreview | null;
+	sessionId?: string;
 	cwd?: string;
 	open: boolean;
 	onExited: () => void;
@@ -33,22 +33,13 @@ export function PrPreviewSlideIn({
 		<Box
 			aria-hidden={!open}
 			onTransitionEnd={handleTransitionEnd}
-			sx={{
-				position: "absolute",
-				top: 0,
-				right: 0,
-				bottom: 0,
-				width: "50%",
-				display: "flex",
-				transform: open ? "none" : "translateX(100%)",
-				opacity: open ? 1 : 0,
-				transition: `transform ${SPLIT_MS}ms ${SPLIT_EASE}, opacity ${SPLIT_MS}ms ${SPLIT_EASE}`,
-			}}
+			sx={slideInSx(open)}
 		>
 			{rendered && (
 				<PrPreviewPane
 					key={rendered.requestId}
 					preview={rendered}
+					sessionId={sessionId}
 					cwd={cwd}
 					onDecision={(decision, details) =>
 						onDecision(rendered.requestId, decision, details)

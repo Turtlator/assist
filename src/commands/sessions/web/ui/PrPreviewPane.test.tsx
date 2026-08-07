@@ -237,6 +237,54 @@ describe("PrPreviewPane inline comments", () => {
 				expect.objectContaining({ reviewAfter: false, announceAfter: false }),
 			);
 		});
+
+		const retry: PrPreview = { ...preview, requestId: "r2" };
+
+		it("restores the chosen toggles when the same session re-raises under a new requestId", () => {
+			const first = render(
+				<PrPreviewPane preview={preview} sessionId="s1" onDecision={vi.fn()} />,
+			);
+			fireEvent.click(toggle("Post"));
+			fireEvent.click(screen.getByRole("button", { name: "Reject" }));
+			first.unmount();
+
+			render(
+				<PrPreviewPane preview={retry} sessionId="s1" onDecision={vi.fn()} />,
+			);
+
+			expect(toggle("Review").checked).toBe(true);
+			expect(toggle("Post").checked).toBe(false);
+		});
+
+		it("starts a different session at the defaults", () => {
+			const first = render(
+				<PrPreviewPane preview={preview} sessionId="s1" onDecision={vi.fn()} />,
+			);
+			fireEvent.click(toggle("Post"));
+			first.unmount();
+
+			render(
+				<PrPreviewPane preview={retry} sessionId="s2" onDecision={vi.fn()} />,
+			);
+
+			expect(toggle("Review").checked).toBe(true);
+			expect(toggle("Post").checked).toBe(true);
+		});
+
+		it("clears the remembered choice once the preview is approved", () => {
+			const first = render(
+				<PrPreviewPane preview={preview} sessionId="s1" onDecision={vi.fn()} />,
+			);
+			fireEvent.click(toggle("Post"));
+			approve();
+			first.unmount();
+
+			render(
+				<PrPreviewPane preview={retry} sessionId="s1" onDecision={vi.fn()} />,
+			);
+
+			expect(toggle("Post").checked).toBe(true);
+		});
 	});
 
 	it("restores persisted comments after a remount (page refresh)", () => {

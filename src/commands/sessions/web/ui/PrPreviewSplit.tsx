@@ -2,7 +2,8 @@ import Box from "@mui/material/Box";
 import type { ReactNode } from "react";
 import type { PrPreview } from "../../shared/SessionInfoBase";
 import type { PrDecisionDetails } from "./PrDecisionDetails";
-import { PrPreviewSlideIn, SPLIT_EASE, SPLIT_MS } from "./PrPreviewSlideIn";
+import { PrPreviewSlideIn } from "./PrPreviewSlideIn";
+import { SPLIT_EASE, SPLIT_MS } from "./slideInSx";
 import { useRetainedPreview } from "./useRetainedPreview";
 
 type OnDecision = (
@@ -13,11 +14,13 @@ type OnDecision = (
 
 export function PrPreviewSplit({
 	preview,
+	sessionId,
 	cwd,
 	onDecision,
 	children,
 }: {
 	preview: PrPreview | null;
+	sessionId?: string;
 	cwd?: string;
 	onDecision: OnDecision;
 	children: ReactNode;
@@ -46,6 +49,7 @@ export function PrPreviewSplit({
 			</Box>
 			<PrPreviewSlideIn
 				rendered={rendered}
+				sessionId={sessionId}
 				cwd={cwd}
 				open={open}
 				onExited={onExited}
