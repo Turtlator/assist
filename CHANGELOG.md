@@ -1,3 +1,10 @@
+# [0.557.0](https://github.com/staff0rd/assist/compare/v0.556.0...v0.557.0) (2026-08-09)
+
+
+### Features
+
+* codex session history and resume ([9066b80](https://github.com/staff0rd/assist/commit/9066b801f256aa3b7ac89071192f88f3470c9dc7))
+
 # [0.556.0](https://github.com/staff0rd/assist/compare/v0.555.0...v0.556.0) (2026-08-07)
 
 
