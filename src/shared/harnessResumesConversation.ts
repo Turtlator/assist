@@ -3,7 +3,7 @@ import { resolveHarness } from "./harnessLabel";
 
 const RESUMES_CONVERSATION: Record<HarnessKind, boolean> = {
 	claude: true,
-	codex: false,
+	codex: true,
 	pi: false,
 };
 

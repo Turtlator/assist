@@ -140,8 +140,13 @@ export class SessionManager {
 		return spawnAssistInTree(this.treeCtx(), assistArgs, cwd, meta, context);
 	}
 
-	resume(sessionId: string, cwd: string, name?: string): string {
-		return resumeInTree(this.treeCtx(), sessionId, cwd, name);
+	resume(
+		sessionId: string,
+		cwd: string,
+		name?: string,
+		harness?: HarnessKind,
+	): string {
+		return resumeInTree(this.treeCtx(), sessionId, cwd, name, harness);
 	}
 
 	private readonly onStatusChange = makeStatusChangeHandler(

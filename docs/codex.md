@@ -46,7 +46,38 @@ Two ways to look it up, both against `codex-cli 0.145.0`:
 
 Route 1 is what the daemon's Codex resume path is built on: resolve the id after
 spawn, record it like any other conversation id, then `codex resume <id> "<nudge>"`
-for restart and restore.
+for restart and restore. The resolved id is stable: `codex resume <id>` appends to
+the **same** rollout file and keeps the same `session_id` (verified on 0.145.0 by
+resuming a session and watching the file grow with no new file created), so a
+session only needs binding once no matter how many times it is resumed.
+
+The id is stored on the session as `harnessSessionId`, additively — Claude keeps
+using `claudeSessionId`, which stays the Claude-only field the transcript watcher,
+title generation and usage recording key off. Resolution matches on `cwd` plus a
+spawn-time window; two Codex sessions started in the same directory within the
+same second are the one case that could bind to the wrong rollout (Claude avoids
+this with `--session-id`, which Codex has no equivalent for).
+
+## History and transcripts
+
+`~/.codex/sessions` is discovered alongside `~/.claude/projects`, gated on the
+directory existing. Each rollout becomes a history card with `harness: "codex"`
+(the badge, chips and resume action come from that field), named after the first
+`event_msg`/`user_message` in the file.
+
+Transcripts are parsed by a Codex-specific adapter, not the Claude JSONL parser:
+
+| Rollout record                                          | Transcript message                         |
+| ------------------------------------------------------- | ------------------------------------------ |
+| `event_msg` / `user_message`                            | user                                       |
+| `event_msg` / `agent_message`                           | assistant                                  |
+| `response_item` / `function_call` \| `custom_tool_call` | tool (target from `cmd`/`command`/`input`) |
+
+The conversation is read from the `event_msg` stream rather than the
+`response_item` messages, because the latter replay the whole system prompt and
+`AGENTS.md` as `developer`/`user` messages on every turn. Claude's discovery and
+parser are untouched; `parseTranscript` tries the Claude lookup first and only
+falls back to a rollout when no Claude transcript matches the id.
 
 ## Session status (running / waiting)
 

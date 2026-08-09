@@ -71,10 +71,13 @@ export function resumeInTree(
 	sessionId: string,
 	cwd: string,
 	name: string | undefined,
+	harness?: HarnessKind,
 ): string {
 	if (!existsSync(cwd))
-		return resumeInReplacementTree(ctx, sessionId, cwd, name);
-	const id = ctx.spawnWith((sid) => resumeSession(sid, sessionId, cwd, name));
+		return resumeInReplacementTree(ctx, sessionId, cwd, name, harness);
+	const id = ctx.spawnWith((sid) =>
+		resumeSession(sid, sessionId, cwd, name, undefined, harness),
+	);
 	daemonLog(`session ${id} resuming ${sessionId} in ${cwd}`);
 	bindResumedWorktree(ctx.sessions.get(id), cwd, ctx.notify);
 	return id;

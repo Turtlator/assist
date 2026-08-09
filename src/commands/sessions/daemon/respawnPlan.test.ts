@@ -10,14 +10,17 @@ import {
 vi.mock("node:crypto", () => ({ randomUUID: vi.fn(() => "fresh-uuid") }));
 vi.mock("./spawnClaude", () => ({ spawnClaude: vi.fn(() => "claude-pty") }));
 vi.mock("./spawnPty", () => ({ spawnPty: vi.fn(() => "assist-pty") }));
+vi.mock("./spawnCodex", () => ({ spawnCodex: vi.fn(() => "codex-pty") }));
 
 import type { Session } from "./createSession";
 import { respawnPlan } from "./respawnPlan";
 import { spawnClaude } from "./spawnClaude";
+import { spawnCodex } from "./spawnCodex";
 import { spawnPty } from "./spawnPty";
 
 const mockSpawnClaude = spawnClaude as unknown as MockInstance;
 const mockSpawnPty = spawnPty as unknown as MockInstance;
+const mockSpawnCodex = spawnCodex as unknown as MockInstance;
 
 function fakeSession(overrides: Partial<Session> = {}): Session {
 	return {
@@ -67,11 +70,41 @@ describe("respawnPlan", () => {
 		it("has no plan rather than respawning it as claude", () => {
 			expect(
 				respawnPlan(
-					fakeSession({ harness: "codex", initialPrompt: "/refine a279" }),
+					fakeSession({ harness: "pi", initialPrompt: "/refine a279" }),
 				),
 			).toBeNull();
-			expect(respawnPlan(fakeSession({ harness: "pi" }))).toBeNull();
 			expect(mockSpawnClaude).not.toHaveBeenCalled();
+		});
+	});
+
+	describe("for a codex session", () => {
+		it("resumes the bound codex conversation", () => {
+			const plan = respawnPlan(
+				fakeSession({ harness: "codex", harnessSessionId: "codex-conv" }),
+			) as NonNullable<ReturnType<typeof respawnPlan>>;
+			plan.spawn();
+
+			expect(plan.status).toBe("waiting");
+			expect(mockSpawnCodex).toHaveBeenCalledWith({
+				resumeSessionId: "codex-conv",
+				cwd: "/repo",
+				sessionId: "1",
+			});
+			expect(mockSpawnClaude).not.toHaveBeenCalled();
+		});
+
+		it("relaunches from its prompt when no conversation was bound", () => {
+			const plan = respawnPlan(
+				fakeSession({ harness: "codex", initialPrompt: "refine a279" }),
+			) as NonNullable<ReturnType<typeof respawnPlan>>;
+			plan.spawn();
+
+			expect(plan.status).toBe("running");
+			expect(mockSpawnCodex).toHaveBeenCalledWith({
+				prompt: "refine a279",
+				cwd: "/repo",
+				sessionId: "1",
+			});
 		});
 	});
 

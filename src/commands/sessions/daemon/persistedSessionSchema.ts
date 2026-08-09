@@ -14,6 +14,7 @@ export const persistedSessionSchema = z.object({
 	startedAt: z.number(),
 	runningMs: z.number().optional(),
 	claudeSessionId: z.string().optional(),
+	harnessSessionId: z.string().optional(),
 	initialPrompt: z.string().optional(),
 	runName: z.string().optional(),
 	runArgs: z.array(z.string()).optional(),

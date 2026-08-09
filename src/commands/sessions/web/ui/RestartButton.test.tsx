@@ -30,13 +30,23 @@ describe("RestartButton", () => {
 		).toContain("resumes the conversation");
 	});
 
-	it("says a codex session relaunches from the start", () => {
+	it("says a codex session resumes its conversation", () => {
 		render(<RestartButton id="54" onRestart={() => {}} harness="codex" />);
 
 		fireEvent.click(screen.getByRole("button"));
 
 		expect(
 			screen.getByText(/Restart this Codex session/).textContent,
-		).toContain("relaunches it from the start");
+		).toContain("resumes the conversation");
+	});
+
+	it("says a pi session relaunches from the start", () => {
+		render(<RestartButton id="54" onRestart={() => {}} harness="pi" />);
+
+		fireEvent.click(screen.getByRole("button"));
+
+		expect(screen.getByText(/Restart this pi session/).textContent).toContain(
+			"relaunches it from the start",
+		);
 	});
 });

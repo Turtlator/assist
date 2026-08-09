@@ -20,7 +20,12 @@ export function useSidebarNavigation(
 
 	const handleResume = useCallback(
 		(session: HistoricalSession) => {
-			resumeSession(session.sessionId, session.cwd, session.name);
+			resumeSession(
+				session.sessionId,
+				session.cwd,
+				session.name,
+				session.harness,
+			);
 			onTabChange("active");
 			navigate("/sessions");
 		},

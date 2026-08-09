@@ -2,6 +2,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { loadConfig } from "../../../shared/loadConfig";
+import { discoverCodexSessions } from "./codex/discoverCodexSessions";
 import {
 	type HistoricalSession,
 	parseSessionFile,
@@ -69,6 +70,7 @@ export async function discoverSessions(): Promise<HistoricalSession[]> {
 			if (session) sessions.push(session);
 		}),
 	);
+	sessions.push(...(await discoverCodexSessions()));
 
 	sessions.sort(
 		(a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),

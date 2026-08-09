@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import type { HarnessKind } from "../../../../shared/harnesses";
 import { daemonLog } from "../daemonLog";
 import { resumeSession } from "../resumeSession";
 import { allocateAndBind, type TreeSpawnContext } from "./allocateAndBind";
@@ -10,6 +11,7 @@ export function resumeInReplacementTree(
 	claudeSessionId: string,
 	missingCwd: string,
 	name: string | undefined,
+	harness?: HarnessKind,
 ): string {
 	const clone = cloneForReapedTree(missingCwd);
 	daemonLog(
@@ -22,7 +24,14 @@ export function resumeInReplacementTree(
 			const cwd = resolvedCwd ?? clone;
 			carryTranscriptToTree(claudeSessionId, missingCwd, cwd);
 			daemonLog(`session ${id} resuming ${claudeSessionId} in ${cwd}`);
-			return resumeSession(id, claudeSessionId, cwd, name, holdUntilSeeded);
+			return resumeSession(
+				id,
+				claudeSessionId,
+				cwd,
+				name,
+				holdUntilSeeded,
+				harness,
+			);
 		},
 		{ replacesTree: missingCwd },
 	);

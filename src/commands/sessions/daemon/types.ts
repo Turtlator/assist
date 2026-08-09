@@ -56,6 +56,7 @@ export type Session = {
 	cwd?: string;
 	launchedFrom?: string;
 	claudeSessionId?: string;
+	harnessSessionId?: string;
 	initialPrompt?: string;
 	restored?: boolean;
 	error?: string;

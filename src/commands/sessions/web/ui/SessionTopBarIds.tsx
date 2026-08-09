@@ -13,7 +13,8 @@ export function SessionTopBarIds({
 	session: SessionInfo;
 	collapsed: boolean;
 }) {
-	const { id, claudeSessionId } = session;
+	const { id, claudeSessionId, harnessSessionId } = session;
+	const conversationId = claudeSessionId ?? harnessSessionId;
 	const repo = isRepoScoped(sessionType(session)) ? repoLabel(session.cwd) : "";
 
 	return (
@@ -32,9 +33,9 @@ export function SessionTopBarIds({
 			>
 				{`#${id}`}
 			</Typography>
-			{claudeSessionId && (
+			{conversationId && (
 				<SessionTopBarConversationId
-					conversationId={claudeSessionId}
+					conversationId={conversationId}
 					collapsed={collapsed}
 					harness={session.harness}
 				/>

@@ -40,6 +40,7 @@ export type SessionInfoBase = {
 	cwd?: string;
 	launchedFrom?: string;
 	claudeSessionId?: string;
+	harnessSessionId?: string;
 	repoGroup?: RepoGroup;
 	restored?: boolean;
 	error?: string;

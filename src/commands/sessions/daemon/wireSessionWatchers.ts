@@ -1,3 +1,4 @@
+import { bindCodexSession } from "./bindCodexSession";
 import type { Session } from "./createSession";
 import type { OnStatusChange } from "./types";
 import { watchActivity } from "./watchActivity";
@@ -12,4 +13,5 @@ export function wireSessionWatchers(
 		watchTranscript(s, notify, onStatusChange);
 	watchActivity(session, notify, wireTranscript);
 	wireTranscript(session);
+	bindCodexSession(session, notify);
 }

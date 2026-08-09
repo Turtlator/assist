@@ -29,8 +29,8 @@ export function createAssistSessionAction(send: SendFn) {
 }
 
 export function resumeSessionAction(send: SendFn) {
-	return (sessionId: string, cwd: string, name?: string) =>
-		send({ type: "resume", sessionId, cwd, name });
+	return (sessionId: string, cwd: string, name?: string, harness?: string) =>
+		send({ type: "resume", sessionId, cwd, name, harness });
 }
 
 export function retrySessionAction(send: SendFn, buffers: Map<string, string>) {

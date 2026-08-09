@@ -10,6 +10,7 @@ export function restoreBase(id: string, persisted: PersistedSession) {
 		subtitle: persisted.subtitle,
 		commandType: persisted.commandType,
 		harness: persisted.harness,
+		harnessSessionId: persisted.harnessSessionId,
 		scrollback: "",
 		cwd: persisted.cwd,
 		assistArgs: persisted.assistArgs,

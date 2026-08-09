@@ -1,15 +1,17 @@
-import { harnessLabel } from "../../../shared/harnessLabel";
-import { harnessResumesConversation } from "../../../shared/harnessResumesConversation";
-import { buildResumePrompt } from "../../backlog/buildResumePrompt";
+import { resolveHarness } from "../../../shared/harnessLabel";
 import type { Session } from "./createSession";
 import { errorSession } from "./errorSession";
 import type { PersistedSession } from "./loadPersistedSessions";
 import type { restoreBase } from "./restoreBase";
-import { runningSession, waitingSession } from "./runningSession";
-import { spawnClaude } from "./spawnClaude";
-import { hasTranscriptOnDisk } from "./hasTranscriptOnDisk";
+import { restoreCodexSession } from "./restoreCodexSession";
+import { unresumableReason } from "./unresumableReason";
+import { resumeViaClaude } from "./resumeViaClaude";
 
 type RestoreBase = ReturnType<typeof restoreBase>;
+
+function isCodex(harness: PersistedSession["harness"]): boolean {
+	return resolveHarness(harness) === "codex";
+}
 
 export function restoreInteractiveSession(
 	id: string,
@@ -24,9 +26,14 @@ export function restoreInteractiveSession(
 	if (
 		persisted.commandType !== "run" &&
 		persisted.claudeSessionId &&
-		harnessResumesConversation(persisted.harness)
+		resolveHarness(persisted.harness) === "claude"
 	) {
 		return resumeViaClaude(id, persisted, base, idle);
+	}
+
+	if (persisted.commandType !== "run" && isCodex(persisted.harness)) {
+		const resumed = restoreCodexSession(id, persisted, base, idle);
+		if (resumed) return resumed;
 	}
 
 	/* why: a plain claude session that reaches here has no claudeSessionId to
@@ -43,39 +50,8 @@ export function restoreInteractiveSession(
 	return notRestoredStub(base, persisted);
 }
 
-function resumeViaClaude(
-	id: string,
-	persisted: PersistedSession,
-	base: RestoreBase,
-	idle: boolean,
-): Session {
-	const pty = spawnClaude(
-		hasTranscriptOnDisk(persisted)
-			? {
-					resumeSessionId: persisted.claudeSessionId,
-					prompt: idle ? undefined : buildResumePrompt(),
-					cwd: persisted.cwd,
-					sessionId: id,
-				}
-			: {
-					claudeSessionId: persisted.claudeSessionId,
-					cwd: persisted.cwd,
-					sessionId: id,
-				},
-	);
-	return idle
-		? waitingSession(base, persisted, pty)
-		: runningSession(base, persisted, pty);
-}
-
 function unrecoverableClaude(id: string, persisted: PersistedSession): Session {
 	return errorSession(id, persisted, unresumableReason(persisted.harness));
-}
-
-function unresumableReason(harness: PersistedSession["harness"]): string {
-	return harnessResumesConversation(harness)
-		? "no claude session id was recorded before the daemon stopped, so the conversation cannot be resumed"
-		: `${harnessLabel(harness)} sessions cannot be resumed yet, so the conversation cannot be restored`;
 }
 
 function notRestoredStub(

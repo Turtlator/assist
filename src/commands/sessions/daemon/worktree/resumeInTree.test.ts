@@ -65,6 +65,7 @@ describe("resumeInTree", () => {
 			"abc12345",
 			"/git/repo-2",
 			"work",
+			undefined,
 		);
 		expect(sessions.size).toBe(0);
 	});

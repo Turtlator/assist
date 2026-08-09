@@ -30,4 +30,29 @@ describe("spawnCodex", () => {
 
 		expect(spawnPtyMock).toHaveBeenCalledWith(["codex"], undefined, undefined);
 	});
+
+	it("resumes a recorded conversation by id", () => {
+		spawnCodex({ resumeSessionId: "conv-1", cwd: "/repo", sessionId: "7" });
+
+		expect(spawnPtyMock).toHaveBeenCalledWith(
+			["codex", "resume", "conv-1"],
+			"/repo",
+			"7",
+		);
+	});
+
+	it("passes the restart nudge as the resumed turn's prompt", () => {
+		spawnCodex({
+			resumeSessionId: "conv-1",
+			prompt: "continue",
+			cwd: "/repo",
+			sessionId: "7",
+		});
+
+		expect(spawnPtyMock).toHaveBeenCalledWith(
+			["codex", "resume", "conv-1", "continue"],
+			"/repo",
+			"7",
+		);
+	});
 });

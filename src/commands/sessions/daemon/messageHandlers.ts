@@ -1,3 +1,4 @@
+import type { HarnessKind } from "../../../shared/harnesses";
 import type { RateLimits } from "../../../shared/RateLimits";
 import { type SessionClient, sendTo } from "./broadcast";
 import { buildHello } from "./buildHello";
@@ -48,6 +49,7 @@ export const messageHandlers: Record<string, Handler> = {
 			d.sessionId as string,
 			d.cwd as string,
 			d.name as string | undefined,
+			d.harness as HarnessKind | undefined,
 		),
 	),
 	...lifecycleHandlers,

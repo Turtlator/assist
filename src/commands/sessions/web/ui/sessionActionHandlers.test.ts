@@ -40,7 +40,7 @@ describe("sessionActionHandlers", () => {
 	describe("for an interactive session on a harness that cannot resume", () => {
 		it("offers no restart, since the daemon has no plan to respawn it", () => {
 			const actions = sessionActionHandlers(
-				session({ harness: "codex" }),
+				session({ harness: "pi" }),
 				handlers,
 			);
 

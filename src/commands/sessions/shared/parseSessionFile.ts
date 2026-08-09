@@ -1,9 +1,11 @@
 import * as fs from "node:fs";
-import * as path from "node:path";
+import type { HarnessKind } from "../../../shared/harnesses";
 import { deriveHistoryFields, type SessionType } from "./deriveHistoryFields";
 import { extractSessionMeta } from "./extractSessionMeta";
+import { deriveProject } from "./deriveProject";
+import type { SessionOrigin } from "./SessionOrigin";
 
-export type SessionOrigin = "wsl" | "windows";
+export type { SessionOrigin } from "./SessionOrigin";
 
 export type HistoricalSession = {
 	sessionId: string;
@@ -12,6 +14,7 @@ export type HistoricalSession = {
 	cwd: string;
 	timestamp: string;
 	origin: SessionOrigin;
+	harness?: HarnessKind;
 	sessionType?: SessionType;
 	itemId?: number;
 	prompt?: string;
@@ -52,20 +55,4 @@ async function readHeadLines(
 	const buf = Buffer.alloc(16_384);
 	const { bytesRead } = await handle.read(buf, 0, buf.length, 0);
 	return buf.toString("utf8", 0, bytesRead).split("\n").filter(Boolean);
-}
-
-function deriveProject(
-	cwd: string,
-	filePath: string,
-	origin: SessionOrigin,
-): string {
-	if (!cwd) return dirNameToProject(filePath);
-	// why: POSIX basename mangles Windows cwds like C:\Users\me\repo
-	return origin === "windows" ? path.win32.basename(cwd) : path.basename(cwd);
-}
-
-function dirNameToProject(filePath: string): string {
-	const dirName = path.basename(path.dirname(filePath));
-	const parts = dirName.split("--");
-	return parts[parts.length - 1].replace(/-/g, "/");
 }

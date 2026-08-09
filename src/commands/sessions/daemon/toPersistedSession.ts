@@ -15,6 +15,7 @@ export function toPersistedSession(session: Session): PersistedSession {
 		startedAt: session.startedAt,
 		runningMs: accumulatedRunningMs(session),
 		claudeSessionId: session.claudeSessionId,
+		harnessSessionId: session.harnessSessionId,
 		initialPrompt: session.initialPrompt,
 		runName: session.runName,
 		runArgs: session.runArgs,

@@ -8,6 +8,7 @@ import {
 } from "vitest";
 
 vi.mock("./spawnClaude", () => ({ spawnClaude: vi.fn(() => "claude-pty") }));
+vi.mock("./spawnCodex", () => ({ spawnCodex: vi.fn(() => "codex-pty") }));
 vi.mock("./hasTranscriptOnDisk", () => ({
 	hasTranscriptOnDisk: vi.fn(() => true),
 }));
@@ -19,8 +20,10 @@ import type { PersistedSession } from "./loadPersistedSessions";
 import { restoreBase } from "./restoreBase";
 import { restoreInteractiveSession } from "./restoreInteractiveSession";
 import { spawnClaude } from "./spawnClaude";
+import { spawnCodex } from "./spawnCodex";
 
 const mockSpawnClaude = spawnClaude as unknown as MockInstance;
+const mockSpawnCodex = spawnCodex as unknown as MockInstance;
 
 function persistedSession(
 	overrides: Partial<PersistedSession> = {},
@@ -62,7 +65,7 @@ describe("restoreInteractiveSession", () => {
 	describe("for a session on a harness that cannot resume", () => {
 		it("does not resume it as claude, even with a stale conversation id", () => {
 			const session = restore(
-				persistedSession({ harness: "codex", claudeSessionId: "stale" }),
+				persistedSession({ harness: "pi", claudeSessionId: "stale" }),
 			);
 
 			expect(mockSpawnClaude).not.toHaveBeenCalled();
@@ -70,10 +73,10 @@ describe("restoreInteractiveSession", () => {
 		});
 
 		it("explains the harness cannot be resumed instead of blaming a missing claude id", () => {
-			const session = restore(persistedSession({ harness: "codex" }));
+			const session = restore(persistedSession({ harness: "pi" }));
 
 			expect(session.error).toBe(
-				"Codex sessions cannot be resumed yet, so the conversation cannot be restored",
+				"pi sessions cannot be resumed yet, so the conversation cannot be restored",
 			);
 		});
 
@@ -81,8 +84,8 @@ describe("restoreInteractiveSession", () => {
 			const session = restore(
 				persistedSession({
 					commandType: "assist",
-					harness: "codex",
-					assistArgs: ["refine", "--harness", "codex", "a279"],
+					harness: "pi",
+					assistArgs: ["refine", "--harness", "pi", "a279"],
 					claudeSessionId: "stale",
 				}),
 			);
@@ -90,6 +93,35 @@ describe("restoreInteractiveSession", () => {
 			expect(mockSpawnClaude).not.toHaveBeenCalled();
 			expect(session.status).toBe("done");
 			expect(session.restored).toBe(false);
+		});
+	});
+
+	describe("for a codex session", () => {
+		it("resumes its recorded conversation with the restart nudge", () => {
+			const session = restore(
+				persistedSession({ harness: "codex", harnessSessionId: "codex-conv" }),
+			);
+
+			expect(mockSpawnClaude).not.toHaveBeenCalled();
+			expect(mockSpawnCodex).toHaveBeenCalledWith({
+				resumeSessionId: "codex-conv",
+				prompt: "resume nudge",
+				cwd: "/repo",
+				sessionId: "1",
+			});
+			expect(session.status).toBe("running");
+		});
+
+		it("does not resume it as claude when a stale claude id is all it has", () => {
+			const session = restore(
+				persistedSession({ harness: "codex", claudeSessionId: "stale" }),
+			);
+
+			expect(mockSpawnClaude).not.toHaveBeenCalled();
+			expect(mockSpawnCodex).not.toHaveBeenCalled();
+			expect(session.error).toBe(
+				"no Codex conversation id was recorded before the daemon stopped, so the conversation cannot be resumed",
+			);
 		});
 	});
 
