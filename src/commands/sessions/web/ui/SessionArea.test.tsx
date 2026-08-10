@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PrPreview } from "../../shared/SessionInfoBase";
 import { SessionArea } from "./SessionArea";
 import type { SessionInfo, SessionListHandlers } from "./types";
-import { DiffPanelsProvider } from "./useDiffPanels";
+import { DiffPanelsProvider, useDiffPanels } from "./useDiffPanels";
 import { StarredSessionsProvider } from "./useStarredSessions";
 import { TopBarLayoutContext } from "./useTopBarLayoutContext";
 
@@ -18,6 +18,22 @@ vi.mock("./TerminalPane", () => ({
 
 vi.mock("./PrPreviewPane", () => ({
 	PrPreviewPane: () => <div data-testid="preview-pane" />,
+}));
+
+vi.mock("./DiffContent", () => ({
+	DiffContent: ({
+		mode,
+		onToggleMode,
+	}: {
+		mode?: string;
+		onToggleMode?: () => void;
+	}) => (
+		<div data-testid="diff" data-mode={mode}>
+			<button type="button" onClick={onToggleMode}>
+				toggle mode
+			</button>
+		</div>
+	),
 }));
 
 afterEach(() => {
@@ -183,6 +199,18 @@ const pendingPreview: PrPreview = {
 	prNumber: null,
 };
 
+function OpenDiffButton({ sessionId }: { sessionId: string }) {
+	const { togglePanel } = useDiffPanels();
+	return (
+		<button
+			type="button"
+			onClick={() => togglePanel(sessionId, { cwd: "/repo", scope: "all" })}
+		>
+			open diff
+		</button>
+	);
+}
+
 function renderWithTopBar(
 	topBar: boolean,
 	list: SessionInfo[],
@@ -198,7 +226,11 @@ function renderWithTopBar(
 	render(
 		<TopBarLayoutContext.Provider value={topBar}>
 			<StarredSessionsProvider sessions={[]} setSessionStarred={() => {}}>
-				<DiffPanelsProvider sessionIds={[]} onActivateSession={() => {}}>
+				<DiffPanelsProvider
+					sessionIds={list.map((s) => s.id)}
+					onActivateSession={() => {}}
+				>
+					<OpenDiffButton sessionId={activeId} />
 					<SessionArea
 						sessions={list}
 						activeId={activeId}
@@ -330,6 +362,67 @@ describe("SessionArea last message", () => {
 		);
 
 		expect(screen.queryByTestId("session-last-message")).toBeNull();
+	});
+});
+
+function terminalColumn(): HTMLElement {
+	const diff = screen.getByTestId("diff");
+	let column = screen.getByTestId("pane-1");
+	while (column.parentElement && !column.parentElement.contains(diff))
+		column = column.parentElement;
+	return column;
+}
+
+function openDiff() {
+	fireEvent.click(screen.getByRole("button", { name: "open diff" }));
+}
+
+describe("SessionArea last message beside the diff panel", () => {
+	it("stays within the terminal column so the diff toolbar keeps its controls", () => {
+		renderWithTopBar(
+			true,
+			[barSession({ lastUserMessage: "fix the failing test" })],
+			"1",
+		);
+
+		openDiff();
+
+		const column = terminalColumn();
+		expect(column.contains(screen.getByTestId("session-last-message"))).toBe(
+			true,
+		);
+		expect(column.contains(screen.getByTestId("diff"))).toBe(false);
+	});
+
+	it("goes away with the terminal when the diff fills the area", () => {
+		renderWithTopBar(
+			true,
+			[barSession({ lastUserMessage: "fix the failing test" })],
+			"1",
+		);
+
+		openDiff();
+		fireEvent.click(screen.getByRole("button", { name: "toggle mode" }));
+
+		const column = terminalColumn();
+		expect(column.contains(screen.getByTestId("session-last-message"))).toBe(
+			true,
+		);
+		expect(getComputedStyle(column).display).toBe("none");
+	});
+
+	it("sits over the terminal rather than beside the top bar", () => {
+		renderWithTopBar(
+			true,
+			[barSession({ lastUserMessage: "fix the failing test" })],
+			"1",
+		);
+
+		openDiff();
+
+		const readout = screen.getByTestId("session-last-message");
+		expect(getComputedStyle(readout).top).toBe("0px");
+		expect(getComputedStyle(readout).right).toBe("0px");
 	});
 });
 

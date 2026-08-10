@@ -1,12 +1,9 @@
 import Box from "@mui/material/Box";
 import { ActiveSessionTopBar } from "./ActiveSessionTopBar";
-import {
-	type SendPrDecision,
-	SessionPreviewSplit,
-} from "./SessionPreviewSplit";
+import type { SendPrDecision } from "./SessionPreviewSplit";
 import { SessionDiffSplit } from "./SessionDiffSplit";
-import { SessionLastMessage } from "./SessionLastMessage";
-import { TerminalArea, type TerminalAreaProps } from "./TerminalArea";
+import { SessionTerminalColumn } from "./SessionTerminalColumn";
+import type { TerminalAreaProps } from "./TerminalArea";
 import { TranscriptArea } from "./TranscriptArea";
 import type { SessionListHandlers, Transcript } from "./types";
 import { useTopBarLayoutContext } from "./useTopBarLayoutContext";
@@ -18,7 +15,7 @@ const areaSx = {
 	flexDirection: "column",
 } as const;
 
-const topBarAnchorSx = { position: "relative", flexShrink: 0 } as const;
+const topBarSx = { flexShrink: 0 } as const;
 
 export function SessionArea({
 	viewingTranscriptSessionId,
@@ -49,9 +46,8 @@ export function SessionArea({
 	return (
 		<Box sx={areaSx}>
 			{topBar && activeSession !== undefined && (
-				<Box sx={topBarAnchorSx}>
+				<Box sx={topBarSx}>
 					<ActiveSessionTopBar session={activeSession} lifecycle={lifecycle} />
-					<SessionLastMessage message={activeSession.lastUserMessage} />
 				</Box>
 			)}
 			<SessionDiffSplit
@@ -59,12 +55,12 @@ export function SessionArea({
 				sessions={terminal.sessions}
 				sendInput={terminal.sendInput}
 			>
-				<SessionPreviewSplit
-					session={activeSession}
+				<SessionTerminalColumn
+					{...terminal}
+					activeSession={activeSession}
 					sendPrDecision={sendPrDecision}
-				>
-					<TerminalArea {...terminal} />
-				</SessionPreviewSplit>
+					showLastMessage={topBar}
+				/>
 			</SessionDiffSplit>
 		</Box>
 	);

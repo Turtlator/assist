@@ -6,7 +6,7 @@ const aboveTerminalOverlays = 20;
 
 const baseSx = {
 	position: "absolute",
-	top: "100%",
+	top: 0,
 	right: 0,
 	width: { xs: "60%", md: "33%" },
 	px: 2,
