@@ -1,3 +1,10 @@
+## [0.558.1](https://github.com/staff0rd/assist/compare/v0.558.0...v0.558.1) (2026-08-10)
+
+
+### Bug Fixes
+
+* keep last prompt over the terminal ([9349fd3](https://github.com/staff0rd/assist/commit/9349fd3c53a1a9d467ed8463e96f70e770fffc2d))
+
 # [0.558.0](https://github.com/staff0rd/assist/compare/v0.557.6...v0.558.0) (2026-08-10)
 
 
