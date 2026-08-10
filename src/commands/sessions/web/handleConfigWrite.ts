@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { respondJson } from "../../../shared/web";
 import type { ConfigWriteScope } from "../../config/ConfigWriteScope";
 import { parseConfigWriteRequest } from "./parseConfigWriteRequest";
+import { toGitCwd } from "./toGitCwd";
 
 type ConfigWriteRequest = {
 	key: string;
@@ -26,7 +27,7 @@ export async function handleConfigWrite(
 	}
 
 	try {
-		const result = apply(parsed);
+		const result = apply({ ...parsed, cwd: toGitCwd(parsed.cwd) });
 		if (!result.ok) {
 			respondJson(res, 400, {
 				error: result.errors.join("\n"),
