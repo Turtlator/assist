@@ -19,7 +19,14 @@ export function isHello(msg: Record<string, unknown>): msg is Hello {
 }
 
 export function helloCompatible(msg: Hello): boolean {
-	if (typeof msg.protocol === "number")
-		return msg.protocol === PROTOCOL_VERSION;
+	if (protocolMismatched(msg)) return false;
 	return msg.version === ASSIST_VERSION;
+}
+
+export function helloMismatchKind(msg: Hello): "protocol" | "version" {
+	return protocolMismatched(msg) ? "protocol" : "version";
+}
+
+function protocolMismatched(msg: Hello): boolean {
+	return typeof msg.protocol === "number" && msg.protocol !== PROTOCOL_VERSION;
 }

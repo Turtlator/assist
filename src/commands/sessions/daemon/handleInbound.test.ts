@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ASSIST_VERSION } from "./buildHello";
+import { ASSIST_VERSION, PROTOCOL_VERSION } from "./buildHello";
 import { recentDaemonLogLines, setDaemonLogSink } from "./daemonLog";
 import { handleInbound } from "./handleInbound";
 import { createState } from "./WindowsProxyState";
@@ -103,8 +103,72 @@ describe("handleInbound version-check escape hatch", () => {
 		const { state, onVersionMismatch } = stateWithMismatchSpy();
 		handleInbound(
 			state,
-			JSON.stringify({ type: "hello", version: ASSIST_VERSION }),
+			JSON.stringify({
+				type: "hello",
+				version: ASSIST_VERSION,
+				protocol: PROTOCOL_VERSION,
+			}),
 		);
 		expect(onVersionMismatch).not.toHaveBeenCalled();
+	});
+});
+
+describe("handleInbound version-only skew", () => {
+	beforeEach(() => {
+		vi.spyOn(console, "log").mockImplementation(() => {});
+		setDaemonLogSink(() => {});
+		versionCheck.mode = "block";
+	});
+
+	function sendSkew(state: ReturnType<typeof createState>): void {
+		handleInbound(
+			state,
+			JSON.stringify({
+				type: "hello",
+				version: "0.0.0-behind",
+				protocol: PROTOCOL_VERSION,
+			}),
+		);
+	}
+
+	function stateWithMismatchSpy() {
+		const onVersionMismatch = vi.fn();
+		const state = createState(
+			() => {},
+			() => {},
+			onVersionMismatch,
+		);
+		return { state, onVersionMismatch };
+	}
+
+	it("triggers the heal path and logs a version mismatch under block", () => {
+		const { state, onVersionMismatch } = stateWithMismatchSpy();
+		sendSkew(state);
+		expect(onVersionMismatch).toHaveBeenCalledWith("0.0.0-behind");
+		expect(
+			recentDaemonLogLines().some((l) =>
+				l.includes("windows daemon version mismatch"),
+			),
+		).toBe(true);
+	});
+
+	it("proceeds with a warning under warn", () => {
+		versionCheck.mode = "warn";
+		const { state, onVersionMismatch } = stateWithMismatchSpy();
+		sendSkew(state);
+		expect(onVersionMismatch).not.toHaveBeenCalled();
+		expect(
+			recentDaemonLogLines().some((l) => l.includes("proceeding with warning")),
+		).toBe(true);
+	});
+
+	it("skips the check entirely under off", () => {
+		versionCheck.mode = "off";
+		const { state, onVersionMismatch } = stateWithMismatchSpy();
+		sendSkew(state);
+		expect(onVersionMismatch).not.toHaveBeenCalled();
+		expect(
+			recentDaemonLogLines().some((l) => l.includes("check disabled")),
+		).toBe(true);
 	});
 });

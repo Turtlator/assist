@@ -1,6 +1,7 @@
 import {
 	ASSIST_VERSION,
 	helloCompatible,
+	helloMismatchKind,
 	isHello,
 	PROTOCOL_VERSION,
 } from "./buildHello";
@@ -13,19 +14,20 @@ type Msg = Record<string, unknown>;
 export function handleHello(state: WindowsProxyState, msg: Msg): void {
 	if (!isHello(msg) || helloCompatible(msg)) return;
 	const mode = windowsVersionCheck();
+	const mismatch = `windows daemon ${helloMismatchKind(msg)} mismatch`;
 	const detail = `protocol ${msg.protocol ?? "legacy"} version ${msg.version} (wsl protocol ${PROTOCOL_VERSION} version ${ASSIST_VERSION})`;
 	if (mode === "off") {
 		daemonLog(
-			`windows daemon protocol mismatch: ${detail}; check disabled (sessions.windowsVersionCheck=off), proceeding`,
+			`${mismatch}: ${detail}; check disabled (sessions.windowsVersionCheck=off), proceeding`,
 		);
 		return;
 	}
 	if (mode === "warn") {
 		daemonLog(
-			`windows daemon protocol mismatch: ${detail}; proceeding with warning (sessions.windowsVersionCheck=warn)`,
+			`${mismatch}: ${detail}; proceeding with warning (sessions.windowsVersionCheck=warn)`,
 		);
 		return;
 	}
-	daemonLog(`windows daemon protocol mismatch: ${detail}`);
+	daemonLog(`${mismatch}: ${detail}`);
 	state.onVersionMismatch(msg.version);
 }

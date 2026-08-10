@@ -3,6 +3,7 @@ import {
 	ASSIST_VERSION,
 	buildHello,
 	helloCompatible,
+	helloMismatchKind,
 	isHello,
 	PROTOCOL_VERSION,
 } from "./buildHello";
@@ -41,14 +42,24 @@ describe("isHello", () => {
 });
 
 describe("helloCompatible", () => {
-	it("matches on protocol regardless of differing app versions", () => {
+	it("accepts a peer matching on both protocol and version", () => {
+		expect(
+			helloCompatible({
+				type: "hello",
+				version: ASSIST_VERSION,
+				protocol: PROTOCOL_VERSION,
+			}),
+		).toBe(true);
+	});
+
+	it("rejects a differing app version even when the protocol matches", () => {
 		expect(
 			helloCompatible({
 				type: "hello",
 				version: "9.9.9-different",
 				protocol: PROTOCOL_VERSION,
 			}),
-		).toBe(true);
+		).toBe(false);
 	});
 
 	it("rejects a genuinely different protocol", () => {
@@ -67,6 +78,34 @@ describe("helloCompatible", () => {
 		);
 		expect(helloCompatible({ type: "hello", version: "0.0.0-old" })).toBe(
 			false,
+		);
+	});
+});
+
+describe("helloMismatchKind", () => {
+	it("names a version-only skew", () => {
+		expect(
+			helloMismatchKind({
+				type: "hello",
+				version: "0.0.0-old",
+				protocol: PROTOCOL_VERSION,
+			}),
+		).toBe("version");
+	});
+
+	it("names a protocol skew", () => {
+		expect(
+			helloMismatchKind({
+				type: "hello",
+				version: "0.0.0-old",
+				protocol: PROTOCOL_VERSION + 1,
+			}),
+		).toBe("protocol");
+	});
+
+	it("names a legacy peer's skew as a version skew", () => {
+		expect(helloMismatchKind({ type: "hello", version: "0.0.0-old" })).toBe(
+			"version",
 		);
 	});
 });

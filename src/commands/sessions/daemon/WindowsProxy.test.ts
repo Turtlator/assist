@@ -349,28 +349,37 @@ describe("WindowsProxy", () => {
 	it("logs a warning on protocol mismatch", async () => {
 		const log = vi.spyOn(console, "log").mockImplementation(() => {});
 		await createWindowsSession();
-		daemon.send({ type: "hello", version: "0.0.0-mismatch" });
+		daemon.send({
+			type: "hello",
+			version: "0.0.0-mismatch",
+			protocol: PROTOCOL_VERSION + 1,
+		});
 		await waitFor(() =>
 			log.mock.calls.some((c) => String(c[0]).includes("protocol mismatch")),
 		);
 		log.mockRestore();
 	});
 
-	it("does not heal when the protocol matches despite a differing app version", async () => {
+	it("heals a version-only skew where the protocol still matches", async () => {
+		const log = vi.spyOn(console, "log").mockImplementation(() => {});
 		await createWindowsSession();
 		await waitFor(() => daemon.received.some((l) => l.includes('"hello"')));
+		const before = daemon.received.length;
 
 		daemon.send({
 			type: "hello",
 			version: "0.0.0-different",
 			protocol: PROTOCOL_VERSION,
 		});
-		await settle();
 
-		expect(heal).not.toHaveBeenCalled();
+		await waitFor(() => heal.mock.calls.length === 1);
+		await waitFor(() =>
+			daemon.received.slice(before).some((l) => l.includes('"hello"')),
+		);
 		expect(
-			broadcasts.some((m) => (m as { type?: string }).type === "error"),
-		).toBe(false);
+			log.mock.calls.some((c) => String(c[0]).includes("version mismatch")),
+		).toBe(true);
+		log.mockRestore();
 	});
 
 	it("auto-heals and reconnects on version mismatch", async () => {
