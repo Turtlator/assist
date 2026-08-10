@@ -1,3 +1,10 @@
+## [0.557.3](https://github.com/staff0rd/assist/compare/v0.557.2...v0.557.3) (2026-08-10)
+
+
+### Bug Fixes
+
+* keep tests out of the real store ([816991c](https://github.com/staff0rd/assist/commit/816991c6cc3ff5a71eedee4b5e8c7332280e249b))
+
 ## [0.557.2](https://github.com/staff0rd/assist/compare/v0.557.1...v0.557.2) (2026-08-10)
 
 
