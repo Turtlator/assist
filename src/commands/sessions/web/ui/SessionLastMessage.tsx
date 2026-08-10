@@ -17,7 +17,7 @@ const baseSx = {
 	borderBottom: 1,
 	borderColor: "divider",
 	borderBottomLeftRadius: 1,
-	fontSize: "0.875rem",
+	fontSize: "1rem",
 	lineHeight: 1.4,
 } as const;
 
