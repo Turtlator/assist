@@ -1,3 +1,10 @@
+# [0.563.0](https://github.com/staff0rd/assist/compare/v0.562.1...v0.563.0) (2026-08-10)
+
+
+### Features
+
+* announce windows host heal finish ([8b66755](https://github.com/staff0rd/assist/commit/8b66755cd483a80948d4da3a9887d75b3c77646c))
+
 ## [0.562.1](https://github.com/staff0rd/assist/compare/v0.562.0...v0.562.1) (2026-08-10)
 
 
