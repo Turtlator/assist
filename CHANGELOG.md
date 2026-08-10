@@ -1,3 +1,16 @@
+# [0.561.0](https://github.com/staff0rd/assist/compare/v0.560.0...v0.561.0) (2026-08-10)
+
+
+### Bug Fixes
+
+* revert comments reordering in backlog show ([6b1eb61](https://github.com/staff0rd/assist/commit/6b1eb6167f0cde8c5cf11c8d46f56ef608e66a2c))
+
+
+### Features
+
+* PR preview chip tracks draft toggle ([b1f3562](https://github.com/staff0rd/assist/commit/b1f3562e137ba95395d4c1df414d093681a6a5ca))
+* resolve session ref metadata ([3c9332a](https://github.com/staff0rd/assist/commit/3c9332a4c501851bb2fdbeaacece370cea346b0e))
+
 # [0.560.0](https://github.com/staff0rd/assist/compare/v0.559.0...v0.560.0) (2026-08-10)
 
 
