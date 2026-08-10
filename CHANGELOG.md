@@ -1,3 +1,10 @@
+# [0.558.0](https://github.com/staff0rd/assist/compare/v0.557.6...v0.558.0) (2026-08-10)
+
+
+### Features
+
+* add PR checkout-only option ([7ebd2ea](https://github.com/staff0rd/assist/commit/7ebd2eadc68ede4677f2af4aae7bb4774c250a0e))
+
 ## [0.557.6](https://github.com/staff0rd/assist/compare/v0.557.5...v0.557.6) (2026-08-10)
 
 
