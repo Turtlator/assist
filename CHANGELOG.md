@@ -1,3 +1,10 @@
+## [0.557.6](https://github.com/staff0rd/assist/compare/v0.557.5...v0.557.6) (2026-08-10)
+
+
+### Bug Fixes
+
+* translate Windows cwd in web config API ([3d18596](https://github.com/staff0rd/assist/commit/3d18596d00f620de8113c90817b649ce16521bc9))
+
 ## [0.557.5](https://github.com/staff0rd/assist/compare/v0.557.4...v0.557.5) (2026-08-10)
 
 
