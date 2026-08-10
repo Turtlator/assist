@@ -6,6 +6,9 @@ import type { WindowsProxyState } from "./WindowsProxyState";
 const UNRECOVERABLE_MESSAGE =
 	"Windows host is on an incompatible version that auto-update could not resolve; not reconnecting. Update the Windows host manually, then restart.";
 
+const HEALED_MESSAGE =
+	"Windows host is up to date — you can reselect the repo now.";
+
 /**
  * Decides how the proxy reacts to a version-handshake mismatch: heal once, then
  * — if the gap persists — latch reconnects off so a host that can't be brought
@@ -18,6 +21,7 @@ export class WindowsVersionHealer {
 	private healAttempted = false;
 	private healing = false;
 	private unrecoverable = false;
+	private awaitingConfirmation = false;
 
 	constructor(
 		private readonly conn: WindowsConnection,
@@ -39,6 +43,7 @@ export class WindowsVersionHealer {
 		if (this.healAttempted) return this.giveUp(version);
 		this.healing = true;
 		this.healAttempted = true;
+		this.awaitingConfirmation = true;
 		try {
 			await autoHealWindowsDaemon(this.conn, this.state, this.heal, version);
 		} finally {
@@ -46,8 +51,18 @@ export class WindowsVersionHealer {
 		}
 	}
 
+	onCompatible(): void {
+		if (!this.awaitingConfirmation) return;
+		this.awaitingConfirmation = false;
+		daemonLog(
+			"windows proxy: post-heal handshake compatible; windows host is in step",
+		);
+		this.state.broadcast({ type: "notice", message: HEALED_MESSAGE });
+	}
+
 	private giveUp(version: string): void {
 		this.unrecoverable = true;
+		this.awaitingConfirmation = false;
 		daemonLog(
 			`windows proxy: version mismatch ${version} persists after heal; not reconnecting until the WSL daemon restarts`,
 		);

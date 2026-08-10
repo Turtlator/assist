@@ -5,12 +5,11 @@ import { daemonLog } from "./daemonLog";
 import { defaultConnect } from "./defaultConnect";
 import { discoverWindowsSessions } from "./discoverWindowsSessions";
 import { forwardWindowsCreate } from "./forwardWindowsCreate";
+import { forwardWindowsIo } from "./forwardWindowsIo";
 import { handleInbound } from "./handleInbound";
 import { handleWindowsClose } from "./handleWindowsClose";
 import { healWindowsDaemon } from "./healWindowsDaemon";
 import { isWindowsCreate, isWindowsIo } from "./isWindowsCreate";
-import { logWindowsForward } from "./logWindowsForward";
-import { stripWindowsSessionId } from "./toWindowsSessionId";
 import { WindowsConnection } from "./WindowsConnection";
 import {
 	createState,
@@ -49,6 +48,7 @@ export class WindowsProxy {
 			(msg) => broadcast(clients, msg),
 			onSessionsChanged,
 			(version) => void this.healer.onMismatch(version),
+			() => this.healer.onCompatible(),
 			createTimeoutMs,
 		);
 		this.conn = new WindowsConnection({
@@ -77,7 +77,10 @@ export class WindowsProxy {
 	route(client: SessionClient, data: Msg): boolean {
 		if (!this.enabled) return false;
 		if (isWindowsCreate(data)) return this.routeCreate(client, data);
-		if (isWindowsIo(data)) return this.routeIo(data);
+		if (isWindowsIo(data)) {
+			forwardWindowsIo(this.conn, data);
+			return true;
+		}
 		return false;
 	}
 
@@ -88,13 +91,6 @@ export class WindowsProxy {
 			);
 			sendTo(client, this.healer.refusal());
 		} else void forwardWindowsCreate(this.conn, this.state, client, data);
-		return true;
-	}
-
-	private routeIo(data: Msg): boolean {
-		const sessionId = stripWindowsSessionId(data.sessionId as string);
-		const delivered = this.conn.trySend({ ...data, sessionId });
-		logWindowsForward(delivered, data.type, data.sessionId);
 		return true;
 	}
 

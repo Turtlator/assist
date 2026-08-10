@@ -12,7 +12,11 @@ import type { WindowsProxyState } from "./WindowsProxyState";
 type Msg = Record<string, unknown>;
 
 export function handleHello(state: WindowsProxyState, msg: Msg): void {
-	if (!isHello(msg) || helloCompatible(msg)) return;
+	if (!isHello(msg)) return;
+	if (helloCompatible(msg)) {
+		state.onVersionOk();
+		return;
+	}
 	const mode = windowsVersionCheck();
 	const mismatch = `windows daemon ${helloMismatchKind(msg)} mismatch`;
 	const detail = `protocol ${msg.protocol ?? "legacy"} version ${msg.version} (wsl protocol ${PROTOCOL_VERSION} version ${ASSIST_VERSION})`;

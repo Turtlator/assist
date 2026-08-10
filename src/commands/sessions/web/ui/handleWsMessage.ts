@@ -1,6 +1,8 @@
 import type { RateLimits } from "../../../../shared/RateLimits";
 import { handleClear } from "./handleClear";
 import { handleCreated } from "./handleCreated";
+import { handleError } from "./handleError";
+import { handleNotice } from "./handleNotice";
 import { handleOutput } from "./handleOutput";
 import { handleRunConflict } from "./handleRunConflict";
 import { handleSessions } from "./handleSessions";
@@ -30,12 +32,12 @@ export function handleWsMessage(
 		case "hello":
 			d.setDaemonVersion(msg.version as string);
 			break;
-		case "error": {
-			const message = msg.message as string;
-			d.setError(message);
-			d.failPendingLaunch(message);
+		case "error":
+			handleError(msg, d);
 			break;
-		}
+		case "notice":
+			handleNotice(msg, d);
+			break;
 		case "run-conflict":
 			handleRunConflict(msg, d);
 			break;

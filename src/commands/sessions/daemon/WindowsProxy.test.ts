@@ -11,7 +11,7 @@ import {
 	vi,
 } from "vitest";
 import type { SessionClient } from "./broadcast";
-import { PROTOCOL_VERSION } from "./buildHello";
+import { ASSIST_VERSION, PROTOCOL_VERSION } from "./buildHello";
 import { WindowsProxy } from "./WindowsProxy";
 
 // route() only proxies under WSL; tests run on plain Linux/macOS CI
@@ -499,6 +499,44 @@ describe("WindowsProxy", () => {
 		} finally {
 			Object.defineProperty(process, "platform", { value: original });
 		}
+	});
+
+	it("announces the host is in step once the post-heal handshake passes", async () => {
+		await createWindowsSession();
+		const before = daemon.received.length;
+		daemon.send({ type: "hello", version: "0.0.0-mismatch" });
+		await waitFor(() => heal.mock.calls.length === 1);
+		await waitFor(() =>
+			daemon.received.slice(before).some((l) => l.includes('"hello"')),
+		);
+
+		daemon.send({
+			type: "hello",
+			version: ASSIST_VERSION,
+			protocol: PROTOCOL_VERSION,
+		});
+
+		await waitFor(() =>
+			broadcasts.some((m) => (m as { type: string }).type === "notice"),
+		);
+		expect(
+			broadcasts.find((m) => (m as { type: string }).type === "notice"),
+		).toMatchObject({ message: expect.stringContaining("reselect the repo") });
+	});
+
+	it("stays silent on a compatible handshake when no heal ran", async () => {
+		await createWindowsSession();
+
+		daemon.send({
+			type: "hello",
+			version: ASSIST_VERSION,
+			protocol: PROTOCOL_VERSION,
+		});
+		await settle();
+
+		expect(
+			broadcasts.some((m) => (m as { type: string }).type === "notice"),
+		).toBe(false);
 	});
 
 	it("tells a pending creator to reselect while it heals", async () => {

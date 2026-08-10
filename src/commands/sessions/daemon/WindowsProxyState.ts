@@ -20,12 +20,14 @@ export type WindowsProxyState = {
 	broadcast: (msg: object) => void;
 	onSessionsChanged: () => void;
 	onVersionMismatch: (version: string) => void;
+	onVersionOk: () => void;
 };
 
 export function createState(
 	broadcast: (msg: object) => void,
 	onSessionsChanged: () => void,
 	onVersionMismatch: (version: string) => void,
+	onVersionOk: () => void = () => {},
 	createTimeoutMs: number = DEFAULT_CREATE_TIMEOUT_MS,
 ): WindowsProxyState {
 	return {
@@ -36,6 +38,7 @@ export function createState(
 		broadcast,
 		onSessionsChanged,
 		onVersionMismatch,
+		onVersionOk,
 	};
 }
 
