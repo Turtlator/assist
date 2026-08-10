@@ -1,4 +1,4 @@
-import type { GitRef } from "../types";
+import type { GitRef } from "./types";
 
 export function refLabel(ref: GitRef): string {
 	if (ref.kind === "commit") {
@@ -10,7 +10,7 @@ export function refLabel(ref: GitRef): string {
 		const state = ref.state ? ` (${ref.state.toLowerCase()})` : "";
 		return `#${ref.ref}${title}${state}`;
 	}
-	if (ref.kind === "slack") {
+	if (ref.kind === "slack" || ref.kind === "session") {
 		return ref.title ?? ref.ref;
 	}
 	return ref.ref;

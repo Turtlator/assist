@@ -70,6 +70,7 @@ export const gitRefKindSchema = z.enum([
 	"commit-parent",
 	"pr",
 	"slack",
+	"session",
 ]);
 
 const gitRefSchema = z.strictObject({

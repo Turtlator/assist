@@ -1,7 +1,7 @@
 import { Box, Link, Typography } from "@mui/material";
 import type { GitRef } from "../types";
 import { CommitTimestamp } from "./CommitTimestamp";
-import { refLabel } from "./refLabel";
+import { refLabel } from "../../../refLabel";
 
 const kindSx = {
 	color: "text.secondary",

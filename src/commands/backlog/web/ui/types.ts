@@ -50,7 +50,13 @@ export type Subtask = {
 	status: SubtaskStatus;
 };
 
-type GitRefKind = "branch" | "commit" | "commit-parent" | "pr" | "slack";
+type GitRefKind =
+	| "branch"
+	| "commit"
+	| "commit-parent"
+	| "pr"
+	| "slack"
+	| "session";
 
 export type GitRef = {
 	kind: GitRefKind;

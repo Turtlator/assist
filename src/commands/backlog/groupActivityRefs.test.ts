@@ -7,12 +7,13 @@ function commit(ref: string): GitRef {
 }
 
 describe("groupActivityRefs", () => {
-	it("splits refs into branch, commit, PR, and slack groups", () => {
+	it("splits refs into branch, commit, PR, slack, and session groups", () => {
 		const refs: GitRef[] = [
 			{ kind: "branch", ref: "feature" },
 			commit("aaa"),
 			{ kind: "pr", ref: "42" },
 			{ kind: "slack", ref: "https://slack/thread", title: "My PR" },
+			{ kind: "session", ref: "sess-1", title: "Fix the thing" },
 		];
 
 		const grouped = groupActivityRefs(refs);
@@ -23,7 +24,21 @@ describe("groupActivityRefs", () => {
 		expect(grouped.slacks).toEqual([
 			{ kind: "slack", ref: "https://slack/thread", title: "My PR" },
 		]);
+		expect(grouped.sessions).toEqual([
+			{ kind: "session", ref: "sess-1", title: "Fix the thing" },
+		]);
 		expect(grouped.overflowCommits).toEqual([]);
+	});
+
+	it("orders sessions newest-first", () => {
+		const refs: GitRef[] = [
+			{ kind: "session", ref: "older" },
+			{ kind: "session", ref: "newer" },
+		];
+
+		const grouped = groupActivityRefs(refs);
+
+		expect(grouped.sessions.map((s) => s.ref)).toEqual(["newer", "older"]);
 	});
 
 	it("orders each group newest-first (reversing the oldest-first input)", () => {

@@ -84,6 +84,28 @@ describe("printActivity", () => {
 		expect(out).toContain("https://slack.com/archives/C/p123");
 	});
 
+	it("prints a session ref labelled with its transcript title", () => {
+		printActivity(
+			item([
+				{
+					kind: "session",
+					ref: "0f2a-session-id",
+					title: "Attach sessions to backlog items",
+				},
+			]),
+		);
+
+		const out = output();
+		expect(out).toContain("session");
+		expect(out).toContain("Attach sessions to backlog items");
+	});
+
+	it("prints a session with no transcript title by its bare id", () => {
+		printActivity(item([{ kind: "session", ref: "0f2a-session-id" }]));
+
+		expect(output()).toContain("0f2a-session-id");
+	});
+
 	it("caps the commit list with an overflow indicator", () => {
 		const commits: GitRef[] = Array.from({ length: 13 }, (_, i) => ({
 			kind: "commit",

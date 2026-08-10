@@ -20,7 +20,7 @@ const toggleSx = {
 
 export function ActivitySection({ gitRefs }: { gitRefs: GitRef[] }) {
 	const [expanded, setExpanded] = useState(false);
-	const { branches, commits, overflowCommits, prs, slacks } =
+	const { branches, commits, overflowCommits, prs, slacks, sessions } =
 		groupActivityRefs(gitRefs);
 	const ordered = [
 		...branches,
@@ -28,6 +28,7 @@ export function ActivitySection({ gitRefs }: { gitRefs: GitRef[] }) {
 		...(expanded ? overflowCommits : []),
 		...prs,
 		...slacks,
+		...sessions,
 	];
 	if (ordered.length === 0) return null;
 	return (
