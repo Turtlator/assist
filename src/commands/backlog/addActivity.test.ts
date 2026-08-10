@@ -72,8 +72,6 @@ describe("addActivity", () => {
 		mockResolve.mockReturnValue({
 			path: `/home/dev/.claude/projects/-home-dev-other/${SESSION_ID}.jsonl`,
 			prompt: "Fix the flaky test",
-			firstTimestamp: "2026-08-10T01:00:00.000Z",
-			lastTimestamp: "2026-08-10T01:05:00.000Z",
 		});
 
 		await addActivity("1", "session", SESSION_ID, {});

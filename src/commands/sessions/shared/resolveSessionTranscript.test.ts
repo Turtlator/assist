@@ -33,15 +33,6 @@ function userLine(text: string, timestamp: string) {
 	};
 }
 
-function assistantLine(timestamp: string) {
-	return {
-		type: "assistant",
-		sessionId: SESSION_ID,
-		timestamp,
-		message: { content: [{ type: "text", text: "done" }] },
-	};
-}
-
 describe("resolveSessionTranscript", () => {
 	beforeEach(() => {
 		projectsRoot = mkdtempSync(join(tmpdir(), "session-transcript-"));
@@ -55,15 +46,12 @@ describe("resolveSessionTranscript", () => {
 		mkdirSync(join(projectsRoot, "-home-dev-assist"), { recursive: true });
 		const filePath = writeTranscript("-home-dev-other-repo", SESSION_ID, [
 			userLine("Fix the flaky test", "2026-08-10T01:00:00.000Z"),
-			assistantLine("2026-08-10T01:05:00.000Z"),
 		]);
 
 		const resolved = resolveSessionTranscript(SESSION_ID, projectsRoot);
 
 		expect(resolved?.path).toBe(filePath);
 		expect(resolved?.prompt).toBe("Fix the flaky test");
-		expect(resolved?.firstTimestamp).toBe("2026-08-10T01:00:00.000Z");
-		expect(resolved?.lastTimestamp).toBe("2026-08-10T01:05:00.000Z");
 	});
 
 	it("returns undefined when no transcript exists for the session", () => {
@@ -93,16 +81,40 @@ describe("resolveSessionTranscript", () => {
 		);
 	});
 
-	it("omits metadata a transcript without prompts or timestamps cannot supply", () => {
+	it("names a slash-command session after the command and its args", () => {
 		writeTranscript("-home-dev-assist", SESSION_ID, [
-			{ type: "summary", summary: "no timestamps here" },
+			userLine(
+				"<command-message>bug</command-message>\n<command-name>/bug</command-name>\n<command-args>no hyperlink preview on hover</command-args>",
+				"2026-08-10T02:00:00.000Z",
+			),
+		]);
+
+		expect(resolveSessionTranscript(SESSION_ID, projectsRoot)?.prompt).toBe(
+			"/bug no hyperlink preview on hover",
+		);
+	});
+
+	it("names an argument-free slash-command session after the command", () => {
+		writeTranscript("-home-dev-assist", SESSION_ID, [
+			userLine(
+				"<command-name>/verify</command-name><command-args></command-args>",
+				"2026-08-10T02:00:00.000Z",
+			),
+		]);
+
+		expect(resolveSessionTranscript(SESSION_ID, projectsRoot)?.prompt).toBe(
+			"/verify",
+		);
+	});
+
+	it("omits the prompt a transcript without user messages cannot supply", () => {
+		writeTranscript("-home-dev-assist", SESSION_ID, [
+			{ type: "summary", summary: "no prompts here" },
 		]);
 
 		const resolved = resolveSessionTranscript(SESSION_ID, projectsRoot);
 
 		expect(resolved?.path).toContain(`${SESSION_ID}.jsonl`);
 		expect(resolved?.prompt).toBeUndefined();
-		expect(resolved?.firstTimestamp).toBeUndefined();
-		expect(resolved?.lastTimestamp).toBeUndefined();
 	});
 });

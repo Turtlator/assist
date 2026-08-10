@@ -1,15 +1,14 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { readTranscriptHead } from "../summarise/readTranscriptHead";
-import { readTranscriptTail } from "../summarise/readTranscriptTail";
 import { claudeProjectsRoot } from "./claudeProjectsRoot";
 import { extractSessionMeta } from "./extractSessionMeta";
+
+const MAX_PROMPT_LENGTH = 80;
 
 type SessionTranscript = {
 	path: string;
 	prompt?: string;
-	firstTimestamp?: string;
-	lastTimestamp?: string;
 };
 
 export function resolveSessionTranscript(
@@ -19,13 +18,9 @@ export function resolveSessionTranscript(
 	const filePath = findTranscriptFile(sessionId, projectsRoot);
 	if (!filePath) return undefined;
 
-	const meta = extractSessionMeta(splitLines(readTranscriptHead(filePath)));
-	return {
-		path: filePath,
-		prompt: meta.name || undefined,
-		firstTimestamp: meta.timestamp || undefined,
-		lastTimestamp: lastTimestamp(splitLines(readTranscriptTail(filePath))),
-	};
+	const head = readTranscriptHead(filePath);
+	const meta = extractSessionMeta(head ? head.split("\n").filter(Boolean) : []);
+	return { path: filePath, prompt: promptOf(meta) };
 }
 
 function findTranscriptFile(
@@ -45,23 +40,16 @@ function findTranscriptFile(
 	return undefined;
 }
 
-function splitLines(content: string | undefined): string[] {
-	return content ? content.split("\n").filter(Boolean) : [];
-}
-
-function lastTimestamp(lines: string[]): string | undefined {
-	for (const line of lines.reverse()) {
-		const timestamp = timestampOf(line);
-		if (timestamp) return timestamp;
-	}
-	return undefined;
-}
-
-function timestampOf(line: string): string | undefined {
-	try {
-		const entry = JSON.parse(line) as { timestamp?: unknown };
-		return typeof entry.timestamp === "string" ? entry.timestamp : undefined;
-	} catch {
-		return undefined;
-	}
+function promptOf(meta: {
+	name: string;
+	commandName: string;
+	commandArgs: string;
+}): string | undefined {
+	if (meta.name) return meta.name;
+	if (!meta.commandName) return undefined;
+	const command = `/${meta.commandName}`;
+	const rendered = meta.commandArgs
+		? `${command} ${meta.commandArgs}`
+		: command;
+	return rendered.slice(0, MAX_PROMPT_LENGTH);
 }
