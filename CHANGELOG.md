@@ -1,3 +1,10 @@
+## [0.557.2](https://github.com/staff0rd/assist/compare/v0.557.1...v0.557.2) (2026-08-10)
+
+
+### Bug Fixes
+
+* raise last message above xterm layers ([a3a4c7f](https://github.com/staff0rd/assist/commit/a3a4c7f64508a3e28194d3222451826ce7966422))
+
 ## [0.557.1](https://github.com/staff0rd/assist/compare/v0.557.0...v0.557.1) (2026-08-10)
 
 
