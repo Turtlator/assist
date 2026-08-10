@@ -12,9 +12,9 @@ const key = (sessionId: string) => `${PREFIX}${sessionId}`;
 
 export function loadPersistedPrChain(
 	sessionId: string | undefined,
-): PrPreviewChain | undefined {
+): Partial<PrPreviewChain> | undefined {
 	if (!sessionId) return undefined;
-	return loadPersisted<PrPreviewChain>(key(sessionId))[0];
+	return loadPersisted<Partial<PrPreviewChain>>(key(sessionId))[0];
 }
 
 export function savePersistedPrChain(

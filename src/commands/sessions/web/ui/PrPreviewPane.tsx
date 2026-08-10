@@ -32,7 +32,15 @@ export function PrPreviewPane({
 	) => void;
 }) {
 	const isPr = preview.kind !== "backlog-item";
-	const pane = usePrPane(preview.requestId, sessionId, cwd, onDecision, isPr);
+	const newPr = isPr && preview.prNumber === null;
+	const pane = usePrPane(
+		preview.requestId,
+		sessionId,
+		cwd,
+		onDecision,
+		isPr,
+		preview.draft === true,
+	);
 
 	return (
 		<Box sx={paneSx} onDrop={pane.onDrop} onDragOver={pane.onDragOver}>
@@ -48,6 +56,7 @@ export function PrPreviewPane({
 				onAdd={pane.onAdd}
 				onCancel={pane.onCancel}
 				chain={isPr ? pane.chain : undefined}
+				newPr={newPr}
 				onChainChange={pane.setChain}
 			/>
 		</Box>

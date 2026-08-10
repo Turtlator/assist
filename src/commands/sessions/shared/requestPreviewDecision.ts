@@ -1,9 +1,7 @@
 import { connectToDaemon } from "../daemon/connectToDaemon";
 import { readSocketLines } from "../daemon/readSocketLines";
-import {
-	type PreviewDecision,
-	parsePreviewDecision,
-} from "./parsePreviewDecision";
+import { parsePreviewDecision } from "./parsePreviewDecision";
+import type { PreviewDecision } from "./PreviewDecision";
 import type { PreviewItemType, PreviewKind } from "./SessionInfoBase";
 
 export type PreviewRequest = {

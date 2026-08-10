@@ -5,6 +5,7 @@ import { PrPreviewChainToggles } from "./PrPreviewChainToggles";
 export function PrPreviewActions({
 	commentCount,
 	chain,
+	newPr,
 	onChainChange,
 	onApprove,
 	onReject,
@@ -12,6 +13,7 @@ export function PrPreviewActions({
 }: {
 	commentCount: number;
 	chain?: PrPreviewChain;
+	newPr: boolean;
 	onChainChange: (chain: PrPreviewChain) => void;
 	onApprove: () => void;
 	onReject: () => void;
@@ -24,7 +26,11 @@ export function PrPreviewActions({
 			sx={{ p: 2, alignItems: "center", justifyContent: "flex-end" }}
 		>
 			{chain && (
-				<PrPreviewChainToggles chain={chain} onChange={onChainChange} />
+				<PrPreviewChainToggles
+					chain={chain}
+					newPr={newPr}
+					onChange={onChainChange}
+				/>
 			)}
 			<Button color="error" variant="outlined" onClick={onReject}>
 				Reject

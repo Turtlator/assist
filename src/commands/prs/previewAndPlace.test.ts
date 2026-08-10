@@ -14,6 +14,7 @@ vi.mock("../sessions/shared/requestPreviewDecision", () => ({
 		requestPrDecisionMock(...args),
 }));
 
+import { buildCreateArgs, type CreateOptions } from "./buildCreateArgs";
 import { previewAndPlace } from "./previewAndPlace";
 
 const args = {
@@ -71,6 +72,59 @@ describe("previewAndPlace", () => {
 		expect(requestPrDecisionMock).toHaveBeenCalledWith(
 			expect.objectContaining({ draft: false }),
 		);
+	});
+
+	describe("the reviewer's draft choice", () => {
+		const placedArgs = () =>
+			buildCreateArgs("t", "b", placePrMock.mock.calls[0][3] as CreateOptions);
+
+		it("adds --draft when the reviewer ticked Draft on a ready PR", async () => {
+			requestPrDecisionMock.mockResolvedValue({
+				decision: "approve",
+				draft: true,
+			});
+
+			await previewAndPlace({ ...args, options: { draft: false } });
+
+			expect(placedArgs()).toContain("--draft");
+		});
+
+		it("omits --draft when the reviewer unticked Draft on a draft PR", async () => {
+			requestPrDecisionMock.mockResolvedValue({
+				decision: "approve",
+				draft: false,
+			});
+
+			await previewAndPlace({ ...args, options: { draft: true } });
+
+			expect(placedArgs()).not.toContain("--draft");
+		});
+
+		it("keeps the CLI-resolved draft state when the decision carries no draft field", async () => {
+			requestPrDecisionMock.mockResolvedValue({ decision: "approve" });
+
+			await previewAndPlace({ ...args, options: { draft: true } });
+
+			expect(placedArgs()).toContain("--draft");
+		});
+
+		it("leaves the other create options alone when overriding draft", async () => {
+			requestPrDecisionMock.mockResolvedValue({
+				decision: "approve",
+				draft: true,
+			});
+
+			await previewAndPlace({
+				...args,
+				options: { draft: false, base: "main", reviewer: ["someone"] },
+			});
+
+			expect(placePrMock).toHaveBeenCalledWith(null, "t", "## What\n\nx", {
+				draft: true,
+				base: "main",
+				reviewer: ["someone"],
+			});
+		});
 	});
 
 	describe("chaining after the PR is placed", () => {

@@ -1,4 +1,4 @@
-import type { PreviewDecision } from "./parsePreviewDecision";
+import type { PreviewDecision } from "./PreviewDecision";
 import { reportPreviewRejection } from "./reportPreviewRejection";
 import {
 	type PreviewRequest,

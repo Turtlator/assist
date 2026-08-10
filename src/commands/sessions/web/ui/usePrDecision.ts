@@ -20,17 +20,19 @@ export function usePrDecision(
 	sessionId: string | undefined,
 	onDecision: OnDecision,
 	isPr: boolean,
+	resolvedDraft: boolean,
 	screenshotMarkdown: () => string[],
 ) {
 	const [chain, setChain] = useState<PrPreviewChain>(() => {
-		if (!isPr) return { reviewAfter: false, announceAfter: false };
+		if (!isPr)
+			return { reviewAfter: false, announceAfter: false, draft: false };
 		prunePersistedPrChains();
-		return (
-			loadPersistedPrChain(sessionId) ?? {
-				reviewAfter: true,
-				announceAfter: true,
-			}
-		);
+		const saved = loadPersistedPrChain(sessionId);
+		return {
+			reviewAfter: saved?.reviewAfter ?? true,
+			announceAfter: saved?.announceAfter ?? true,
+			draft: saved?.draft ?? resolvedDraft,
+		};
 	});
 
 	const chooseChain = (next: PrPreviewChain) => {
@@ -50,6 +52,7 @@ export function usePrDecision(
 			screenshots: approved ? screenshotMarkdown() : [],
 			reviewAfter: approved && chain.reviewAfter,
 			announceAfter: approved && chain.announceAfter,
+			draft: chain.draft,
 		});
 	};
 

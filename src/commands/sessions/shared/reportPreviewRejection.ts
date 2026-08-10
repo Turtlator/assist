@@ -1,4 +1,4 @@
-import type { PreviewDecision } from "./parsePreviewDecision";
+import type { PreviewDecision } from "./PreviewDecision";
 
 export function reportPreviewRejection(
 	subject: string,

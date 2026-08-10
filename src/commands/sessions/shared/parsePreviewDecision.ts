@@ -1,53 +1,21 @@
-import type { PrPreviewComment } from "./SessionInfoBase";
-
-export type PreviewDecision = {
-	decision: "approve" | "reject";
-	reason?: string;
-	comments?: PrPreviewComment[];
-	screenshots?: string[];
-	reviewAfter?: boolean;
-	announceAfter?: boolean;
-};
+import type { PreviewDecision } from "./PreviewDecision";
+import { type DecisionMessage, toPreviewDecision } from "./toPreviewDecision";
 
 type Incoming =
 	| { kind: "decision"; decision: PreviewDecision }
 	| { kind: "error"; message: string };
-
-type IncomingMessage = {
-	type?: string;
-	requestId?: string;
-	decision?: PreviewDecision["decision"];
-	reason?: string;
-	comments?: PrPreviewComment[];
-	screenshots?: string[];
-	reviewAfter?: boolean;
-	announceAfter?: boolean;
-	message?: string;
-};
 
 export function parsePreviewDecision(
 	line: string,
 	requestId: string,
 ): Incoming | null {
 	try {
-		const msg = JSON.parse(line) as IncomingMessage;
+		const msg = JSON.parse(line) as DecisionMessage;
 		if (msg.type === "error" && (msg.message ?? "").includes("pr-preview"))
 			return { kind: "error", message: msg.message ?? "pr-preview failed" };
 		if (msg.type !== "pr-decision" || msg.requestId !== requestId) return null;
-		if (msg.decision !== "approve" && msg.decision !== "reject") return null;
-		return {
-			kind: "decision",
-			decision: {
-				decision: msg.decision,
-				reason: msg.reason,
-				comments: Array.isArray(msg.comments) ? msg.comments : undefined,
-				screenshots: Array.isArray(msg.screenshots)
-					? msg.screenshots
-					: undefined,
-				reviewAfter: msg.reviewAfter === true,
-				announceAfter: msg.announceAfter === true,
-			},
-		};
+		const decision = toPreviewDecision(msg);
+		return decision ? { kind: "decision", decision } : null;
 	} catch {
 		return null;
 	}

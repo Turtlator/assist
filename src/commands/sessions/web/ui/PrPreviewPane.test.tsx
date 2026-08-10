@@ -115,6 +115,7 @@ describe("PrPreviewPane inline comments", () => {
 			screenshots: [],
 			reviewAfter: false,
 			announceAfter: false,
+			draft: false,
 		});
 	});
 
@@ -165,6 +166,7 @@ describe("PrPreviewPane inline comments", () => {
 			screenshots: [],
 			reviewAfter: true,
 			announceAfter: true,
+			draft: false,
 		});
 
 		fireEvent.click(screen.getByRole("button", { name: "Reject" }));
@@ -173,6 +175,7 @@ describe("PrPreviewPane inline comments", () => {
 			screenshots: [],
 			reviewAfter: false,
 			announceAfter: false,
+			draft: false,
 		});
 	});
 
@@ -334,6 +337,116 @@ describe("PrPreviewPane inline comments", () => {
 		});
 	});
 
+	describe("Draft toggle", () => {
+		const toggle = (label: string) =>
+			screen.getByLabelText(label) as HTMLInputElement;
+		const approve = () =>
+			fireEvent.click(screen.getByRole("button", { name: "Approve" }));
+
+		const readyPr: PrPreview = { ...preview, draft: false };
+		const draftPr: PrPreview = { ...preview, draft: true };
+
+		it("starts unchecked for a PR the CLI resolved as ready", () => {
+			render(<PrPreviewPane preview={readyPr} onDecision={vi.fn()} />);
+
+			expect(toggle("Draft").checked).toBe(false);
+		});
+
+		it("starts checked for a PR the CLI resolved as a draft", () => {
+			render(<PrPreviewPane preview={draftPr} onDecision={vi.fn()} />);
+
+			expect(toggle("Draft").checked).toBe(true);
+		});
+
+		it("approves a ready PR as a draft once ticked", () => {
+			const onDecision = vi.fn();
+			render(<PrPreviewPane preview={readyPr} onDecision={onDecision} />);
+
+			fireEvent.click(toggle("Draft"));
+			approve();
+
+			expect(onDecision).toHaveBeenCalledWith(
+				"approve",
+				expect.objectContaining({ draft: true }),
+			);
+		});
+
+		it("approves a resolved draft as ready once unticked", () => {
+			const onDecision = vi.fn();
+			render(<PrPreviewPane preview={draftPr} onDecision={onDecision} />);
+
+			fireEvent.click(toggle("Draft"));
+			approve();
+
+			expect(onDecision).toHaveBeenCalledWith(
+				"approve",
+				expect.objectContaining({ draft: false }),
+			);
+		});
+
+		it("is absent on an update to an existing PR", () => {
+			render(
+				<PrPreviewPane
+					preview={{ ...preview, prNumber: 42 }}
+					onDecision={vi.fn()}
+				/>,
+			);
+
+			expect(screen.queryByLabelText("Draft")).toBeNull();
+			expect(toggle("Review").checked).toBe(true);
+			expect(toggle("Post").checked).toBe(true);
+		});
+
+		const retry: PrPreview = { ...readyPr, requestId: "r2" };
+
+		it("remembers a manual tick across a reject and re-raise", () => {
+			const first = render(
+				<PrPreviewPane preview={readyPr} sessionId="s1" onDecision={vi.fn()} />,
+			);
+			fireEvent.click(toggle("Draft"));
+			fireEvent.click(screen.getByRole("button", { name: "Reject" }));
+			first.unmount();
+
+			render(
+				<PrPreviewPane preview={retry} sessionId="s1" onDecision={vi.fn()} />,
+			);
+
+			expect(toggle("Draft").checked).toBe(true);
+		});
+
+		it("falls back to the resolved state once the preview is approved", () => {
+			const first = render(
+				<PrPreviewPane preview={readyPr} sessionId="s1" onDecision={vi.fn()} />,
+			);
+			fireEvent.click(toggle("Draft"));
+			approve();
+			first.unmount();
+
+			render(
+				<PrPreviewPane preview={retry} sessionId="s1" onDecision={vi.fn()} />,
+			);
+
+			expect(toggle("Draft").checked).toBe(false);
+		});
+
+		it("uses the resolved state when a stored chain predates the Draft toggle", () => {
+			localStorage.setItem(
+				"assist:pr-preview-chain:s1",
+				JSON.stringify({
+					savedAt: Date.now() - 60 * 60 * 1000,
+					items: [{ reviewAfter: false, announceAfter: true }],
+				}),
+			);
+
+			render(
+				<PrPreviewPane preview={draftPr} sessionId="s1" onDecision={vi.fn()} />,
+			);
+
+			expect(toggle("Draft").checked).toBe(true);
+			expect(toggle("Review").checked).toBe(false);
+		});
+	});
+
 	it("restores persisted comments after a remount (page refresh)", () => {
 		const first = render(
 			<PrPreviewPane preview={preview} onDecision={vi.fn()} />,
@@ -482,6 +595,7 @@ describe("PrPreviewPane inline comments", () => {
 			screenshots: [],
 			reviewAfter: false,
 			announceAfter: false,
+			draft: false,
 		});
 
 		fireEvent.click(screen.getByRole("button", { name: "Approve" }));
@@ -490,6 +604,7 @@ describe("PrPreviewPane inline comments", () => {
 			screenshots: ["![shot](https://x/y.png)"],
 			reviewAfter: true,
 			announceAfter: true,
+			draft: false,
 		});
 	});
 
@@ -554,6 +669,7 @@ describe("PrPreviewPane inline comments", () => {
 				screenshots: [],
 				reviewAfter: false,
 				announceAfter: false,
+				draft: false,
 			});
 		});
 
@@ -562,6 +678,7 @@ describe("PrPreviewPane inline comments", () => {
 
 			expect(screen.queryByLabelText("Review")).toBeNull();
 			expect(screen.queryByLabelText("Post")).toBeNull();
+			expect(screen.queryByLabelText("Draft")).toBeNull();
 		});
 	});
 

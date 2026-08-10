@@ -22,8 +22,12 @@ export async function previewAndPlace(args: {
 	});
 
 	const body = appendScreenshots(args.body, decision.screenshots ?? []);
+	const options =
+		decision.draft === undefined
+			? args.options
+			: { ...args.options, draft: decision.draft };
 
-	await placePr(args.prNumber, args.title, body, args.options);
+	await placePr(args.prNumber, args.title, body, options);
 
 	await chainAfterRaise(args.prNumber, decision);
 }

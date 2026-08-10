@@ -16,6 +16,7 @@ export function PrPreviewFooter({
 	onCancel,
 	onDecision,
 	chain,
+	newPr,
 	onChainChange,
 }: {
 	comments: LocalComment[];
@@ -29,6 +30,7 @@ export function PrPreviewFooter({
 		comments: PrPreviewComment[],
 	) => void;
 	chain?: PrPreviewChain;
+	newPr: boolean;
 	onChainChange: (chain: PrPreviewChain) => void;
 }) {
 	return (
@@ -42,6 +44,7 @@ export function PrPreviewFooter({
 			<PrPreviewActions
 				commentCount={comments.length}
 				chain={chain}
+				newPr={newPr}
 				onChainChange={onChainChange}
 				onApprove={() => onDecision("approve", [])}
 				onReject={() => onDecision("reject", [])}

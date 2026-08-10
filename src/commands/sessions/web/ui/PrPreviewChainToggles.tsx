@@ -7,13 +7,29 @@ const labelSx = { "& .MuiFormControlLabel-label": { fontSize: 12 } } as const;
 
 export function PrPreviewChainToggles({
 	chain,
+	newPr,
 	onChange,
 }: {
 	chain: PrPreviewChain;
+	newPr: boolean;
 	onChange: (chain: PrPreviewChain) => void;
 }) {
 	return (
 		<Stack direction="row" sx={{ mr: "auto" }}>
+			{newPr && (
+				<FormControlLabel
+					control={
+						<Checkbox
+							size="small"
+							checked={chain.draft}
+							onChange={(e) => onChange({ ...chain, draft: e.target.checked })}
+						/>
+					}
+					label="Draft"
+					title="Create the PR as a draft rather than ready for review"
+					sx={labelSx}
+				/>
+			)}
 			<FormControlLabel
 				control={
 					<Checkbox

@@ -17,13 +17,19 @@ export function usePrPane(
 	cwd: string | undefined,
 	onDecision: OnDecision,
 	isPr: boolean,
+	resolvedDraft: boolean,
 ) {
 	const { wrapperRef, contentRef, pending, dragRects, onMouseDown, clear } =
 		usePreviewSelection();
 	const { comments, add, remove } = usePrComments(requestId);
 	const shots = usePaneScreenshots(cwd, isPr);
-	const decision = usePrDecision(requestId, sessionId, onDecision, isPr, () =>
-		shots.screenshots.map((s) => s.markdown),
+	const decision = usePrDecision(
+		requestId,
+		sessionId,
+		onDecision,
+		isPr,
+		resolvedDraft,
+		() => shots.screenshots.map((s) => s.markdown),
 	);
 
 	const { commentColors, dragColor, ranges } = useMemo(
