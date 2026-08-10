@@ -1,3 +1,11 @@
+## [0.562.1](https://github.com/staff0rd/assist/compare/v0.562.0...v0.562.1) (2026-08-10)
+
+
+### Bug Fixes
+
+* drop duplicate transcript tail reader ([ec6c44c](https://github.com/staff0rd/assist/commit/ec6c44c46762d6af14bd82be5feb10f4068fc128))
+* title slash-command session refs ([133a122](https://github.com/staff0rd/assist/commit/133a1228fca5ad698db4823f0c4ca9534d91b9f2))
+
 # [0.562.0](https://github.com/staff0rd/assist/compare/v0.561.0...v0.562.0) (2026-08-10)
 
 
