@@ -1,14 +1,9 @@
 import * as fs from "node:fs";
-import * as os from "node:os";
 import * as path from "node:path";
+import { claudeProjectsRoot, projectSlug } from "./claudeProjectsRoot";
 
 export function projectDirForCwd(cwd: string): string {
-	return path.join(
-		os.homedir(),
-		".claude",
-		"projects",
-		cwd.replace(/[^a-zA-Z0-9]/g, "-"),
-	);
+	return path.join(claudeProjectsRoot(), projectSlug(cwd));
 }
 
 function transcriptPathFor(cwd: string, claudeSessionId: string): string {

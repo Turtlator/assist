@@ -1,8 +1,8 @@
 import * as fs from "node:fs";
-import * as os from "node:os";
 import * as path from "node:path";
 import { readTranscriptHead } from "../summarise/readTranscriptHead";
 import { readTranscriptTail } from "../summarise/readTranscriptTail";
+import { claudeProjectsRoot } from "./claudeProjectsRoot";
 import { extractSessionMeta } from "./extractSessionMeta";
 
 type SessionTranscript = {
@@ -14,7 +14,7 @@ type SessionTranscript = {
 
 export function resolveSessionTranscript(
 	sessionId: string,
-	projectsRoot: string = path.join(os.homedir(), ".claude", "projects"),
+	projectsRoot: string = claudeProjectsRoot(),
 ): SessionTranscript | undefined {
 	const filePath = findTranscriptFile(sessionId, projectsRoot);
 	if (!filePath) return undefined;

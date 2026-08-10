@@ -182,6 +182,7 @@ Backlog item ids are written and displayed in an `a`-prefixed form (e.g. item 55
 - `assist backlog associate-github <id> [issue]` - Associate a GitHub issue (URL or `owner/repo#number`); clears any Jira key on the item. `--clear` removes it
 - `assist backlog add-activity <id> <kind> <ref>` - Attach an activity ref (`branch`, `commit`, `commit-parent`, `pr`, `slack`, `session`); `--title`, `--url`, `--state` override metadata
 - `assist backlog record-slack <url>` - Attach a Slack thread permalink to the current session's item; used by `/prs-slack`
+- `assist backlog record-session <id>` - Attach the Claude session the command runs inside to an item; `--session <sessionId>` overrides detection
 - `assist backlog move-repo <old-origin> [new-origin]` - Retag all items from one origin to another after a repo rename (`-y, --yes` skips the prompt)
 - `assist backlog clone <origin>` - Clone a repo over SSH into `clone.baseDir` (default `~/git`)
 - `assist backlog web [-p, --port <number>] [--no-open]` - Open the backlog tab in the web dashboard (default port 3100)

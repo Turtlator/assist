@@ -1,5 +1,6 @@
 import type { Command } from "commander";
 import { addActivity } from "./addActivity";
+import { recordSession } from "./recordSession";
 import { recordSlack } from "./recordSlack";
 
 export function registerActivityCommands(cmd: Command): void {
@@ -20,4 +21,15 @@ export function registerActivityCommands(cmd: Command): void {
 		)
 		.option("--title <title>", "PR title to label the ref with")
 		.action(recordSlack);
+
+	cmd
+		.command("record-session <id>")
+		.description(
+			"Attach the Claude session this command runs inside to a backlog item",
+		)
+		.option(
+			"--session <sessionId>",
+			"Session id to attach instead of the detected one",
+		)
+		.action(recordSession);
 }
