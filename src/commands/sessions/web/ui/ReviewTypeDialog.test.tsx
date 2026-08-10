@@ -141,7 +141,7 @@ describe("ReviewTypeDialog", () => {
 		expect(onSelect).toHaveBeenCalledWith(["fix-conflict", "--rebase"]);
 	});
 
-	it("lists both fix-conflict items after Address Comments", () => {
+	it("lists both fix-conflict items after Address Comments, below Checkout", () => {
 		render(<ReviewTypeDialog pr={pr} onSelect={vi.fn()} onCancel={vi.fn()} />);
 
 		const items = screen
@@ -151,5 +151,6 @@ describe("ReviewTypeDialog", () => {
 		expect(items.at(-1)).toBe("Fix conflicts (rebase)");
 		expect(items.at(-2)).toBe("Fix conflicts (merge)");
 		expect(items.at(-3)).toBe("Address Comments");
+		expect(items.at(-4)).toBe("Checkout");
 	});
 });

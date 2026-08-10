@@ -6,9 +6,14 @@ const mockMoveToPrCheckoutTree = vi.fn();
 const mockSpawnClaude = vi.fn((_prompt: string, _options?: unknown) => ({
 	done: Promise.resolve(0),
 }));
+const mockEmitActivity = vi.fn();
 
 vi.mock("node:child_process", () => ({
 	execFileSync: (...args: unknown[]) => mockExecFileSync(...args),
+}));
+
+vi.mock("../../shared/emitActivity", () => ({
+	emitActivity: (...args: unknown[]) => mockEmitActivity(...args),
 }));
 
 vi.mock("../../shared/spawnClaude", () => ({
@@ -31,6 +36,7 @@ vi.mock("./reviewPr", () => ({
 const mockExit = vi.spyOn(process, "exit").mockImplementation(() => {
 	throw new Error("process.exit");
 });
+const mockError = vi.spyOn(console, "error").mockImplementation(() => {});
 
 import { review } from "./review";
 
@@ -136,12 +142,34 @@ describe("review", () => {
 			expect(mockReviewPr).not.toHaveBeenCalled();
 		});
 
+		it("should route the checkout through the worktree allocator", async () => {
+			await review({ checkoutOnly: true, number: "123" });
+
+			expect(mockMoveToPrCheckoutTree).toHaveBeenCalled();
+		});
+
 		it("should start an idle Claude session with no prompt", async () => {
 			await review({ checkoutOnly: true, number: "123" });
 
 			const [prompt, options] = mockSpawnClaude.mock.calls[0];
 			expect(prompt).toBe("");
-			expect((options as { sessionId?: string }).sessionId).toBeTruthy();
+			expect(options).toMatchObject({
+				permissionMode: "acceptEdits",
+				sessionId: expect.any(String),
+			});
+		});
+
+		it("should announce the activity under the spawned session's id so the card stays alive", async () => {
+			await review({ checkoutOnly: true, number: "123" });
+
+			const { sessionId } = mockSpawnClaude.mock.calls[0][1] as {
+				sessionId: string;
+			};
+			expect(mockEmitActivity).toHaveBeenCalledWith({
+				kind: "command",
+				name: "review",
+				claudeSessionId: sessionId,
+			});
 		});
 	});
 
@@ -151,6 +179,9 @@ describe("review", () => {
 				"process.exit",
 			);
 			expect(mockExit).toHaveBeenCalledWith(1);
+			expect(mockError).toHaveBeenCalledWith(
+				"Error: --checkout-only requires a PR number.",
+			);
 			expect(mockSpawnClaude).not.toHaveBeenCalled();
 		});
 	});
@@ -163,6 +194,10 @@ describe("review", () => {
 					review({ checkoutOnly: true, number: "123", [flag]: true }),
 				).rejects.toThrow("process.exit");
 				expect(mockExit).toHaveBeenCalledWith(1);
+				expect(mockError).toHaveBeenCalledWith(
+					"Error: --checkout-only cannot be combined with --refine, --apply, --backlog or --submit.",
+				);
+				expect(mockExecFileSync).not.toHaveBeenCalled();
 				expect(mockSpawnClaude).not.toHaveBeenCalled();
 			});
 		},
