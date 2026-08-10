@@ -1,3 +1,10 @@
+## [0.558.3](https://github.com/staff0rd/assist/compare/v0.558.2...v0.558.3) (2026-08-10)
+
+
+### Bug Fixes
+
+* fail handshake on version skew ([03eb39a](https://github.com/staff0rd/assist/commit/03eb39a733ad40a4b709f22acf323427d754d462))
+
 ## [0.558.2](https://github.com/staff0rd/assist/compare/v0.558.1...v0.558.2) (2026-08-10)
 
 
