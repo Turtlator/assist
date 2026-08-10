@@ -1,3 +1,10 @@
+## [0.558.2](https://github.com/staff0rd/assist/compare/v0.558.1...v0.558.2) (2026-08-10)
+
+
+### Bug Fixes
+
+* left-align the last-prompt readout ([6c8eddf](https://github.com/staff0rd/assist/commit/6c8eddf8643089267f9b644916720fca4d92aca1))
+
 ## [0.558.1](https://github.com/staff0rd/assist/compare/v0.558.0...v0.558.1) (2026-08-10)
 
 
