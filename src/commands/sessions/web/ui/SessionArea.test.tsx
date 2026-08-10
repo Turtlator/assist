@@ -411,7 +411,7 @@ describe("SessionArea last message beside the diff panel", () => {
 		expect(getComputedStyle(column).display).toBe("none");
 	});
 
-	it("sits over the terminal rather than beside the top bar", () => {
+	it("hugs the left edge of the terminal, away from every right-hand panel", () => {
 		renderWithTopBar(
 			true,
 			[barSession({ lastUserMessage: "fix the failing test" })],
@@ -422,7 +422,8 @@ describe("SessionArea last message beside the diff panel", () => {
 
 		const readout = screen.getByTestId("session-last-message");
 		expect(getComputedStyle(readout).top).toBe("0px");
-		expect(getComputedStyle(readout).right).toBe("0px");
+		expect(getComputedStyle(readout).left).toBe("0px");
+		expect(getComputedStyle(readout).right).toBe("auto");
 	});
 });
 
