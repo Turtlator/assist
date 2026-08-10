@@ -3,9 +3,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockExecFileSync = vi.fn();
 const mockReviewPr = vi.fn();
 const mockMoveToPrCheckoutTree = vi.fn();
+const mockSpawnClaude = vi.fn((_prompt: string, _options?: unknown) => ({
+	done: Promise.resolve(0),
+}));
 
 vi.mock("node:child_process", () => ({
 	execFileSync: (...args: unknown[]) => mockExecFileSync(...args),
+}));
+
+vi.mock("../../shared/spawnClaude", () => ({
+	spawnClaude: (prompt: string, options?: unknown) =>
+		mockSpawnClaude(prompt, options),
 }));
 
 vi.mock("./moveToPrCheckoutTree", () => ({
@@ -28,6 +36,7 @@ import { review } from "./review";
 
 beforeEach(() => {
 	vi.clearAllMocks();
+	mockExecFileSync.mockReset();
 });
 
 describe("review", () => {
@@ -114,4 +123,48 @@ describe("review", () => {
 			expect(mockReviewPr).toHaveBeenCalledWith("/repo", { backlog: true });
 		});
 	});
+
+	describe("when --checkout-only is given with a PR number", () => {
+		it("should check the PR out without reviewing", async () => {
+			await review({ checkoutOnly: true, number: "123" });
+
+			expect(mockExecFileSync).toHaveBeenCalledWith(
+				"gh",
+				["pr", "checkout", "123"],
+				{ stdio: "inherit" },
+			);
+			expect(mockReviewPr).not.toHaveBeenCalled();
+		});
+
+		it("should start an idle Claude session with no prompt", async () => {
+			await review({ checkoutOnly: true, number: "123" });
+
+			const [prompt, options] = mockSpawnClaude.mock.calls[0];
+			expect(prompt).toBe("");
+			expect((options as { sessionId?: string }).sessionId).toBeTruthy();
+		});
+	});
+
+	describe("when --checkout-only is given without a PR number", () => {
+		it("should reject", async () => {
+			await expect(review({ checkoutOnly: true })).rejects.toThrow(
+				"process.exit",
+			);
+			expect(mockExit).toHaveBeenCalledWith(1);
+			expect(mockSpawnClaude).not.toHaveBeenCalled();
+		});
+	});
+
+	describe.each(["refine", "apply", "backlog", "submit"] as const)(
+		"when --checkout-only is combined with --%s",
+		(flag) => {
+			it("should reject", async () => {
+				await expect(
+					review({ checkoutOnly: true, number: "123", [flag]: true }),
+				).rejects.toThrow("process.exit");
+				expect(mockExit).toHaveBeenCalledWith(1);
+				expect(mockSpawnClaude).not.toHaveBeenCalled();
+			});
+		},
+	);
 });

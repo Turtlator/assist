@@ -51,7 +51,9 @@ function buildArgs(prompt: string, options: SpawnClaudeOptions): string[] {
 	 * which transcript this run owns (and can resume it on restart) rather than
 	 * inferring it later from cwd + file timestamps. */
 	if (options.sessionId) {
-		return ["--session-id", options.sessionId, prompt];
+		return prompt
+			? ["--session-id", options.sessionId, prompt]
+			: ["--session-id", options.sessionId];
 	}
-	return [prompt];
+	return prompt ? [prompt] : [];
 }

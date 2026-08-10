@@ -97,6 +97,17 @@ describe("ReviewTypeDialog", () => {
 		},
 	);
 
+	it("selects Checkout with no option flags", () => {
+		const onSelect = vi.fn();
+		render(<ReviewTypeDialog pr={pr} onSelect={onSelect} onCancel={vi.fn()} />);
+
+		fireEvent.click(checkbox("Force re-run"));
+		fireEvent.click(checkbox("Announce to Slack after"));
+		fireEvent.click(screen.getByText("Checkout"));
+
+		expect(onSelect).toHaveBeenCalledWith(["review", "--checkout-only"]);
+	});
+
 	it("selects Address Comments with no option flags", () => {
 		const onSelect = vi.fn();
 		render(<ReviewTypeDialog pr={pr} onSelect={onSelect} onCancel={vi.fn()} />);

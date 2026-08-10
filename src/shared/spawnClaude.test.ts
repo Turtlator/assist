@@ -51,6 +51,18 @@ describe("spawnClaude", () => {
 		]);
 	});
 
+	it("omits the prompt argument when there is no prompt", () => {
+		spawnClaude("");
+
+		expect(spawnedArgs()).toEqual([...SETTINGS]);
+	});
+
+	it("starts an idle session when given a session id and no prompt", () => {
+		spawnClaude("", { sessionId: "new-1" });
+
+		expect(spawnedArgs()).toEqual([...SETTINGS, "--session-id", "new-1"]);
+	});
+
 	it("resumes by sessionId and passes the prompt as a continuation nudge", () => {
 		spawnClaude("continue where you left off", { resumeSessionId: "abc-123" });
 

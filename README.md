@@ -128,6 +128,7 @@ Every command supports `--help` for full detail on its flags and behaviour.
   - `--refine` - Skip posting; walk through `synthesis.md` interactively and edit it in place
   - `--apply` - Skip posting; walk through each finding asking apply/skip. Applied findings are fixed in the working tree
   - `--backlog` - Skip posting; file all findings as a single bug backlog item with one phase per finding
+  - `--checkout-only` - Skip the review entirely; check the PR out and leave an idle interactive Claude session running in the checkout tree. Requires a PR number, and cannot be combined with `--refine`, `--apply`, `--backlog` or `--submit`
   - `--address-comments` - After the review posts comments and submits, start an Address Comments session (`assist review-pr-comments <n>`) for the PR. Only fires inside an assist session, and only when at least one comment was posted and the review was submitted
   - `--announce` - Announce the PR in Slack (`/prs-slack <n> --no-confirm`) at the tail of the chain: the Address Comments session announces once every thread is processed when one was started, otherwise a `/prs-slack` session is started directly. Announces exactly once, and only inside an assist session
   - `--verbose` - Per-line log output instead of the stacked-spinner UI (automatic in CI)

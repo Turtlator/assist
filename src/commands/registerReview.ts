@@ -5,7 +5,7 @@ export function registerReview(program: Command): void {
 	program
 		.command("review")
 		.description(
-			"Run Claude and Codex in parallel to review the current branch's PR, or check out a PR by number first when given",
+			"Run Claude and Codex in parallel to review the current branch's PR, or check out a PR by number first when given; --checkout-only just checks the PR out and leaves an idle Claude session in the checkout tree",
 		)
 		.argument(
 			"[number]",
@@ -34,6 +34,10 @@ export function registerReview(program: Command): void {
 		.option(
 			"--backlog",
 			"After synthesis, launch an interactive Claude session running /bug to file all findings as a single backlog item with one phase per finding, instead of posting to the PR",
+		)
+		.option(
+			"--checkout-only",
+			"Check the PR out and start an idle interactive Claude session in the checkout tree instead of reviewing; requires a PR number and cannot be combined with --refine, --apply, --backlog or --submit",
 		)
 		.option(
 			"--address-comments",
