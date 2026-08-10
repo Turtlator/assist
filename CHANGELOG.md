@@ -1,3 +1,10 @@
+## [0.557.1](https://github.com/staff0rd/assist/compare/v0.557.0...v0.557.1) (2026-08-10)
+
+
+### Bug Fixes
+
+* route pr-decision to windows daemon ([66d308e](https://github.com/staff0rd/assist/commit/66d308e0ea2125f5ca3babd737d321ef68debf3b))
+
 # [0.557.0](https://github.com/staff0rd/assist/compare/v0.556.0...v0.557.0) (2026-08-09)
 
 
