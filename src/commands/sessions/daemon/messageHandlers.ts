@@ -100,7 +100,7 @@ export const messageHandlers: Record<string, Handler> = {
 		m.verify.start(client, d.sessionId as string),
 	),
 	"pr-preview": (client, m, d) => m.prPreview.set(client, d),
-	"pr-decision": (_client, m, d) => m.prPreview.decide(d),
+	"pr-decision": routed((_client, m, d) => m.prPreview.decide(d)),
 	"ui-status": (_client, _m, d) =>
 		daemonLog(`ui rendered: id=${d.sessionId} status=${d.status}`),
 };

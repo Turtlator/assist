@@ -241,6 +241,46 @@ describe("restart handler", () => {
 	});
 });
 
+describe("pr-decision handler", () => {
+	function prManager(routeReturns: boolean) {
+		return {
+			windowsProxy: { route: vi.fn(() => routeReturns) },
+			prPreview: { decide: vi.fn() },
+		} as unknown as SessionManager & {
+			windowsProxy: { route: ReturnType<typeof vi.fn> };
+			prPreview: { decide: ReturnType<typeof vi.fn> };
+		};
+	}
+
+	it("decides locally when the message is not routed away", () => {
+		const m = prManager(false);
+		const d = { sessionId: "42", requestId: "r1", decision: "approve" };
+
+		messageHandlers["pr-decision"](fakeClient() as never, m, d);
+
+		expect(m.prPreview.decide).toHaveBeenCalledWith(d);
+	});
+
+	it("hands a windows-proxied decision to the windows daemon instead", () => {
+		const m = prManager(true);
+		const d = {
+			sessionId: "w-1",
+			requestId: "r1",
+			decision: "reject",
+			reason: "nope",
+			comments: ["fix this"],
+			screenshots: ["shot.png"],
+			reviewAfter: true,
+			announceAfter: true,
+		};
+
+		messageHandlers["pr-decision"](fakeClient() as never, m, d);
+
+		expect(m.windowsProxy.route).toHaveBeenCalledWith(expect.anything(), d);
+		expect(m.prPreview.decide).not.toHaveBeenCalled();
+	});
+});
+
 describe("ui-status handler", () => {
 	beforeEach(() => daemonLogMock.mockClear());
 
