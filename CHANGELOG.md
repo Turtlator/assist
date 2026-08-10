@@ -1,3 +1,10 @@
+# [0.560.0](https://github.com/staff0rd/assist/compare/v0.559.0...v0.560.0) (2026-08-10)
+
+
+### Features
+
+* draft checkbox on the PR preview ([257b0ca](https://github.com/staff0rd/assist/commit/257b0ca892db49c6ac9f5b4ef9b32dbe3d21d550))
+
 # [0.559.0](https://github.com/staff0rd/assist/compare/v0.558.3...v0.559.0) (2026-08-10)
 
 
