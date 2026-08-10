@@ -89,6 +89,22 @@ describe("ActivitySection", () => {
 		expect(screen.getByText("untitled-session")).toBeTruthy();
 	});
 
+	it("does not linkify a session's transcript path", () => {
+		const refs: GitRef[] = [
+			{
+				kind: "session",
+				ref: "titled-session",
+				title: "Fix the thing",
+				url: "/home/dev/.claude/projects/-home-dev-other/titled-session.jsonl",
+			},
+		];
+
+		render(<ActivitySection gitRefs={refs} />);
+
+		expect(screen.queryByRole("link")).toBeNull();
+		expect(screen.getByText("Fix the thing")).toBeTruthy();
+	});
+
 	it("shows a timestamp on commits but not on branches or PRs", () => {
 		const createdAt = "2026-07-08T09:34:00.000Z";
 		const refs: GitRef[] = [

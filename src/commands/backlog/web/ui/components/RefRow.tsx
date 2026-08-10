@@ -11,7 +11,7 @@ const kindSx = {
 
 function RefText({ gitRef }: { gitRef: GitRef }) {
 	const label = refLabel(gitRef);
-	if (!gitRef.url) return <>{label}</>;
+	if (!gitRef.url || gitRef.kind === "session") return <>{label}</>;
 	return (
 		<Link
 			href={gitRef.url}
