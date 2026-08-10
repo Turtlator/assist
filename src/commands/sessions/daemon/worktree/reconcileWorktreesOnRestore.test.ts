@@ -1,9 +1,10 @@
 import { existsSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Session } from "../createSession";
 import { daemonLog } from "../daemonLog";
 import { loadPersistedSessions } from "../loadPersistedSessions";
-import { readWorktreeRegistry } from "./readWorktreeRegistry";
+import { forgetWorktree, readWorktreeRegistry } from "./readWorktreeRegistry";
 import { reapWorktree } from "./reapWorktree";
 import { reclaimVanishedWorktrees } from "./reclaimVanishedWorktrees";
 import { reconcileWorktreesOnRestore } from "./reconcileWorktreesOnRestore";
@@ -19,7 +20,10 @@ vi.mock("../loadPersistedSessions", () => ({
 	loadPersistedSessions: vi.fn(() => []),
 }));
 vi.mock("./bindNewWorktree", () => ({ bindRestoredWorktrees: vi.fn() }));
-vi.mock("./readWorktreeRegistry", () => ({ readWorktreeRegistry: vi.fn() }));
+vi.mock("./readWorktreeRegistry", () => ({
+	readWorktreeRegistry: vi.fn(),
+	forgetWorktree: vi.fn(),
+}));
 vi.mock("./reapWorktree", () => ({
 	reapWorktree: vi.fn(() => Promise.resolve({ removed: true })),
 }));
@@ -50,6 +54,7 @@ const durabilityMock = checkDurability as unknown as ReturnType<typeof vi.fn>;
 const persistedMock = loadPersistedSessions as unknown as ReturnType<
 	typeof vi.fn
 >;
+const forgetMock = forgetWorktree as unknown as ReturnType<typeof vi.fn>;
 const logMock = daemonLog as unknown as ReturnType<typeof vi.fn>;
 
 function reconcile(sessions: Map<string, Session>) {
@@ -96,6 +101,21 @@ describe("reconcileWorktreesOnRestore", () => {
 		});
 		expect(reapMock).not.toHaveBeenCalled();
 		expect(armMock).toHaveBeenCalledTimes(1);
+	});
+
+	it("prunes a registry entry pointing outside any project root", async () => {
+		const stale = `${tmpdir()}/clone-collision-ABC123/real/myrepo-2`;
+		registryMock.mockReturnValue([
+			{ path: stale, clone: `${tmpdir()}/clone-collision-ABC123/real/myrepo` },
+		]);
+		const sessions = new Map<string, Session>();
+
+		await reconcile(sessions);
+
+		expect(sessions.size).toBe(0);
+		expect(durabilityMock).not.toHaveBeenCalled();
+		expect(reclaimMock).not.toHaveBeenCalled();
+		expect(forgetMock).toHaveBeenCalledWith(stale);
 	});
 
 	it("reaps a durable orphan without leaving a card behind", async () => {

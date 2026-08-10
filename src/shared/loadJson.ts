@@ -2,8 +2,8 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-function getStoreDir(): string {
-	return join(homedir(), ".assist");
+export function getStoreDir(): string {
+	return process.env.ASSIST_STORE_DIR || join(homedir(), ".assist");
 }
 
 function getStorePath(filename: string): string {

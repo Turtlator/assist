@@ -4,17 +4,12 @@ import type { Session } from "../createSession";
 import { daemonLog } from "../daemonLog";
 import { accountedTrees } from "./accountedTrees";
 import { bindRestoredWorktrees } from "./bindNewWorktree";
-import { describeHeldWork } from "./describeHeldWork";
-import { readWorktreeRegistry } from "./readWorktreeRegistry";
-import { reapWorktree } from "./reapWorktree";
+import { forgetWorktree, readWorktreeRegistry } from "./readWorktreeRegistry";
 import { reclaimVanishedWorktrees } from "./reclaimVanishedWorktrees";
 import type { SpawnSession } from "../types";
-import {
-	type OrphanedWorktree,
-	resurfaceOrphanedWorktree,
-} from "./resurfaceOrphanedWorktree";
-import { checkDurability } from "./treeDurability";
 import { logVanishedTree } from "./logVanishedTree";
+import { underTempRoot } from "./underTempRoot";
+import { recoverOrphan } from "./recoverOrphan";
 
 export function reconcileWorktreesOnRestore(
 	sessions: Map<string, Session>,
@@ -33,6 +28,13 @@ async function recoverOrphanedWorktrees(
 	const accounted = accountedTrees(sessions);
 	const vanished = new Map<string, { path: string; branch: string }[]>();
 	for (const { path, clone } of readWorktreeRegistry()) {
+		if (underTempRoot(path)) {
+			forgetWorktree(path);
+			daemonLog(
+				`worktree ${path} lies outside any project root; pruned from the registry rather than recovered`,
+			);
+			continue;
+		}
 		if (!existsSync(path)) {
 			logVanishedTree(sessions, path);
 			vanished.set(clone, [
@@ -46,25 +48,4 @@ async function recoverOrphanedWorktrees(
 	}
 	for (const [clone, paths] of vanished)
 		await reclaimVanishedWorktrees(clone, paths);
-}
-
-async function recoverOrphan(
-	sessions: Map<string, Session>,
-	spawnWith: SpawnSession,
-	orphan: OrphanedWorktree,
-	notify: () => void,
-): Promise<void> {
-	daemonLog(`worktree ${orphan.path} orphaned across restart; reconciling`);
-	const durability = await checkDurability(orphan.path);
-	if (durability.durable) {
-		await reapWorktree(orphan.path);
-		return;
-	}
-	const held = await describeHeldWork(orphan.path, durability.reason);
-	resurfaceOrphanedWorktree(
-		sessions,
-		spawnWith,
-		{ orphan, reason: durability.reason, held },
-		notify,
-	);
 }

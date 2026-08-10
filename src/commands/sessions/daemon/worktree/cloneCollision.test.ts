@@ -3,12 +3,13 @@ import {
 	mkdirSync,
 	mkdtempSync,
 	realpathSync,
+	rmSync,
 	symlinkSync,
 	writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Session } from "../createSession";
 import { allocateAndBind, type TreeSpawnContext } from "./allocateAndBind";
 import { planReuseTree } from "./planReuseTree";
@@ -16,8 +17,16 @@ import { planReuseTree } from "./planReuseTree";
 vi.mock("../daemonLog", () => ({ daemonLog: vi.fn() }));
 vi.mock("./seedWorktree", () => ({ seedWorktree: vi.fn() }));
 
+const created: string[] = [];
+
+afterEach(() => {
+	for (const base of created.splice(0))
+		rmSync(base, { recursive: true, force: true });
+});
+
 function makeRepo(): { base: string; clone: string } {
 	const base = realpathSync(mkdtempSync(join(tmpdir(), "clone-collision-")));
+	created.push(base);
 	const real = join(base, "real");
 	const clone = join(real, "myrepo");
 	mkdirSync(clone, { recursive: true });
