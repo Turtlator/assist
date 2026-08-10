@@ -1,3 +1,10 @@
+## [0.557.4](https://github.com/staff0rd/assist/compare/v0.557.3...v0.557.4) (2026-08-10)
+
+
+### Bug Fixes
+
+* drop temp-rooted persisted sessions ([00153fc](https://github.com/staff0rd/assist/commit/00153fce7912d14ef67dc7e04992fb5fb7dc8a4f))
+
 ## [0.557.3](https://github.com/staff0rd/assist/compare/v0.557.2...v0.557.3) (2026-08-10)
 
 
