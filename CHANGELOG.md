@@ -1,3 +1,15 @@
+# [0.559.0](https://github.com/staff0rd/assist/compare/v0.558.3...v0.559.0) (2026-08-10)
+
+
+### Bug Fixes
+
+* surface comments in backlog show ([4a4efd3](https://github.com/staff0rd/assist/commit/4a4efd3443974a86be94552d3d66b2fe8ba1f9c0))
+
+
+### Features
+
+* attach sessions as activity refs ([e0dfc5b](https://github.com/staff0rd/assist/commit/e0dfc5b6123cd92de6907dbd9e53f8659ab96f3a))
+
 ## [0.558.3](https://github.com/staff0rd/assist/compare/v0.558.2...v0.558.3) (2026-08-10)
 
 
