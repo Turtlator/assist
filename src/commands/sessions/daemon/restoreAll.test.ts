@@ -1,3 +1,5 @@
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Session } from "./createSession";
 import { daemonLog } from "./daemonLog";
@@ -271,6 +273,24 @@ describe("restoreAll", () => {
 
 		expect(sessions.get("2")?.status).toBe("stopped");
 		expect(sessions.get("1")?.launchedFrom).toBeUndefined();
+	});
+
+	it("drops a persisted session whose cwd lies outside any project root", () => {
+		const stale = {
+			...persistedEntry(3),
+			name: "recovered myrepo-2",
+			cwd: join(tmpdir(), "clone-collision-ABC123", "real", "myrepo-2"),
+		};
+		loadPersistedMock.mockReturnValue([persistedEntry(1), stale]);
+		const { sessions, spawner } = harness();
+
+		const names = restoreAll(spawner, sessions);
+
+		expect(names).toEqual(["session 1"]);
+		expect(sessions.size).toBe(1);
+		expect(daemonLogMock).toHaveBeenCalledWith(
+			expect.stringContaining("lies outside any project root"),
+		);
 	});
 
 	it("logs a deferred session in full when even its card cannot be created", () => {

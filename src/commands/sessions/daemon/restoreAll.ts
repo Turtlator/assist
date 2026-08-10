@@ -2,6 +2,7 @@ import type { Session } from "./createSession";
 import { daemonLog } from "./daemonLog";
 import { deferredSession } from "./deferredSession";
 import { describePersistedSession } from "./describePersistedSession";
+import { dropTempRootedSessions } from "./dropTempRootedSessions";
 import {
 	loadPersistedSessions,
 	type PersistedSession,
@@ -16,7 +17,7 @@ export function restoreAll(
 	spawner: SessionSpawner,
 	sessions: Map<string, Session>,
 ): string[] {
-	const persisted = loadPersistedSessions();
+	const persisted = dropTempRootedSessions(loadPersistedSessions());
 	const cap = sessionLimits.maxRestore();
 	const restoredIds = new Map<string, string>();
 	const names = persisted.slice(0, cap).map((entry) => {
