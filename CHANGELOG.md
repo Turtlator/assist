@@ -1,3 +1,15 @@
+# [0.562.0](https://github.com/staff0rd/assist/compare/v0.561.0...v0.562.0) (2026-08-10)
+
+
+### Bug Fixes
+
+* block head and tail on backlog show output ([4370583](https://github.com/staff0rd/assist/commit/4370583e4deb725f2f95c6bcc9c4f17c1d5a37b6))
+
+
+### Features
+
+* record the current session as a ref ([e5933d7](https://github.com/staff0rd/assist/commit/e5933d755c10531065b5eca1bf961d4e7176cec0))
+
 # [0.561.0](https://github.com/staff0rd/assist/compare/v0.560.0...v0.561.0) (2026-08-10)
 
 
