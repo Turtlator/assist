@@ -2,6 +2,8 @@ import Box from "@mui/material/Box";
 import { useRef, useState } from "react";
 import { useDismissablePin } from "./useDismissablePin";
 
+const aboveTerminalOverlays = 20;
+
 const baseSx = {
 	position: "absolute",
 	top: "100%",
@@ -21,7 +23,7 @@ const baseSx = {
 
 const collapsedSx = {
 	...baseSx,
-	zIndex: 2,
+	zIndex: aboveTerminalOverlays,
 	whiteSpace: "nowrap",
 	overflow: "hidden",
 	textOverflow: "ellipsis",
@@ -31,7 +33,7 @@ const collapsedSx = {
 
 const expandedSx = {
 	...collapsedSx,
-	zIndex: 3,
+	zIndex: aboveTerminalOverlays + 1,
 	whiteSpace: "pre-wrap",
 	overflowWrap: "anywhere",
 	overflow: "hidden auto",

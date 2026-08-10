@@ -85,6 +85,16 @@ describe("SessionLastMessage", () => {
 		expect(readout().dataset.pinned).toBe("false");
 	});
 
+	it("stacks above the terminal's own overlay layers so hover reaches it", () => {
+		render(<SessionLastMessage message={long} />);
+
+		expect(Number(getComputedStyle(readout()).zIndex)).toBeGreaterThan(11);
+
+		fireEvent.mouseEnter(readout());
+
+		expect(Number(getComputedStyle(readout()).zIndex)).toBeGreaterThan(11);
+	});
+
 	it("renders nothing without a message", () => {
 		render(<SessionLastMessage message="   " />);
 
