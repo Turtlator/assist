@@ -429,6 +429,17 @@ describe("PrPreviewPane inline comments", () => {
 			expect(toggle("Draft").checked).toBe(false);
 		});
 
+		it("flips the header chip as the toggle is ticked and unticked", () => {
+			render(<PrPreviewPane preview={readyPr} onDecision={vi.fn()} />);
+			expect(screen.getByText("New PR")).toBeTruthy();
+
+			fireEvent.click(toggle("Draft"));
+			expect(screen.getByText("New draft PR")).toBeTruthy();
+
+			fireEvent.click(toggle("Draft"));
+			expect(screen.getByText("New PR")).toBeTruthy();
+		});
+
 		it("uses the resolved state when a stored chain predates the Draft toggle", () => {
 			localStorage.setItem(
 				"assist:pr-preview-chain:s1",

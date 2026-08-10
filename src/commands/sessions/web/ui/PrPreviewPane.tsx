@@ -4,18 +4,8 @@ import type { PrDecisionDetails } from "./PrDecisionDetails";
 import { PrPreviewContent } from "./PrPreviewContent";
 import { PrPreviewFooter } from "./PrPreviewFooter";
 import { PrPreviewHeader } from "./PrPreviewHeader";
+import { prPreviewPaneSx } from "./prPreviewPaneSx";
 import { usePrPane } from "./usePrPane";
-
-const paneSx = {
-	flex: 1,
-	minWidth: 0,
-	height: "100%",
-	display: "flex",
-	flexDirection: "column",
-	borderLeft: 1,
-	borderColor: "divider",
-	bgcolor: "background.paper",
-} as const;
 
 export function PrPreviewPane({
 	preview,
@@ -43,8 +33,8 @@ export function PrPreviewPane({
 	);
 
 	return (
-		<Box sx={paneSx} onDrop={pane.onDrop} onDragOver={pane.onDragOver}>
-			<PrPreviewHeader preview={preview} />
+		<Box sx={prPreviewPaneSx} onDrop={pane.onDrop} onDragOver={pane.onDragOver}>
+			<PrPreviewHeader preview={preview} draft={pane.chain.draft} />
 			<Divider />
 			<PrPreviewContent body={preview.body} pane={pane} screenshots={isPr} />
 			<PrPreviewFooter

@@ -2,8 +2,14 @@ import { Box, Chip, Typography } from "@mui/material";
 import type { PrPreview } from "../../shared/SessionInfoBase";
 import { previewChip } from "./previewChip";
 
-export function PrPreviewHeader({ preview }: { preview: PrPreview }) {
-	const chip = previewChip(preview);
+export function PrPreviewHeader({
+	preview,
+	draft,
+}: {
+	preview: PrPreview;
+	draft: boolean;
+}) {
+	const chip = previewChip(preview, draft);
 	return (
 		<Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 1 }}>
 			<Typography variant="subtitle1" sx={{ flex: 1, fontWeight: 600 }}>
