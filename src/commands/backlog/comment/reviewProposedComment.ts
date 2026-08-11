@@ -16,7 +16,6 @@ export async function reviewProposedComment(
 		title: `Comment on ${formatItemId(item.id)}: ${item.name}`,
 		body: text,
 		prNumber: null,
-		kind: "backlog-item",
-		itemType: item.type,
+		kind: "backlog-comment",
 	});
 }

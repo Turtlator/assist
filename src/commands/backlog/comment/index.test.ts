@@ -89,8 +89,7 @@ describe("comment", () => {
 				sessionId: "7",
 				title: "Comment on a1: Preview items",
 				body: "Looks good to me",
-				kind: "backlog-item",
-				itemType: "story",
+				kind: "backlog-comment",
 				prNumber: null,
 			}),
 		);

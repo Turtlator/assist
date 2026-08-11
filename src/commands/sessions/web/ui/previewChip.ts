@@ -1,8 +1,14 @@
 import type { PrPreview } from "../../shared/SessionInfoBase";
 
-type ChipSpec = { label: string; color: "success" | "info" | "warning" };
+type ChipSpec = {
+	label: string;
+	color: "success" | "info" | "warning" | "default";
+};
 
 export function previewChip(preview: PrPreview, draft: boolean): ChipSpec {
+	if (preview.kind === "backlog-comment")
+		return { label: "Comment", color: "default" };
+
 	if (preview.kind === "backlog-item")
 		return preview.itemType === "bug"
 			? { label: "Bug", color: "warning" }

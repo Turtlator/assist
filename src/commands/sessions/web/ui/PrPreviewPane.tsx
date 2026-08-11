@@ -21,7 +21,7 @@ export function PrPreviewPane({
 		details: PrDecisionDetails,
 	) => void;
 }) {
-	const isPr = preview.kind !== "backlog-item";
+	const isPr = (preview.kind ?? "pr") === "pr";
 	const newPr = isPr && preview.prNumber === null;
 	const pane = usePrPane(
 		preview.requestId,

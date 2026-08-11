@@ -1,6 +1,7 @@
 import { type SessionClient, sendTo } from "./broadcast";
 import type { Session } from "./createSession";
 import { daemonLog } from "./daemonLog";
+import { previewTargetLabel } from "./previewTargetLabel";
 
 type Msg = Record<string, unknown>;
 
@@ -22,7 +23,8 @@ export function setPrPreview(
 		return;
 	}
 	const prNumber = typeof d.prNumber === "number" ? d.prNumber : null;
-	const kind = d.kind === "backlog-item" ? "backlog-item" : "pr";
+	const kind =
+		d.kind === "backlog-item" || d.kind === "backlog-comment" ? d.kind : "pr";
 	const itemType = d.itemType === "bug" ? "bug" : "story";
 	const draft = d.draft === true;
 	session.pendingPrPreview = {
@@ -35,14 +37,7 @@ export function setPrPreview(
 		draft: kind === "pr" && prNumber === null ? draft : undefined,
 	};
 	waiters.set(id, client);
-	const target =
-		kind === "backlog-item"
-			? `backlog ${itemType}`
-			: prNumber === null
-				? draft
-					? "create draft"
-					: "create"
-				: `edit #${prNumber}`;
+	const target = previewTargetLabel(kind, itemType, prNumber, draft);
 	daemonLog(
 		`pr-preview set: id=${id} requestId=${d.requestId} kind=${kind} target=${target}`,
 	);

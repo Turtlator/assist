@@ -25,6 +25,13 @@ describe("previewChip", () => {
 		).toEqual({ label: "Story", color: "info" });
 	});
 
+	it("labels a backlog comment neutrally", () => {
+		expect(previewChip(preview({ kind: "backlog-comment" }), false)).toEqual({
+			label: "Comment",
+			color: "default",
+		});
+	});
+
 	it("labels an update to an existing PR", () => {
 		expect(previewChip(preview({ prNumber: 42 }), false)).toEqual({
 			label: "Update #42",
