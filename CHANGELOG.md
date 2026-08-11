@@ -1,3 +1,10 @@
+# [0.564.0](https://github.com/staff0rd/assist/compare/v0.563.0...v0.564.0) (2026-08-11)
+
+
+### Features
+
+* preview backlog comment writes ([542d3fe](https://github.com/staff0rd/assist/commit/542d3fed947d6689eecb356787fa07cd1bf509e4))
+
 # [0.563.0](https://github.com/staff0rd/assist/compare/v0.562.1...v0.563.0) (2026-08-10)
 
 
