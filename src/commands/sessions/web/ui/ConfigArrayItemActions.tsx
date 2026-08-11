@@ -24,6 +24,7 @@ export function ConfigArrayItemActions({ entry, index, editor }: Props) {
 				label,
 				ownerScope,
 				repoKey: entry.repoKey,
+				globalConfigFile: entry.globalConfigFile,
 				canMoveUp,
 				canMoveDown,
 			})}

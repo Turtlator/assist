@@ -6,6 +6,7 @@ type Options = {
 	scope: ConfigScope;
 	scopesWithValue: ConfigScope[];
 	repoKey: string | undefined;
+	globalConfigFile?: string;
 	lockedToGlobal: boolean;
 	selected: boolean;
 };
@@ -24,12 +25,13 @@ export function configScopeToggleTitle({
 	scope,
 	scopesWithValue,
 	repoKey,
+	globalConfigFile,
 	lockedToGlobal,
 	selected,
 }: Options): string {
 	if (lockedToGlobal && scope !== "global") return "Global-only key";
 
-	const where = configScopeFiles(repoKey)[scope];
+	const where = configScopeFiles(repoKey, globalConfigFile)[scope];
 	if (selected)
 		return `This save will be written to ${where} — ${savedValueState(scope, scopesWithValue)}`;
 

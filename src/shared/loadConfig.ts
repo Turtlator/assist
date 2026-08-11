@@ -25,12 +25,17 @@ export function loadProjectConfig(
 	return loadRawYaml(projectConfigPathFrom(cwd));
 }
 
-export function loadGlobalConfigRaw(): Record<string, unknown> {
-	return loadRawYaml(getGlobalConfigPath());
+export function loadGlobalConfigRaw(
+	globalConfigPath: string = getGlobalConfigPath(),
+): Record<string, unknown> {
+	return loadRawYaml(globalConfigPath);
 }
 
-export function saveGlobalConfig(config: Record<string, unknown>): void {
-	writeFileSync(getGlobalConfigPath(), stringifyYaml(config, { lineWidth: 0 }));
+export function saveGlobalConfig(
+	config: Record<string, unknown>,
+	globalConfigPath: string = getGlobalConfigPath(),
+): void {
+	writeFileSync(globalConfigPath, stringifyYaml(config, { lineWidth: 0 }));
 }
 
 export function saveConfig(

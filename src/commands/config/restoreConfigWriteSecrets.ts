@@ -7,9 +7,13 @@ export function restoreConfigWriteSecrets(
 	key: string,
 	value: unknown,
 	cwd: string,
+	globalConfigPath?: string,
 ): unknown {
 	const node = configKeyNode(key);
 	if (!node) return value;
-	const stored = loadConfigFrom(cwd) as unknown as Record<string, unknown>;
+	const stored = loadConfigFrom(cwd, globalConfigPath) as unknown as Record<
+		string,
+		unknown
+	>;
 	return restoreConfigSecrets(value, getNestedValue(stored, key), node);
 }

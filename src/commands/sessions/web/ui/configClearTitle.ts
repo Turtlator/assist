@@ -8,7 +8,7 @@ export function configClearTitle(
 	entry: ConfigEntry,
 	scope: ConfigScope,
 ): string {
-	const where = configScopeFiles(entry.repoKey)[scope];
+	const where = configScopeFiles(entry.repoKey, entry.globalConfigFile)[scope];
 	const fallback = configScopesWithValue(entry).find(
 		(source) => source !== scope,
 	);

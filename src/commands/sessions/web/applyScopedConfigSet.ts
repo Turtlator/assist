@@ -14,13 +14,26 @@ export function applyScopedConfigSet(
 	value: ConfigWritableValue,
 	cwd: string,
 	scope: ConfigWriteScope,
+	globalConfigPath?: string,
 ): ScopedConfigSetResult {
 	if (scope === "repo") {
-		const result = applyRepoConfigSet(key, value, undefined, cwd);
+		const result = applyRepoConfigSet(
+			key,
+			value,
+			undefined,
+			cwd,
+			globalConfigPath,
+		);
 		return result.ok
 			? { ok: true, payload: { target: result.target, repoKey: result.label } }
 			: result;
 	}
-	const result = applyConfigSet(key, value, scope === "global", cwd);
+	const result = applyConfigSet(
+		key,
+		value,
+		scope === "global",
+		cwd,
+		globalConfigPath,
+	);
 	return result.ok ? { ok: true, payload: { target: result.target } } : result;
 }

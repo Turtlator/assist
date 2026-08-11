@@ -13,6 +13,7 @@ export function applyRepoConfigUnset(
 	key: string,
 	repoName?: string,
 	cwd: string = process.cwd(),
+	globalConfigPath?: string,
 ): RepoConfigUnsetResult {
 	if (isGlobalOnlyConfigKey(key)) {
 		return {
@@ -25,6 +26,7 @@ export function applyRepoConfigUnset(
 	const { globalRaw, repos, label, block } = resolveRepoConfigBlock(
 		repoName,
 		cwd,
+		globalConfigPath,
 	);
 	const { config: updatedBlock, removed } = unsetNestedValue(block, key);
 	if (!removed) return { ok: true, target: "repo", label, removed: false };
@@ -38,6 +40,6 @@ export function applyRepoConfigUnset(
 	const next = { ...globalRaw };
 	if (Object.keys(repos).length === 0) delete next.repos;
 	else next.repos = repos;
-	saveGlobalConfig(next);
+	saveGlobalConfig(next, globalConfigPath);
 	return { ok: true, target: "repo", label, removed: true };
 }

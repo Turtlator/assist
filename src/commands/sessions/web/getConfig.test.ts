@@ -6,6 +6,7 @@ import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 const root = join(tmpdir(), "assist-get-config-test");
 const home = join(root, "home");
+const winHome = join(root, "win-home");
 const repo = join(root, "repo");
 const windowsCwd = String.raw`C:\git\nextgen`;
 
@@ -39,6 +40,7 @@ import { getConfig } from "./getConfig";
 
 mkdirSync(repo, { recursive: true });
 mkdirSync(home, { recursive: true });
+mkdirSync(winHome, { recursive: true });
 
 afterAll(() => {
 	vi.unstubAllEnvs();
@@ -67,7 +69,11 @@ describe("getConfig", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.stubEnv("HOME", home);
-		writeFileSync(join(home, ".assist.yml"), "commit:\n  pull: false\n");
+		writeFileSync(
+			join(home, ".assist.yml"),
+			`commit:\n  pull: false\nsessions:\n  windowsProjectsRoot: ${winHome}/.claude/projects\n`,
+		);
+		writeFileSync(join(winHome, ".assist.yml"), "");
 		writeFileSync(
 			join(repo, "assist.yml"),
 			"run:\n  - name: build\n    command: pnpm build\n",

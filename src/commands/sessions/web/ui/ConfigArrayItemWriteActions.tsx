@@ -24,6 +24,7 @@ export function ConfigArrayItemWriteActions({ entry, index, editor }: Props) {
 				arrayOwnerScope: editor.items[0]?.owner?.scope,
 				targetScope: scope,
 				repoKey: entry.repoKey,
+				globalConfigFile: entry.globalConfigFile,
 			})}
 			onScopeChange={editor.setScope}
 			onSave={() => void editor.save()}

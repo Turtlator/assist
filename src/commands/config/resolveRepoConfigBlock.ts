@@ -13,8 +13,9 @@ type RepoConfigBlock = {
 export function resolveRepoConfigBlock(
 	repoName: string | undefined,
 	cwd: string,
+	globalConfigPath?: string,
 ): RepoConfigBlock {
-	const globalRaw = loadGlobalConfigRaw();
+	const globalRaw = loadGlobalConfigRaw(globalConfigPath);
 	const label =
 		repoName === undefined
 			? resolveRepoWriteLabel(globalRaw, getCurrentOrigin(cwd))

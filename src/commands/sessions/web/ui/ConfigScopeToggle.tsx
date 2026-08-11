@@ -13,6 +13,7 @@ type Props = {
 	lockedToGlobal: boolean;
 	scopesWithValue: ConfigScope[];
 	repoKey?: string;
+	globalConfigFile?: string;
 	onChange: (scope: ConfigScope) => void;
 };
 
@@ -22,6 +23,7 @@ export function ConfigScopeToggle({
 	lockedToGlobal,
 	scopesWithValue,
 	repoKey,
+	globalConfigFile,
 	onChange,
 }: Props) {
 	return (
@@ -43,6 +45,7 @@ export function ConfigScopeToggle({
 						scope: candidate,
 						scopesWithValue,
 						repoKey,
+						globalConfigFile,
 						lockedToGlobal,
 						selected: candidate === scope,
 					})}

@@ -24,6 +24,7 @@ export function applyConfigSet(
 	coerced: ConfigWritableValue,
 	global: boolean,
 	cwd: string = process.cwd(),
+	globalConfigPath?: string,
 ): ConfigSetResult {
 	if (!global && isGlobalOnlyConfigKey(key)) {
 		return {
@@ -33,12 +34,14 @@ export function applyConfigSet(
 			],
 		};
 	}
-	const raw = global ? loadGlobalConfigRaw() : loadProjectConfig(cwd);
+	const raw = global
+		? loadGlobalConfigRaw(globalConfigPath)
+		: loadProjectConfig(cwd);
 	const updated = setNestedValue(raw, key, coerced);
 	const validation = validateConfig(updated, key);
 	if (!validation.ok) return validation;
 	if (global) {
-		saveGlobalConfig(updated);
+		saveGlobalConfig(updated, globalConfigPath);
 		return { ok: true, target: "global" };
 	}
 	saveConfig(updated, cwd);

@@ -15,6 +15,7 @@ export function applyRepoConfigSet(
 	coerced: ConfigWritableValue,
 	repoName?: string,
 	cwd: string = process.cwd(),
+	globalConfigPath?: string,
 ): RepoConfigSetResult {
 	if (isGlobalOnlyConfigKey(key)) {
 		return {
@@ -27,11 +28,12 @@ export function applyRepoConfigSet(
 	const { globalRaw, repos, label, block } = resolveRepoConfigBlock(
 		repoName,
 		cwd,
+		globalConfigPath,
 	);
 	const updatedBlock = setNestedValue(block, key, coerced);
 	const validation = validateConfig(updatedBlock, key, repoConfigSchema);
 	if (!validation.ok) return validation;
 	repos[label] = updatedBlock;
-	saveGlobalConfig({ ...globalRaw, repos });
+	saveGlobalConfig({ ...globalRaw, repos }, globalConfigPath);
 	return { ok: true, target: "repo", label };
 }

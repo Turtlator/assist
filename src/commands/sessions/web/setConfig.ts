@@ -11,7 +11,12 @@ export function setConfig(
 	return handleConfigWrite(req, res, (request) => {
 		const coerced = coerceConfigValue(
 			request.key,
-			restoreConfigWriteSecrets(request.key, request.value, request.cwd),
+			restoreConfigWriteSecrets(
+				request.key,
+				request.value,
+				request.cwd,
+				request.globalConfigPath,
+			),
 		);
 		if (!coerced.ok) return { ok: false, errors: [coerced.error] };
 
@@ -20,6 +25,7 @@ export function setConfig(
 			coerced.value,
 			request.cwd,
 			request.scope,
+			request.globalConfigPath,
 		);
 	});
 }

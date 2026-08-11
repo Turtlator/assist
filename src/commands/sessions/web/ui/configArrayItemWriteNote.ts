@@ -9,6 +9,7 @@ type Options = {
 	arrayOwnerScope: ConfigScope | undefined;
 	targetScope: ConfigScope;
 	repoKey: string | undefined;
+	globalConfigFile?: string;
 };
 
 const LOWEST_TO_HIGHEST_PRECEDENCE: ConfigScope[] = [
@@ -40,8 +41,9 @@ export function configArrayItemWriteNote({
 	arrayOwnerScope,
 	targetScope,
 	repoKey,
+	globalConfigFile,
 }: Options): string | undefined {
-	const files = configScopeFiles(repoKey);
+	const files = configScopeFiles(repoKey, globalConfigFile);
 	const strategy = configArrayMergeStrategy(key);
 
 	if (strategy.kind === "replace")

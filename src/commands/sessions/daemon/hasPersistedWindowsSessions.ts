@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { posix } from "node:path";
-import { loadConfig } from "../../../shared/loadConfig";
+import { windowsHomeFromWsl } from "../../../shared/windowsHomeFromWsl";
 import { daemonLog } from "./daemonLog";
 
 export function hasPersistedWindowsSessions(): boolean {
@@ -20,8 +20,7 @@ export function hasPersistedWindowsSessions(): boolean {
 }
 
 function windowsSessionsFileFromWsl(): string | null {
-	const projectsRootUnderWinHome = loadConfig().sessions?.windowsProjectsRoot;
-	if (!projectsRootUnderWinHome) return null;
-	const winHome = posix.dirname(posix.dirname(projectsRootUnderWinHome));
+	const winHome = windowsHomeFromWsl();
+	if (!winHome) return null;
 	return posix.join(winHome, ".assist", "sessions.json");
 }

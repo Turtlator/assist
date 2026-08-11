@@ -16,8 +16,11 @@ export type RawConfigLayers = {
 	repoKey?: string;
 };
 
-export function readRawConfigLayers(cwd: string): RawConfigLayers {
-	const global = loadRawYaml(getGlobalConfigPath());
+export function readRawConfigLayers(
+	cwd: string,
+	globalConfigPath: string = getGlobalConfigPath(),
+): RawConfigLayers {
+	const global = loadRawYaml(globalConfigPath);
 	if (!global.repos)
 		return {
 			project: loadRawYaml(projectConfigPathFrom(cwd)),

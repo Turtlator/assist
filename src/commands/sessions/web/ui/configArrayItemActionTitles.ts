@@ -5,6 +5,7 @@ type Options = {
 	label: string;
 	ownerScope: ConfigScope | undefined;
 	repoKey: string | undefined;
+	globalConfigFile?: string;
 	canMoveUp: boolean;
 	canMoveDown: boolean;
 };
@@ -19,6 +20,7 @@ export function configArrayItemActionTitles({
 	label,
 	ownerScope,
 	repoKey,
+	globalConfigFile,
 	canMoveUp,
 	canMoveDown,
 }: Options): ConfigArrayItemActionTitles {
@@ -27,7 +29,7 @@ export function configArrayItemActionTitles({
 		return { moveUp: unowned, moveDown: unowned, remove: unowned };
 	}
 
-	const where = configScopeFiles(repoKey)[ownerScope];
+	const where = configScopeFiles(repoKey, globalConfigFile)[ownerScope];
 	const edge = (position: string) =>
 		`${label} is the ${position} entry in ${where} — entries cannot move across scopes`;
 

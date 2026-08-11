@@ -359,6 +359,36 @@ describe("ConfigView", () => {
 		);
 	});
 
+	it("names the windows host's config in the write-target hint and scope titles", async () => {
+		stubApi([
+			{
+				key: "worktree.enabled",
+				type: "boolean",
+				value: false,
+				source: "default",
+				repoKey: "nextgen",
+				globalConfigFile: "/mnt/c/Users/me/.assist.yml on the Windows host",
+				node: node("worktree.enabled"),
+			},
+		]);
+		renderView(String.raw`C:\git\nextgen`);
+
+		await waitFor(() =>
+			expect(screen.getByText("worktree.enabled")).toBeTruthy(),
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Edit worktree.enabled" }),
+		);
+		fireEvent.click(screen.getByRole("button", { name: "This repo" }));
+
+		expect(screen.getByTestId("config-write-target").textContent).toBe(
+			"This save writes to repos.nextgen in /mnt/c/Users/me/.assist.yml on the Windows host. Dots mark where the saved value lives now.",
+		);
+		expect(
+			screen.getByRole("button", { name: "Global" }).getAttribute("title"),
+		).toBe("Not set in /mnt/c/Users/me/.assist.yml on the Windows host");
+	});
+
 	it("saves back to the scope the effective value is already set at", async () => {
 		const fetchMock = stubApi(
 			[

@@ -46,6 +46,7 @@ export function ConfigEditorActions({
 					lockedToGlobal={scopeLocked}
 					scopesWithValue={configScopesWithValue(entry)}
 					repoKey={entry.repoKey}
+					globalConfigFile={entry.globalConfigFile}
 					onChange={onScopeChange}
 				/>
 				<ConfigWriteButtons
@@ -57,7 +58,11 @@ export function ConfigEditorActions({
 					onCancel={onCancel}
 				/>
 			</Stack>
-			<ConfigWriteTargetHint scope={scope} repoKey={entry.repoKey} />
+			<ConfigWriteTargetHint
+				scope={scope}
+				repoKey={entry.repoKey}
+				globalConfigFile={entry.globalConfigFile}
+			/>
 			<ConfigWriteNote note={note} />
 		</Stack>
 	);

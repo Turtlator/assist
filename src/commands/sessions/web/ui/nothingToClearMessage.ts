@@ -6,6 +6,6 @@ export function nothingToClearMessage(
 	entry: ConfigEntry,
 	scope: ConfigScope,
 ): string {
-	const where = configScopeFiles(entry.repoKey)[scope];
+	const where = configScopeFiles(entry.repoKey, entry.globalConfigFile)[scope];
 	return `${entry.key} is no longer set in ${where} — nothing was removed.`;
 }

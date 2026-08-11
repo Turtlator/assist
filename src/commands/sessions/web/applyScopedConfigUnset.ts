@@ -10,9 +10,10 @@ export function applyScopedConfigUnset(
 	key: string,
 	cwd: string,
 	scope: ConfigWriteScope,
+	globalConfigPath?: string,
 ): ScopedConfigUnsetResult {
 	if (scope === "repo") {
-		const result = applyRepoConfigUnset(key, undefined, cwd);
+		const result = applyRepoConfigUnset(key, undefined, cwd, globalConfigPath);
 		return result.ok
 			? {
 					ok: true,
@@ -24,7 +25,12 @@ export function applyScopedConfigUnset(
 				}
 			: result;
 	}
-	const result = applyConfigUnset(key, scope === "global", cwd);
+	const result = applyConfigUnset(
+		key,
+		scope === "global",
+		cwd,
+		globalConfigPath,
+	);
 	return result.ok
 		? { ok: true, payload: { target: result.target, removed: result.removed } }
 		: result;

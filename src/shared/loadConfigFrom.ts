@@ -39,8 +39,11 @@ export function projectConfigPathFrom(cwd: string): string {
 	return getConfigPathFrom(clone ?? cwd);
 }
 
-export function loadConfigFrom(cwd: string): AssistConfig {
-	const globalRaw = loadRawYaml(getGlobalConfigPath());
+export function loadConfigFrom(
+	cwd: string,
+	globalConfigPath: string = getGlobalConfigPath(),
+): AssistConfig {
+	const globalRaw = loadRawYaml(globalConfigPath);
 	const projectRaw = loadRawYaml(projectConfigPathFrom(cwd));
 	const repoOverride = globalRaw.repos
 		? resolveRepoOverride(globalRaw, getCurrentOrigin(cwd))
