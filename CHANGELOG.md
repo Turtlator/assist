@@ -1,3 +1,10 @@
+## [0.565.1](https://github.com/staff0rd/assist/compare/v0.565.0...v0.565.1) (2026-08-11)
+
+
+### Bug Fixes
+
+* config writes reach windows home ([d815d5a](https://github.com/staff0rd/assist/commit/d815d5aa2397736c360206a58354ad4ffe2a29dc))
+
 # [0.565.0](https://github.com/staff0rd/assist/compare/v0.564.0...v0.565.0) (2026-08-11)
 
 
