@@ -1,0 +1,22 @@
+import { randomUUID } from "node:crypto";
+import { awaitPreviewApproval } from "../../sessions/shared/awaitPreviewApproval";
+import { formatItemId } from "../formatItemId";
+import type { BacklogItem } from "../types";
+
+export async function reviewProposedComment(
+	item: BacklogItem,
+	text: string,
+): Promise<void> {
+	const sessionId = process.env.ASSIST_SESSION_ID;
+	if (process.env.ASSIST_SESSION !== "1" || !sessionId) return;
+
+	await awaitPreviewApproval("Backlog comment preview", {
+		sessionId,
+		requestId: randomUUID(),
+		title: `Comment on ${formatItemId(item.id)}: ${item.name}`,
+		body: text,
+		prNumber: null,
+		kind: "backlog-item",
+		itemType: item.type,
+	});
+}
