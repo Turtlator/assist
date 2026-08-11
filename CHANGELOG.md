@@ -1,3 +1,10 @@
+## [0.565.2](https://github.com/staff0rd/assist/compare/v0.565.1...v0.565.2) (2026-08-11)
+
+
+### Bug Fixes
+
+* keep project scope off windows home ([b583de0](https://github.com/staff0rd/assist/commit/b583de02ae11a0ff363beb8ae59c49a07c28a64a))
+
 ## [0.565.1](https://github.com/staff0rd/assist/compare/v0.565.0...v0.565.1) (2026-08-11)
 
 
