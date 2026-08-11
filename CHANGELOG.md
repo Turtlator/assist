@@ -1,3 +1,10 @@
+# [0.565.0](https://github.com/staff0rd/assist/compare/v0.564.0...v0.565.0) (2026-08-11)
+
+
+### Features
+
+* comment chip for backlog previews ([5e85fcf](https://github.com/staff0rd/assist/commit/5e85fcf350ebcb7847f13a2711d6eb11a6dec30d))
+
 # [0.564.0](https://github.com/staff0rd/assist/compare/v0.563.0...v0.564.0) (2026-08-11)
 
 
