@@ -205,6 +205,22 @@ describe("config scopes for a windows-host repo", () => {
 		});
 	});
 
+	it("still writes a project-scoped key when the windows home is unknown", async () => {
+		windowsHome.path = null;
+
+		const [status, payload] = await post(setConfig, {
+			key: "commit.push",
+			value: true,
+			cwd: windowsCwd,
+			scope: "project",
+		});
+
+		expect([status, payload]).toEqual([200, { target: "project" }]);
+		expect(readYaml(join(repo, "assist.yml"))).toEqual({
+			commit: { push: true },
+		});
+	});
+
 	it("fails the read when the windows home is not reachable", () => {
 		windowsHome.path = "/mnt/z/Users/absent";
 
