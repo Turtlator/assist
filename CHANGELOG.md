@@ -1,3 +1,10 @@
+## [0.567.1](https://github.com/staff0rd/assist/compare/v0.567.0...v0.567.1) (2026-08-12)
+
+
+### Bug Fixes
+
+* match sidebar toggle to toolbar size ([3f4486a](https://github.com/staff0rd/assist/commit/3f4486ac9a495bfb3c4e5c2d6d77a9c43a0d476a))
+
 # [0.567.0](https://github.com/staff0rd/assist/compare/v0.566.0...v0.567.0) (2026-08-12)
 
 
