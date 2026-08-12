@@ -12,10 +12,11 @@ const sidebarSx = {
 	flexDirection: "column",
 	bgcolor: "background.paper",
 } as const;
+const collapsedSx = { display: "none" } as const;
 
 export function Sidebar(props: SidebarProps) {
 	return (
-		<Box sx={sidebarSx}>
+		<Box sx={props.collapsed ? collapsedSx : sidebarSx}>
 			<SidebarTabs
 				tab={props.tab}
 				activeCount={props.sessions.length}

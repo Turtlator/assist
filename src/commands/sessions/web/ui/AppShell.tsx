@@ -9,6 +9,7 @@ import { useAppShell } from "./useAppShell";
 import { DaemonVersionContext } from "./useDaemonVersionContext";
 import { RepoSelectionContext } from "./useRepoSelectionContext";
 import { SessionLaunchContext } from "./useSessionLaunchContext";
+import { SidebarCollapsedContext } from "./useSidebarCollapsedContext";
 import { TopBarLayoutContext } from "./useTopBarLayoutContext";
 
 const appBarSx = {
@@ -23,33 +24,41 @@ export function AppShell({
 	mode: "light" | "dark";
 	toggle: () => void;
 }) {
-	const { socket, selection, launch, viewLaunchedSession, topBar } =
-		useAppShell();
+	const {
+		socket,
+		selection,
+		launch,
+		viewLaunchedSession,
+		topBar,
+		sidebarCollapse,
+	} = useAppShell();
 
 	return (
 		<TopBarLayoutContext.Provider value={topBar}>
-			<RepoSelectionContext.Provider value={selection}>
-				<SessionLaunchContext.Provider value={launch}>
-					<DaemonVersionContext.Provider value={socket.daemonVersion}>
-						<HamburgerMenu
-							mode={mode}
-							toggle={toggle}
-							reconnecting={socket.reconnecting}
+			<SidebarCollapsedContext.Provider value={sidebarCollapse}>
+				<RepoSelectionContext.Provider value={selection}>
+					<SessionLaunchContext.Provider value={launch}>
+						<DaemonVersionContext.Provider value={socket.daemonVersion}>
+							<HamburgerMenu
+								mode={mode}
+								toggle={toggle}
+								reconnecting={socket.reconnecting}
+							/>
+						</DaemonVersionContext.Provider>
+						<AppBar position="fixed" elevation={1} sx={appBarSx}>
+							<AppToolbar socket={socket} selection={selection} />
+						</AppBar>
+						<Toolbar variant="dense" sx={toolbarSx} />
+						<ServerRunLayer socket={socket}>
+							<AppRoutes socket={socket} />
+						</ServerRunLayer>
+						<AppOverlays
+							socket={socket}
+							onViewLaunchedSession={viewLaunchedSession}
 						/>
-					</DaemonVersionContext.Provider>
-					<AppBar position="fixed" elevation={1} sx={appBarSx}>
-						<AppToolbar socket={socket} selection={selection} />
-					</AppBar>
-					<Toolbar variant="dense" sx={toolbarSx} />
-					<ServerRunLayer socket={socket}>
-						<AppRoutes socket={socket} />
-					</ServerRunLayer>
-					<AppOverlays
-						socket={socket}
-						onViewLaunchedSession={viewLaunchedSession}
-					/>
-				</SessionLaunchContext.Provider>
-			</RepoSelectionContext.Provider>
+					</SessionLaunchContext.Provider>
+				</RepoSelectionContext.Provider>
+			</SidebarCollapsedContext.Provider>
 		</TopBarLayoutContext.Provider>
 	);
 }

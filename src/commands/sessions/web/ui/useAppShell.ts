@@ -1,6 +1,7 @@
 import { useRepoSelection } from "./useRepoSelection";
 import { useSessionLaunch } from "./useSessionLaunch";
 import { useSessionSocket } from "./useSessionSocket";
+import { useSidebarCollapsed } from "./useSidebarCollapsed";
 import { useTopBarLayout } from "./useTopBarLayout";
 
 export function useAppShell() {
@@ -13,6 +14,14 @@ export function useAppShell() {
 	);
 	const { launch, viewLaunchedSession } = useSessionLaunch(socket);
 	const topBar = useTopBarLayout();
+	const sidebarCollapse = useSidebarCollapsed();
 
-	return { socket, selection, launch, viewLaunchedSession, topBar };
+	return {
+		socket,
+		selection,
+		launch,
+		viewLaunchedSession,
+		topBar,
+		sidebarCollapse,
+	};
 }

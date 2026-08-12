@@ -7,6 +7,7 @@ import { DiffPanelsProvider } from "./useDiffPanels";
 import { useScrollRestoration } from "./useScrollRestoration";
 import { ScrollRestorationContext } from "./useScrollRestorationContext";
 import type { SessionSocket } from "./useSessionSocket";
+import { useSidebarCollapsedContext } from "./useSidebarCollapsedContext";
 import { useSidebarTab } from "./useSidebarTab";
 import { StarredSessionsProvider } from "./useStarredSessions";
 
@@ -18,6 +19,7 @@ export function AppLayout({ socket }: { socket: SessionSocket }) {
 		socket.clearTranscript,
 	);
 	const activateSession = useActivateSession(socket.selectSession);
+	const { collapsed } = useSidebarCollapsedContext();
 
 	return (
 		<StarredSessionsProvider
@@ -31,7 +33,12 @@ export function AppLayout({ socket }: { socket: SessionSocket }) {
 				<Box
 					sx={{ display: "flex", width: "100%", height: "calc(100vh - 48px)" }}
 				>
-					<AppSidebar socket={socket} tab={tab} onTabChange={onTabChange} />
+					<AppSidebar
+						socket={socket}
+						tab={tab}
+						onTabChange={onTabChange}
+						collapsed={collapsed}
+					/>
 					<Box
 						ref={containerRef}
 						sx={{

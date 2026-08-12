@@ -9,9 +9,10 @@ type Props = {
 	socket: ReturnType<typeof useSessionSocket>;
 	tab: SidebarTab;
 	onTabChange: (tab: SidebarTab) => void;
+	collapsed: boolean;
 };
 
-export function AppSidebar({ socket, tab, onTabChange }: Props) {
+export function AppSidebar({ socket, tab, onTabChange, collapsed }: Props) {
 	const { sessions, isFloatingWaiter } = useSidebarOrdering(socket.sessions);
 	const { handleSelect, handleResume, handleView } = useSidebarNavigation(
 		socket,
@@ -46,6 +47,7 @@ export function AppSidebar({ socket, tab, onTabChange }: Props) {
 			onSetAutoAdvance={socket.setAutoAdvance}
 			initialized={socket.initialized}
 			isFloatingWaiter={isFloatingWaiter}
+			collapsed={collapsed}
 		/>
 	);
 }

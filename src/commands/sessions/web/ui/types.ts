@@ -40,6 +40,7 @@ export type SidebarProps = {
 	onResume: (session: HistoricalSession) => void;
 	initialized: Set<string>;
 	isFloatingWaiter?: (session: SessionInfo) => boolean;
+	collapsed?: boolean;
 } & SessionListHandlers;
 
 export type SessionLifecycleHandlers = {

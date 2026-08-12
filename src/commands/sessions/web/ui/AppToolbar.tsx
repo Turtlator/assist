@@ -6,9 +6,11 @@ import { OpenInGitHubButton } from "./OpenInGitHubButton";
 import { RateLimitsIndicator } from "./RateLimitsIndicator";
 import { RefreshWebserverButton } from "./RefreshWebserverButton";
 import { RepoPicker } from "./RepoPicker";
+import { SidebarCollapseToggle } from "./SidebarCollapseToggle";
 import { TopNavActions } from "./TopNavActions";
 import type { RepoSelection } from "./useRepoSelectionContext";
 import type { SessionSocket } from "./useSessionSocket";
+import { useSidebarCollapsedContext } from "./useSidebarCollapsedContext";
 
 const toolbarSx = { minHeight: 48, pl: 1, pr: 14 } as const;
 const pickerSx = { width: 240, ml: 2 } as const;
@@ -20,8 +22,14 @@ export function AppToolbar({
 	socket: SessionSocket;
 	selection: RepoSelection;
 }) {
+	const { collapsed, onToggleCollapsed } = useSidebarCollapsedContext();
+
 	return (
 		<Toolbar variant="dense" disableGutters sx={toolbarSx}>
+			<SidebarCollapseToggle
+				collapsed={collapsed}
+				onToggleCollapsed={onToggleCollapsed}
+			/>
 			<RefreshWebserverButton reconnecting={socket.reconnecting} />
 			<NavTabs />
 			<Box sx={pickerSx}>
