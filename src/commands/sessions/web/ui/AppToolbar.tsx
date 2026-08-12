@@ -26,10 +26,12 @@ export function AppToolbar({
 
 	return (
 		<Toolbar variant="dense" disableGutters sx={toolbarSx}>
-			<SidebarCollapseToggle
-				collapsed={collapsed}
-				onToggleCollapsed={onToggleCollapsed}
-			/>
+			{collapsed && (
+				<SidebarCollapseToggle
+					collapsed={collapsed}
+					onToggleCollapsed={onToggleCollapsed}
+				/>
+			)}
 			<RefreshWebserverButton reconnecting={socket.reconnecting} />
 			<NavTabs />
 			<Box sx={pickerSx}>

@@ -127,6 +127,10 @@ function toggleSidebar() {
 	fireEvent.click(screen.getByRole("button", { name: "toggle sidebar" }));
 }
 
+function hideSidebarButton(): HTMLElement {
+	return screen.getByRole("button", { name: "Hide sidebar" });
+}
+
 function pressNextWaitingHotkey() {
 	fireEvent.keyDown(globalThis.window, { key: ".", ctrlKey: true });
 }
@@ -178,6 +182,29 @@ describe("AppLayout sidebar collapse", () => {
 		renderLayout({ collapsed: true });
 
 		expect(screen.getByTestId("sidebar-body")).toBeDefined();
+	});
+});
+
+describe("AppLayout sidebar toggle placement", () => {
+	it("puts the toggle in the tabs row while expanded", () => {
+		renderLayout();
+
+		expect(sidebar().contains(hideSidebarButton())).toBe(true);
+	});
+
+	it("collapses the sidebar from its own toggle", () => {
+		renderLayout();
+
+		fireEvent.click(hideSidebarButton());
+
+		expect(styleOf(sidebar()).display).toBe("none");
+	});
+
+	it("exposes no reachable toggle inside the collapsed sidebar", () => {
+		renderLayout({ collapsed: true });
+
+		expect(screen.queryByRole("button", { name: "Hide sidebar" })).toBeNull();
+		expect(screen.queryByRole("button", { name: "Show sidebar" })).toBeNull();
 	});
 });
 
