@@ -1,6 +1,7 @@
 import { type SessionClient, sendTo } from "./broadcast";
 import type { Session } from "./createSession";
 import { daemonLog } from "./daemonLog";
+import { isPreviewKind } from "./isPreviewKind";
 import { previewTargetLabel } from "./previewTargetLabel";
 
 type Msg = Record<string, unknown>;
@@ -23,8 +24,7 @@ export function setPrPreview(
 		return;
 	}
 	const prNumber = typeof d.prNumber === "number" ? d.prNumber : null;
-	const kind =
-		d.kind === "backlog-item" || d.kind === "backlog-comment" ? d.kind : "pr";
+	const kind = isPreviewKind(d.kind) ? d.kind : "pr";
 	const itemType = d.itemType === "bug" ? "bug" : "story";
 	const draft = d.draft === true;
 	session.pendingPrPreview = {

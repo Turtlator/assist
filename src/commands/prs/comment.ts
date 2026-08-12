@@ -1,9 +1,6 @@
-import { runGhGraphql } from "../../shared/runGhGraphql";
+import { postReviewComment } from "./postReviewComment";
+import { reviewProposedPrComment } from "./reviewProposedPrComment";
 import { getCurrentPrNodeId, isGhNotInstalled } from "./shared";
-
-const MUTATION_SINGLE = `mutation($prId: ID!, $body: String!, $path: String!, $line: Int!) { addPullRequestReviewThread(input: { pullRequestId: $prId, body: $body, path: $path, line: $line, side: RIGHT }) { thread { id } } }`;
-
-const MUTATION_MULTI = `mutation($prId: ID!, $body: String!, $path: String!, $line: Int!, $startLine: Int!) { addPullRequestReviewThread(input: { pullRequestId: $prId, body: $body, path: $path, line: $line, startLine: $startLine, side: RIGHT, startSide: RIGHT }) { thread { id } } }`;
 
 function validateBody(body: string): void {
 	const lower = body.toLowerCase();
@@ -20,53 +17,22 @@ function validateLine(line: number): void {
 	}
 }
 
-type CommentVars = {
-	prId: string;
-	body: string;
-	path: string;
-	line: number;
-	startLine?: number;
-};
-
-function assertThreadCreated(stdout: string): void {
-	let parsed: {
-		data?: { addPullRequestReviewThread?: { thread?: { id?: unknown } } };
-	};
-	try {
-		parsed = JSON.parse(stdout);
-	} catch {
-		throw new Error(`GitHub returned an unparseable response: ${stdout}`);
-	}
-	const id = parsed.data?.addPullRequestReviewThread?.thread?.id;
-	if (typeof id !== "string" || id.length === 0) {
-		throw new Error(
-			"GitHub did not create a review thread (no thread id returned); the line is likely outside the PR diff.",
-		);
-	}
-}
-
-function postComment(vars: CommentVars): void {
-	const { startLine, ...base } = vars;
-	const stdout =
-		startLine === undefined
-			? runGhGraphql(MUTATION_SINGLE, base)
-			: runGhGraphql(MUTATION_MULTI, { ...base, startLine });
-	assertThreadCreated(stdout);
-}
-
-export function comment(
+export async function comment(
 	path: string,
 	line: number,
 	body: string,
 	startLine?: number,
-): void {
+): Promise<void> {
 	validateBody(body);
 	validateLine(line);
 	if (startLine !== undefined) validateLine(startLine);
+
+	const range = startLine !== undefined ? `${startLine}-${line}` : `${line}`;
+	await reviewProposedPrComment(`Comment on ${path}:${range}`, body, null);
+
 	try {
 		const prId = getCurrentPrNodeId();
-		postComment({ prId, body, path, line, startLine });
-		const range = startLine !== undefined ? `${startLine}-${line}` : `${line}`;
+		postReviewComment({ prId, body, path, line, startLine });
 		console.log(`Added review comment on ${path}:${range}`);
 	} catch (error) {
 		if (isGhNotInstalled(error)) {

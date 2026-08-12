@@ -110,7 +110,7 @@ Every command supports `--help` for full detail on its flags and behaviour.
 - `assist prs edit [--title <t>] [--what <w>] [--why <y>] [--how <h>] [--resolves <key>]` - Update only the supplied sections of the current PR's body. In a web session the resulting title and body are previewed for approve/reject first (with inline comments and pasted screenshots, as for `raise`); on approval the edit is applied with any screenshots appended, on rejection the reviewer's comments are printed and nothing is changed. Outside a session the edit applies directly
 - `assist prs list-comments` - List all comments on the current branch's pull request
 - `assist prs fixed <comment-id> <sha>` - Reply with commit link and resolve thread
-- `assist prs wontfix <comment-id> <reason>` - Reply with reason and resolve thread. Pass `-` as the reason to read it from stdin. A body containing markdown — backticks around identifiers, `$(...)`, `$VAR` — must be piped in rather than passed as an argument, or the calling shell expands it before assist sees it:
+- `assist prs wontfix <comment-id> <reason>` - Reply with reason and resolve thread. In a web session the reason is previewed for approve/reject first (with inline comments); on rejection nothing is posted, the reviewer's comments are printed and the command exits non-zero. Pass `-` as the reason to read it from stdin. A body containing markdown — backticks around identifiers, `$(...)`, `$VAR` — must be piped in rather than passed as an argument, or the calling shell expands it before assist sees it:
 
   ```bash
   assist prs wontfix 3718677497 - <<'EOF'
@@ -118,8 +118,8 @@ Every command supports `--help` for full detail on its flags and behaviour.
   EOF
   ```
 
-- `assist prs reply <comment-id> <body>` - Reply to a comment thread without resolving it. Pass `-` as the body to read it from stdin
-- `assist prs comment <path> <line> <body>` - Add a line comment to the pending review. Pass `-` as the body to read it from stdin
+- `assist prs reply <comment-id> <body>` - Reply to a comment thread without resolving it. In a web session the body is previewed for approve/reject first (with inline comments), as for `wontfix`. Pass `-` as the body to read it from stdin
+- `assist prs comment <path> <line> <body>` - Add a line comment to the pending review. In a web session the comment is previewed for approve/reject first (with inline comments), headed `Comment on <path>:<line>`; nothing is posted until it is approved. Pass `-` as the body to read it from stdin
 - `assist review [number]` - Run Claude and Codex in parallel to review the current branch's PR, then post line-bound comments. The diff comes from GitHub, so stale local base branches don't pollute the review; cached `claude.md` / `codex.md` / `synthesis.md` are reused when present
   - `[number]` - `gh pr checkout <number>` first, placed by the worktree allocator on a repo with parallel work enabled (see [docs/parallel-work.md](docs/parallel-work.md))
   - `--no-prompt` - Skip all confirmations
@@ -168,7 +168,7 @@ Backlog item ids are written and displayed in an `a`-prefixed form (e.g. item 55
 - `assist backlog set-status <id> <status>` - Set status (`todo`, `in-progress`, `done`, `wontdo`)
 - `assist backlog star <id>` / `assist backlog unstar <id>` - Pin an item ahead of unstarred items in the web view
 - `assist backlog delete <id>` - Delete a backlog item
-- `assist backlog comment <id> <text>` - Add a comment to a backlog item (inside a web session the comment is shown in the preview pane and only written once approved)
+- `assist backlog comment <id> <text>` - Add a comment to a backlog item. Set `backlog.previewComments` to `true` to have the comment shown in the web preview pane and only written once approved; by default it is written immediately
 - `assist backlog comments <id>` - List comments and summaries for a backlog item
 - `assist backlog delete-comment <id> <comment-id>` - Delete a comment (summaries cannot be deleted)
 - `assist backlog phase-done <id> <phase> <summary>` - Signal that a plan phase is complete

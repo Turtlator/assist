@@ -1,4 +1,5 @@
 import { replyToComment } from "./replyToComment";
+import { reviewProposedPrComment } from "./reviewProposedPrComment";
 import { getCurrentPrNumber, getRepoInfo, isGhNotInstalled } from "./shared";
 
 function validateBody(body: string): void {
@@ -9,8 +10,10 @@ function validateBody(body: string): void {
 	}
 }
 
-export function reply(commentId: number, body: string): void {
+export async function reply(commentId: number, body: string): Promise<void> {
 	validateBody(body);
+
+	await reviewProposedPrComment(`Reply to comment #${commentId}`, body, null);
 
 	try {
 		const prNumber = getCurrentPrNumber();

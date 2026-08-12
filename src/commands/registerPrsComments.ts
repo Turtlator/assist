@@ -30,7 +30,7 @@ export function registerPrsComments(prsCommand: Command): void {
 			"Reply with reason and resolve thread (reason of - reads it from stdin)",
 		)
 		.action(async (commentId: string, reason: string) => {
-			prsWontfix(
+			await prsWontfix(
 				Number.parseInt(commentId, 10),
 				await readBodyArgument(reason),
 			);
@@ -42,7 +42,10 @@ export function registerPrsComments(prsCommand: Command): void {
 			"Reply to a comment thread without resolving it (body of - reads it from stdin)",
 		)
 		.action(async (commentId: string, body: string) => {
-			prsReply(Number.parseInt(commentId, 10), await readBodyArgument(body));
+			await prsReply(
+				Number.parseInt(commentId, 10),
+				await readBodyArgument(body),
+			);
 		});
 
 	prsCommand
@@ -51,6 +54,10 @@ export function registerPrsComments(prsCommand: Command): void {
 			"Add a line comment to the pending review (body of - reads it from stdin)",
 		)
 		.action(async (path: string, line: string, body: string) => {
-			prsComment(path, Number.parseInt(line, 10), await readBodyArgument(body));
+			await prsComment(
+				path,
+				Number.parseInt(line, 10),
+				await readBodyArgument(body),
+			);
 		});
 }

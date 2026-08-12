@@ -12,6 +12,11 @@ export const backlogConfigHelp: ConfigHelpEntry[] = [
 		note: "default sub-tasks seeded onto every new backlog item",
 	},
 	{
+		key: "backlog.previewComments",
+		setter: "assist config set backlog.previewComments true",
+		note: "review 'backlog comment' in the web preview pane before it is written (default: off)",
+	},
+	{
 		key: "clone.baseDir",
 		setter: "assist config set clone.baseDir ~/git",
 		note: "base directory 'backlog clone' clones repos into (default: ~/git)",

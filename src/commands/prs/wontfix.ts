@@ -1,5 +1,6 @@
 import { execSync } from "node:child_process";
 import { resolveCommentWithReply } from "./resolveCommentWithReply";
+import { reviewProposedPrComment } from "./reviewProposedPrComment";
 import { isGhNotInstalled } from "./shared";
 
 function validateReason(reason: string): void {
@@ -38,9 +39,18 @@ function validateShaReferences(reason: string): void {
 	}
 }
 
-export function wontfix(commentId: number, reason: string): void {
+export async function wontfix(
+	commentId: number,
+	reason: string,
+): Promise<void> {
 	validateReason(reason);
 	validateShaReferences(reason);
+
+	await reviewProposedPrComment(
+		`Won't fix comment #${commentId}`,
+		reason,
+		null,
+	);
 
 	try {
 		resolveCommentWithReply(commentId, reason);

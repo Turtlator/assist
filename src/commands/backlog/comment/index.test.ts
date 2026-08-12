@@ -9,6 +9,11 @@ let orm: Db;
 let close: () => Promise<void>;
 
 const mockRequestPreviewDecision = vi.fn();
+const mockLoadConfig = vi.fn();
+
+vi.mock("../../../shared/loadConfig", () => ({
+	loadConfig: () => mockLoadConfig(),
+}));
 
 vi.mock("../../../shared/db/getDb", () => ({
 	getDb: () => Promise.resolve(orm),
@@ -44,6 +49,8 @@ beforeEach(async () => {
 		.insert(items)
 		.values({ id: 1, origin: "test", name: "Preview items", status: "todo" });
 	mockRequestPreviewDecision.mockReset();
+	mockLoadConfig.mockReset();
+	mockLoadConfig.mockReturnValue({ backlog: { previewComments: true } });
 	vi.spyOn(console, "log").mockImplementation(() => {});
 	delete process.env.ASSIST_SESSION;
 	delete process.env.ASSIST_SESSION_ID;
@@ -68,6 +75,19 @@ describe("comment", () => {
 
 	it("appends the comment without a preview when the session id is missing", async () => {
 		process.env.ASSIST_SESSION = "1";
+
+		await comment("a1", "Looks good to me");
+
+		expect(mockRequestPreviewDecision).not.toHaveBeenCalled();
+		expect(await getComments()).toEqual([
+			{ text: "Looks good to me", type: "comment" },
+		]);
+	});
+
+	it("appends the comment without a preview when backlog.previewComments is off", async () => {
+		mockLoadConfig.mockReturnValue({});
+		process.env.ASSIST_SESSION = "1";
+		process.env.ASSIST_SESSION_ID = "7";
 
 		await comment("a1", "Looks good to me");
 

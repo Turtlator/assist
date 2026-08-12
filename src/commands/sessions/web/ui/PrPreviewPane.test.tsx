@@ -758,6 +758,60 @@ describe("PrPreviewPane inline comments", () => {
 		});
 	});
 
+	describe("pr comment previews", () => {
+		const prComment: PrPreview = {
+			requestId: "p1",
+			title: "Comment on src/foo.ts:42",
+			body: "This branch swallows the error silently",
+			prNumber: null,
+			kind: "pr-comment",
+		};
+
+		it("shows a neutral Comment chip with no PR chain or screenshot UI", () => {
+			render(<PrPreviewPane preview={prComment} onDecision={vi.fn()} />);
+
+			expect(screen.getByText("Comment")).toBeTruthy();
+			expect(screen.queryByText("New PR")).toBeNull();
+			expect(screen.queryByLabelText("Review")).toBeNull();
+			expect(screen.queryByLabelText("Post")).toBeNull();
+			expect(screen.queryByLabelText("Draft")).toBeNull();
+			expect(screen.queryByText(/attach a screenshot/)).toBeNull();
+		});
+
+		it("stays neutral when the preview carries a PR number", () => {
+			render(
+				<PrPreviewPane
+					preview={{ ...prComment, prNumber: 42 }}
+					onDecision={vi.fn()}
+				/>,
+			);
+
+			expect(screen.getByText("Comment")).toBeTruthy();
+			expect(screen.queryByText("Update #42")).toBeNull();
+			expect(screen.queryByLabelText("Review")).toBeNull();
+		});
+
+		it("returns each inline comment with Request changes", () => {
+			const onDecision = vi.fn();
+			const { container } = render(
+				<PrPreviewPane preview={prComment} onDecision={onDecision} />,
+			);
+
+			addComment(container, "swallows the error", "name the error");
+
+			fireEvent.click(
+				screen.getByRole("button", { name: /Request changes \(1\)/ }),
+			);
+			expect(onDecision).toHaveBeenCalledWith("reject", {
+				comments: [{ quote: "swallows the error", note: "name the error" }],
+				screenshots: [],
+				reviewAfter: false,
+				announceAfter: false,
+				draft: false,
+			});
+		});
+	});
+
 	it("clears persisted comments once a decision is made", () => {
 		const { container, unmount } = render(
 			<PrPreviewPane preview={preview} onDecision={vi.fn()} />,

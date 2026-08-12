@@ -32,6 +32,19 @@ describe("previewChip", () => {
 		});
 	});
 
+	it("labels a PR comment neutrally", () => {
+		expect(previewChip(preview({ kind: "pr-comment" }), false)).toEqual({
+			label: "Comment",
+			color: "default",
+		});
+	});
+
+	it("keeps a PR comment neutral even when it carries a PR number", () => {
+		expect(
+			previewChip(preview({ kind: "pr-comment", prNumber: 42 }), false),
+		).toEqual({ label: "Comment", color: "default" });
+	});
+
 	it("labels an update to an existing PR", () => {
 		expect(previewChip(preview({ prNumber: 42 }), false)).toEqual({
 			label: "Update #42",

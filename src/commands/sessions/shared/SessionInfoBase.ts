@@ -9,7 +9,11 @@ export type PrPreviewComment = {
 	note: string;
 };
 
-export type PreviewKind = "pr" | "backlog-item" | "backlog-comment";
+export type PreviewKind =
+	| "pr"
+	| "backlog-item"
+	| "backlog-comment"
+	| "pr-comment";
 
 export type PreviewItemType = "story" | "bug";
 
