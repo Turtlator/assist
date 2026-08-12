@@ -1,3 +1,10 @@
+# [0.568.0](https://github.com/staff0rd/assist/compare/v0.567.1...v0.568.0) (2026-08-12)
+
+
+### Features
+
+* move sidebar toggle beside sidebar tabs ([00064ed](https://github.com/staff0rd/assist/commit/00064edc5a6f0273efbde669bdd5768283e416a6))
+
 ## [0.567.1](https://github.com/staff0rd/assist/compare/v0.567.0...v0.567.1) (2026-08-12)
 
 
