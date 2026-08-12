@@ -1,3 +1,10 @@
+# [0.567.0](https://github.com/staff0rd/assist/compare/v0.566.0...v0.567.0) (2026-08-12)
+
+
+### Features
+
+* collapsible left sidebar toggle ([1a92044](https://github.com/staff0rd/assist/commit/1a9204463e9579c75f68adebbb8915e59b8ccfdf))
+
 # [0.566.0](https://github.com/staff0rd/assist/compare/v0.565.2...v0.566.0) (2026-08-12)
 
 
