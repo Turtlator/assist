@@ -12,7 +12,6 @@ export function SidebarCollapseToggle({
 
 	return (
 		<IconButton
-			size="small"
 			onClick={onToggleCollapsed}
 			title={label}
 			aria-label={label}
@@ -22,7 +21,7 @@ export function SidebarCollapseToggle({
 				"&:hover": { color: "text.primary" },
 			}}
 		>
-			<ViewSidebarOutlined sx={{ fontSize: 16 }} />
+			<ViewSidebarOutlined />
 		</IconButton>
 	);
 }
