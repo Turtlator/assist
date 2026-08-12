@@ -1,3 +1,10 @@
+# [0.566.0](https://github.com/staff0rd/assist/compare/v0.565.2...v0.566.0) (2026-08-12)
+
+
+### Features
+
+* preview pr comment writes ([d9ea0c0](https://github.com/staff0rd/assist/commit/d9ea0c05e71079062803dff4a4e654950867d4c1))
+
 ## [0.565.2](https://github.com/staff0rd/assist/compare/v0.565.1...v0.565.2) (2026-08-11)
 
 
