@@ -19,6 +19,11 @@ const BUILTIN_DENIES: { pattern: string; message: string }[] = [
 			"Do not run 'gh pr edit' directly. Use 'assist prs edit [--title <title>] [--what <what>] [--why <why>] [--how <how>]' instead — it assembles and validates the body before delegating to gh, and in an assist web session blocks on the preview pane until the user approves or rejects. Compose the sections and run it; see 'assist prs edit --help' for how to pitch each section.",
 	},
 	{
+		pattern: "gh issue create",
+		message:
+			"Do not run 'gh issue create' directly. Use 'assist github issue create --title <title> --body <body> [-R <owner>/<repo>]' instead — it validates the title and body before delegating to gh, and gates the issue on the user's approval itself. Run 'assist github issue create --help' and follow its guidance to compose the body; it is authoritative on how approval is handled in this environment.",
+	},
+	{
 		pattern: "git commit",
 		message:
 			"Do not run 'git commit' directly. Use 'assist commit \"<message>\"' instead.",

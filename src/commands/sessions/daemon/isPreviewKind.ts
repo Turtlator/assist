@@ -5,6 +5,7 @@ const PREVIEW_KINDS: PreviewKind[] = [
 	"backlog-item",
 	"backlog-comment",
 	"pr-comment",
+	"github-issue",
 ];
 
 export function isPreviewKind(value: unknown): value is PreviewKind {

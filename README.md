@@ -133,6 +133,7 @@ Every command supports `--help` for full detail on its flags and behaviour.
   - `--announce` - Announce the PR in Slack (`/prs-slack <n> --no-confirm`) at the tail of the chain: the Address Comments session announces once every thread is processed when one was started, otherwise a `/prs-slack` session is started directly. Announces exactly once, and only inside an assist session
   - `--verbose` - Per-line log output instead of the stacked-spinner UI (automatic in CI)
 - `assist github commits <org> [--since <date>] [--top <n>] [--json]` - Report commit activity across a GitHub organisation: repos ranked by commits, top committers, and a per-repo author breakdown
+- `assist github issue create --title <title> --body <body> [-R <owner>/<repo>]` - Create a GitHub issue on the current repo (or `-R`'s). There is no What/Why/How template — an issue reports a problem, and the target repo's own issue template is unknowable from here. The title and body are rejected if they reference Claude or an assist backlog item, and in a web session they are previewed for approve/reject first (with inline comments); nothing is created until it is approved. Raw `gh issue create` is denied in favour of this command
 - `assist news add [url]` - Add an RSS feed URL (rendered in the sessions web News tab)
 
 ### Backlog

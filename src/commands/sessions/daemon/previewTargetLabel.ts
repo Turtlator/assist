@@ -8,6 +8,7 @@ export function previewTargetLabel(
 ): string {
 	if (kind === "backlog-comment") return "backlog comment";
 	if (kind === "pr-comment") return "pr comment";
+	if (kind === "github-issue") return "github issue";
 	if (kind === "backlog-item") return `backlog ${itemType}`;
 	if (prNumber !== null) return `edit #${prNumber}`;
 	return draft ? "create draft" : "create";

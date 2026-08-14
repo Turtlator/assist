@@ -45,6 +45,33 @@ describe("findBuiltinDeny gh pr create", () => {
 	});
 });
 
+describe("findBuiltinDeny gh issue create", () => {
+	it("denies 'gh issue create' with a redirect to 'assist github issue create'", () => {
+		const decision = findBuiltinDeny([
+			"gh issue create --title x --body y -R acme/widgets",
+		]);
+		expect(decision?.permissionDecision).toBe("deny");
+		expect(decision?.permissionDecisionReason).toContain(
+			"assist github issue create",
+		);
+	});
+
+	it("denies 'gh issue create' buried in a compound command part", () => {
+		const decision = findBuiltinDeny(["cd /repo", "gh issue create --web"]);
+		expect(decision?.permissionDecision).toBe("deny");
+	});
+
+	it("does not deny an unrelated gh issue command", () => {
+		expect(findBuiltinDeny(["gh issue list"])).toBeUndefined();
+		expect(findBuiltinDeny(["gh issue view 42"])).toBeUndefined();
+	});
+
+	it("does not ask for an AskUserQuestion confirmation before the redirect", () => {
+		const decision = findBuiltinDeny(["gh issue create --title x --body y"]);
+		expect(decision?.permissionDecisionReason).not.toContain("AskUserQuestion");
+	});
+});
+
 describe("findBuiltinDeny git commit", () => {
 	it("denies a leading 'git commit'", () => {
 		const decision = findBuiltinDeny(['git commit -m "fix: x"']);

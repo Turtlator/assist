@@ -9,6 +9,9 @@ export function previewChip(preview: PrPreview, draft: boolean): ChipSpec {
 	if (preview.kind === "backlog-comment" || preview.kind === "pr-comment")
 		return { label: "Comment", color: "default" };
 
+	if (preview.kind === "github-issue")
+		return { label: "Issue", color: "warning" };
+
 	if (preview.kind === "backlog-item")
 		return preview.itemType === "bug"
 			? { label: "Bug", color: "warning" }
