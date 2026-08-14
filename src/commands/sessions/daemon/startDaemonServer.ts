@@ -3,6 +3,7 @@ import * as net from "node:net";
 import { isDaemonRunning } from "./connectToDaemon";
 import { daemonLog } from "./daemonLog";
 import { daemonPaths } from "./daemonPaths";
+import { exitAfterFlush } from "./exitAfterFlush";
 import { handleConnection } from "./handleConnection";
 import { onListening } from "./onListening";
 import type { SessionManager } from "./SessionManager";
@@ -17,7 +18,8 @@ export async function startDaemonServer(
 		daemonLog(
 			"exiting before binding the pipe so the next launch can take over",
 		);
-		process.exit(1);
+		exitAfterFlush(1);
+		return;
 	}
 	const server = net.createServer((socket) =>
 		handleConnection(socket, manager),

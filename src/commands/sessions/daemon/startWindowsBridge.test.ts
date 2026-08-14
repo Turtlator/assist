@@ -2,12 +2,14 @@ import { EventEmitter } from "node:events";
 import * as net from "node:net";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { daemonLog } from "./daemonLog";
+import { exitAfterFlush } from "./exitAfterFlush";
 import type { SessionManager } from "./SessionManager";
 import { startWindowsBridge } from "./startWindowsBridge";
 import { WINDOWS_BRIDGE_FAILURE_PREFIX } from "./windowsBridgeFailureCause";
 
 vi.mock("node:net", () => ({ createServer: vi.fn() }));
 vi.mock("./daemonLog", () => ({ daemonLog: vi.fn() }));
+vi.mock("./exitAfterFlush", () => ({ exitAfterFlush: vi.fn() }));
 vi.mock("./handleConnection", () => ({ handleConnection: vi.fn() }));
 vi.mock("./windowsDaemonPort", () => ({ windowsDaemonPort: () => 51764 }));
 
@@ -15,6 +17,9 @@ const createServerMock = net.createServer as unknown as ReturnType<
 	typeof vi.fn
 >;
 const logMock = daemonLog as unknown as ReturnType<typeof vi.fn>;
+const exitAfterFlushMock = exitAfterFlush as unknown as ReturnType<
+	typeof vi.fn
+>;
 
 function eaddrinuse(): NodeJS.ErrnoException {
 	return Object.assign(
@@ -96,14 +101,11 @@ describe("startWindowsBridge", () => {
 
 	it("exits when the bridge dies after it started listening", async () => {
 		const [bridge] = queueBridges("listening");
-		const exit = vi
-			.spyOn(process, "exit")
-			.mockImplementation((() => undefined) as never);
 
 		await startWindowsBridge(manager);
 		bridge?.emit("error", eaddrinuse());
 
-		expect(exit).toHaveBeenCalledWith(1);
+		expect(exitAfterFlushMock).toHaveBeenCalledWith(1);
 		expect(loggedLines()).toContainEqual(
 			expect.stringContaining(WINDOWS_BRIDGE_FAILURE_PREFIX),
 		);

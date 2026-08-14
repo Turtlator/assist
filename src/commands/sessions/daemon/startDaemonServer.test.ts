@@ -3,6 +3,7 @@ import { unlinkSync } from "node:fs";
 import * as net from "node:net";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { isDaemonRunning } from "./connectToDaemon";
+import { exitAfterFlush } from "./exitAfterFlush";
 import { onListening } from "./onListening";
 import type { SessionManager } from "./SessionManager";
 import { startDaemonServer } from "./startDaemonServer";
@@ -12,6 +13,7 @@ vi.mock("node:fs", () => ({ unlinkSync: vi.fn() }));
 vi.mock("node:net", () => ({ createServer: vi.fn() }));
 vi.mock("./connectToDaemon", () => ({ isDaemonRunning: vi.fn() }));
 vi.mock("./daemonLog", () => ({ daemonLog: vi.fn() }));
+vi.mock("./exitAfterFlush", () => ({ exitAfterFlush: vi.fn() }));
 vi.mock("./onListening", () => ({ onListening: vi.fn() }));
 vi.mock("./startWindowsBridge", () => ({ startWindowsBridge: vi.fn() }));
 
@@ -21,6 +23,9 @@ const createServerMock = net.createServer as unknown as ReturnType<
 const isRunningMock = isDaemonRunning as unknown as ReturnType<typeof vi.fn>;
 const onListeningMock = onListening as unknown as ReturnType<typeof vi.fn>;
 const bridgeMock = startWindowsBridge as unknown as ReturnType<typeof vi.fn>;
+const exitAfterFlushMock = exitAfterFlush as unknown as ReturnType<
+	typeof vi.fn
+>;
 
 function asPlatform(platform: NodeJS.Platform): void {
 	Object.defineProperty(process, "platform", {
@@ -109,18 +114,13 @@ describe("startDaemonServer", () => {
 		it("exits without owning the pipe when the bridge cannot bind", async () => {
 			asPlatform("win32");
 			bridgeMock.mockResolvedValue(false);
-			const exit = vi.spyOn(process, "exit").mockImplementation((() => {
-				throw new Error("exited");
-			}) as never);
 
-			await expect(startDaemonServer(manager, checkAutoExit)).rejects.toThrow(
-				"exited",
-			);
+			await startDaemonServer(manager, checkAutoExit);
+			await flush();
 
-			expect(exit).toHaveBeenCalledWith(1);
+			expect(exitAfterFlushMock).toHaveBeenCalledWith(1);
 			expect(createServerMock).not.toHaveBeenCalled();
 			expect(onListeningMock).not.toHaveBeenCalled();
-			exit.mockRestore();
 		});
 	});
 });

@@ -1,5 +1,6 @@
 import * as net from "node:net";
 import { daemonLog } from "./daemonLog";
+import { exitAfterFlush } from "./exitAfterFlush";
 import { handleConnection } from "./handleConnection";
 import type { SessionManager } from "./SessionManager";
 import { WINDOWS_BRIDGE_FAILURE_PREFIX } from "./windowsBridgeFailureCause";
@@ -49,7 +50,7 @@ function bindBridge(
 				daemonLog(
 					`${WINDOWS_BRIDGE_FAILURE_PREFIX} ${error.message} after listening; exiting so the next launch can take over`,
 				);
-				process.exit(1);
+				exitAfterFlush(1);
 			});
 			resolve(null);
 		});
