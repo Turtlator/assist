@@ -1,3 +1,10 @@
+# [0.571.0](https://github.com/staff0rd/assist/compare/v0.570.2...v0.571.0) (2026-08-14)
+
+
+### Features
+
+* persist auto mode across respawns ([1f3b4d3](https://github.com/staff0rd/assist/commit/1f3b4d3b96156086bff0eee729e664367f94d6fd))
+
 ## [0.570.2](https://github.com/staff0rd/assist/compare/v0.570.1...v0.570.2) (2026-08-14)
 
 
