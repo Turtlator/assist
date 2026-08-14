@@ -74,6 +74,24 @@ describe("configUnset", () => {
 			});
 			expect(mockSaveConfig).not.toHaveBeenCalled();
 		});
+
+		it("should remove the key alongside a legacy news key and preserve it", () => {
+			mockLoadGlobalConfigRaw.mockReturnValue({
+				news: { feeds: ["https://example.com/feed"] },
+				sync: { autoConfirm: true },
+			});
+			const mockExit = vi
+				.spyOn(process, "exit")
+				.mockImplementation(() => undefined as never);
+
+			configUnset("sync.autoConfirm", { global: true });
+
+			expect(mockExit).not.toHaveBeenCalled();
+			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({
+				news: { feeds: ["https://example.com/feed"] },
+			});
+			mockExit.mockRestore();
+		});
 	});
 
 	describe("with -g --repo", () => {

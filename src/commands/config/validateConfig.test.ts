@@ -35,6 +35,39 @@ describe("validateConfig", () => {
 		});
 	});
 
+	it("accepts a config carrying a legacy news key", () => {
+		expect(
+			validateConfig(
+				{
+					news: { feeds: ["https://example.com/feed"] },
+					commit: { push: true },
+				},
+				"commit.push",
+			),
+		).toEqual({ ok: true });
+	});
+
+	it("rejects an unknown top-level key and names it", () => {
+		const result = validateConfig(
+			{ bogus: true, commit: { push: true } },
+			"commit.push",
+		);
+
+		expect(result).toEqual({
+			ok: false,
+			errors: ["bogus: Unrecognized key"],
+		});
+	});
+
+	it("names an unknown nested key by its full path", () => {
+		const result = validateConfig({ commit: { bogus: true } }, "commit.bogus");
+
+		expect(result).toEqual({
+			ok: false,
+			errors: ["commit.bogus: Unrecognized key"],
+		});
+	});
+
 	it("masks a secret value echoed by a validation message", () => {
 		const result = validateConfig(
 			{ database: { url: "mysql://user:hunter2@host/db" } },

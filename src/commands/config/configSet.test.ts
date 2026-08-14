@@ -73,6 +73,24 @@ describe("configSet", () => {
 				sync: { autoConfirm: true },
 			});
 		});
+
+		it("should write alongside a legacy news key and preserve it", () => {
+			mockLoadGlobalConfigRaw.mockReturnValue({
+				news: { feeds: ["https://example.com/feed"] },
+			});
+			const mockExit = vi
+				.spyOn(process, "exit")
+				.mockImplementation(() => undefined as never);
+
+			configSet("sessions.windowsDaemonPort", "21764", { global: true });
+
+			expect(mockExit).not.toHaveBeenCalled();
+			expect(mockSaveGlobalConfig).toHaveBeenCalledWith({
+				news: { feeds: ["https://example.com/feed"] },
+				sessions: { windowsDaemonPort: 21764 },
+			});
+			mockExit.mockRestore();
+		});
 	});
 
 	describe("global-only keys", () => {

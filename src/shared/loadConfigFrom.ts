@@ -6,6 +6,7 @@ import { linkedWorktree } from "./linkedWorktree";
 import { loadRawYaml } from "./loadRawYaml";
 import { mergeRawConfigs } from "./mergeDenyRules";
 import { resolveRepoOverride } from "./resolveRepoOverride";
+import { stripLegacyConfigKeys } from "./stripLegacyConfigKeys";
 import { type AssistConfig, assistConfigSchema } from "./types";
 
 export function findConfigUp(
@@ -49,8 +50,9 @@ export function loadConfigFrom(
 		? resolveRepoOverride(globalRaw, getCurrentOrigin(cwd))
 		: {};
 	const globalWithRepo = mergeRawConfigs(globalRaw, repoOverride);
-	const merged = mergeRawConfigs(globalWithRepo, projectRaw);
+	const merged = stripLegacyConfigKeys(
+		mergeRawConfigs(globalWithRepo, projectRaw),
+	);
 	delete merged.repos;
-	delete merged.news;
 	return assistConfigSchema.parse(merged);
 }
