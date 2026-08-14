@@ -10,6 +10,7 @@ const BACKOFF_MS = 60_000;
 export class LaunchCircuitBreaker {
 	private failures = 0;
 	private until = 0;
+	private lastCause = "";
 
 	tripped(): boolean {
 		return this.failures >= MAX_FAILURES && Date.now() < this.until;
@@ -17,20 +18,25 @@ export class LaunchCircuitBreaker {
 
 	reason(): string {
 		const secs = Math.ceil((this.until - Date.now()) / 1000);
-		return `Windows daemon failed to start ${this.failures} times in a row; not retrying for ${secs}s`;
+		const summary = `${this.failures} times in a row; not retrying for ${secs}s`;
+		return this.lastCause
+			? `${this.lastCause} (failed ${summary})`
+			: `Windows daemon failed to start ${summary}`;
 	}
 
 	clear(): void {
 		this.failures = 0;
 		this.until = 0;
+		this.lastCause = "";
 	}
 
-	fail(): void {
+	fail(cause: string): void {
 		this.failures++;
+		this.lastCause = cause;
 		if (this.failures < MAX_FAILURES) return;
 		this.until = Date.now() + BACKOFF_MS;
 		daemonLog(
-			`windows connection: ${this.failures} consecutive launch failures; backing off ${BACKOFF_MS / 1000}s`,
+			`windows connection: ${this.failures} consecutive launch failures; backing off ${BACKOFF_MS / 1000}s; last error: ${cause}`,
 		);
 	}
 }

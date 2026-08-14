@@ -32,14 +32,16 @@ export class WindowsConnection {
 		this.connection = connection;
 		connection.then(
 			() => this.breaker.clear(),
-			() => this.onOpenFailure(connection),
+			(error: unknown) => this.onOpenFailure(connection, error),
 		);
 		return connection;
 	}
 
-	private onOpenFailure(connection: Promise<Socket>): void {
+	private onOpenFailure(connection: Promise<Socket>, error: unknown): void {
 		if (this.connection === connection) this.connection = null;
-		this.breaker.fail();
+		this.breaker.fail(
+			error instanceof Error ? error.message : String(error ?? "unknown error"),
+		);
 	}
 
 	write(msg: object): void {

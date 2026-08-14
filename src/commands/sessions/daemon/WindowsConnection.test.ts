@@ -29,6 +29,18 @@ describe("WindowsConnection circuit breaker", () => {
 		expect(connect).toHaveBeenCalledTimes(3);
 	});
 
+	it("keeps the real cause in the tripped-breaker error", async () => {
+		const cause =
+			"Windows daemon failed to start: windows bridge unavailable: could not bind port 51764 after 3 attempts";
+		const connect = vi.fn(() => Promise.reject(new Error(cause)));
+		const conn = new WindowsConnection({ ...sink, connect });
+
+		for (let i = 0; i < 3; i++) await expect(conn.ensure()).rejects.toThrow();
+
+		await expect(conn.ensure()).rejects.toThrow(/could not bind port 51764/);
+		await expect(conn.ensure()).rejects.toThrow(/not retrying/);
+	});
+
 	it("resets the breaker once a connection succeeds", async () => {
 		/* why: track server-side peers so teardown can destroy them — without a
 		 * connection handler the accepted socket lingers and server.close() hangs */
