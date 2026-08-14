@@ -1,3 +1,10 @@
+# [0.570.0](https://github.com/staff0rd/assist/compare/v0.569.0...v0.570.0) (2026-08-14)
+
+
+### Features
+
+* add agents in auto mode ([7fde4c1](https://github.com/staff0rd/assist/commit/7fde4c181784a564ac61d85780f048e8d2f1b7d0))
+
 # [0.569.0](https://github.com/staff0rd/assist/compare/v0.568.3...v0.569.0) (2026-08-14)
 
 
