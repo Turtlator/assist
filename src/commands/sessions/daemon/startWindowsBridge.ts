@@ -1,6 +1,7 @@
 import * as net from "node:net";
 import { daemonLog } from "./daemonLog";
 import { exitAfterFlush } from "./exitAfterFlush";
+import { findPortHolderPid } from "./findPortHolderPid";
 import { handleConnection } from "./handleConnection";
 import type { SessionManager } from "./SessionManager";
 import { WINDOWS_BRIDGE_FAILURE_PREFIX } from "./windowsBridgeFailureCause";
@@ -26,9 +27,16 @@ export async function startWindowsBridge(
 		if (attempt < BIND_ATTEMPTS) await delay(BIND_RETRY_DELAY_MS);
 	}
 	daemonLog(
-		`${WINDOWS_BRIDGE_FAILURE_PREFIX} could not bind port ${port} after ${BIND_ATTEMPTS} attempts; the port is held by another process or reserved by a Hyper-V/WSL dynamic port range — set sessions.windowsDaemonPort to a free port outside 49152-65535`,
+		`${WINDOWS_BRIDGE_FAILURE_PREFIX} could not bind port ${port} after ${BIND_ATTEMPTS} attempts; ${describePortHolder(port)}`,
 	);
 	return false;
+}
+
+function describePortHolder(port: number): string {
+	const holder = findPortHolderPid(port);
+	return holder !== undefined && holder !== process.pid
+		? `PID ${holder} is listening on it — kill PID ${holder} to free the port`
+		: "the port is held by another process or reserved by a Hyper-V/WSL dynamic port range — set sessions.windowsDaemonPort to a free port outside 49152-65535";
 }
 
 function bindBridge(

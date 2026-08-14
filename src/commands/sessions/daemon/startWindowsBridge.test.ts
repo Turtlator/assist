@@ -3,6 +3,7 @@ import * as net from "node:net";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { daemonLog } from "./daemonLog";
 import { exitAfterFlush } from "./exitAfterFlush";
+import { findPortHolderPid } from "./findPortHolderPid";
 import type { SessionManager } from "./SessionManager";
 import { startWindowsBridge } from "./startWindowsBridge";
 import { WINDOWS_BRIDGE_FAILURE_PREFIX } from "./windowsBridgeFailureCause";
@@ -10,6 +11,7 @@ import { WINDOWS_BRIDGE_FAILURE_PREFIX } from "./windowsBridgeFailureCause";
 vi.mock("node:net", () => ({ createServer: vi.fn() }));
 vi.mock("./daemonLog", () => ({ daemonLog: vi.fn() }));
 vi.mock("./exitAfterFlush", () => ({ exitAfterFlush: vi.fn() }));
+vi.mock("./findPortHolderPid", () => ({ findPortHolderPid: vi.fn() }));
 vi.mock("./handleConnection", () => ({ handleConnection: vi.fn() }));
 vi.mock("./windowsDaemonPort", () => ({ windowsDaemonPort: () => 51764 }));
 
@@ -20,6 +22,7 @@ const logMock = daemonLog as unknown as ReturnType<typeof vi.fn>;
 const exitAfterFlushMock = exitAfterFlush as unknown as ReturnType<
 	typeof vi.fn
 >;
+const holderMock = findPortHolderPid as unknown as ReturnType<typeof vi.fn>;
 
 function eaddrinuse(): NodeJS.ErrnoException {
 	return Object.assign(
@@ -96,6 +99,17 @@ describe("startWindowsBridge", () => {
 			expect.stringContaining(
 				`${WINDOWS_BRIDGE_FAILURE_PREFIX} could not bind port 51764`,
 			),
+		);
+	});
+
+	it("names the process holding the port when it can be identified", async () => {
+		holderMock.mockReturnValue(192936);
+		queueBridges("error", "error", "error");
+
+		await expect(startWindowsBridge(manager)).resolves.toBe(false);
+		expect(holderMock).toHaveBeenCalledWith(51764);
+		expect(loggedLines()).toContainEqual(
+			expect.stringContaining("kill PID 192936 to free the port"),
 		);
 	});
 

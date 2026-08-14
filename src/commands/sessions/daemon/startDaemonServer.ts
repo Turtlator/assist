@@ -8,6 +8,7 @@ import { handleConnection } from "./handleConnection";
 import { onListening } from "./onListening";
 import type { SessionManager } from "./SessionManager";
 import { startWindowsBridge } from "./startWindowsBridge";
+import { describeWedgedHolder } from "./describeWedgedHolder";
 
 export async function startDaemonServer(
 	manager: SessionManager,
@@ -59,11 +60,16 @@ async function recoverFromAddrInUse(
 		daemonLog("another daemon owns the socket; exiting");
 		process.exit(1);
 	}
-	daemonLog("removing stale socket left by a crashed daemon");
-	if (process.platform !== "win32") {
-		try {
-			unlinkSync(daemonPaths.socket);
-		} catch {}
+	if (process.platform === "win32") {
+		daemonLog(
+			`${daemonPaths.socket} is bound but not answering: ${describeWedgedHolder()}; a named pipe cannot be removed, so exiting instead of retrying the bind`,
+		);
+		exitAfterFlush(1);
+		return;
 	}
+	daemonLog("removing stale socket left by a crashed daemon");
+	try {
+		unlinkSync(daemonPaths.socket);
+	} catch {}
 	listenWithSingleOnListening(server, manager, checkAutoExit);
 }

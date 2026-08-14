@@ -3,8 +3,10 @@ import { unlinkSync } from "node:fs";
 import * as net from "node:net";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { isDaemonRunning } from "./connectToDaemon";
+import { daemonLog } from "./daemonLog";
 import { exitAfterFlush } from "./exitAfterFlush";
 import { onListening } from "./onListening";
+import { isPidAlive, readDaemonPidFile } from "./readDaemonPidFile";
 import type { SessionManager } from "./SessionManager";
 import { startDaemonServer } from "./startDaemonServer";
 import { startWindowsBridge } from "./startWindowsBridge";
@@ -15,6 +17,10 @@ vi.mock("./connectToDaemon", () => ({ isDaemonRunning: vi.fn() }));
 vi.mock("./daemonLog", () => ({ daemonLog: vi.fn() }));
 vi.mock("./exitAfterFlush", () => ({ exitAfterFlush: vi.fn() }));
 vi.mock("./onListening", () => ({ onListening: vi.fn() }));
+vi.mock("./readDaemonPidFile", () => ({
+	isPidAlive: vi.fn(),
+	readDaemonPidFile: vi.fn(),
+}));
 vi.mock("./startWindowsBridge", () => ({ startWindowsBridge: vi.fn() }));
 
 const createServerMock = net.createServer as unknown as ReturnType<
@@ -26,6 +32,13 @@ const bridgeMock = startWindowsBridge as unknown as ReturnType<typeof vi.fn>;
 const exitAfterFlushMock = exitAfterFlush as unknown as ReturnType<
 	typeof vi.fn
 >;
+const logMock = daemonLog as unknown as ReturnType<typeof vi.fn>;
+const readPidMock = readDaemonPidFile as unknown as ReturnType<typeof vi.fn>;
+const isPidAliveMock = isPidAlive as unknown as ReturnType<typeof vi.fn>;
+
+function loggedLines(): string[] {
+	return logMock.mock.calls.map((call) => String(call[0]));
+}
 
 function asPlatform(platform: NodeJS.Platform): void {
 	Object.defineProperty(process, "platform", {
@@ -109,6 +122,44 @@ describe("startDaemonServer", () => {
 			await flush();
 
 			expect(onListeningMock).toHaveBeenCalledTimes(1);
+		});
+
+		it("names the wedged holder instead of retrying a held pipe", async () => {
+			asPlatform("win32");
+			bridgeMock.mockResolvedValue(true);
+			readPidMock.mockReturnValue(192936);
+			isPidAliveMock.mockReturnValue(true);
+			const server = new FakeServer(["error", "listening"]);
+			createServerMock.mockReturnValue(server);
+
+			await startDaemonServer(manager, checkAutoExit);
+			await flush();
+
+			expect(server.listenCalls).toBe(1);
+			expect(unlinkSync).not.toHaveBeenCalled();
+			expect(exitAfterFlushMock).toHaveBeenCalledWith(1);
+			expect(onListeningMock).not.toHaveBeenCalled();
+			expect(loggedLines()).toContainEqual(
+				expect.stringContaining("kill PID 192936"),
+			);
+			expect(loggedLines()).not.toContainEqual(
+				expect.stringContaining("removing stale socket"),
+			);
+		});
+
+		it("reports an unidentifiable holder when daemon.pid is gone", async () => {
+			asPlatform("win32");
+			bridgeMock.mockResolvedValue(true);
+			readPidMock.mockReturnValue(undefined);
+			createServerMock.mockReturnValue(new FakeServer(["error", "listening"]));
+
+			await startDaemonServer(manager, checkAutoExit);
+			await flush();
+
+			expect(exitAfterFlushMock).toHaveBeenCalledWith(1);
+			expect(loggedLines()).toContainEqual(
+				expect.stringContaining("could not be identified"),
+			);
 		});
 
 		it("exits without owning the pipe when the bridge cannot bind", async () => {

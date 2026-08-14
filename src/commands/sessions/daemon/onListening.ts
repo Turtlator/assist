@@ -12,7 +12,12 @@ export function onListening(
 	startPidFileWatchdog(() => {
 		daemonLog("lost daemon.pid ownership; shutting down sessions and exiting");
 		void manager.flushActiveMs().finally(() => {
-			manager.shutdown();
+			try {
+				manager.shutdown();
+			} catch (error) {
+				const reason = error instanceof Error ? error.message : String(error);
+				daemonLog(`shutdown teardown failed: ${reason}; exiting anyway`);
+			}
 			process.exit(0);
 		});
 	});

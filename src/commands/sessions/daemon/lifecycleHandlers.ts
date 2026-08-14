@@ -1,6 +1,7 @@
 import { discoverSessions } from "../shared/discoverSessions";
 import { parseTranscript } from "../shared/parseTranscript";
 import { type SessionClient, sendTo } from "./broadcast";
+import { daemonLog } from "./daemonLog";
 import type { SessionManager } from "./SessionManager";
 import { withRepoGroups } from "./withRepoGroups";
 
@@ -27,8 +28,13 @@ async function handleShutdown(
 	client: SessionClient,
 	manager: SessionManager,
 ): Promise<void> {
-	await manager.flushActiveMs();
-	manager.shutdown();
+	try {
+		await manager.flushActiveMs();
+		manager.shutdown();
+	} catch (error) {
+		const reason = error instanceof Error ? error.message : String(error);
+		daemonLog(`shutdown teardown failed: ${reason}; exiting anyway`);
+	}
 	sendTo(client, { type: "shutting-down" });
 	setImmediate(() => process.exit(0));
 }
