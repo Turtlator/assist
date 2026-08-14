@@ -1,3 +1,10 @@
+# [0.569.0](https://github.com/staff0rd/assist/compare/v0.568.3...v0.569.0) (2026-08-14)
+
+
+### Features
+
+* launch prompt sessions in auto mode ([f98b5ef](https://github.com/staff0rd/assist/commit/f98b5ef39d5289ac708dacbe5d38cb70763db171))
+
 ## [0.568.3](https://github.com/staff0rd/assist/compare/v0.568.2...v0.568.3) (2026-08-14)
 
 
