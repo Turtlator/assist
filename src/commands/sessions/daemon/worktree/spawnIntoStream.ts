@@ -12,7 +12,12 @@ export function spawnIntoStream(
 	const holdUntilSeeded = target.pendingStart !== undefined;
 	const id = ctx.spawnWith(
 		(sid) =>
-			createSession(sid, prompt, target.cwd, false, harness, holdUntilSeeded),
+			createSession(sid, {
+				prompt,
+				cwd: target.cwd,
+				harness,
+				holdPty: holdUntilSeeded,
+			}),
 		{ launchedFrom: target.id },
 	);
 	const joined = ctx.sessions.get(id);

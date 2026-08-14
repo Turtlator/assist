@@ -90,6 +90,7 @@ describe("dispatchMessage", () => {
 					prompt: "/prs-slack 42 --no-confirm",
 					cwd: "/git/repo",
 					design: false,
+					auto: false,
 					harness: undefined,
 					inPlace: true,
 				},

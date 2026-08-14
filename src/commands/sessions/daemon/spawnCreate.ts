@@ -27,6 +27,7 @@ export function spawnCreate(
 			prompt,
 			cwd: d.cwd as string | undefined,
 			design,
+			auto: d.auto === true,
 			harness,
 			inPlace: d.inPlace === true,
 		},

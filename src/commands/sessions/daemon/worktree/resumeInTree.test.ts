@@ -2,7 +2,8 @@ import { existsSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Session } from "../createSession";
 import { resumeInReplacementTree } from "./resumeInReplacementTree";
-import { resumeInTree, type TreeSpawnContext } from "./spawnInTree";
+import { type TreeSpawnContext } from "./spawnInTree";
+import { resumeInTree } from "./resumeInTree";
 
 vi.mock("node:fs", () => ({ existsSync: vi.fn(() => true) }));
 vi.mock("../daemonLog", () => ({ daemonLog: vi.fn() }));

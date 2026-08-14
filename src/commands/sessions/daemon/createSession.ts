@@ -10,13 +10,18 @@ import { sessionBase } from "./sessionBase";
 
 export type { Session, SessionInfo, SessionStatus } from "./types";
 
+export type CreateSessionOpts = {
+	prompt?: string;
+	cwd?: string;
+	design?: boolean;
+	auto?: boolean;
+	harness?: HarnessKind;
+	holdPty?: boolean;
+};
+
 export function createSession(
 	id: string,
-	prompt?: string,
-	cwd?: string,
-	design?: boolean,
-	harness?: HarnessKind,
-	holdPty?: boolean,
+	{ prompt, cwd, design, auto, harness, holdPty }: CreateSessionOpts = {},
 ): Session {
 	if (harness && harness !== "claude")
 		return createHarnessSession(id, harness, prompt, cwd, holdPty);
@@ -34,7 +39,14 @@ export function createSession(
 		commandType: "claude",
 		...startOrHoldPty(
 			() =>
-				spawnClaude({ prompt, cwd, sessionId: id, claudeSessionId, design }),
+				spawnClaude({
+					prompt,
+					cwd,
+					sessionId: id,
+					claudeSessionId,
+					design,
+					auto,
+				}),
 			holdPty,
 		),
 		cwd,

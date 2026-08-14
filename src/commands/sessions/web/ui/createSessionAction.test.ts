@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import {
 	createAssistSessionAction,
+	createHarnessSessionAction,
+	createSessionAction,
 	dismissSessionAction,
 	outputAction,
 	restartSessionAction,
@@ -23,6 +25,34 @@ function terminalState() {
 	} as unknown as WsDispatch;
 	return { buffers, written, unsubscribe, dispatch };
 }
+
+describe("createSessionAction", () => {
+	it("launches the prompt dropdown's claude session in auto mode", () => {
+		const send = vi.fn();
+
+		createSessionAction(send)("go", "/git/repo");
+
+		expect(send).toHaveBeenCalledWith({
+			type: "create",
+			prompt: "go",
+			cwd: "/git/repo",
+			auto: true,
+		});
+	});
+
+	it("leaves a codex launch on its own default approvals", () => {
+		const send = vi.fn();
+
+		createHarnessSessionAction(send)("codex", "go", "/git/repo");
+
+		expect(send).toHaveBeenCalledWith({
+			type: "create",
+			prompt: "go",
+			cwd: "/git/repo",
+			harness: "codex",
+		});
+	});
+});
 
 describe("createAssistSessionAction", () => {
 	it("carries the launching card's id so the new session nests under it", () => {

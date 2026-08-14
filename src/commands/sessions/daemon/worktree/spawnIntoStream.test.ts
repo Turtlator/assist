@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import type { CreateSessionOpts } from "../createSession";
 import { createSession, type Session } from "../createSession";
 import { spawnIntoStream } from "./spawnIntoStream";
 import type { TreeSpawnContext } from "./spawnInTree";
@@ -6,14 +7,7 @@ import type { TreeSpawnContext } from "./spawnInTree";
 vi.mock("../daemonLog", () => ({ daemonLog: vi.fn() }));
 vi.mock("../createSession", () => ({
 	createSession: vi.fn(
-		(
-			id: string,
-			prompt?: string,
-			cwd?: string,
-			_d?: boolean,
-			_h?: unknown,
-			hold?: boolean,
-		) =>
+		(id: string, { prompt, cwd, holdPty }: CreateSessionOpts = {}) =>
 			({
 				id,
 				name: prompt ?? `Session ${id}`,
@@ -23,8 +17,8 @@ vi.mock("../createSession", () => ({
 				runningMs: 0,
 				runningSince: 1,
 				waitingSince: null,
-				pty: hold ? null : ({} as Session["pty"]),
-				pendingStart: hold ? () => null : undefined,
+				pty: holdPty ? null : ({} as Session["pty"]),
+				pendingStart: holdPty ? () => null : undefined,
 				scrollback: "",
 				cwd,
 			}) as Session,
@@ -103,7 +97,7 @@ describe("spawnIntoStream", () => {
 
 		const id = spawnIntoStream(ctx, stream, "go", undefined);
 
-		expect(vi.mocked(createSession).mock.calls[0]?.[5]).toBe(false);
+		expect(vi.mocked(createSession).mock.calls[0]?.[1]?.holdPty).toBe(false);
 		expect(ctx.sessions.get(id)?.pty).not.toBeNull();
 	});
 
@@ -113,7 +107,7 @@ describe("spawnIntoStream", () => {
 
 		const id = spawnIntoStream(ctx, stream, "go", undefined);
 
-		expect(vi.mocked(createSession).mock.calls.at(-1)?.[5]).toBe(true);
+		expect(vi.mocked(createSession).mock.calls.at(-1)?.[1]?.holdPty).toBe(true);
 		expect(ctx.sessions.get(id)?.pendingStart).toBeDefined();
 	});
 

@@ -25,9 +25,21 @@ describe("spawnCreate", () => {
 				prompt: "go",
 				cwd: "/git/repo",
 				design: false,
+				auto: false,
 				harness: undefined,
 				inPlace: false,
 			},
+			{ launchedFrom: undefined },
+		);
+	});
+
+	it("carries the prompt dropdown's auto mode through to the spawn request", () => {
+		const m = manager({ reason: "no such session" });
+
+		spawnCreate(m, { prompt: "go", cwd: "/git/repo", auto: true });
+
+		expect(m.spawn).toHaveBeenCalledWith(
+			expect.objectContaining({ auto: true }),
 			{ launchedFrom: undefined },
 		);
 	});

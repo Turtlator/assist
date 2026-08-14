@@ -40,12 +40,12 @@ import type { SpawnContext } from "./types";
 import { addAgentToStream } from "./worktree/addAgentToStream";
 import {
 	type CreateSpawnRequest,
-	resumeInTree,
 	spawnAssistInTree,
 	spawnInTree,
 	type TreeSpawnContext,
 } from "./worktree/spawnInTree";
 import * as sessionIo from "./writeToSession";
+import { resumeInTree } from "./worktree/resumeInTree";
 
 export class SessionManager {
 	private sessions = new Map<string, Session>();
