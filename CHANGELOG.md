@@ -1,3 +1,10 @@
+## [0.572.1](https://github.com/staff0rd/assist/compare/v0.572.0...v0.572.1) (2026-08-14)
+
+
+### Bug Fixes
+
+* survive pty kill failure on shutdown ([ef8c087](https://github.com/staff0rd/assist/commit/ef8c08785b0f62a6dd0734d9646ca02af8f586a5))
+
 # [0.572.0](https://github.com/staff0rd/assist/compare/v0.571.1...v0.572.0) (2026-08-14)
 
 
