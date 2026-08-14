@@ -1,3 +1,10 @@
+## [0.570.2](https://github.com/staff0rd/assist/compare/v0.570.1...v0.570.2) (2026-08-14)
+
+
+### Bug Fixes
+
+* tolerate legacy news config key ([304b1e1](https://github.com/staff0rd/assist/commit/304b1e1dd006f723a4351cb1e6ea511e88bead72))
+
 ## [0.570.1](https://github.com/staff0rd/assist/compare/v0.570.0...v0.570.1) (2026-08-14)
 
 
