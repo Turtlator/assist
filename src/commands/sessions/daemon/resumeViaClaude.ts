@@ -14,6 +14,7 @@ export function resumeViaClaude(
 	base: RestoreBase,
 	idle: boolean,
 ): Session {
+	const mode = { design: persisted.design, auto: persisted.auto };
 	const pty = spawnClaude(
 		hasTranscriptOnDisk(persisted)
 			? {
@@ -21,11 +22,13 @@ export function resumeViaClaude(
 					prompt: idle ? undefined : buildResumePrompt(),
 					cwd: persisted.cwd,
 					sessionId: id,
+					...mode,
 				}
 			: {
 					claudeSessionId: persisted.claudeSessionId,
 					cwd: persisted.cwd,
 					sessionId: id,
+					...mode,
 				},
 	);
 	return idle

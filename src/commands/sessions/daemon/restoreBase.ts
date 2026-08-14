@@ -17,6 +17,8 @@ export function restoreBase(id: string, persisted: PersistedSession) {
 		initialPrompt: persisted.initialPrompt,
 		starred: persisted.starred,
 		watcher: persisted.watcher,
+		design: persisted.design,
+		auto: persisted.auto,
 		autoRun: persisted.autoRun,
 		autoAdvance: restoredAutoAdvance(id, persisted),
 		reviewStarted: persisted.reviewStarted,

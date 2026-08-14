@@ -385,6 +385,47 @@ describe("persistLiveSessions", () => {
 		expect(restored.reviewStarted).toBeUndefined();
 	});
 
+	it("round-trips the auto and design launch modes so a restart respawns in them", () => {
+		const sessions = new Map<string, Session>([
+			["1", fakeSession({ id: "1", claudeSessionId: "abc", auto: true })],
+			["2", fakeSession({ id: "2", claudeSessionId: "def", design: true })],
+		]);
+
+		persistLiveSessions(sessions);
+
+		const [, persisted] = saveJsonMock.mock.lastCall as [
+			string,
+			PersistedSession[],
+		];
+		expect(persisted[0]).toMatchObject({ auto: true });
+		expect(persisted[1]).toMatchObject({ design: true });
+
+		loadJsonMock.mockReturnValue(persisted);
+		const [auto, design] = loadPersistedSessions();
+
+		expect(restoreBase("1", auto).auto).toBe(true);
+		expect(restoreBase("2", design).design).toBe(true);
+	});
+
+	it("leaves an ordinary session's launch modes undefined after restore", () => {
+		const sessions = new Map<string, Session>([
+			["1", fakeSession({ id: "1", claudeSessionId: "abc" })],
+		]);
+
+		persistLiveSessions(sessions);
+
+		const [, persisted] = saveJsonMock.mock.lastCall as [
+			string,
+			PersistedSession[],
+		];
+		loadJsonMock.mockReturnValue(persisted);
+		const [parsed] = loadPersistedSessions();
+		const restored = restoreBase("1", parsed);
+
+		expect(restored.auto).toBeUndefined();
+		expect(restored.design).toBeUndefined();
+	});
+
 	it("round-trips the harness through persist, schema parse, and restore", () => {
 		const sessions = new Map<string, Session>([
 			["1", fakeSession({ id: "1", claudeSessionId: "abc", harness: "pi" })],

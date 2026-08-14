@@ -64,6 +64,39 @@ describe("respawnPlan", () => {
 
 			expect(plan?.status).toBe("waiting");
 		});
+
+		it("resumes an auto session in auto mode", () => {
+			const plan = respawnPlan(
+				fakeSession({ claudeSessionId: "conv-1", auto: true }),
+			) as NonNullable<ReturnType<typeof respawnPlan>>;
+			plan.spawn();
+
+			expect(mockSpawnClaude).toHaveBeenCalledWith(
+				expect.objectContaining({ resumeSessionId: "conv-1", auto: true }),
+			);
+		});
+
+		it("relaunches an auto session in auto mode when no conversation was recorded", () => {
+			const plan = respawnPlan(
+				fakeSession({ initialPrompt: "go", auto: true }),
+			) as NonNullable<ReturnType<typeof respawnPlan>>;
+			plan.spawn();
+
+			expect(mockSpawnClaude).toHaveBeenCalledWith(
+				expect.objectContaining({ prompt: "go", auto: true }),
+			);
+		});
+
+		it("keeps a design session's system prompt and auto mode on respawn", () => {
+			const plan = respawnPlan(
+				fakeSession({ claudeSessionId: "conv-1", design: true }),
+			) as NonNullable<ReturnType<typeof respawnPlan>>;
+			plan.spawn();
+
+			expect(mockSpawnClaude).toHaveBeenCalledWith(
+				expect.objectContaining({ resumeSessionId: "conv-1", design: true }),
+			);
+		});
 	});
 
 	describe("for an interactive session on a harness that cannot resume", () => {

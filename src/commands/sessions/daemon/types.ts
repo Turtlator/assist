@@ -76,6 +76,7 @@ export type Session = {
 	starred?: boolean;
 	watcher?: boolean;
 	design?: boolean;
+	auto?: boolean;
 	verifying?: boolean;
 	reviewStarted?: boolean;
 	usageSeeded?: boolean;

@@ -22,6 +22,8 @@ export const persistedSessionSchema = z.object({
 	activity: activitySchema.optional(),
 	starred: z.boolean().optional(),
 	watcher: z.boolean().optional(),
+	design: z.boolean().optional(),
+	auto: z.boolean().optional(),
 	autoRun: z.boolean().optional(),
 	autoAdvance: z.boolean().optional(),
 	reviewStarted: z.boolean().optional(),

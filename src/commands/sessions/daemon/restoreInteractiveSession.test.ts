@@ -62,6 +62,16 @@ describe("restoreInteractiveSession", () => {
 		});
 	});
 
+	describe("for a claude session launched in auto mode", () => {
+		it("resumes it in auto mode after a daemon restart", () => {
+			restore(persistedSession({ claudeSessionId: "conv-1", auto: true }));
+
+			expect(mockSpawnClaude).toHaveBeenCalledWith(
+				expect.objectContaining({ resumeSessionId: "conv-1", auto: true }),
+			);
+		});
+	});
+
 	describe("for a session on a harness that cannot resume", () => {
 		it("does not resume it as claude, even with a stale conversation id", () => {
 			const session = restore(

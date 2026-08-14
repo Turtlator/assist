@@ -53,6 +53,7 @@ export function createSession(
 		claudeSessionId,
 		initialPrompt: prompt,
 		design,
+		auto,
 	};
 }
 

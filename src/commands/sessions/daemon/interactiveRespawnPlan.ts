@@ -11,7 +11,7 @@ export function interactiveRespawnPlan(
 	session: Session,
 	resumes: boolean,
 ): RespawnPlan | null {
-	const { claudeSessionId, cwd, initialPrompt } = session;
+	const { claudeSessionId, cwd, initialPrompt, design, auto } = session;
 	if (!resumes) return null;
 	if (claudeSessionId)
 		return {
@@ -20,6 +20,8 @@ export function interactiveRespawnPlan(
 					resumeSessionId: claudeSessionId,
 					cwd,
 					sessionId: session.id,
+					design,
+					auto,
 				}),
 			status: "waiting",
 		};
@@ -42,6 +44,8 @@ function freshClaudePlan(
 				cwd,
 				sessionId: session.id,
 				claudeSessionId,
+				design: session.design,
+				auto: session.auto,
 			});
 		},
 		status: prompt ? "running" : "waiting",
