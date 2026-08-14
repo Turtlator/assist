@@ -1,3 +1,10 @@
+## [0.568.1](https://github.com/staff0rd/assist/compare/v0.568.0...v0.568.1) (2026-08-14)
+
+
+### Bug Fixes
+
+* exit when windows bridge cannot bind ([21785bf](https://github.com/staff0rd/assist/commit/21785bff2b13666ca9f9c940a9bbf96ff882e3dd))
+
 # [0.568.0](https://github.com/staff0rd/assist/compare/v0.567.1...v0.568.0) (2026-08-12)
 
 
