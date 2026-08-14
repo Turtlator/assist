@@ -1,3 +1,10 @@
+## [0.568.2](https://github.com/staff0rd/assist/compare/v0.568.1...v0.568.2) (2026-08-14)
+
+
+### Bug Fixes
+
+* flush bridge failure log before exit ([52a52f4](https://github.com/staff0rd/assist/commit/52a52f4b5ee1b6ab1331a31dc1ea6ba3e4bc64fb))
+
 ## [0.568.1](https://github.com/staff0rd/assist/compare/v0.568.0...v0.568.1) (2026-08-14)
 
 
