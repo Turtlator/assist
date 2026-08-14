@@ -1,3 +1,10 @@
+# [0.572.0](https://github.com/staff0rd/assist/compare/v0.571.1...v0.572.0) (2026-08-14)
+
+
+### Features
+
+* assist github issue create ([7d1167a](https://github.com/staff0rd/assist/commit/7d1167a50e6280a91d51a6821b9e180b61cdd39d))
+
 ## [0.571.1](https://github.com/staff0rd/assist/compare/v0.571.0...v0.571.1) (2026-08-14)
 
 
