@@ -1,3 +1,10 @@
+## [0.568.3](https://github.com/staff0rd/assist/compare/v0.568.2...v0.568.3) (2026-08-14)
+
+
+### Bug Fixes
+
+* keep launch cause in breaker error ([45bb941](https://github.com/staff0rd/assist/commit/45bb94159ceb986c947f22dab7f6844fb0eef931))
+
 ## [0.568.2](https://github.com/staff0rd/assist/compare/v0.568.1...v0.568.2) (2026-08-14)
 
 
