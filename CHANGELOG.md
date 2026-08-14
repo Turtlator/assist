@@ -1,3 +1,10 @@
+## [0.570.1](https://github.com/staff0rd/assist/compare/v0.570.0...v0.570.1) (2026-08-14)
+
+
+### Bug Fixes
+
+* drop AskUserQuestion from pr denies ([ab33c8b](https://github.com/staff0rd/assist/commit/ab33c8b18ba03e285741e68863cfcb5a221aec01))
+
 # [0.570.0](https://github.com/staff0rd/assist/compare/v0.569.0...v0.570.0) (2026-08-14)
 
 
