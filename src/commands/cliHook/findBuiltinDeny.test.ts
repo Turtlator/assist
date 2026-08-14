@@ -25,6 +25,24 @@ describe("findBuiltinDeny gh pr edit", () => {
 	it("does not deny an unrelated gh command", () => {
 		expect(findBuiltinDeny(["gh pr view 89"])).toBeUndefined();
 	});
+
+	it("does not ask for an AskUserQuestion confirmation before the redirect", () => {
+		const decision = findBuiltinDeny(["gh pr edit 89 --title x"]);
+		expect(decision?.permissionDecisionReason).not.toContain("AskUserQuestion");
+	});
+});
+
+describe("findBuiltinDeny gh pr create", () => {
+	it("denies 'gh pr create' with a redirect to 'assist prs raise'", () => {
+		const decision = findBuiltinDeny(["gh pr create --title x --body y"]);
+		expect(decision?.permissionDecision).toBe("deny");
+		expect(decision?.permissionDecisionReason).toContain("assist prs raise");
+	});
+
+	it("does not ask for an AskUserQuestion confirmation before the redirect", () => {
+		const decision = findBuiltinDeny(["gh pr create --title x --body y"]);
+		expect(decision?.permissionDecisionReason).not.toContain("AskUserQuestion");
+	});
 });
 
 describe("findBuiltinDeny git commit", () => {

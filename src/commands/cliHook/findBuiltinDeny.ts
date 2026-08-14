@@ -11,12 +11,12 @@ const BUILTIN_DENIES: { pattern: string; message: string }[] = [
 	{
 		pattern: "gh pr create",
 		message:
-			"Do not run 'gh pr create' directly. Use 'assist prs raise --title <title> --what <what> --why <why>' instead — it assembles and validates the body before delegating to gh. Before running it, get explicit approval via the AskUserQuestion tool, regardless of permission mode, with the full proposed title and body in the approve option's preview field so the user actually sees them.",
+			"Do not run 'gh pr create' directly. Use 'assist prs raise --title <title> --what <what> --why <why>' instead — it assembles and validates the body before delegating to gh, and gates the PR on the user's approval itself. Run 'assist prs raise --help' and follow its guidance to compose the sections; it is authoritative on how approval is handled in this environment.",
 	},
 	{
 		pattern: "gh pr edit",
 		message:
-			"Do not run 'gh pr edit' directly. Use 'assist prs edit [--title <title>] [--what <what>] [--why <why>] [--how <how>]' instead — it assembles and validates the body before delegating to gh. Before running it, get explicit approval via the AskUserQuestion tool, regardless of permission mode, with the full proposed title and body in the approve option's preview field so the user actually sees them.",
+			"Do not run 'gh pr edit' directly. Use 'assist prs edit [--title <title>] [--what <what>] [--why <why>] [--how <how>]' instead — it assembles and validates the body before delegating to gh, and in an assist web session blocks on the preview pane until the user approves or rejects. Compose the sections and run it; see 'assist prs edit --help' for how to pitch each section.",
 	},
 	{
 		pattern: "git commit",
