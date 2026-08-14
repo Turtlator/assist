@@ -38,6 +38,7 @@ import { VerifyTracker } from "./VerifyTracker";
 import { WindowsProxy } from "./WindowsProxy";
 import type { SpawnContext } from "./types";
 import { addAgentToStream } from "./worktree/addAgentToStream";
+import type { AddAgentRequest } from "./worktree/spawnIntoStream";
 import {
 	type CreateSpawnRequest,
 	spawnAssistInTree,
@@ -119,8 +120,8 @@ export class SessionManager {
 		return spawnInTree(this.treeCtx(), request, context);
 	}
 
-	addAgent(targetId: string, prompt?: string, harness?: HarnessKind) {
-		return addAgentToStream(this.treeCtx(), targetId, prompt, harness);
+	addAgent(targetId: string, request: AddAgentRequest = {}) {
+		return addAgentToStream(this.treeCtx(), targetId, request);
 	}
 
 	spawnRun(request: RunSpawnRequest, context?: SpawnContext): string {

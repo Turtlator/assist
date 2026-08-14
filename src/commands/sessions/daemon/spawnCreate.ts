@@ -10,6 +10,7 @@ export function spawnCreate(
 	const design = d.design === true;
 	const harness = d.harness as HarnessKind | undefined;
 	const prompt = d.prompt as string | undefined;
+	const auto = d.auto === true;
 	if (design)
 		daemonLog(`create: design session (cwd=${(d.cwd as string) ?? ""})`);
 	if (harness && harness !== "claude")
@@ -18,7 +19,7 @@ export function spawnCreate(
 		? undefined
 		: (d.joinSessionId as string | undefined);
 	if (joinSessionId) {
-		const joined = m.addAgent(joinSessionId, prompt, harness);
+		const joined = m.addAgent(joinSessionId, { prompt, harness, auto });
 		if ("sessionId" in joined) return joined.sessionId;
 		return { error: `Can't add an agent: ${joined.reason}.` };
 	}
@@ -27,7 +28,7 @@ export function spawnCreate(
 			prompt,
 			cwd: d.cwd as string | undefined,
 			design,
-			auto: d.auto === true,
+			auto,
 			harness,
 			inPlace: d.inPlace === true,
 		},

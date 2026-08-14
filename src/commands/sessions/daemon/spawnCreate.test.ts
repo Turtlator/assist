@@ -54,8 +54,28 @@ describe("spawnCreate", () => {
 		});
 
 		expect(id).toBe("4");
-		expect(m.addAgent).toHaveBeenCalledWith("3", "go", undefined);
+		expect(m.addAgent).toHaveBeenCalledWith("3", {
+			prompt: "go",
+			harness: undefined,
+			auto: false,
+		});
 		expect(m.spawn).not.toHaveBeenCalled();
+	});
+
+	it("carries the add agent dropdown's auto mode through to the join", () => {
+		const m = manager({ sessionId: "4" });
+
+		spawnCreate(m, {
+			prompt: "go",
+			cwd: "/git/repo-2",
+			joinSessionId: "3",
+			auto: true,
+		});
+
+		expect(m.addAgent).toHaveBeenCalledWith(
+			"3",
+			expect.objectContaining({ auto: true }),
+		);
 	});
 
 	it("reports a refused join instead of spawning somewhere else", () => {

@@ -1,14 +1,12 @@
-import type { HarnessKind } from "../../../../shared/harnesses";
 import { daemonLog } from "../daemonLog";
 import { joinableStream } from "./joinableStream";
 import type { TreeSpawnContext } from "./spawnInTree";
-import { spawnIntoStream } from "./spawnIntoStream";
+import { type AddAgentRequest, spawnIntoStream } from "./spawnIntoStream";
 
 export function addAgentToStream(
 	ctx: TreeSpawnContext,
 	targetId: string,
-	prompt: string | undefined,
-	harness: HarnessKind | undefined,
+	request: AddAgentRequest,
 ): { sessionId: string } | { reason: string } {
 	const joinable = joinableStream(ctx.sessions, targetId);
 	if ("reason" in joinable) {
@@ -18,6 +16,6 @@ export function addAgentToStream(
 		return joinable;
 	}
 	return {
-		sessionId: spawnIntoStream(ctx, joinable.session, prompt, harness),
+		sessionId: spawnIntoStream(ctx, joinable.session, request),
 	};
 }

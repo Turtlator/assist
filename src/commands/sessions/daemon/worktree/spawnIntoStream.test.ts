@@ -71,7 +71,7 @@ describe("spawnIntoStream", () => {
 		const stream = target();
 		const { ctx, notify } = context([stream]);
 
-		const id = spawnIntoStream(ctx, stream, "help with this", undefined);
+		const id = spawnIntoStream(ctx, stream, { prompt: "help with this" });
 
 		const joined = ctx.sessions.get(id);
 		expect(joined?.cwd).toBe("/git/repo-2");
@@ -86,16 +86,25 @@ describe("spawnIntoStream", () => {
 		const stream = target({ cwd: "/git/repo", worktree: undefined });
 		const { ctx } = context([stream]);
 
-		const id = spawnIntoStream(ctx, stream, "go", undefined);
+		const id = spawnIntoStream(ctx, stream, { prompt: "go" });
 
 		expect(ctx.sessions.get(id)?.launchedFrom).toBe("3");
+	});
+
+	it("launches the added agent in auto mode when the launcher asked for it", () => {
+		const stream = target();
+		const { ctx } = context([stream]);
+
+		spawnIntoStream(ctx, stream, { prompt: "go", auto: true });
+
+		expect(vi.mocked(createSession).mock.calls.at(-1)?.[1]?.auto).toBe(true);
 	});
 
 	it("starts the added agent straight away when the workspace is ready", () => {
 		const stream = target();
 		const { ctx } = context([stream]);
 
-		const id = spawnIntoStream(ctx, stream, "go", undefined);
+		const id = spawnIntoStream(ctx, stream, { prompt: "go" });
 
 		expect(vi.mocked(createSession).mock.calls[0]?.[1]?.holdPty).toBe(false);
 		expect(ctx.sessions.get(id)?.pty).not.toBeNull();
@@ -105,7 +114,7 @@ describe("spawnIntoStream", () => {
 		const stream = target({ pty: null, pendingStart: () => null });
 		const { ctx } = context([stream]);
 
-		const id = spawnIntoStream(ctx, stream, "go", undefined);
+		const id = spawnIntoStream(ctx, stream, { prompt: "go" });
 
 		expect(vi.mocked(createSession).mock.calls.at(-1)?.[1]?.holdPty).toBe(true);
 		expect(ctx.sessions.get(id)?.pendingStart).toBeDefined();
@@ -115,7 +124,7 @@ describe("spawnIntoStream", () => {
 		const stream = target({ cwd: "/git/repo", worktree: undefined });
 		const { ctx } = context([stream]);
 
-		const id = spawnIntoStream(ctx, stream, "go", undefined);
+		const id = spawnIntoStream(ctx, stream, { prompt: "go" });
 
 		expect(ctx.sessions.get(id)?.cwd).toBe("/git/repo");
 		expect(ctx.sessions.get(id)?.worktree).toBeUndefined();
