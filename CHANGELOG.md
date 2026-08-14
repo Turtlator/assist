@@ -1,3 +1,10 @@
+## [0.571.1](https://github.com/staff0rd/assist/compare/v0.571.0...v0.571.1) (2026-08-14)
+
+
+### Bug Fixes
+
+* keep watcher auto on respawn ([235f197](https://github.com/staff0rd/assist/commit/235f1974722d0e5c559fdb8da55c4bc137ae17ca))
+
 # [0.571.0](https://github.com/staff0rd/assist/compare/v0.570.2...v0.571.0) (2026-08-14)
 
 
