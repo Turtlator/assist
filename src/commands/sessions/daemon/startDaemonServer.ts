@@ -6,17 +6,22 @@ import { daemonPaths } from "./daemonPaths";
 import { handleConnection } from "./handleConnection";
 import { onListening } from "./onListening";
 import type { SessionManager } from "./SessionManager";
-import { windowsDaemonPort } from "./windowsDaemonPort";
+import { startWindowsBridge } from "./startWindowsBridge";
 
-export function startDaemonServer(
+export async function startDaemonServer(
 	manager: SessionManager,
 	checkAutoExit: (idle: boolean) => void,
-): void {
+): Promise<void> {
+	// why: the WSL daemon cannot reach the Windows named pipe, so add a TCP bridge
+	if (process.platform === "win32" && !(await startWindowsBridge(manager))) {
+		daemonLog(
+			"exiting before binding the pipe so the next launch can take over",
+		);
+		process.exit(1);
+	}
 	const server = net.createServer((socket) =>
 		handleConnection(socket, manager),
 	);
-	// why: the WSL daemon cannot reach the Windows named pipe, so add a TCP bridge
-	if (process.platform === "win32") startWindowsBridge(manager);
 	let retried = false;
 	server.on("error", (e: NodeJS.ErrnoException) => {
 		if (e.code !== "EADDRINUSE" || retried) {
@@ -38,19 +43,6 @@ function listenWithSingleOnListening(
 ): void {
 	server.removeAllListeners("listening");
 	server.listen(daemonPaths.socket, () => onListening(manager, checkAutoExit));
-}
-
-function startWindowsBridge(manager: SessionManager): void {
-	const port = windowsDaemonPort();
-	const bridge = net.createServer((socket) => {
-		// why: keep the WSL<->Windows mapping alive from this end too, so an idle connection survives WSL2's NAT idle drop
-		socket.setKeepAlive(true, 10_000);
-		handleConnection(socket, manager);
-	});
-	bridge.on("error", (e: NodeJS.ErrnoException) =>
-		daemonLog(`windows bridge error: ${e.message}`),
-	);
-	bridge.listen(port, () => daemonLog(`windows bridge listening on :${port}`));
 }
 
 // The socket path is taken: either a live daemon owns it (this process lost

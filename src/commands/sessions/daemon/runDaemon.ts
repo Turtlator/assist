@@ -24,5 +24,5 @@ export async function runDaemon(): Promise<void> {
 	const manager = new SessionManager(checkAutoExit);
 	// why: forward every daemonLog line to log subscribers (e.g. the web server) so they reach assist.log alongside web-server lifecycle output.
 	setDaemonLogSink(manager.clients.emitLog);
-	startDaemonServer(manager, checkAutoExit);
+	await startDaemonServer(manager, checkAutoExit);
 }

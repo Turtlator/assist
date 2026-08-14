@@ -6,18 +6,28 @@ import { isDaemonRunning } from "./connectToDaemon";
 import { onListening } from "./onListening";
 import type { SessionManager } from "./SessionManager";
 import { startDaemonServer } from "./startDaemonServer";
+import { startWindowsBridge } from "./startWindowsBridge";
 
 vi.mock("node:fs", () => ({ unlinkSync: vi.fn() }));
 vi.mock("node:net", () => ({ createServer: vi.fn() }));
 vi.mock("./connectToDaemon", () => ({ isDaemonRunning: vi.fn() }));
 vi.mock("./daemonLog", () => ({ daemonLog: vi.fn() }));
 vi.mock("./onListening", () => ({ onListening: vi.fn() }));
+vi.mock("./startWindowsBridge", () => ({ startWindowsBridge: vi.fn() }));
 
 const createServerMock = net.createServer as unknown as ReturnType<
 	typeof vi.fn
 >;
 const isRunningMock = isDaemonRunning as unknown as ReturnType<typeof vi.fn>;
 const onListeningMock = onListening as unknown as ReturnType<typeof vi.fn>;
+const bridgeMock = startWindowsBridge as unknown as ReturnType<typeof vi.fn>;
+
+function asPlatform(platform: NodeJS.Platform): void {
+	Object.defineProperty(process, "platform", {
+		value: platform,
+		configurable: true,
+	});
+}
 
 function eaddrinuse(): NodeJS.ErrnoException {
 	return Object.assign(new Error("EADDRINUSE"), { code: "EADDRINUSE" });
@@ -60,7 +70,7 @@ describe("startDaemonServer", () => {
 	it("restores sessions once on the normal startup path", async () => {
 		createServerMock.mockReturnValue(new FakeServer(["listening"]));
 
-		startDaemonServer(manager, checkAutoExit);
+		await startDaemonServer(manager, checkAutoExit);
 		await flush();
 
 		expect(onListeningMock).toHaveBeenCalledTimes(1);
@@ -70,11 +80,47 @@ describe("startDaemonServer", () => {
 		const server = new FakeServer(["error", "listening"]);
 		createServerMock.mockReturnValue(server);
 
-		startDaemonServer(manager, checkAutoExit);
+		await startDaemonServer(manager, checkAutoExit);
 		await flush();
 
 		expect(unlinkSync).toHaveBeenCalled();
 		expect(server.listenCalls).toBe(2);
 		expect(onListeningMock).toHaveBeenCalledTimes(1);
+	});
+
+	describe("on the windows host", () => {
+		const realPlatform = process.platform;
+
+		afterEach(() => {
+			asPlatform(realPlatform);
+		});
+
+		it("binds the pipe once the bridge is listening", async () => {
+			asPlatform("win32");
+			bridgeMock.mockResolvedValue(true);
+			createServerMock.mockReturnValue(new FakeServer(["listening"]));
+
+			await startDaemonServer(manager, checkAutoExit);
+			await flush();
+
+			expect(onListeningMock).toHaveBeenCalledTimes(1);
+		});
+
+		it("exits without owning the pipe when the bridge cannot bind", async () => {
+			asPlatform("win32");
+			bridgeMock.mockResolvedValue(false);
+			const exit = vi.spyOn(process, "exit").mockImplementation((() => {
+				throw new Error("exited");
+			}) as never);
+
+			await expect(startDaemonServer(manager, checkAutoExit)).rejects.toThrow(
+				"exited",
+			);
+
+			expect(exit).toHaveBeenCalledWith(1);
+			expect(createServerMock).not.toHaveBeenCalled();
+			expect(onListeningMock).not.toHaveBeenCalled();
+			exit.mockRestore();
+		});
 	});
 });
