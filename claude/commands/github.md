@@ -86,13 +86,13 @@ Keep it concise: no headers, no wall of text, no restating the whole session. If
 
 Do not mention `assist`, the assist backlog, or any backlog item number in the comment — the GitHub issue is outward-facing and must not leak internal tooling references. Refer to commits, PRs, or the work itself instead.
 
-**Preview and confirm before posting.** Show the drafted comment and the target issue to the user. Do not post until the user explicitly confirms. If they ask for edits, revise and show the updated draft again. Once confirmed, post it:
+**Post it** through the assist wrapper, which validates the body and, in a web session, opens the preview pane for approve/reject before anything lands:
 
 ```
-gh issue comment <number> -R <owner>/<repo> --body "<comment>" 2>&1
+assist github issue comment <number> -R <owner>/<repo> --body "<comment>" 2>&1
 ```
 
-Display the result so the user can see it landed.
+Display the result so the user can see it landed. If the command exits non-zero, relay the rejection reason and any inline comments, revise the draft accordingly, and run it again — nothing was posted.
 
 ## Action: started
 
@@ -122,7 +122,7 @@ List the available actions and their arguments:
 
 - `/github <owner/repo#number>` or `/github view <ref>` — view an issue (ref optional; falls back to the session item's GitHub issue).
 - `/github associate <ref> [id]` — associate a GitHub issue with a backlog item (id optional; falls back to the session item).
-- `/github update [ref]` — post a concise session-summary comment to the issue (previews before posting).
+- `/github update [ref]` — post a concise session-summary comment to the issue (previewed for approval before posting).
 - `/github started [ref]` — assign the issue to yourself.
 - `/github done [ref]` — close the issue (no assignment change).
 - `/github help` — show this list.

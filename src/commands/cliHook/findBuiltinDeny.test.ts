@@ -72,6 +72,34 @@ describe("findBuiltinDeny gh issue create", () => {
 	});
 });
 
+describe("findBuiltinDeny gh issue comment", () => {
+	it("denies 'gh issue comment' with a redirect to 'assist github issue comment'", () => {
+		const decision = findBuiltinDeny([
+			"gh issue comment 42 --body y -R acme/widgets",
+		]);
+		expect(decision?.permissionDecision).toBe("deny");
+		expect(decision?.permissionDecisionReason).toContain(
+			"assist github issue comment",
+		);
+	});
+
+	it("denies 'gh issue comment' buried in a compound command part", () => {
+		const decision = findBuiltinDeny(["cd /repo", "gh issue comment 42 --web"]);
+		expect(decision?.permissionDecision).toBe("deny");
+	});
+
+	it("does not deny the assist wrapper that delegates to it", () => {
+		expect(
+			findBuiltinDeny(["assist github issue comment 42 --body y"]),
+		).toBeUndefined();
+	});
+
+	it("does not ask for an AskUserQuestion confirmation before the redirect", () => {
+		const decision = findBuiltinDeny(["gh issue comment 42 --body y"]);
+		expect(decision?.permissionDecisionReason).not.toContain("AskUserQuestion");
+	});
+});
+
 describe("findBuiltinDeny git commit", () => {
 	it("denies a leading 'git commit'", () => {
 		const decision = findBuiltinDeny(['git commit -m "fix: x"']);

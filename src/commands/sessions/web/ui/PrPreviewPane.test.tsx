@@ -812,6 +812,47 @@ describe("PrPreviewPane inline comments", () => {
 		});
 	});
 
+	describe("github issue comment previews", () => {
+		const issueComment: PrPreview = {
+			requestId: "g1",
+			title: "Comment on acme/widgets#42",
+			body: "Fixed by the latest release",
+			prNumber: null,
+			kind: "github-issue-comment",
+		};
+
+		it("shows a neutral Comment chip with no PR chain or screenshot UI", () => {
+			render(<PrPreviewPane preview={issueComment} onDecision={vi.fn()} />);
+
+			expect(screen.getByText("Comment")).toBeTruthy();
+			expect(screen.queryByText("New PR")).toBeNull();
+			expect(screen.queryByLabelText("Review")).toBeNull();
+			expect(screen.queryByLabelText("Post")).toBeNull();
+			expect(screen.queryByLabelText("Draft")).toBeNull();
+			expect(screen.queryByText(/attach a screenshot/)).toBeNull();
+		});
+
+		it("returns each inline comment with Request changes", () => {
+			const onDecision = vi.fn();
+			const { container } = render(
+				<PrPreviewPane preview={issueComment} onDecision={onDecision} />,
+			);
+
+			addComment(container, "latest release", "name the version");
+
+			fireEvent.click(
+				screen.getByRole("button", { name: /Request changes \(1\)/ }),
+			);
+			expect(onDecision).toHaveBeenCalledWith("reject", {
+				comments: [{ quote: "latest release", note: "name the version" }],
+				screenshots: [],
+				reviewAfter: false,
+				announceAfter: false,
+				draft: false,
+			});
+		});
+	});
+
 	it("clears persisted comments once a decision is made", () => {
 		const { container, unmount } = render(
 			<PrPreviewPane preview={preview} onDecision={vi.fn()} />,

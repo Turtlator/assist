@@ -45,6 +45,12 @@ describe("previewChip", () => {
 		).toEqual({ label: "Comment", color: "default" });
 	});
 
+	it("labels a GitHub issue comment neutrally", () => {
+		expect(
+			previewChip(preview({ kind: "github-issue-comment" }), false),
+		).toEqual({ label: "Comment", color: "default" });
+	});
+
 	it("labels a GitHub issue", () => {
 		expect(previewChip(preview({ kind: "github-issue" }), false)).toEqual({
 			label: "Issue",
