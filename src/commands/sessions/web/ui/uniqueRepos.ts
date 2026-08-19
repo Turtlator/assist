@@ -5,17 +5,23 @@ export function uniqueRepos(
 	currentCwd: string,
 	history: HistoricalSession[],
 ): string[] {
-	const seen = new Set<string>();
+	const seenKeys = new Set<string>();
+	const seenCwds = new Set<string>();
 	const ordered: string[] = [];
 	for (const s of history) {
 		if (s.cwdMissing) continue;
 		const key = repoGroupKey(s);
 		const cwd = repoGroupCwd(s);
-		if (!key || !cwd || seen.has(key)) continue;
-		seen.add(key);
+		if (!key || !cwd || seenKeys.has(key) || seenCwds.has(cwd)) continue;
+		seenKeys.add(key);
+		seenCwds.add(cwd);
 		ordered.push(cwd);
 	}
-	if (currentCwd && !seen.has(repoKeyForCwd(currentCwd, history)))
+	if (
+		currentCwd &&
+		!seenKeys.has(repoKeyForCwd(currentCwd, history)) &&
+		!seenCwds.has(currentCwd)
+	)
 		ordered.unshift(currentCwd);
 	return ordered;
 }

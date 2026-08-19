@@ -122,6 +122,21 @@ describe("uniqueRepos", () => {
 		expect(uniqueRepos("", history)).toEqual(["/git/other"]);
 	});
 
+	it("lists a clone once when sessions disagree on its origin", () => {
+		const history = [
+			{
+				...session("/git/apm"),
+				repoGroup: { origin: "host/org/apm", clone: "/git/apm" },
+			},
+			{
+				...session("/git/apm-2"),
+				repoGroup: { origin: "local:/git/apm", clone: "/git/apm" },
+			},
+		];
+
+		expect(uniqueRepos("", history)).toEqual(["/git/apm"]);
+	});
+
 	it("keeps a windows checkout separate from its wsl counterpart", () => {
 		const history = [
 			{

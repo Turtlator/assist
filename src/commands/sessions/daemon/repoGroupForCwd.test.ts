@@ -51,6 +51,20 @@ describe("repoGroupForCwd", () => {
 		});
 	});
 
+	it("reconciles a stale registry origin against the clone's current origin", () => {
+		clone.mockImplementation((cwd) => (cwd === "/git/repo-f" ? cwd : null));
+		origin.mockReturnValue("host/org/repo-f");
+		attribution.mockReturnValue({
+			clone: "/git/repo-f",
+			origin: "local:/git/repo-f",
+		});
+
+		expect(repoGroupForCwd("/git/repo-f-2")).toEqual({
+			origin: "host/org/repo-f",
+			clone: "/git/repo-f",
+		});
+	});
+
 	it("returns undefined for a path that is neither a repo nor a known worktree", () => {
 		clone.mockReturnValue(null);
 
