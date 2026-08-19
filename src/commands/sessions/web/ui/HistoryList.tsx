@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { HistoryCard } from "./HistoryCard";
-import { repoGroupKey, repoKeyForCwd } from "./repoGroupKey";
+import { repoGroupCwd, repoGroupKey, repoKeyForCwd } from "./repoGroupKey";
 import type { HistoricalSession, HistoryCardHandlers } from "./types";
 import { useRepoSelectionContext } from "./useRepoSelectionContext";
 
@@ -44,8 +44,12 @@ export function HistoryList({
 }: { sessions: HistoricalSession[] } & HistoryCardHandlers) {
 	const { selectedCwd } = useRepoSelectionContext();
 	const selectedKey = repoKeyForCwd(selectedCwd, sessions);
+	// why: uniqueRepos renders one row per clone even if two groups disagree on origin, so match the clone too or the suppressed group's sessions become unreachable
 	const filtered = selectedCwd
-		? sessions.filter((s) => repoGroupKey(s) === selectedKey)
+		? sessions.filter(
+				(s) =>
+					repoGroupKey(s) === selectedKey || repoGroupCwd(s) === selectedCwd,
+			)
 		: [];
 
 	return (

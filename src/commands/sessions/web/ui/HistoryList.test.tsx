@@ -71,6 +71,25 @@ describe("HistoryList", () => {
 		expect(screen.queryByText("theirs")).toBeNull();
 	});
 
+	it("keeps a stale-origin session under the clone it shares", () => {
+		renderList(
+			[
+				session("live", "/git/apm", {
+					origin: "host/org/apm",
+					clone: "/git/apm",
+				}),
+				session("reaped", "/git/apm-2", {
+					origin: "local:/git/apm",
+					clone: "/git/apm",
+				}),
+			],
+			"/git/apm",
+		);
+
+		expect(screen.getByText("live")).toBeTruthy();
+		expect(screen.getByText("reaped")).toBeTruthy();
+	});
+
 	it("falls back to the cwd for sessions with no resolved group", () => {
 		renderList(
 			[session("ungrouped", "/git/plain"), session("elsewhere", "/git/other")],
