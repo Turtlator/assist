@@ -1,3 +1,10 @@
+## [0.573.2](https://github.com/staff0rd/assist/compare/v0.573.1...v0.573.2) (2026-08-19)
+
+
+### Bug Fixes
+
+* match history by clone path too ([1ebcf1f](https://github.com/staff0rd/assist/commit/1ebcf1f7f39907cf392bbcbf88634abf346a2348))
+
 ## [0.573.1](https://github.com/staff0rd/assist/compare/v0.573.0...v0.573.1) (2026-08-19)
 
 
