@@ -1,3 +1,10 @@
+## [0.573.1](https://github.com/staff0rd/assist/compare/v0.573.0...v0.573.1) (2026-08-19)
+
+
+### Bug Fixes
+
+* dedupe repo selector by clone path ([549226e](https://github.com/staff0rd/assist/commit/549226e813cd6d10b19ff4ccdede3ad114977559))
+
 # [0.573.0](https://github.com/staff0rd/assist/compare/v0.572.1...v0.573.0) (2026-08-17)
 
 
