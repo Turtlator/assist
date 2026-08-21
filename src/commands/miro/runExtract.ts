@@ -1,17 +1,16 @@
-import chalk from "chalk";
-import { stringify } from "yaml";
 import { anchorSource } from "./anchorSource";
-import { applyIgnore } from "./applyIgnore";
+import { boardSource } from "./boardSource";
+import { emitExtract } from "./emitExtract";
+import { extractToSave } from "./extractToSave";
+import { keptTexts } from "./keptTexts";
 import { MiroExtractError } from "./MiroExtractError";
-import { miroSource } from "./miroSource";
 import { normaliseItems } from "./normaliseItems";
+import { offerSaveExtract } from "./offerSaveExtract";
 import { pickAnchors } from "./pickAnchors";
-import { readIgnoreList } from "./readIgnoreList";
 import { readMiroItems } from "./readMiroItems";
+import { resolveExtractOptions } from "./resolveExtractOptions";
 import { selectBoxes } from "./selectBoxes";
-import type { MiroExtractOptions } from "./types";
-import { uniqueTexts } from "./uniqueTexts";
-import { writeExtract } from "./writeExtract";
+import type { MiroExtractOptions, MiroExtractPaths } from "./types";
 
 function requireItems(file: string | undefined): string {
 	if (!file)
@@ -21,37 +20,33 @@ function requireItems(file: string | undefined): string {
 	return file;
 }
 
-function warnUnmatched(file: string, unmatched: string[]): void {
-	if (unmatched.length === 0) return;
-	const entries = unmatched.map((entry) => `  - ${entry}`).join("\n");
-	console.error(
-		chalk.yellow(
-			`${unmatched.length} ${unmatched.length === 1 ? "entry" : "entries"} in ${file} matched no box text:\n${entries}`,
-		),
-	);
-}
-
-export async function runExtract(options: MiroExtractOptions): Promise<void> {
-	const source = anchorSource(options);
-	const raw = readMiroItems(requireItems(options.items));
+export async function runExtract(
+	name: string | undefined,
+	options: MiroExtractOptions,
+	paths: MiroExtractPaths = {},
+): Promise<void> {
+	const resolved = resolveExtractOptions(name, options, paths);
+	const source = anchorSource(resolved);
+	const itemsFile = requireItems(resolved.items);
+	const raw = readMiroItems(itemsFile);
 	const items = normaliseItems(raw);
 	const [topLeft, bottomRight] = source.pick
 		? await pickAnchors(source.sessionId, items)
 		: [source.topLeft, source.bottomRight];
 	const selection = selectBoxes(items, topLeft, bottomRight);
-	const ignore = options.ignore ? readIgnoreList(options.ignore) : [];
-	const kept = applyIgnore(uniqueTexts(selection.boxes), ignore);
-	if (options.ignore) warnUnmatched(options.ignore, kept.unmatched);
-	if (!options.out) {
-		process.stdout.write(stringify(kept.texts));
-		return;
-	}
-	writeExtract(
-		options.out,
-		{ ...miroSource(raw, topLeft), topLeft, bottomRight, rect: selection.rect },
-		kept.texts,
+	const board = boardSource(raw, topLeft, resolved);
+	emitExtract(
+		resolved.out,
+		{ ...board, topLeft, bottomRight, rect: selection.rect },
+		keptTexts(resolved, selection.boxes),
 	);
-	console.log(
-		`Wrote ${kept.texts.length} ${kept.texts.length === 1 ? "box" : "boxes"} to ${options.out}`,
-	);
+	if (source.pick || resolved.save)
+		await offerSaveExtract(
+			extractToSave(
+				{ options: resolved, items: itemsFile, topLeft, bottomRight, ...board },
+				paths.cwd,
+			),
+			resolved,
+			paths,
+		);
 }

@@ -39,4 +39,14 @@ export type MiroExtractOptions = {
 	bottomRight?: string;
 	ignore?: string;
 	out?: string;
+	board?: string;
+	frame?: string;
+	save?: string;
+	global?: boolean;
+	repo?: boolean | string;
+};
+
+export type MiroExtractPaths = {
+	cwd?: string;
+	globalConfigPath?: string;
 };

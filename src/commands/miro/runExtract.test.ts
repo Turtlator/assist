@@ -2,6 +2,7 @@ import { mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { parse, stringify } from "yaml";
 import type { PreviewDecision } from "../sessions/shared/PreviewDecision";
 import { requestPreviewDecision } from "../sessions/shared/requestPreviewDecision";
 import { runExtract } from "./runExtract";
@@ -151,6 +152,18 @@ function ignoreFile(contents: string): string {
 	return itemsFile(contents, "ignore.yml");
 }
 
+function paths() {
+	return { cwd: dir, globalConfigPath: join(dir, "global.yml") };
+}
+
+function configFile(epics: Record<string, string>): void {
+	writeFileSync(
+		join(dir, "assist.yml"),
+		stringify({ miro: { extracts: { epics } } }),
+	);
+	writeFileSync(join(dir, "global.yml"), "{}\n");
+}
+
 beforeEach(() => {
 	dir = mkdtempSync(join(tmpdir(), "miro-"));
 	written = [];
@@ -175,7 +188,7 @@ describe("runExtract", () => {
 		it("should print the boxes as YAML, leftmost edge first", async () => {
 			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
 
-			await runExtract({
+			await runExtract(undefined, {
 				items,
 				topLeft: topLeftId,
 				bottomRight: bottomRightId,
@@ -194,7 +207,7 @@ describe("runExtract", () => {
 				"board-items.jsonl",
 			);
 
-			await runExtract({
+			await runExtract(undefined, {
 				items,
 				topLeft: topLeftId,
 				bottomRight: bottomRightId,
@@ -210,7 +223,7 @@ describe("runExtract", () => {
 		it("should read the widget id out of the link", async () => {
 			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
 
-			await runExtract({
+			await runExtract(undefined, {
 				items,
 				topLeft: `https://miro.com/app/board/uXjVGqQsR5Q=/?moveToWidget=${topLeftId}`,
 				bottomRight: `https://miro.com/app/board/uXjVGqQsR5Q=/?moveToWidget=${bottomRightId}`,
@@ -227,7 +240,11 @@ describe("runExtract", () => {
 			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
 
 			await expect(
-				runExtract({ items, topLeft: "missing", bottomRight: bottomRightId }),
+				runExtract(undefined, {
+					items,
+					topLeft: "missing",
+					bottomRight: bottomRightId,
+				}),
 			).rejects.toThrow(/No item with id missing.*Re-dump the frame/s);
 		});
 	});
@@ -246,20 +263,26 @@ describe("runExtract", () => {
 			);
 
 			await expect(
-				runExtract({ items, topLeft: topLeftId, bottomRight: bottomRightId }),
+				runExtract(undefined, {
+					items,
+					topLeft: topLeftId,
+					bottomRight: bottomRightId,
+				}),
 			).rejects.toThrow(/parent_top_left/);
 		});
 	});
 
 	describe("when the anchor flags are missing and there is no session", () => {
 		it("should fail naming both flags", async () => {
-			await expect(runExtract({ items: "board-items.json" })).rejects.toThrow(
-				/--top-left .*--bottom-right/,
-			);
+			await expect(
+				runExtract(undefined, { items: "board-items.json" }),
+			).rejects.toThrow(/--top-left .*--bottom-right/);
 		});
 
 		it("should not request a preview it cannot host", async () => {
-			await expect(runExtract({ items: "board-items.json" })).rejects.toThrow();
+			await expect(
+				runExtract(undefined, { items: "board-items.json" }),
+			).rejects.toThrow();
 
 			expect(requestPreview).not.toHaveBeenCalled();
 		});
@@ -268,7 +291,10 @@ describe("runExtract", () => {
 	describe("when the items file is missing", () => {
 		it("should fail naming the flag", async () => {
 			await expect(
-				runExtract({ topLeft: topLeftId, bottomRight: bottomRightId }),
+				runExtract(undefined, {
+					topLeft: topLeftId,
+					bottomRight: bottomRightId,
+				}),
 			).rejects.toThrow(/--items <file> is required/);
 		});
 	});
@@ -278,7 +304,7 @@ describe("runExtract", () => {
 			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
 			inSession();
 
-			await runExtract({
+			await runExtract(undefined, {
 				items,
 				topLeft: topLeftId,
 				bottomRight: bottomRightId,
@@ -293,7 +319,7 @@ describe("runExtract", () => {
 			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
 			const ignore = ignoreFile("- Delivery\n- Beta & friends\n");
 
-			await runExtract({
+			await runExtract(undefined, {
 				items,
 				ignore,
 				topLeft: topLeftId,
@@ -313,7 +339,7 @@ describe("runExtract", () => {
 				warnings.push(String(line));
 			});
 
-			await runExtract({
+			await runExtract(undefined, {
 				items,
 				ignore,
 				topLeft: topLeftId,
@@ -335,7 +361,7 @@ describe("runExtract", () => {
 				.spyOn(console, "error")
 				.mockImplementation(() => undefined);
 
-			await runExtract({
+			await runExtract(undefined, {
 				items,
 				ignore,
 				topLeft: topLeftId,
@@ -349,7 +375,7 @@ describe("runExtract", () => {
 			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
 
 			await expect(
-				runExtract({
+				runExtract(undefined, {
 					items,
 					ignore: join(dir, "absent.yml"),
 					topLeft: topLeftId,
@@ -363,7 +389,7 @@ describe("runExtract", () => {
 			const ignore = ignoreFile("ignore:\n  - Delivery\n");
 
 			await expect(
-				runExtract({
+				runExtract(undefined, {
 					items,
 					ignore,
 					topLeft: topLeftId,
@@ -392,7 +418,7 @@ describe("runExtract", () => {
 			);
 			const items = itemsFile(JSON.stringify([firstPage, secondPage, repeats]));
 
-			await runExtract({
+			await runExtract(undefined, {
 				items,
 				topLeft: topLeftId,
 				bottomRight: bottomRightId,
@@ -409,7 +435,7 @@ describe("runExtract", () => {
 			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
 			const out = join(dir, "epics.yml");
 
-			await runExtract({
+			await runExtract(undefined, {
 				items,
 				out,
 				topLeft: topLeftId,
@@ -433,7 +459,7 @@ describe("runExtract", () => {
 			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
 			const out = join(dir, "nested", "epics.yml");
 
-			await runExtract({
+			await runExtract(undefined, {
 				items,
 				out,
 				topLeft: topLeftId,
@@ -448,7 +474,7 @@ describe("runExtract", () => {
 		it("should print the list to stdout and write no file", async () => {
 			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
 
-			await runExtract({
+			await runExtract(undefined, {
 				items,
 				topLeft: topLeftId,
 				bottomRight: bottomRightId,
@@ -470,7 +496,7 @@ describe("runExtract", () => {
 				selection: { topLeft: topLeftId, bottomRight: bottomRightId },
 			});
 
-			await runExtract({ items });
+			await runExtract(undefined, { items });
 
 			const request = requestPreview.mock.calls[0]?.[0];
 			expect(request).toMatchObject({
@@ -501,7 +527,7 @@ describe("runExtract", () => {
 				selection: { topLeft: topLeftId, bottomRight: bottomRightId },
 			});
 
-			await runExtract({ items });
+			await runExtract(undefined, { items });
 
 			expect(written.join("")).toContain(
 				`Anchors: --top-left ${topLeftId} --bottom-right ${bottomRightId}`,
@@ -516,9 +542,125 @@ describe("runExtract", () => {
 			inSession();
 			picks({ decision: "approve" });
 
-			await expect(runExtract({ items })).rejects.toThrow(
+			await expect(runExtract(undefined, { items })).rejects.toThrow(
 				/returned no boxes.*--top-left/s,
 			);
+		});
+	});
+
+	describe("when a named extract is given", () => {
+		it("should resolve every field from config and report the file", async () => {
+			itemsFile(JSON.stringify([firstPage, secondPage]));
+			configFile({
+				items: "board-items.json",
+				topLeft: topLeftId,
+				bottomRight: bottomRightId,
+				out: "epics.yml",
+			});
+			const errors: string[] = [];
+			vi.spyOn(console, "error").mockImplementation((line: unknown) => {
+				errors.push(String(line));
+			});
+
+			await runExtract("epics", {}, paths());
+
+			expect(readFileSync(join(dir, "epics.yml"), "utf8")).toContain(
+				"- Alpha\n",
+			);
+			expect(errors.join("\n")).toContain(
+				`Extract "epics" from ${join(dir, "assist.yml")}`,
+			);
+		});
+
+		it("should let a flag override the configured field", async () => {
+			itemsFile(JSON.stringify([firstPage, secondPage]));
+			configFile({
+				items: "board-items.json",
+				topLeft: topLeftId,
+				bottomRight: bottomRightId,
+				out: "epics.yml",
+			});
+			const out = join(dir, "override.yml");
+
+			await runExtract("epics", { out }, paths());
+
+			expect(readdirSync(dir).sort()).toEqual([
+				"assist.yml",
+				"board-items.json",
+				"global.yml",
+				"override.yml",
+			]);
+		});
+
+		it("should fail listing the configured names when the name is unknown", async () => {
+			configFile({
+				items: "board-items.json",
+				topLeft: topLeftId,
+				bottomRight: bottomRightId,
+			});
+
+			await expect(runExtract("themes", {}, paths())).rejects.toThrow(
+				/Configured extracts: epics\./,
+			);
+		});
+	});
+
+	describe("when the picked anchors are saved", () => {
+		it("should record the board, frame and repo-relative paths", async () => {
+			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
+			writeFileSync(join(dir, "assist.yml"), "{}\n");
+			inSession();
+			picks({
+				decision: "approve",
+				selection: { topLeft: topLeftId, bottomRight: bottomRightId },
+			});
+
+			await runExtract(undefined, { items, save: "epics" }, paths());
+
+			expect(parse(readFileSync(join(dir, "assist.yml"), "utf8"))).toEqual({
+				miro: {
+					extracts: {
+						epics: {
+							board: "uXjVGqQsR5Q=",
+							frame: "3458764665701555761",
+							topLeft: topLeftId,
+							bottomRight: bottomRightId,
+							items: "board-items.json",
+						},
+					},
+				},
+			});
+		});
+
+		it("should print the file it wrote", async () => {
+			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
+			writeFileSync(join(dir, "assist.yml"), "{}\n");
+			inSession();
+			picks({
+				decision: "approve",
+				selection: { topLeft: topLeftId, bottomRight: bottomRightId },
+			});
+
+			await runExtract(undefined, { items, save: "epics" }, paths());
+
+			expect(written.join("")).toContain(
+				`Saved extract "epics" to ${join(dir, "assist.yml")}`,
+			);
+		});
+	});
+
+	describe("when the anchors come from flags", () => {
+		it("should save nothing", async () => {
+			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
+			writeFileSync(join(dir, "assist.yml"), "{}\n");
+
+			await runExtract(
+				undefined,
+				{ items, topLeft: topLeftId, bottomRight: bottomRightId },
+				paths(),
+			);
+
+			expect(readFileSync(join(dir, "assist.yml"), "utf8")).toBe("{}\n");
 		});
 	});
 });

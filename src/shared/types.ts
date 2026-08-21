@@ -8,6 +8,16 @@ const transcriptConfigSchema = z.strictObject({
 	summaryDir: z.string(),
 });
 
+export const miroExtractSchema = z.strictObject({
+	board: z.string().optional(),
+	frame: z.string().optional(),
+	topLeft: z.string(),
+	bottomRight: z.string(),
+	items: z.string(),
+	ignore: z.string().optional(),
+	out: z.string().optional(),
+});
+
 const DEFAULT_WAKE_WORDS = ["computer"];
 const DEFAULT_MODELS_DIR = "~/.assist/voice/models";
 const DEFAULT_BACKUP_DIR = "~/.assist/backups";
@@ -212,6 +222,11 @@ const assistConfigShape = {
 			krokiUrl: z.string().default("https://kroki.io"),
 		})
 		.default({ krokiUrl: "https://kroki.io" }),
+	miro: z
+		.strictObject({
+			extracts: z.record(z.string(), miroExtractSchema).optional(),
+		})
+		.optional(),
 	deny: z
 		.array(
 			z.strictObject({
@@ -278,3 +293,4 @@ export type RunConfig = z.infer<typeof runConfigSchema>;
 export type RunLink = z.infer<typeof runLinkSchema>;
 export type RunEntry = RunConfig | RunLink;
 export type TranscriptConfig = z.infer<typeof transcriptConfigSchema>;
+export type MiroExtractConfig = z.infer<typeof miroExtractSchema>;

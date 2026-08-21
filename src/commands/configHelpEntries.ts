@@ -11,6 +11,7 @@ import { devlogConfigHelp } from "./devlog/devlogConfigHelp";
 import { dotnetConfigHelp } from "./dotnet/dotnetConfigHelp";
 import { jiraConfigHelp } from "./jira/jiraConfigHelp";
 import { mermaidConfigHelp } from "./mermaid/mermaidConfigHelp";
+import { miroConfigHelp } from "./miro/miroConfigHelp";
 import { prsConfigHelp } from "./prs/prsConfigHelp";
 import { ravendbConfigHelp } from "./ravendb/ravendbConfigHelp";
 import { refactorConfigHelp } from "./refactor/refactorConfigHelp";
@@ -38,6 +39,7 @@ export const configHelpEntries: ConfigHelpEntry[] = [
 	...harnessConfigHelp,
 	...jiraConfigHelp,
 	...mermaidConfigHelp,
+	...miroConfigHelp,
 	...prsConfigHelp,
 	...ravendbConfigHelp,
 	...refactorConfigHelp,
