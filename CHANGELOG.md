@@ -1,3 +1,10 @@
+# [0.579.0](https://github.com/staff0rd/assist/compare/v0.578.0...v0.579.0) (2026-08-21)
+
+
+### Features
+
+* pick Miro anchors in a preview pane ([39b94a9](https://github.com/staff0rd/assist/commit/39b94a9b2bd050fcbb33f03b569ee1a2cf38cf37))
+
 # [0.578.0](https://github.com/staff0rd/assist/compare/v0.577.0...v0.578.0) (2026-08-21)
 
 
