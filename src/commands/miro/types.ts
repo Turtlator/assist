@@ -4,6 +4,8 @@ export type MiroRawItem = {
 	data?: { content?: string };
 	geometry?: { width?: number; height?: number };
 	position?: { relativeTo?: string; x?: number; y?: number };
+	parent?: { id?: string };
+	miro_url?: string;
 };
 
 export type MiroRawPage = {
@@ -29,4 +31,12 @@ export type MiroRect = {
 
 export type MiroBoardPreview = {
 	boxes: MiroItem[];
+};
+
+export type MiroExtractOptions = {
+	items?: string;
+	topLeft?: string;
+	bottomRight?: string;
+	ignore?: string;
+	out?: string;
 };

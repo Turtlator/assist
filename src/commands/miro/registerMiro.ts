@@ -18,5 +18,7 @@ export function registerMiro(program: Command): void {
 			"--bottom-right <id>",
 			"Widget id or ?moveToWidget=<id> link of the bottom-right box",
 		)
+		.option("--ignore <file>", "YAML list of box texts to drop from the output")
+		.option("--out <file>", "Write the YAML to this file instead of stdout")
 		.action(runExtract);
 }

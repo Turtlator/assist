@@ -1,4 +1,4 @@
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -147,6 +147,10 @@ function itemsFile(contents: string, name = "board-items.json"): string {
 	return path;
 }
 
+function ignoreFile(contents: string): string {
+	return itemsFile(contents, "ignore.yml");
+}
+
 beforeEach(() => {
 	dir = mkdtempSync(join(tmpdir(), "miro-"));
 	written = [];
@@ -281,6 +285,179 @@ describe("runExtract", () => {
 			});
 
 			expect(requestPreview).not.toHaveBeenCalled();
+		});
+	});
+
+	describe("when an ignore file is given", () => {
+		it("should drop exact text matches", async () => {
+			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
+			const ignore = ignoreFile("- Delivery\n- Beta & friends\n");
+
+			await runExtract({
+				items,
+				ignore,
+				topLeft: topLeftId,
+				bottomRight: bottomRightId,
+			});
+
+			expect(written.join("")).toBe(
+				"- Alpha\n- Sticky note idea\n- Gamma\n- Edge\n- Omega\n",
+			);
+		});
+
+		it("should warn about entries that matched nothing", async () => {
+			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
+			const ignore = ignoreFile("- Delivery\n- Outside\n- Nowhere\n");
+			const warnings: string[] = [];
+			vi.spyOn(console, "error").mockImplementation((line: unknown) => {
+				warnings.push(String(line));
+			});
+
+			await runExtract({
+				items,
+				ignore,
+				topLeft: topLeftId,
+				bottomRight: bottomRightId,
+			});
+
+			const warning = warnings.join("\n");
+			expect(warning).toContain("2 entries");
+			expect(warning).toContain("ignore.yml");
+			expect(warning).toContain("- Outside");
+			expect(warning).toContain("- Nowhere");
+			expect(warning).not.toContain("- Delivery");
+		});
+
+		it("should not warn when every entry matched", async () => {
+			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
+			const ignore = ignoreFile("- Delivery\n");
+			const error = vi
+				.spyOn(console, "error")
+				.mockImplementation(() => undefined);
+
+			await runExtract({
+				items,
+				ignore,
+				topLeft: topLeftId,
+				bottomRight: bottomRightId,
+			});
+
+			expect(error).not.toHaveBeenCalled();
+		});
+
+		it("should fail when the ignore file is missing", async () => {
+			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
+
+			await expect(
+				runExtract({
+					items,
+					ignore: join(dir, "absent.yml"),
+					topLeft: topLeftId,
+					bottomRight: bottomRightId,
+				}),
+			).rejects.toThrow(/No ignore file at/);
+		});
+
+		it("should fail when the ignore file is not a list of strings", async () => {
+			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
+			const ignore = ignoreFile("ignore:\n  - Delivery\n");
+
+			await expect(
+				runExtract({
+					items,
+					ignore,
+					topLeft: topLeftId,
+					bottomRight: bottomRightId,
+				}),
+			).rejects.toThrow(/must be a YAML list/);
+		});
+	});
+
+	describe("when the same text appears on more than one box", () => {
+		it("should list it once at its highest-priority position", async () => {
+			const repeats = page(
+				[
+					shape(
+						"dup-late",
+						"<p><strong>Alpha</strong></p>",
+						1000,
+						800,
+						200,
+						100,
+					),
+					shape("dup-mid", "<p><strong>Alpha</strong></p>", 700, 500, 200, 100),
+				],
+				false,
+				null,
+			);
+			const items = itemsFile(JSON.stringify([firstPage, secondPage, repeats]));
+
+			await runExtract({
+				items,
+				topLeft: topLeftId,
+				bottomRight: bottomRightId,
+			});
+
+			expect(written.join("")).toBe(
+				"- Delivery\n- Alpha\n- Sticky note idea\n- Beta & friends\n- Gamma\n- Edge\n- Omega\n",
+			);
+		});
+	});
+
+	describe("when --out is given", () => {
+		it("should write YAML with a provenance header", async () => {
+			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
+			const out = join(dir, "epics.yml");
+
+			await runExtract({
+				items,
+				out,
+				topLeft: topLeftId,
+				bottomRight: bottomRightId,
+			});
+
+			expect(readFileSync(out, "utf8")).toBe(
+				[
+					"# board: uXjVGqQsR5Q=",
+					"# frame: 3458764665701555761",
+					`# top-left: ${topLeftId}`,
+					`# bottom-right: ${bottomRightId}`,
+					"# rectangle: 100,350 to 1300,950",
+					...expectedOrder.map((text) => `- ${text}`),
+					"",
+				].join("\n"),
+			);
+		});
+
+		it("should report the file it wrote instead of printing the list", async () => {
+			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
+			const out = join(dir, "nested", "epics.yml");
+
+			await runExtract({
+				items,
+				out,
+				topLeft: topLeftId,
+				bottomRight: bottomRightId,
+			});
+
+			expect(written.join("")).toBe(`Wrote 7 boxes to ${out}\n`);
+		});
+	});
+
+	describe("when --out is omitted", () => {
+		it("should print the list to stdout and write no file", async () => {
+			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
+
+			await runExtract({
+				items,
+				topLeft: topLeftId,
+				bottomRight: bottomRightId,
+			});
+
+			expect(written.join("")).toBe(
+				`${expectedOrder.map((text) => `- ${text}`).join("\n")}\n`,
+			);
+			expect(readdirSync(dir)).toEqual(["board-items.json"]);
 		});
 	});
 

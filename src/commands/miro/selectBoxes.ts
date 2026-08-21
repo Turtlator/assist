@@ -17,11 +17,16 @@ function centreInside(rect: MiroRect, item: MiroItem): boolean {
 	return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
 }
 
+type BoxSelection = {
+	rect: MiroRect;
+	boxes: MiroItem[];
+};
+
 export function selectBoxes(
 	items: MiroItem[],
 	topLeftId: string,
 	bottomRightId: string,
-): MiroItem[] {
+): BoxSelection {
 	const topLeft = findAnchor(items, topLeftId);
 	const bottomRight = findAnchor(items, bottomRightId);
 	const rect: MiroRect = {
@@ -30,7 +35,8 @@ export function selectBoxes(
 		right: bottomRight.right,
 		bottom: bottomRight.bottom,
 	};
-	return items
+	const boxes = items
 		.filter((item) => isBox(item) && centreInside(rect, item))
 		.sort((a, b) => a.left - b.left || a.top - b.top);
+	return { rect, boxes };
 }
