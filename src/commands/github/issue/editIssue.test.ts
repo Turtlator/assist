@@ -231,6 +231,68 @@ describe("editIssue staleness", () => {
 	});
 });
 
+describe("editIssue edited body", () => {
+	const COLLAPSED =
+		"# History\n\n<details>\n<summary>Click to expand</summary>\n\nlots of noise\n\n</details>";
+
+	it("pushes the edited markdown rather than the fetched body", async () => {
+		webSession();
+		mockRequestPreviewDecision.mockResolvedValue({
+			decision: "approve",
+			body: COLLAPSED,
+		});
+
+		await editIssue("42", { repo: "acme/widgets" });
+
+		expect(readFileSync(workingBodyPath(), "utf8")).toBe(COLLAPSED);
+		expect(ghCalls("edit")).toHaveLength(1);
+	});
+
+	it("writes the edited markdown to the working file on Request changes", async () => {
+		webSession();
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		exitThrows();
+		mockRequestPreviewDecision.mockResolvedValue({
+			decision: "reject",
+			body: COLLAPSED,
+			comments: [{ quote: "lots of noise", note: "collapse this" }],
+		});
+
+		await expect(editIssue("42", {})).rejects.toThrow("process.exit");
+
+		expect(readFileSync(workingBodyPath(), "utf8")).toBe(COLLAPSED);
+		expect(ghCalls("edit")).toEqual([]);
+	});
+
+	it("rejects an edited body referencing Claude before pushing", async () => {
+		webSession();
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		exitThrows();
+		mockRequestPreviewDecision.mockResolvedValue({
+			decision: "approve",
+			body: "Rewritten by Claude",
+		});
+
+		await expect(editIssue("42", {})).rejects.toThrow("process.exit");
+
+		expect(ghCalls("edit")).toEqual([]);
+	});
+
+	it("rejects an edited body referencing an assist backlog item", async () => {
+		webSession();
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		exitThrows();
+		mockRequestPreviewDecision.mockResolvedValue({
+			decision: "approve",
+			body: "Tracked as a706.",
+		});
+
+		await expect(editIssue("42", {})).rejects.toThrow("process.exit");
+
+		expect(ghCalls("edit")).toEqual([]);
+	});
+});
+
 describe("editIssue validation", () => {
 	it("rejects a body referencing Claude before previewing or pushing", async () => {
 		webSession();

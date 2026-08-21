@@ -3,17 +3,15 @@ import { ScreenshotsSection } from "./ScreenshotsSection";
 import type { usePrPane } from "./usePrPane";
 
 export function PrPreviewContent({
-	body,
 	pane,
 	screenshots,
 }: {
-	body: string;
 	pane: ReturnType<typeof usePrPane>;
 	screenshots: boolean;
 }) {
 	return (
 		<PreviewBody
-			content={body}
+			content={pane.body}
 			ranges={pane.ranges}
 			wrapperRef={pane.wrapperRef}
 			contentRef={pane.contentRef}

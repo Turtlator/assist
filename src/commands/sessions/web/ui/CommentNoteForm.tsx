@@ -4,9 +4,11 @@ import { useState } from "react";
 export function CommentNoteForm({
 	onAdd,
 	onCancel,
+	onCollapse,
 }: {
 	onAdd: (note: string) => void;
 	onCancel: () => void;
+	onCollapse?: (() => void) | undefined;
 }) {
 	const [note, setNote] = useState("");
 	const submit = () => {
@@ -35,6 +37,11 @@ export function CommentNoteForm({
 				<Button size="small" onClick={onCancel}>
 					Cancel
 				</Button>
+				{onCollapse && (
+					<Button size="small" variant="outlined" onClick={onCollapse}>
+						Collapse
+					</Button>
+				)}
 				<Button
 					size="small"
 					variant="contained"

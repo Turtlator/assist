@@ -19,13 +19,17 @@ const boxSx = {
 export function SelectionCommentPopover({
 	pending,
 	moved,
+	editable,
 	onAdd,
 	onCancel,
+	onCollapse,
 }: {
 	pending: SelectionAnchor | null;
 	moved?: boolean;
+	editable?: boolean;
 	onAdd: (note: string) => void;
 	onCancel: () => void;
+	onCollapse?: () => void;
 }) {
 	const draftKey = pending?.quote ?? "";
 
@@ -47,7 +51,12 @@ export function SelectionCommentPopover({
 					</Typography>
 				)}
 				<QuoteBlock text={draftKey} />
-				<CommentNoteForm key={draftKey} onAdd={onAdd} onCancel={onCancel} />
+				<CommentNoteForm
+					key={draftKey}
+					onAdd={onAdd}
+					onCancel={onCancel}
+					onCollapse={editable ? onCollapse : undefined}
+				/>
 			</Box>
 		</Popover>
 	);

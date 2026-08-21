@@ -1,24 +1,17 @@
 import { useMemo } from "react";
-import type { PrDecisionDetails } from "./PrDecisionDetails";
+import type { PrPaneOptions } from "./PrPaneOptions";
 import { previewHighlights } from "./previewHighlights";
 import { usePaneScreenshots } from "./usePaneScreenshots";
 import { usePrComments } from "./usePrComments";
 import { usePrDecision } from "./usePrDecision";
+import { useEditableBody } from "./useEditableBody";
+import { usePaneSelectionActions } from "./usePaneSelectionActions";
 import { usePreviewSelection } from "./usePreviewSelection";
 
-type OnDecision = (
-	decision: "approve" | "reject",
-	details: PrDecisionDetails,
-) => void;
-
-export function usePrPane(
-	requestId: string,
-	sessionId: string | undefined,
-	cwd: string | undefined,
-	onDecision: OnDecision,
-	isPr: boolean,
-	resolvedDraft: boolean,
-) {
+export function usePrPane(options: PrPaneOptions) {
+	const { requestId, sessionId, cwd, onDecision, isPr, resolvedDraft } =
+		options;
+	const edit = useEditableBody(options.initialBody, options.editable);
 	const { wrapperRef, contentRef, pending, dragRects, onMouseDown, clear } =
 		usePreviewSelection();
 	const { comments, add, remove } = usePrComments(requestId);
@@ -30,6 +23,7 @@ export function usePrPane(
 		isPr,
 		resolvedDraft,
 		() => shots.screenshots.map((s) => s.markdown),
+		edit.editedBody,
 	);
 
 	const { commentColors, dragColor, ranges } = useMemo(
@@ -37,18 +31,15 @@ export function usePrPane(
 		[comments, pending],
 	);
 
-	const onAdd = (note: string) => {
-		if (pending)
-			add({
-				quote: pending.quote,
-				note,
-				start: pending.start,
-				end: pending.end,
-			});
-		clear();
-	};
+	const { onAdd, onCollapse } = usePaneSelectionActions(
+		pending,
+		add,
+		edit.collapse,
+		clear,
+	);
 
 	return {
+		body: edit.body,
 		wrapperRef,
 		contentRef,
 		onMouseDown,
@@ -60,6 +51,7 @@ export function usePrPane(
 		dragRects,
 		dragColor,
 		onAdd,
+		onCollapse,
 		onCancel: clear,
 		onDecide: decision.onDecide,
 		chain: decision.chain,

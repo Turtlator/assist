@@ -1,7 +1,7 @@
 import { validateProposedContent } from "../../../shared/validateProposedContent";
 import { inWebSession } from "../../sessions/shared/inWebSession";
 import { fetchIssue } from "./fetchIssue";
-import { pushIssueBody } from "./pushIssueBody";
+import { pushUnchangedIssue } from "./pushUnchangedIssue";
 import { reviewProposedIssueEdit } from "./reviewProposedIssueEdit";
 import { viewIssue } from "./viewIssue";
 import { writeIssueWorkingFile } from "./writeIssueWorkingFile";
@@ -41,22 +41,20 @@ export async function editIssue(
 		issue.body,
 	);
 
-	const bodyPath = writeIssueWorkingFile(
-		slug,
-		number,
-		target,
-		issue.updatedAt,
+	const save = (markdown: string) =>
+		writeIssueWorkingFile(slug, number, target, issue.updatedAt, markdown);
+
+	const bodyPath = save(issue.body);
+	const edited = await reviewProposedIssueEdit(
+		`Edit ${target}: ${issue.title}`,
 		issue.body,
+		save,
 	);
-	await reviewProposedIssueEdit(`Edit ${target}: ${issue.title}`, issue.body);
+	validateProposedContent(
+		{ subject: "Issue", context: "GitHub issues" },
+		issue.title,
+		edited,
+	);
 
-	if (fetchIssue(number, options.repo).updatedAt !== issue.updatedAt) {
-		console.error(
-			`${target} was updated on GitHub after it was fetched. Nothing was pushed; the markdown is at ${bodyPath}`,
-		);
-		process.exit(1);
-	}
-
-	pushIssueBody(number, options.repo, bodyPath);
-	console.log(`Issue body updated on ${target}`);
+	pushUnchangedIssue(number, options.repo, target, issue.updatedAt, bodyPath);
 }

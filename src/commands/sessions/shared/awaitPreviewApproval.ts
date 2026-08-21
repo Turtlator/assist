@@ -8,6 +8,7 @@ import {
 export async function awaitPreviewApproval(
 	subject: string,
 	request: PreviewRequest,
+	saveEditedBody?: (body: string) => void,
 ): Promise<PreviewDecision> {
 	console.log("Awaiting your approval in the assist web UI preview pane…");
 
@@ -21,6 +22,7 @@ export async function awaitPreviewApproval(
 		process.exit(1);
 	}
 
+	if (decision.body !== undefined) saveEditedBody?.(decision.body);
 	if (decision.decision === "reject") reportPreviewRejection(subject, decision);
 
 	return decision;

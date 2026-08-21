@@ -22,21 +22,24 @@ export function PrPreviewPane({
 	) => void;
 }) {
 	const isPr = (preview.kind ?? "pr") === "pr";
+	const editable = preview.kind === "github-issue-edit";
 	const newPr = isPr && preview.prNumber === null;
-	const pane = usePrPane(
-		preview.requestId,
+	const pane = usePrPane({
+		requestId: preview.requestId,
 		sessionId,
 		cwd,
 		onDecision,
 		isPr,
-		preview.draft === true,
-	);
+		resolvedDraft: preview.draft === true,
+		initialBody: preview.body,
+		editable,
+	});
 
 	return (
 		<Box sx={prPreviewPaneSx} onDrop={pane.onDrop} onDragOver={pane.onDragOver}>
 			<PrPreviewHeader preview={preview} draft={pane.chain.draft} />
 			<Divider />
-			<PrPreviewContent body={preview.body} pane={pane} screenshots={isPr} />
+			<PrPreviewContent pane={pane} screenshots={isPr} />
 			<PrPreviewFooter
 				comments={pane.comments}
 				commentColors={pane.commentColors}
@@ -45,7 +48,9 @@ export function PrPreviewPane({
 				onDecision={pane.onDecide}
 				onAdd={pane.onAdd}
 				onCancel={pane.onCancel}
+				onCollapse={pane.onCollapse}
 				chain={isPr ? pane.chain : undefined}
+				editable={editable}
 				newPr={newPr}
 				onChainChange={pane.setChain}
 			/>

@@ -853,6 +853,128 @@ describe("PrPreviewPane inline comments", () => {
 		});
 	});
 
+	describe("github issue edit previews", () => {
+		const issueEdit: PrPreview = {
+			requestId: "e1",
+			title: "Edit acme/widgets#42: Tidy the history",
+			body: "## Notes\n\nlots of noise here",
+			prNumber: null,
+			kind: "github-issue-edit",
+		};
+
+		const collapse = () =>
+			fireEvent.click(screen.getByRole("button", { name: "Collapse" }));
+
+		it("wraps the selection in a details block shown in the pane", () => {
+			const { container } = render(
+				<PrPreviewPane preview={issueEdit} onDecision={vi.fn()} />,
+			);
+
+			selectText(container, "lots of noise");
+			collapse();
+
+			const details = container.querySelector("details");
+			expect(details?.querySelector("summary")?.textContent).toBe(
+				"Click to expand",
+			);
+			expect(details?.textContent).toContain("lots of noise here");
+			expect(screen.queryByText("Comments (1)")).toBeNull();
+			expect(container.querySelector("mark.pr-comment")).toBeNull();
+		});
+
+		it("sends the collapsed markdown as the body on approve", () => {
+			const onDecision = vi.fn();
+			const { container } = render(
+				<PrPreviewPane preview={issueEdit} onDecision={onDecision} />,
+			);
+
+			selectText(container, "lots of noise");
+			collapse();
+			fireEvent.click(screen.getByRole("button", { name: "Approve" }));
+
+			expect(onDecision).toHaveBeenCalledWith(
+				"approve",
+				expect.objectContaining({
+					body: "## Notes\n\n<details>\n<summary>Click to expand</summary>\n\nlots of noise here\n\n</details>",
+				}),
+			);
+		});
+
+		it("sends the edited body with Request changes alongside the comments", () => {
+			const onDecision = vi.fn();
+			const { container } = render(
+				<PrPreviewPane preview={issueEdit} onDecision={onDecision} />,
+			);
+
+			selectText(container, "lots of noise");
+			collapse();
+			addComment(container, "Notes", "name the section");
+			fireEvent.click(
+				screen.getByRole("button", { name: /Request changes \(1\)/ }),
+			);
+
+			expect(onDecision).toHaveBeenCalledWith(
+				"reject",
+				expect.objectContaining({
+					comments: [{ quote: "Notes", note: "name the section" }],
+					body: expect.stringContaining("<summary>Click to expand</summary>"),
+				}),
+			);
+		});
+
+		it("still returns an unedited body when nothing was collapsed", () => {
+			const onDecision = vi.fn();
+			render(<PrPreviewPane preview={issueEdit} onDecision={onDecision} />);
+
+			fireEvent.click(screen.getByRole("button", { name: "Approve" }));
+
+			expect(onDecision).toHaveBeenCalledWith(
+				"approve",
+				expect.objectContaining({ body: issueEdit.body }),
+			);
+		});
+
+		it("shows an Edit chip with no PR chain or screenshot UI", () => {
+			render(<PrPreviewPane preview={issueEdit} onDecision={vi.fn()} />);
+
+			expect(screen.getByText("Edit")).toBeTruthy();
+			expect(screen.queryByText("New PR")).toBeNull();
+			expect(screen.queryByLabelText("Review")).toBeNull();
+			expect(screen.queryByLabelText("Post")).toBeNull();
+			expect(screen.queryByLabelText("Draft")).toBeNull();
+			expect(screen.queryByText(/attach a screenshot/)).toBeNull();
+		});
+	});
+
+	describe("Collapse is confined to the editable kind", () => {
+		const noCollapse = (p: PrPreview) => {
+			const { container, unmount } = render(
+				<PrPreviewPane preview={p} onDecision={vi.fn()} />,
+			);
+			selectText(container, "Adds x");
+			expect(screen.getByRole("button", { name: "Add comment" })).toBeTruthy();
+			expect(screen.queryByRole("button", { name: "Collapse" })).toBeNull();
+			unmount();
+		};
+
+		it("offers no Collapse button on a PR preview", () => {
+			noCollapse(preview);
+		});
+
+		it("offers no Collapse button on an issue create preview", () => {
+			noCollapse({ ...preview, requestId: "i1", kind: "github-issue" });
+		});
+
+		it("sends no body on a PR preview decision", () => {
+			const onDecision = vi.fn();
+			render(<PrPreviewPane preview={preview} onDecision={onDecision} />);
+
+			fireEvent.click(screen.getByRole("button", { name: "Approve" }));
+
+			expect(onDecision.mock.calls[0][1]).not.toHaveProperty("body");
+		});
+	});
+
 	it("clears persisted comments once a decision is made", () => {
 		const { container, unmount } = render(
 			<PrPreviewPane preview={preview} onDecision={vi.fn()} />,

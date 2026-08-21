@@ -8,6 +8,7 @@ export type DecisionMessage = {
 	reason?: string;
 	comments?: PrPreviewComment[];
 	screenshots?: string[];
+	body?: string;
 	reviewAfter?: boolean;
 	announceAfter?: boolean;
 	draft?: boolean;
@@ -23,6 +24,7 @@ export function toPreviewDecision(
 		reason: msg.reason,
 		comments: Array.isArray(msg.comments) ? msg.comments : undefined,
 		screenshots: Array.isArray(msg.screenshots) ? msg.screenshots : undefined,
+		body: typeof msg.body === "string" ? msg.body : undefined,
 		reviewAfter: msg.reviewAfter === true,
 		announceAfter: msg.announceAfter === true,
 		draft: typeof msg.draft === "boolean" ? msg.draft : undefined,

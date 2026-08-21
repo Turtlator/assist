@@ -1,11 +1,8 @@
 import { Divider } from "@mui/material";
-import type { PrPreviewComment } from "../../shared/SessionInfoBase";
-import type { PendingComment } from "./PendingComment";
 import { PrCommentList } from "./PrCommentList";
 import { PrPreviewActions } from "./PrPreviewActions";
-import type { PrPreviewChain } from "./PrPreviewChain";
+import type { PrPreviewFooterProps } from "./PrPreviewFooterProps";
 import { SelectionCommentPopover } from "./SelectionCommentPopover";
-import type { LocalComment } from "./usePrComments";
 
 export function PrPreviewFooter({
 	comments,
@@ -14,25 +11,13 @@ export function PrPreviewFooter({
 	onAdd,
 	onRemove,
 	onCancel,
+	onCollapse,
 	onDecision,
 	chain,
+	editable,
 	newPr,
 	onChainChange,
-}: {
-	comments: LocalComment[];
-	commentColors: string[];
-	pending: PendingComment | null;
-	onAdd: (note: string) => void;
-	onRemove: (id: number) => void;
-	onCancel: () => void;
-	onDecision: (
-		decision: "approve" | "reject",
-		comments: PrPreviewComment[],
-	) => void;
-	chain?: PrPreviewChain;
-	newPr: boolean;
-	onChainChange: (chain: PrPreviewChain) => void;
-}) {
+}: PrPreviewFooterProps) {
 	return (
 		<>
 			<PrCommentList
@@ -57,8 +42,10 @@ export function PrPreviewFooter({
 			/>
 			<SelectionCommentPopover
 				pending={pending}
+				editable={editable}
 				onAdd={onAdd}
 				onCancel={onCancel}
+				onCollapse={onCollapse}
 			/>
 		</>
 	);

@@ -5,6 +5,7 @@ export type PreviewDecision = {
 	reason?: string;
 	comments?: PrPreviewComment[];
 	screenshots?: string[];
+	body?: string;
 	reviewAfter?: boolean;
 	announceAfter?: boolean;
 	draft?: boolean;

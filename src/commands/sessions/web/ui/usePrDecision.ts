@@ -9,6 +9,7 @@ import {
 } from "./loadPersistedPrChain";
 import type { PrDecisionDetails } from "./PrDecisionDetails";
 import type { PrPreviewChain } from "./PrPreviewChain";
+import { previewDecisionDetails } from "./previewDecisionDetails";
 
 type OnDecision = (
 	decision: "approve" | "reject",
@@ -22,6 +23,7 @@ export function usePrDecision(
 	isPr: boolean,
 	resolvedDraft: boolean,
 	screenshotMarkdown: () => string[],
+	editedBody: () => string | undefined,
 ) {
 	const [chain, setChain] = useState<PrPreviewChain>(() => {
 		if (!isPr)
@@ -47,13 +49,16 @@ export function usePrDecision(
 		const approved = decision === "approve";
 		clearPersistedComments(requestId);
 		if (approved) clearPersistedPrChain(sessionId);
-		onDecision(decision, {
-			comments,
-			screenshots: approved ? screenshotMarkdown() : [],
-			reviewAfter: approved && chain.reviewAfter,
-			announceAfter: approved && chain.announceAfter,
-			draft: chain.draft,
-		});
+		onDecision(
+			decision,
+			previewDecisionDetails(
+				approved,
+				comments,
+				chain,
+				approved ? screenshotMarkdown() : [],
+				editedBody(),
+			),
+		);
 	};
 
 	return { chain, setChain: chooseChain, onDecide };

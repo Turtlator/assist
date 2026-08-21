@@ -35,6 +35,7 @@ export function decidePrPreview(
 			reason: d.reason,
 			comments: d.comments,
 			screenshots: d.screenshots,
+			body: d.body,
 			reviewAfter: d.reviewAfter,
 			announceAfter: d.announceAfter,
 			draft: d.draft,
