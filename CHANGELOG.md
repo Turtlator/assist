@@ -1,3 +1,10 @@
+# [0.578.0](https://github.com/staff0rd/assist/compare/v0.577.0...v0.578.0) (2026-08-21)
+
+
+### Features
+
+* apply an issue subtree's type fixes ([5d4e52e](https://github.com/staff0rd/assist/commit/5d4e52e41da8c45e425182a8842f87c23699b5a2))
+
 # [0.577.0](https://github.com/staff0rd/assist/compare/v0.576.0...v0.577.0) (2026-08-21)
 
 
