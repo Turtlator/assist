@@ -1,3 +1,11 @@
+# [0.575.0](https://github.com/staff0rd/assist/compare/v0.574.1...v0.575.0) (2026-08-21)
+
+
+### Features
+
+* collapse sections in issue preview ([8150f9e](https://github.com/staff0rd/assist/commit/8150f9e3056f8fed582c2ef3aed4f9730cef4ee5))
+* report what a pull needs synced ([e51c2bd](https://github.com/staff0rd/assist/commit/e51c2bd51caca08e8a563964428a65051b5f6fc7))
+
 ## [0.574.1](https://github.com/staff0rd/assist/compare/v0.574.0...v0.574.1) (2026-08-21)
 
 
