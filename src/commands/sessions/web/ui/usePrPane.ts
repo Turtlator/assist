@@ -40,6 +40,8 @@ export function usePrPane(options: PrPaneOptions) {
 
 	return {
 		body: edit.body,
+		criteria: edit.criteria,
+		onCriteriaChange: edit.writeCriteria,
 		wrapperRef,
 		contentRef,
 		onMouseDown,

@@ -1,37 +1,13 @@
 import Box from "@mui/material/Box";
-import { marked } from "marked";
-import {
-	type MouseEvent as ReactMouseEvent,
-	type ReactNode,
-	type RefObject,
-	useLayoutEffect,
-	useMemo,
-} from "react";
-import { applyHighlights } from "./applyHighlights";
-import type { OverlayRect } from "./caretFromPoint";
 import { DragOverlay } from "./DragOverlay";
-
-type ColoredOffsets = { start: number; end: number; color: string };
-
-const wrapperSx = {
-	flex: 1,
-	overflow: "auto",
-	p: 2,
-	position: "relative",
-	userSelect: "none",
-	cursor: "text",
-	lineHeight: 1.7,
-	wordBreak: "break-word",
-	"& p": { mt: 0 },
-	"& a": { color: "primary.main" },
-	"& mark.pr-comment": {
-		color: "inherit",
-		borderRadius: "2px",
-	},
-} as const;
+import { MarkdownSections } from "./MarkdownSections";
+import { previewBodySx } from "./previewBodySx";
+import type { PreviewBodyProps } from "./PreviewBodyProps";
 
 export function PreviewBody({
 	content,
+	control,
+	trailing,
 	ranges,
 	wrapperRef,
 	contentRef,
@@ -39,27 +15,16 @@ export function PreviewBody({
 	dragColor,
 	onMouseDown,
 	footer,
-}: {
-	content: string;
-	ranges: ColoredOffsets[];
-	wrapperRef: RefObject<HTMLDivElement | null>;
-	contentRef: RefObject<HTMLDivElement | null>;
-	dragRects: OverlayRect[] | null;
-	dragColor: string;
-	onMouseDown: (e: ReactMouseEvent) => void;
-	footer?: ReactNode;
-}) {
-	const html = useMemo(() => marked.parse(content) as string, [content]);
-	useLayoutEffect(() => {
-		const root = contentRef.current;
-		if (!root) return;
-		root.innerHTML = html;
-		applyHighlights(root, ranges);
-	}, [html, ranges, contentRef]);
-
+}: PreviewBodyProps) {
 	return (
-		<Box ref={wrapperRef} onMouseDown={onMouseDown} sx={wrapperSx}>
-			<Box ref={contentRef} className="markdown" />
+		<Box ref={wrapperRef} onMouseDown={onMouseDown} sx={previewBodySx}>
+			<MarkdownSections
+				content={content}
+				control={control}
+				trailing={trailing}
+				ranges={ranges}
+				contentRef={contentRef}
+			/>
 			{footer}
 			<DragOverlay rects={dragRects} color={dragColor} />
 		</Box>

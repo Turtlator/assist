@@ -1,4 +1,5 @@
 import { offsetsToRange } from "./rangeToOffsets";
+import { textWalker } from "./textWalker";
 
 type ColoredOffsets = { start: number; end: number; color: string };
 
@@ -18,7 +19,7 @@ function wrapWithinNode(
 }
 
 function wrapRange(root: Node, range: Range, color: string): void {
-	const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+	const walker = textWalker(root);
 	const targets: { node: Text; start: number; end: number }[] = [];
 	let node = walker.nextNode();
 	while (node) {

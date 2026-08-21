@@ -2,6 +2,7 @@ import { type Caret, caretFromPoint, orderedRange } from "./caretFromPoint";
 import type { PendingComment } from "./PendingComment";
 import { rangeToOffsets } from "./rangeToOffsets";
 import { snapRangeToWords } from "./snapRangeToWords";
+import { skipsSelection } from "./textWalker";
 
 export function startCaret(
 	wrapper: HTMLElement,
@@ -12,6 +13,7 @@ export function startCaret(
 	const el = document.elementFromPoint(x, y);
 	if (!el || el === wrapper || el === content || !content.contains(el))
 		return null;
+	if (skipsSelection(el)) return null;
 	const caret = caretFromPoint(x, y);
 	if (!caret || !content.contains(caret.node)) return null;
 	return caret;

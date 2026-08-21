@@ -1,7 +1,9 @@
+import { textWalker } from "./textWalker";
+
 type TextOffsets = { start: number; end: number };
 
 function pointToOffset(root: Node, container: Node, offset: number): number {
-	const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+	const walker = textWalker(root);
 	let total = 0;
 	let node = walker.nextNode();
 	while (node) {
@@ -24,7 +26,7 @@ export function offsetsToRange(
 	{ start, end }: TextOffsets,
 ): Range | null {
 	const range = document.createRange();
-	const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+	const walker = textWalker(root);
 	let total = 0;
 	let startSet = false;
 	let node = walker.nextNode();

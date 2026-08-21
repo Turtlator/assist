@@ -946,6 +946,101 @@ describe("PrPreviewPane inline comments", () => {
 		});
 	});
 
+	describe("acceptance criteria outliner", () => {
+		const criteriaBody = [
+			"## Background",
+			"",
+			"why",
+			"",
+			"## Acceptance criteria",
+			"",
+			"1. first",
+			"   1. nested",
+			"",
+			"## Notes",
+			"",
+			"tail",
+		].join("\n");
+
+		const issueEdit: PrPreview = {
+			requestId: "e2",
+			title: "Edit acme/widgets#7: Tidy the criteria",
+			body: criteriaBody,
+			prNumber: null,
+			kind: "github-issue-edit",
+		};
+
+		const row = (number: string) =>
+			screen.getByLabelText(`Criterion ${number}`) as HTMLTextAreaElement;
+
+		it("replaces the section with a row per criterion at its source depth", () => {
+			const { container } = render(
+				<PrPreviewPane preview={issueEdit} onDecision={vi.fn()} />,
+			);
+
+			expect(row("1").value).toBe("first");
+			expect(row("1.1").value).toBe("nested");
+			expect(screen.getByText("1.1.")).toBeTruthy();
+			expect(container.querySelector("ol")).toBeNull();
+			expect(container.textContent).toContain("Background");
+			expect(container.textContent).toContain("tail");
+		});
+
+		it("rewrites only the criteria section when a row is edited", () => {
+			const onDecision = vi.fn();
+			render(<PrPreviewPane preview={issueEdit} onDecision={onDecision} />);
+
+			fireEvent.change(row("1"), { target: { value: "first edited" } });
+			fireEvent.click(screen.getByRole("button", { name: "Approve" }));
+
+			expect(onDecision).toHaveBeenCalledWith(
+				"approve",
+				expect.objectContaining({
+					body: criteriaBody.replace("1. first", "1. first edited"),
+				}),
+			);
+		});
+
+		it("pushes the body unchanged when no criterion is touched", () => {
+			const onDecision = vi.fn();
+			render(<PrPreviewPane preview={issueEdit} onDecision={onDecision} />);
+
+			fireEvent.click(screen.getByRole("button", { name: "Approve" }));
+
+			expect(onDecision).toHaveBeenCalledWith(
+				"approve",
+				expect.objectContaining({ body: criteriaBody }),
+			);
+		});
+
+		it("leaves a bulleted section rendered as markdown", () => {
+			const { container } = render(
+				<PrPreviewPane
+					preview={{
+						...issueEdit,
+						requestId: "e3",
+						body: "## Acceptance criteria\n\n- first\n- second",
+					}}
+					onDecision={vi.fn()}
+				/>,
+			);
+
+			expect(screen.queryByLabelText("Criterion 1")).toBeNull();
+			expect(container.querySelector("ul")).toBeTruthy();
+		});
+
+		it("shows no outliner on a preview that is not editable", () => {
+			render(
+				<PrPreviewPane
+					preview={{ ...issueEdit, requestId: "e4", kind: "github-issue" }}
+					onDecision={vi.fn()}
+				/>,
+			);
+
+			expect(screen.queryByLabelText("Criterion 1")).toBeNull();
+		});
+	});
+
 	describe("Collapse is confined to the editable kind", () => {
 		const noCollapse = (p: PrPreview) => {
 			const { container, unmount } = render(

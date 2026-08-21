@@ -1,3 +1,4 @@
+import { AcceptanceCriteriaOutline } from "./AcceptanceCriteriaOutline";
 import { PreviewBody } from "./PreviewBody";
 import { ScreenshotsSection } from "./ScreenshotsSection";
 import type { usePrPane } from "./usePrPane";
@@ -9,9 +10,23 @@ export function PrPreviewContent({
 	pane: ReturnType<typeof usePrPane>;
 	screenshots: boolean;
 }) {
+	const criteria = pane.criteria;
+	const parts = criteria
+		? {
+				content: criteria.before.join("\n"),
+				trailing: criteria.after.join("\n"),
+				control: (
+					<AcceptanceCriteriaOutline
+						items={criteria.items}
+						onChange={pane.onCriteriaChange}
+					/>
+				),
+			}
+		: { content: pane.body };
+
 	return (
 		<PreviewBody
-			content={pane.body}
+			{...parts}
 			ranges={pane.ranges}
 			wrapperRef={pane.wrapperRef}
 			contentRef={pane.contentRef}
