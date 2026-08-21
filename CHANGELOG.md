@@ -1,3 +1,10 @@
+# [0.583.0](https://github.com/staff0rd/assist/compare/v0.582.0...v0.583.0) (2026-08-21)
+
+
+### Features
+
+* link the issue ref in the preview header ([b99e128](https://github.com/staff0rd/assist/commit/b99e1283db5dac0af00cf056f90afc43c6cbf51c))
+
 # [0.582.0](https://github.com/staff0rd/assist/compare/v0.581.0...v0.582.0) (2026-08-21)
 
 
