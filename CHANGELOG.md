@@ -1,3 +1,10 @@
+# [0.580.0](https://github.com/staff0rd/assist/compare/v0.579.0...v0.580.0) (2026-08-21)
+
+
+### Features
+
+* portable chain and strip labels ([a27dedc](https://github.com/staff0rd/assist/commit/a27dedccdef6e232828db156680f0f9f266e868c))
+
 # [0.579.0](https://github.com/staff0rd/assist/compare/v0.578.0...v0.579.0) (2026-08-21)
 
 
