@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { criteriaPaneActions } from "./criteriaPaneActions";
 import type { PrPaneOptions } from "./PrPaneOptions";
 import { previewHighlights } from "./previewHighlights";
 import { usePaneScreenshots } from "./usePaneScreenshots";
@@ -40,8 +41,7 @@ export function usePrPane(options: PrPaneOptions) {
 
 	return {
 		body: edit.body,
-		criteria: edit.criteria,
-		onCriteriaChange: edit.writeCriteria,
+		...criteriaPaneActions(edit),
 		wrapperRef,
 		contentRef,
 		onMouseDown,

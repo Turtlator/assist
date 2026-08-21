@@ -1,7 +1,37 @@
 import { AcceptanceCriteriaOutline } from "./AcceptanceCriteriaOutline";
+import { CriteriaSectionButton } from "./CriteriaSectionButton";
 import { PreviewBody } from "./PreviewBody";
 import { ScreenshotsSection } from "./ScreenshotsSection";
 import type { usePrPane } from "./usePrPane";
+
+function criteriaParts(pane: ReturnType<typeof usePrPane>) {
+	const criteria = pane.criteria;
+	if (!criteria) return { content: pane.body };
+	const parts = { content: criteria.before, trailing: criteria.after };
+	if (criteria.kind === "outline")
+		return {
+			...parts,
+			control: (
+				<AcceptanceCriteriaOutline
+					items={criteria.items}
+					onChange={pane.onCriteriaChange}
+				/>
+			),
+		};
+	return {
+		...parts,
+		control: (
+			<CriteriaSectionButton
+				kind={criteria.kind}
+				onClick={
+					criteria.kind === "insert"
+						? pane.onCriteriaInsert
+						: pane.onCriteriaConvert
+				}
+			/>
+		),
+	};
+}
 
 export function PrPreviewContent({
 	pane,
@@ -10,23 +40,9 @@ export function PrPreviewContent({
 	pane: ReturnType<typeof usePrPane>;
 	screenshots: boolean;
 }) {
-	const criteria = pane.criteria;
-	const parts = criteria
-		? {
-				content: criteria.before.join("\n"),
-				trailing: criteria.after.join("\n"),
-				control: (
-					<AcceptanceCriteriaOutline
-						items={criteria.items}
-						onChange={pane.onCriteriaChange}
-					/>
-				),
-			}
-		: { content: pane.body };
-
 	return (
 		<PreviewBody
-			{...parts}
+			{...criteriaParts(pane)}
 			ranges={pane.ranges}
 			wrapperRef={pane.wrapperRef}
 			contentRef={pane.contentRef}

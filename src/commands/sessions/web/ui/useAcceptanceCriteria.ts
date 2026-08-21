@@ -1,9 +1,9 @@
 import { useMemo } from "react";
-import { splitAcceptanceCriteria } from "./splitAcceptanceCriteria";
+import { acceptanceCriteriaState } from "./acceptanceCriteriaState";
 
 export function useAcceptanceCriteria(body: string, editable: boolean) {
 	return useMemo(
-		() => (editable ? splitAcceptanceCriteria(body) : null),
+		() => (editable ? acceptanceCriteriaState(body) : null),
 		[body, editable],
 	);
 }

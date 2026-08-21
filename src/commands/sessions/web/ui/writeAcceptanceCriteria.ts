@@ -1,7 +1,5 @@
-import {
-	type AcceptanceCriterion,
-	splitAcceptanceCriteria,
-} from "./splitAcceptanceCriteria";
+import { acceptanceSectionSlice } from "./acceptanceSectionSlice";
+import type { AcceptanceCriterion } from "./splitAcceptanceCriteria";
 
 const LEVEL_INDENT = "   ";
 
@@ -14,11 +12,9 @@ export function writeAcceptanceCriteria(
 	body: string,
 	items: AcceptanceCriterion[],
 ): string {
-	const section = splitAcceptanceCriteria(body);
-	if (!section) return body;
-	return [
-		...section.before,
-		...items.map(criterionLine),
-		...section.after,
-	].join("\n");
+	const slice = acceptanceSectionSlice(body);
+	if (!slice) return body;
+	return [...slice.before, ...items.map(criterionLine), ...slice.after].join(
+		"\n",
+	);
 }

@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { convertAcceptanceCriteria } from "./convertAcceptanceCriteria";
+import { insertAcceptanceCriteria } from "./insertAcceptanceCriteria";
 import type { AcceptanceCriterion } from "./splitAcceptanceCriteria";
 import { useAcceptanceCriteria } from "./useAcceptanceCriteria";
 import { wrapCollapsed } from "./wrapCollapsed";
@@ -15,6 +17,8 @@ export function useEditableBody(initialBody: string, editable: boolean) {
 			setBody((current) => wrapCollapsed(current, quote)),
 		writeCriteria: (items: AcceptanceCriterion[]) =>
 			setBody((current) => writeAcceptanceCriteria(current, items)),
+		insertCriteria: () => setBody(insertAcceptanceCriteria),
+		convertCriteria: () => setBody(convertAcceptanceCriteria),
 		editedBody: () => (editable ? body : undefined),
 	};
 }
