@@ -1,3 +1,10 @@
+# [0.586.0](https://github.com/staff0rd/assist/compare/v0.585.0...v0.586.0) (2026-08-21)
+
+
+### Features
+
+* insert or convert a criteria section ([4df0f7d](https://github.com/staff0rd/assist/commit/4df0f7d883ef4ced238eb8189d801fc1e9a653ec))
+
 # [0.585.0](https://github.com/staff0rd/assist/compare/v0.584.0...v0.585.0) (2026-08-21)
 
 
