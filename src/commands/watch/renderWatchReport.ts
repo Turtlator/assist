@@ -5,6 +5,7 @@ type WatchReport = {
 	commits: CommitEntry[];
 	newShas: string[];
 	restarts: string[];
+	syncs: string[];
 };
 
 const escapeCell = (text: string): string =>
@@ -15,6 +16,7 @@ export function renderWatchReport({
 	commits,
 	newShas,
 	restarts,
+	syncs,
 }: WatchReport): string {
 	const isNew = new Set(newShas);
 	const lines = [`**Version** ${version}`, ""];
@@ -36,6 +38,13 @@ export function renderWatchReport({
 		...(restarts.length === 0
 			? ["- none needed"]
 			: restarts.map((restart) => `- ${restart}`)),
+	);
+
+	lines.push("", "**Sync**", "");
+	lines.push(
+		...(syncs.length === 0
+			? ["- not needed"]
+			: syncs.map((sync) => `- ${sync}`)),
 	);
 
 	return lines.join("\n");

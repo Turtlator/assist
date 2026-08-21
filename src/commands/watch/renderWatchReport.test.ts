@@ -22,6 +22,7 @@ describe("renderWatchReport", () => {
 			commits,
 			newShas: [],
 			restarts: [],
+			syncs: [],
 		});
 
 		expect(report.split("\n")[0]).toBe("**Version** 0.488.2");
@@ -33,6 +34,7 @@ describe("renderWatchReport", () => {
 			commits,
 			newShas: [],
 			restarts: [],
+			syncs: [],
 		});
 
 		expect(report).toContain(
@@ -52,6 +54,7 @@ describe("renderWatchReport", () => {
 			commits,
 			newShas: [commits[0].sha, commits[1].sha],
 			restarts: [],
+			syncs: [],
 		});
 
 		expect(report).toContain(
@@ -67,6 +70,7 @@ describe("renderWatchReport", () => {
 			commits: [commit("ddd4444", "just now", "fix: pipe | in subject")],
 			newShas: [],
 			restarts: [],
+			syncs: [],
 		});
 
 		expect(report).toContain(
@@ -83,6 +87,7 @@ describe("renderWatchReport", () => {
 				"restart the web server, then hard-reload the browser tab",
 				"restart the daemon",
 			],
+			syncs: [],
 		});
 
 		expect(report).toContain(
@@ -101,9 +106,55 @@ describe("renderWatchReport", () => {
 			commits,
 			newShas: [],
 			restarts: [],
+			syncs: [],
 		});
 
 		expect(report).toContain("**Restarts**\n\n- none needed");
+	});
+
+	it("lists every reason the pull makes a sync necessary", () => {
+		const report = renderWatchReport({
+			version: "0.488.2",
+			commits,
+			newShas: [],
+			restarts: [],
+			syncs: ["claude/commands changed", "claude/settings.json changed"],
+		});
+
+		expect(report).toContain(
+			[
+				"**Sync**",
+				"",
+				"- claude/commands changed",
+				"- claude/settings.json changed",
+			].join("\n"),
+		);
+	});
+
+	it("says not needed when no sync is required", () => {
+		const report = renderWatchReport({
+			version: "0.488.2",
+			commits,
+			newShas: [],
+			restarts: [],
+			syncs: [],
+		});
+
+		expect(report).toContain("**Sync**\n\n- not needed");
+	});
+
+	it("renders the Sync section after the Restarts section", () => {
+		const report = renderWatchReport({
+			version: "0.488.2",
+			commits,
+			newShas: [],
+			restarts: ["restart the daemon"],
+			syncs: ["claude/CLAUDE.md changed"],
+		});
+
+		expect(report.indexOf("**Sync**")).toBeGreaterThan(
+			report.indexOf("**Restarts**"),
+		);
 	});
 
 	it("handles a repository with no commits", () => {
@@ -112,6 +163,7 @@ describe("renderWatchReport", () => {
 			commits: [],
 			newShas: [],
 			restarts: [],
+			syncs: [],
 		});
 
 		expect(report).toContain("_no commits_");

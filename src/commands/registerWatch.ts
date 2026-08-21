@@ -42,11 +42,11 @@ export function registerWatch(program: Command): void {
 	watchCommand
 		.command("report")
 		.description(
-			"Print the built version, the last 10 commits as a markdown table, and the restarts the new commits make necessary",
+			"Print the built version, the last 10 commits as a markdown table, the restarts the new commits make necessary, and whether ~/.claude needs a sync",
 		)
 		.option(
 			"--from <sha>",
-			"Mark commits reachable from HEAD but not <sha> as new, and derive restart advice from the files they changed",
+			"Mark commits reachable from HEAD but not <sha> as new, and derive the restart and sync advice from the files they changed",
 		)
 		.action((options: { from?: string }) => watchReport(options));
 }

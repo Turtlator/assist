@@ -55,6 +55,7 @@ describe("buildWatchReport", () => {
 		expect(report).toContain("| `bbb2222` | 1 hour ago | fix: middle ← new |");
 		expect(report).toContain("| `ccc3333` | 3 days ago | chore: oldest |");
 		expect(report).toContain("- none needed");
+		expect(report).toContain("- not needed");
 	});
 
 	it("derives the restart advice from the files changed since --from", () => {
@@ -76,6 +77,23 @@ describe("buildWatchReport", () => {
 		expect(report).toContain("- restart the daemon");
 	});
 
+	it("derives the sync advice from the files changed since --from", () => {
+		respond({
+			"rev-parse --show-toplevel": "/repo",
+			[logArgs]: logLine("aaa1111", "just now", "feat: commands and settings"),
+			"rev-list ccc3333..HEAD": "aaa1111".padEnd(40, "0"),
+			"diff --name-only ccc3333..HEAD": [
+				"claude/commands/watch.md",
+				"claude/settings.json",
+			].join("\n"),
+		});
+
+		const report = buildWatchReport("ccc3333");
+
+		expect(report).toContain("- claude/commands changed");
+		expect(report).toContain("- claude/settings.json changed");
+	});
+
 	it("marks nothing new and asks git for no range when --from is omitted", () => {
 		respond({
 			"rev-parse --show-toplevel": "/repo",
@@ -86,6 +104,7 @@ describe("buildWatchReport", () => {
 
 		expect(report).not.toContain("← new");
 		expect(report).toContain("- none needed");
+		expect(report).toContain("- not needed");
 		expect(
 			mockExecFileSync.mock.calls.map((call) => (call[1] as string[])[0]),
 		).not.toContain("rev-list");
