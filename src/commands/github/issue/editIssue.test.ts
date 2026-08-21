@@ -186,17 +186,18 @@ describe("editIssue preview", () => {
 		expect(ghCalls("edit")).toEqual([]);
 	});
 
-	it("pushes nothing outside a web session", async () => {
-		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-		exitThrows();
-
-		await expect(editIssue("42", {})).rejects.toThrow("process.exit");
+	it("prints the issue and pushes nothing outside a web session", async () => {
+		await editIssue("42", { repo: "acme/widgets" });
 
 		expect(mockRequestPreviewDecision).not.toHaveBeenCalled();
 		expect(ghCalls("edit")).toEqual([]);
-		expect(errorSpy.mock.calls.map((c) => c.join(" ")).join("\n")).toContain(
-			workingBodyPath(),
-		);
+		expect(ghCalls("view")).toEqual([
+			[
+				"gh",
+				["issue", "view", "42", "--repo", "acme/widgets"],
+				expect.anything(),
+			],
+		]);
 	});
 });
 

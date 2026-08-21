@@ -1,7 +1,9 @@
 import { validateProposedContent } from "../../../shared/validateProposedContent";
+import { inWebSession } from "../../sessions/shared/inWebSession";
 import { fetchIssue } from "./fetchIssue";
 import { pushIssueBody } from "./pushIssueBody";
 import { reviewProposedIssueEdit } from "./reviewProposedIssueEdit";
+import { viewIssue } from "./viewIssue";
 import { writeIssueWorkingFile } from "./writeIssueWorkingFile";
 
 type EditIssueOptions = {
@@ -15,13 +17,6 @@ function slugFromUrl(url: string | undefined): string {
 	return match ? match[1] : "unknown/unknown";
 }
 
-function abandon(reason: string, bodyPath: string): never {
-	console.error(
-		`${reason}. Nothing was pushed; the markdown is at ${bodyPath}`,
-	);
-	process.exit(1);
-}
-
 export async function editIssue(
 	numberArg: string,
 	options: EditIssueOptions,
@@ -30,6 +25,11 @@ export async function editIssue(
 	if (!Number.isInteger(number) || number <= 0) {
 		console.error(USAGE);
 		process.exit(1);
+	}
+
+	if (!inWebSession()) {
+		viewIssue(number, options.repo);
+		return;
 	}
 
 	const issue = fetchIssue(number, options.repo);
@@ -48,19 +48,14 @@ export async function editIssue(
 		issue.updatedAt,
 		issue.body,
 	);
+	await reviewProposedIssueEdit(`Edit ${target}: ${issue.title}`, issue.body);
 
-	const reviewed = await reviewProposedIssueEdit(
-		`Edit ${target}: ${issue.title}`,
-		issue.body,
-	);
-	if (!reviewed)
-		abandon(
-			`${target} can only be edited through the assist web preview pane`,
-			bodyPath,
+	if (fetchIssue(number, options.repo).updatedAt !== issue.updatedAt) {
+		console.error(
+			`${target} was updated on GitHub after it was fetched. Nothing was pushed; the markdown is at ${bodyPath}`,
 		);
-
-	if (fetchIssue(number, options.repo).updatedAt !== issue.updatedAt)
-		abandon(`${target} was updated on GitHub after it was fetched`, bodyPath);
+		process.exit(1);
+	}
 
 	pushIssueBody(number, options.repo, bodyPath);
 	console.log(`Issue body updated on ${target}`);
