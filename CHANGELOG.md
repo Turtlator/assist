@@ -1,3 +1,10 @@
+# [0.582.0](https://github.com/staff0rd/assist/compare/v0.581.0...v0.582.0) (2026-08-21)
+
+
+### Features
+
+* outline an issue's acceptance criteria ([2ec732a](https://github.com/staff0rd/assist/commit/2ec732a216f91c0ac2d8b50e792a3b626050fd32))
+
 # [0.581.0](https://github.com/staff0rd/assist/compare/v0.580.0...v0.581.0) (2026-08-21)
 
 
