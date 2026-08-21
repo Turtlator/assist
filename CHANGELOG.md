@@ -1,3 +1,12 @@
+# [0.576.0](https://github.com/staff0rd/assist/compare/v0.575.0...v0.576.0) (2026-08-21)
+
+
+### Features
+
+* report an issue subtree's type drift ([267340a](https://github.com/staff0rd/assist/commit/267340a024b884e80184ce954e93cd95d36df6ae))
+* resume issue edits from the working file ([dcf75a9](https://github.com/staff0rd/assist/commit/dcf75a96a796085ebac99a26de41f8e5085eb3b3))
+* run a sync after a watch pull needs one ([4e6e086](https://github.com/staff0rd/assist/commit/4e6e086995c623048ea7813b372e39c81bfb2f3f))
+
 # [0.575.0](https://github.com/staff0rd/assist/compare/v0.574.1...v0.575.0) (2026-08-21)
 
 
