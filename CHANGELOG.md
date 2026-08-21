@@ -1,3 +1,10 @@
+## [0.574.1](https://github.com/staff0rd/assist/compare/v0.574.0...v0.574.1) (2026-08-21)
+
+
+### Bug Fixes
+
+* let the issue edit command detect the session ([2de9572](https://github.com/staff0rd/assist/commit/2de9572f7ad94dd067cb77ef07a62904fe555187))
+
 # [0.574.0](https://github.com/staff0rd/assist/compare/v0.573.2...v0.574.0) (2026-08-21)
 
 
