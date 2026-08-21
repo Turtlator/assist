@@ -1,3 +1,10 @@
+# [0.581.0](https://github.com/staff0rd/assist/compare/v0.580.0...v0.581.0) (2026-08-21)
+
+
+### Features
+
+* filter, dedup and write Miro extracts ([d7c5c9b](https://github.com/staff0rd/assist/commit/d7c5c9b4e61b81d3c28e674c326dbec105e8876a))
+
 # [0.580.0](https://github.com/staff0rd/assist/compare/v0.579.0...v0.580.0) (2026-08-21)
 
 
