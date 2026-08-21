@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process";
+import { remoteUrl, tryGit } from "./remoteUrl";
 
 function stripLeadingSlashes(path: string): string {
 	return path.replace(/^\/+/, "");
@@ -40,40 +40,17 @@ export function normalizeOrigin(raw: string): string {
 	return trimmed.toLowerCase();
 }
 
-// why: a windows-origin repo (C:\…) must run git natively over interop — the WSL process can't chdir into a Windows path, so it would otherwise derive a different origin than the Windows host and its backlog queries would find no items
-function tryGit(cwd: string, args: string[]): string | null {
-	const windows = /^[A-Za-z]:[\\/]/.test(cwd);
-	const file = windows ? "git.exe" : "git";
-	const argv = windows ? ["-C", cwd, ...args] : args;
-	try {
-		const out = execFileSync(file, argv, {
-			encoding: "utf8",
-			windowsHide: true,
-			stdio: ["pipe", "pipe", "pipe"],
-			...(windows ? {} : { cwd }),
-		}).trim();
-		return out || null;
-	} catch {
-		return null;
-	}
-}
-
-function firstRemoteUrl(cwd: string): string | null {
-	const remotes = tryGit(cwd, ["remote"]);
-	if (!remotes) return null;
-	for (const remote of remotes
-		.split("\n")
-		.map((r) => r.trim())
-		.filter(Boolean)) {
-		const url = tryGit(cwd, ["remote", "get-url", remote]);
-		if (url) return url;
-	}
-	return null;
-}
-
-export function getRemoteOriginUrl(cwd: string): string | null {
-	return tryGit(cwd, ["remote", "get-url", "origin"]) ?? firstRemoteUrl(cwd);
-}
+export type OriginResolution = {
+	origin: string;
+	/**
+	 * False when the `local:<root>` fallback was reached because a git call
+	 * failed rather than because the repository has no remotes. Such a result can
+	 * resolve differently on the next attempt, so callers must not memoise it — a
+	 * transient failure would otherwise pin the wrong key for the whole process
+	 * lifetime.
+	 */
+	stable: boolean;
+};
 
 /**
  * Resolve the normalized origin key for the repository at `cwd`. Prefers the
@@ -81,9 +58,13 @@ export function getRemoteOriginUrl(cwd: string): string | null {
  * resolve to `local:<repo-root>` so they still get a stable per-checkout key
  * (note: separate clones without a shared remote do NOT share a backlog).
  */
-export function getCurrentOrigin(cwd: string): string {
-	const url = getRemoteOriginUrl(cwd);
-	if (url) return normalizeOrigin(url);
+export function resolveCurrentOrigin(cwd: string): OriginResolution {
+	const remote = remoteUrl(cwd);
+	if (remote.url) return { origin: normalizeOrigin(remote.url), stable: true };
 	const root = tryGit(cwd, ["rev-parse", "--show-toplevel"]);
-	return `local:${root ?? cwd}`;
+	return { origin: `local:${root ?? cwd}`, stable: remote.ok };
+}
+
+export function getCurrentOrigin(cwd: string): string {
+	return resolveCurrentOrigin(cwd).origin;
 }

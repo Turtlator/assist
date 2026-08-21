@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { getRemoteOriginUrl } from "./getCurrentOrigin";
+import { getRemoteOriginUrl } from "./remoteUrl";
 import { getBacklogDir } from "./shared";
 
 export function ensureRemoteOrigin(): boolean {
