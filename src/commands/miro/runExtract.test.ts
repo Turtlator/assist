@@ -2,7 +2,24 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { PreviewDecision } from "../sessions/shared/PreviewDecision";
+import { requestPreviewDecision } from "../sessions/shared/requestPreviewDecision";
 import { runExtract } from "./runExtract";
+
+vi.mock("../sessions/shared/requestPreviewDecision", () => ({
+	requestPreviewDecision: vi.fn(),
+}));
+
+const requestPreview = vi.mocked(requestPreviewDecision);
+
+function picks(decision: PreviewDecision) {
+	requestPreview.mockResolvedValue(decision);
+}
+
+function inSession() {
+	vi.stubEnv("ASSIST_SESSION", "1");
+	vi.stubEnv("ASSIST_SESSION_ID", "s1");
+}
 
 const topLeftId = "3458764680658544387";
 const bottomRightId = "3458764680658544425";
@@ -133,6 +150,11 @@ function itemsFile(contents: string, name = "board-items.json"): string {
 beforeEach(() => {
 	dir = mkdtempSync(join(tmpdir(), "miro-"));
 	written = [];
+	vi.stubEnv("ASSIST_SESSION", "");
+	vi.stubEnv("ASSIST_SESSION_ID", "");
+	vi.spyOn(console, "log").mockImplementation((line: unknown) => {
+		written.push(`${String(line)}\n`);
+	});
 	vi.spyOn(process.stdout, "write").mockImplementation((chunk) => {
 		written.push(String(chunk));
 		return true;
@@ -141,14 +163,19 @@ beforeEach(() => {
 
 afterEach(() => {
 	vi.restoreAllMocks();
+	vi.unstubAllEnvs();
 });
 
 describe("runExtract", () => {
 	describe("when given multi-page response pages", () => {
-		it("should print the boxes as YAML, leftmost edge first", () => {
+		it("should print the boxes as YAML, leftmost edge first", async () => {
 			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
 
-			runExtract({ items, topLeft: topLeftId, bottomRight: bottomRightId });
+			await runExtract({
+				items,
+				topLeft: topLeftId,
+				bottomRight: bottomRightId,
+			});
 
 			expect(written.join("")).toBe(
 				`${expectedOrder.map((text) => `- ${text}`).join("\n")}\n`,
@@ -157,13 +184,17 @@ describe("runExtract", () => {
 	});
 
 	describe("when the pages are stored one per line", () => {
-		it("should read every page", () => {
+		it("should read every page", async () => {
 			const items = itemsFile(
 				`${JSON.stringify(firstPage)}\n${JSON.stringify(secondPage)}\n`,
 				"board-items.jsonl",
 			);
 
-			runExtract({ items, topLeft: topLeftId, bottomRight: bottomRightId });
+			await runExtract({
+				items,
+				topLeft: topLeftId,
+				bottomRight: bottomRightId,
+			});
 
 			expect(written.join("")).toBe(
 				`${expectedOrder.map((text) => `- ${text}`).join("\n")}\n`,
@@ -172,10 +203,10 @@ describe("runExtract", () => {
 	});
 
 	describe("when the anchors are given as moveToWidget links", () => {
-		it("should read the widget id out of the link", () => {
+		it("should read the widget id out of the link", async () => {
 			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
 
-			runExtract({
+			await runExtract({
 				items,
 				topLeft: `https://miro.com/app/board/uXjVGqQsR5Q=/?moveToWidget=${topLeftId}`,
 				bottomRight: `https://miro.com/app/board/uXjVGqQsR5Q=/?moveToWidget=${bottomRightId}`,
@@ -188,17 +219,17 @@ describe("runExtract", () => {
 	});
 
 	describe("when an anchor id is not in the items", () => {
-		it("should fail telling the caller to re-dump the frame", () => {
+		it("should fail telling the caller to re-dump the frame", async () => {
 			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
 
-			expect(() =>
+			await expect(
 				runExtract({ items, topLeft: "missing", bottomRight: bottomRightId }),
-			).toThrow(/No item with id missing.*Re-dump the frame/s);
+			).rejects.toThrow(/No item with id missing.*Re-dump the frame/s);
 		});
 	});
 
 	describe("when an item is not in frame coordinates", () => {
-		it("should fail rather than mix coordinate spaces", () => {
+		it("should fail rather than mix coordinate spaces", async () => {
 			const canvasItem = shape("canvas", "<p>Stray</p>", 10, 10, 100, 100);
 			canvasItem.position = {
 				origin: "center",
@@ -210,25 +241,107 @@ describe("runExtract", () => {
 				JSON.stringify([firstPage, page([canvasItem], false, null)]),
 			);
 
-			expect(() =>
+			await expect(
 				runExtract({ items, topLeft: topLeftId, bottomRight: bottomRightId }),
-			).toThrow(/parent_top_left/);
+			).rejects.toThrow(/parent_top_left/);
 		});
 	});
 
-	describe("when the anchor flags are missing", () => {
-		it("should fail naming both flags", () => {
-			expect(() => runExtract({ items: "board-items.json" })).toThrow(
+	describe("when the anchor flags are missing and there is no session", () => {
+		it("should fail naming both flags", async () => {
+			await expect(runExtract({ items: "board-items.json" })).rejects.toThrow(
 				/--top-left .*--bottom-right/,
 			);
+		});
+
+		it("should not request a preview it cannot host", async () => {
+			await expect(runExtract({ items: "board-items.json" })).rejects.toThrow();
+
+			expect(requestPreview).not.toHaveBeenCalled();
 		});
 	});
 
 	describe("when the items file is missing", () => {
-		it("should fail naming the flag", () => {
-			expect(() =>
+		it("should fail naming the flag", async () => {
+			await expect(
 				runExtract({ topLeft: topLeftId, bottomRight: bottomRightId }),
-			).toThrow(/--items <file> is required/);
+			).rejects.toThrow(/--items <file> is required/);
+		});
+	});
+
+	describe("when the anchor flags are supplied", () => {
+		it("should never request a preview", async () => {
+			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
+			inSession();
+
+			await runExtract({
+				items,
+				topLeft: topLeftId,
+				bottomRight: bottomRightId,
+			});
+
+			expect(requestPreview).not.toHaveBeenCalled();
+		});
+	});
+
+	describe("when the anchors are picked in the preview pane", () => {
+		it("should send the dump's boxes to the pane", async () => {
+			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
+			inSession();
+			picks({
+				decision: "approve",
+				selection: { topLeft: topLeftId, bottomRight: bottomRightId },
+			});
+
+			await runExtract({ items });
+
+			const request = requestPreview.mock.calls[0]?.[0];
+			expect(request).toMatchObject({
+				sessionId: "s1",
+				kind: "miro-board",
+				prNumber: null,
+			});
+			const sent = JSON.parse(request?.body ?? "{}") as {
+				boxes: { id: string; text: string }[];
+			};
+			expect(sent.boxes.map((box) => box.text)).toEqual([
+				"Delivery",
+				"Alpha",
+				"Sticky note idea",
+				"Beta & friends",
+				"Gamma",
+				"Edge",
+				"Omega",
+				"Outside",
+			]);
+		});
+
+		it("should echo the picked pair and extract with it", async () => {
+			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
+			inSession();
+			picks({
+				decision: "approve",
+				selection: { topLeft: topLeftId, bottomRight: bottomRightId },
+			});
+
+			await runExtract({ items });
+
+			expect(written.join("")).toContain(
+				`Anchors: --top-left ${topLeftId} --bottom-right ${bottomRightId}`,
+			);
+			expect(written.join("")).toContain(
+				`${expectedOrder.map((text) => `- ${text}`).join("\n")}\n`,
+			);
+		});
+
+		it("should fail when the pane returns no pair", async () => {
+			const items = itemsFile(JSON.stringify([firstPage, secondPage]));
+			inSession();
+			picks({ decision: "approve" });
+
+			await expect(runExtract({ items })).rejects.toThrow(
+				/returned no boxes.*--top-left/s,
+			);
 		});
 	});
 });

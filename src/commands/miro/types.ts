@@ -26,3 +26,7 @@ export type MiroRect = {
 	right: number;
 	bottom: number;
 };
+
+export type MiroBoardPreview = {
+	boxes: MiroItem[];
+};

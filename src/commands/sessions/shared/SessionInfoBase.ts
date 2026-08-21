@@ -16,7 +16,8 @@ export type PreviewKind =
 	| "pr-comment"
 	| "github-issue"
 	| "github-issue-comment"
-	| "github-issue-edit";
+	| "github-issue-edit"
+	| "miro-board";
 
 export type PreviewItemType = "story" | "bug";
 

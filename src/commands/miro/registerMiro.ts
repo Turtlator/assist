@@ -12,7 +12,7 @@ export function registerMiro(program: Command): void {
 		.option("--items <file>", "File of raw board_list_items response pages")
 		.option(
 			"--top-left <id>",
-			"Widget id or ?moveToWidget=<id> link of the top-left box",
+			"Widget id or ?moveToWidget=<id> link of the top-left box (omit both anchors to pick them in the assist web UI)",
 		)
 		.option(
 			"--bottom-right <id>",

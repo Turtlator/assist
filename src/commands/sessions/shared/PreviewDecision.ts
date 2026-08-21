@@ -1,5 +1,10 @@
 import type { PrPreviewComment } from "./SessionInfoBase";
 
+export type PreviewSelection = {
+	topLeft: string;
+	bottomRight: string;
+};
+
 export type PreviewDecision = {
 	decision: "approve" | "reject";
 	reason?: string;
@@ -9,4 +14,5 @@ export type PreviewDecision = {
 	reviewAfter?: boolean;
 	announceAfter?: boolean;
 	draft?: boolean;
+	selection?: PreviewSelection;
 };

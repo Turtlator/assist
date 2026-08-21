@@ -1,7 +1,6 @@
+import { isBox } from "./isBox";
 import { MiroExtractError } from "./MiroExtractError";
 import type { MiroItem, MiroRect } from "./types";
-
-const boxTypes = new Set(["shape", "sticky_note"]);
 
 function findAnchor(items: MiroItem[], id: string): MiroItem {
 	const anchor = items.find((item) => item.id === id);
@@ -10,10 +9,6 @@ function findAnchor(items: MiroItem[], id: string): MiroItem {
 			`No item with id ${id} in the supplied items. Re-dump the frame so the anchor is included, then try again.`,
 		);
 	return anchor;
-}
-
-function isBox(item: MiroItem): boolean {
-	return boxTypes.has(item.type) && item.text.length > 0;
 }
 
 function centreInside(rect: MiroRect, item: MiroItem): boolean {

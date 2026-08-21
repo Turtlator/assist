@@ -43,6 +43,31 @@ describe("parsePreviewDecision", () => {
 		});
 	});
 
+	describe("the selection field", () => {
+		it("round-trips a picked anchor pair", () => {
+			expect(
+				parsed({ selection: { topLeft: "a1", bottomRight: "b2" } }).selection,
+			).toEqual({ topLeft: "a1", bottomRight: "b2" });
+		});
+
+		it("is undefined when a client sends no selection", () => {
+			expect(parsed().selection).toBeUndefined();
+		});
+
+		it("is undefined when either id is missing", () => {
+			expect(
+				parsed({ selection: { topLeft: "a1" } }).selection,
+			).toBeUndefined();
+			expect(
+				parsed({ selection: { bottomRight: "b2" } }).selection,
+			).toBeUndefined();
+		});
+
+		it("is undefined when the field is not an object", () => {
+			expect(parsed({ selection: "a1,b2" }).selection).toBeUndefined();
+		});
+	});
+
 	describe("the draft field", () => {
 		it("reads an explicit true", () => {
 			expect(parsed({ draft: true }).draft).toBe(true);
