@@ -2,6 +2,7 @@ import type { Command } from "commander";
 import { commentIssue } from "./github/issue/commentIssue";
 import { createIssue } from "./github/issue/createIssue";
 import { editIssue } from "./github/issue/editIssue";
+import { registerFixStructure } from "./github/issue/fixStructure/registerFixStructure";
 import { readBodyArgument } from "./prs/readBodyArgument";
 
 export function registerGithubIssue(githubCommand: Command): void {
@@ -61,4 +62,6 @@ export function registerGithubIssue(githubCommand: Command): void {
 				});
 			},
 		);
+
+	registerFixStructure(issueCommand);
 }

@@ -35,6 +35,7 @@ assist config list
 assist coverage
 assist daemon status
 assist dotnet
+assist github issue fix-structure
 assist jira ac
 assist jira auth
 assist jira view
