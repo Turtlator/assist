@@ -13,6 +13,8 @@ const orgIssueTypes = [
 	{ id: "IT_epic", name: "Epic" },
 	{ id: "IT_story", name: "Story" },
 	{ id: "IT_sub", name: "Sub-task" },
+	{ id: "IT_initiative", name: "Initiative" },
+	{ id: "IT_feature", name: "Feature" },
 ];
 
 const graph = new Map<string, FakeIssue>();
@@ -75,7 +77,15 @@ vi.mock("../../../../shared/runGhGraphqlJson", () => ({
 			}
 			return "{}";
 		}
-		calls.push(`labels ${vars.labelableId}`);
+		const labelableId = String(vars.labelableId);
+		const removed = vars.labelIds as string[];
+		calls.push(`labels ${labelableId} ${removed.join(",")}`);
+		const labelled = graph.get(labelableId);
+		if (labelled) {
+			labelled.labels = labelled.labels.filter(
+				(label) => !removed.includes(label.id),
+			);
+		}
 		return "{}";
 	},
 }));
@@ -202,6 +212,81 @@ describe("fixStructure", () => {
 		calls.length = 0;
 		lines.length = 0;
 		run("org/repo#1", { apply: true, level: "epic" });
+
+		expect(calls).toEqual([]);
+		expect(lines.join("\n")).toContain("Nothing to change");
+	});
+	it("normalises against a chain given by --type-chain", () => {
+		seed({
+			I_1: { number: 1, typeName: "Initiative", childIds: ["I_2"] },
+			I_2: { number: 2, typeName: "Story" },
+		});
+
+		run("org/repo#1", { apply: true, typeChain: "Initiative,Feature" });
+
+		expect(calls).toEqual(["type I_2 IT_feature"]);
+		expect(exited).toBeUndefined();
+	});
+
+	it("exits non-zero without mutating when --type-chain names an unknown type", () => {
+		seed({
+			I_1: { number: 1, typeName: "Epic", childIds: ["I_2"] },
+			I_2: { number: 2 },
+		});
+
+		run("org/repo#1", { apply: true, typeChain: "Epic,Widget" });
+
+		expect(exited).toBe(1);
+		expect(calls).toEqual([]);
+	});
+
+	it("removes each --strip-label by the id found on that issue", () => {
+		seed({
+			I_1: {
+				number: 1,
+				typeName: "Epic",
+				childIds: ["I_2"],
+				labels: [
+					{ id: "LA_meta_legacy", name: "legacy" },
+					{ id: "LA_meta_keep", name: "bug" },
+					{ id: "LA_meta_triage", name: "needs-triage" },
+				],
+			},
+			I_2: {
+				number: 2,
+				typeName: "Story",
+				repo: "org/other",
+				labels: [{ id: "LA_other_legacy", name: "Legacy" }],
+			},
+		});
+
+		run("org/repo#1", {
+			apply: true,
+			stripLabel: ["legacy", "needs-triage"],
+		});
+
+		expect(calls).toEqual([
+			"labels I_1 LA_meta_legacy,LA_meta_triage",
+			"labels I_2 LA_other_legacy",
+		]);
+		expect(exited).toBeUndefined();
+		expect(graph.get("I_1")?.labels).toEqual([
+			{ id: "LA_meta_keep", name: "bug" },
+		]);
+	});
+
+	it("leaves labels alone when none are named", () => {
+		seed({
+			I_1: {
+				number: 1,
+				typeName: "Epic",
+				childIds: ["I_2"],
+				labels: [{ id: "LA_legacy", name: "legacy" }],
+			},
+			I_2: { number: 2, typeName: "Story" },
+		});
+
+		run("org/repo#1", { apply: true });
 
 		expect(calls).toEqual([]);
 		expect(lines.join("\n")).toContain("Nothing to change");

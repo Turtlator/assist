@@ -1,6 +1,8 @@
 import { applyAndVerifySubtree } from "./applyAndVerifySubtree";
+import { assertChainTypesExist } from "./assertChainTypesExist";
 import { assertNothingTooDeep } from "./assertNothingTooDeep";
 import { fetchRootIssue } from "./fetchRootIssue";
+import { parseTypeChain } from "./parseTypeChain";
 import { planSubtree } from "./planSubtree";
 import { printFixStructurePlan } from "./printFixStructurePlan";
 import { resolveFixStructureTarget } from "./resolveFixStructureTarget";
@@ -11,6 +13,8 @@ import { defaultTypeChain } from "./types";
 type FixStructureOptions = {
 	repo?: string;
 	level?: string;
+	typeChain?: string;
+	stripLabel?: string[];
 	apply?: boolean;
 };
 
@@ -18,9 +22,13 @@ export function fixStructure(
 	target: string,
 	options: FixStructureOptions,
 ): void {
-	const chain = defaultTypeChain;
 	try {
+		const chain = options.typeChain
+			? parseTypeChain(options.typeChain)
+			: defaultTypeChain;
 		const resolved = resolveFixStructureTarget(target, options.repo);
+		const issueTypes = resolveOrgIssueTypes(resolved.owner);
+		assertChainTypesExist(chain, issueTypes);
 		const root = fetchRootIssue(resolved);
 		const { index, asserted } = resolveRootLevelIndex(
 			chain,
@@ -31,8 +39,8 @@ export function fixStructure(
 			chain,
 			rootLevelIndex: index,
 			rootAsserted: asserted,
-			issueTypes: resolveOrgIssueTypes(resolved.owner),
-			stripLabels: [],
+			issueTypes,
+			stripLabels: options.stripLabel ?? [],
 		};
 		const plan = planSubtree(root, context);
 		printFixStructurePlan(plan, chain, options.apply === true);

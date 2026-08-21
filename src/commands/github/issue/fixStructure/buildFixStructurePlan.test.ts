@@ -218,4 +218,62 @@ describe("buildFixStructurePlan", () => {
 			),
 		).toThrow(/no Story issue type/);
 	});
+
+	it("normalises against a non-default chain", () => {
+		const plan = buildFixStructurePlan(
+			[
+				issue("1", { depth: 0, typeName: "Initiative", childIds: ["2"] }),
+				issue("2", {
+					depth: 1,
+					parentId: "1",
+					typeName: "Epic",
+					childIds: ["3"],
+				}),
+				issue("3", { depth: 2, parentId: "2", typeName: "Story" }),
+			],
+			{
+				...options,
+				chain: ["Initiative", "Feature"],
+				issueTypes: [
+					{ id: "IT_init", name: "Initiative" },
+					{ id: "IT_feature", name: "Feature" },
+				],
+			},
+		);
+		expect(
+			plan.entries.map((entry) => [entry.level, entry.typeChange?.to ?? null]),
+		).toEqual([
+			["Initiative", null],
+			["Feature", "Feature"],
+			[null, null],
+		]);
+		expect(plan.tooDeep.map((entry) => entry.issue.id)).toEqual(["3"]);
+	});
+
+	it("removes every strip label named and leaves the others alone", () => {
+		const legacy: IssueLabel = { id: "LA_legacy", name: "legacy" };
+		const triage: IssueLabel = { id: "LA_triage", name: "Needs-Triage" };
+		const plan = buildFixStructurePlan(
+			[
+				issue("1", {
+					depth: 0,
+					typeName: "Epic",
+					childIds: ["2"],
+					labels: [legacy, { id: "LA_bug", name: "bug" }, triage],
+				}),
+				issue("2", {
+					depth: 1,
+					parentId: "1",
+					typeName: "Story",
+					labels: [{ id: "LA_other", name: "needs-triage" }],
+				}),
+			],
+			{ ...options, stripLabels: ["legacy", "needs-triage"] },
+		);
+		expect(plan.entries[0]?.labelRemovals).toEqual([legacy, triage]);
+		expect(plan.entries[1]?.labelRemovals).toEqual([
+			{ id: "LA_other", name: "needs-triage" },
+		]);
+		expect(plan.labelRemovalCount).toBe(3);
+	});
 });
