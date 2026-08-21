@@ -1,15 +1,17 @@
-import { buildFixStructurePlan } from "./buildFixStructurePlan";
+import { applyAndVerifySubtree } from "./applyAndVerifySubtree";
+import { assertNothingTooDeep } from "./assertNothingTooDeep";
 import { fetchRootIssue } from "./fetchRootIssue";
+import { planSubtree } from "./planSubtree";
 import { printFixStructurePlan } from "./printFixStructurePlan";
 import { resolveFixStructureTarget } from "./resolveFixStructureTarget";
 import { resolveOrgIssueTypes } from "./resolveOrgIssueTypes";
 import { resolveRootLevelIndex } from "./resolveRootLevelIndex";
 import { defaultTypeChain } from "./types";
-import { walkSubtree } from "./walkSubtree";
 
 type FixStructureOptions = {
 	repo?: string;
 	level?: string;
+	apply?: boolean;
 };
 
 export function fixStructure(
@@ -25,15 +27,17 @@ export function fixStructure(
 			root.typeName,
 			options.level,
 		);
-		const issueTypes = resolveOrgIssueTypes(resolved.owner);
-		const issues = walkSubtree(root, chain.length - index);
-		const plan = buildFixStructurePlan(issues, {
+		const context = {
 			chain,
 			rootLevelIndex: index,
 			rootAsserted: asserted,
-			issueTypes,
-		});
-		printFixStructurePlan(plan, chain);
+			issueTypes: resolveOrgIssueTypes(resolved.owner),
+			stripLabels: [],
+		};
+		const plan = planSubtree(root, context);
+		printFixStructurePlan(plan, chain, options.apply === true);
+		assertNothingTooDeep(plan.tooDeep, chain);
+		if (options.apply) applyAndVerifySubtree(resolved, plan, context);
 	} catch (error) {
 		console.error(error instanceof Error ? error.message : String(error));
 		process.exit(1);

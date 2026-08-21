@@ -1,4 +1,5 @@
 import { resolve, sep } from "node:path";
+import { appliesFixStructure } from "./appliesFixStructure";
 import { isGhApiRead } from "./isGhApiRead";
 import { findCliRead, findCliWrite } from "./loadCliReads";
 import { matchesAllow } from "./matchesAllow";
@@ -26,6 +27,9 @@ export function isApprovedRead(
 
 	const cdRead = isCdToReadAllowedDir(command);
 	if (cdRead) return cdRead;
+
+	// why: the cli-reads entry matches by prefix, so the read entry would otherwise cover the mutating --apply run too
+	if (appliesFixStructure(command)) return undefined;
 
 	const matchedRead = findCliRead(command);
 	if (matchedRead) return `Read-only CLI command: ${matchedRead}`;

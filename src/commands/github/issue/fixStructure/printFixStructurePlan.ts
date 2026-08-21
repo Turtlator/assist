@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import type { FixStructurePlan, PlanEntry } from "./types";
+import { writeLineNow } from "./writeLineNow";
 
 function annotate(entry: PlanEntry): string[] {
 	const notes: string[] = [];
@@ -27,31 +28,23 @@ function formatCount(count: number, noun: string): string {
 export function printFixStructurePlan(
 	plan: FixStructurePlan,
 	chain: string[],
+	apply: boolean,
 ): void {
-	console.log(chalk.dim(`chain: ${chain.join(" > ")}`));
+	writeLineNow(chalk.dim(`chain: ${chain.join(" > ")}`));
 	for (const entry of plan.entries) {
 		const indent = "  ".repeat(entry.issue.depth);
 		const name = chalk.cyan(`${entry.issue.repo}#${entry.issue.number}`);
-		console.log(
+		writeLineNow(
 			`${indent}${name} ${entry.issue.title} [${annotate(entry).join(", ")}]`,
 		);
 	}
 
-	for (const { issue, parent } of plan.tooDeep) {
-		const where = parent ? ` under ${parent.repo}#${parent.number}` : "";
-		console.error(
-			chalk.red(
-				`${issue.repo}#${issue.number}${where} sits below ${chain[chain.length - 1]}, the leaf level`,
-			),
-		);
-	}
-
 	if (plan.typeChangeCount === 0 && plan.labelRemovalCount === 0) {
-		console.log(chalk.green("Nothing to change"));
+		writeLineNow(chalk.green("Nothing to change"));
 		return;
 	}
-	console.log(
+	writeLineNow(
 		`${formatCount(plan.typeChangeCount, "type change")}, ${formatCount(plan.labelRemovalCount, "label removal")} planned`,
 	);
-	console.log(chalk.dim("Dry run — nothing written"));
+	if (!apply) writeLineNow(chalk.dim("Dry run — nothing written"));
 }

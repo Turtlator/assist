@@ -6,6 +6,9 @@ vi.mock("./loadCliReads", () => ({
 	findCliRead: (cmd: string) => {
 		if (cmd.startsWith("gh repo view")) return "gh repo view";
 		if (cmd.startsWith("assist config get")) return "assist config get";
+		if (cmd.startsWith("assist github issue fix-structure")) {
+			return "assist github issue fix-structure";
+		}
 		return undefined;
 	},
 	findCliWrite: (cmd: string) =>
@@ -64,6 +67,26 @@ describe("isApprovedRead", () => {
 		it("should not approve the same read with --reveal", () => {
 			const result = isApprovedRead(
 				"assist config get roam.clientSecret --reveal",
+			);
+
+			expect(result).toBeUndefined();
+		});
+	});
+
+	describe("when the command applies an issue subtree fix", () => {
+		it("should approve the dry run", () => {
+			const result = isApprovedRead(
+				"assist github issue fix-structure org/repo#1",
+			);
+
+			expect(result).toBe(
+				"Read-only CLI command: assist github issue fix-structure",
+			);
+		});
+
+		it("should not approve the same command with --apply", () => {
+			const result = isApprovedRead(
+				"assist github issue fix-structure org/repo#1 --apply",
 			);
 
 			expect(result).toBeUndefined();
