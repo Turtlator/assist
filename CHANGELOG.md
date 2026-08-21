@@ -1,3 +1,10 @@
+# [0.577.0](https://github.com/staff0rd/assist/compare/v0.576.0...v0.577.0) (2026-08-21)
+
+
+### Features
+
+* extract Miro boxes in a rectangle ([f5294b2](https://github.com/staff0rd/assist/commit/f5294b2d087803c3d7771402dc4015d73603f707))
+
 # [0.576.0](https://github.com/staff0rd/assist/compare/v0.575.0...v0.576.0) (2026-08-21)
 
 
