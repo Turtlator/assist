@@ -1,3 +1,10 @@
+# [0.585.0](https://github.com/staff0rd/assist/compare/v0.584.0...v0.585.0) (2026-08-21)
+
+
+### Features
+
+* restructure acceptance criteria ([5daad2d](https://github.com/staff0rd/assist/commit/5daad2def833653235c1ecc36c06160d3bcd9267))
+
 # [0.584.0](https://github.com/staff0rd/assist/compare/v0.583.0...v0.584.0) (2026-08-21)
 
 
