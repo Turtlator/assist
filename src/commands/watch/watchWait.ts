@@ -1,10 +1,13 @@
 import { buildWatchReport } from "./buildWatchReport";
+import { changedPaths } from "./changedPaths";
 import { describeOutcome } from "./describeOutcome";
 import { describePull } from "./describePull";
 import type { OutcomeReport } from "./OutcomeReport";
 import { parseWatchDurations } from "./parseWatchDurations";
 import { pullFastForward } from "./pullFastForward";
 import { reportBuildOrExit } from "./reportBuildOrExit";
+import { reportSyncOrExit } from "./reportSyncOrExit";
+import { syncAdvice } from "./syncAdvice";
 import { waitForUpstream } from "./waitForUpstream";
 
 type WatchWaitOptions = {
@@ -53,6 +56,9 @@ export async function watchWait(options: WatchWaitOptions): Promise<void> {
 		await reportBuildOrExit(
 			typeof options.build === "string" ? options.build : DEFAULT_BUILD_ENTRY,
 		);
+
+		if (syncAdvice(changedPaths(outcome.from)).length > 0)
+			await reportSyncOrExit();
 	}
 
 	process.exit(0);

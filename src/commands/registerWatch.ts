@@ -10,7 +10,7 @@ export function registerWatch(program: Command): void {
 	watchCommand
 		.command("wait")
 		.description(
-			"Block until the current branch's upstream gains commits, then exit 0 (2 on timeout, 3 when --pull hits genuine divergence, 4 when --build fails, 1 when waiting is impossible, 130 on interrupt)",
+			"Block until the current branch's upstream gains commits, then exit 0 (2 on timeout, 3 when --pull hits genuine divergence, 4 when --build or the post-build sync fails, 1 when waiting is impossible, 130 on interrupt)",
 		)
 		.option(
 			"--interval <duration>",
@@ -28,7 +28,7 @@ export function registerWatch(program: Command): void {
 		)
 		.option(
 			"--build [entry]",
-			"After a successful pull, run this run entry (default auto-build); exit 4 with its output when it fails",
+			"After a successful pull, run this run entry (default auto-build), then run assist sync --yes when the pulled commits touched the files sync installs; exit 4 with the output of whichever fails",
 		)
 		.action(
 			(options: {

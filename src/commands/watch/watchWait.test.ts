@@ -5,6 +5,8 @@ const mockWaitForUpstream = vi.fn();
 const mockPullFastForward = vi.fn();
 const mockBuildWatchReport = vi.fn();
 const mockRunWatchBuild = vi.fn<(...args: unknown[]) => Promise<unknown>>();
+const mockRunPostBuildSync = vi.fn<() => Promise<unknown>>();
+const mockChangedPaths = vi.fn<(...args: unknown[]) => string[]>();
 
 vi.mock("./waitForUpstream", () => ({
 	waitForUpstream: (...args: unknown[]) => mockWaitForUpstream(...args),
@@ -20,6 +22,14 @@ vi.mock("./buildWatchReport", () => ({
 
 vi.mock("./runWatchBuild", () => ({
 	runWatchBuild: (...args: unknown[]) => mockRunWatchBuild(...args),
+}));
+
+vi.mock("./runPostBuildSync", () => ({
+	runPostBuildSync: () => mockRunPostBuildSync(),
+}));
+
+vi.mock("./changedPaths", () => ({
+	changedPaths: (...args: unknown[]) => mockChangedPaths(...args),
 }));
 
 import { watchWait } from "./watchWait";
@@ -44,6 +54,8 @@ beforeEach(() => {
 	written = [];
 	exitCode = undefined;
 	mockBuildWatchReport.mockReturnValue("**Version** 0.488.2");
+	mockChangedPaths.mockReturnValue(["src/commands/watch/watchWait.ts"]);
+	mockRunPostBuildSync.mockResolvedValue({ kind: "built" });
 	vi.spyOn(console, "log").mockImplementation((message?: unknown) => {
 		logged.push(String(message));
 	});
@@ -184,6 +196,70 @@ describe("watchWait --build", () => {
 		await run({ pull: false, build: true });
 
 		expect(mockRunWatchBuild).not.toHaveBeenCalled();
+		expect(exitCode).toBe(0);
+	});
+});
+
+describe("watchWait --build sync", () => {
+	beforeEach(() => {
+		mockWaitForUpstream.mockResolvedValue(moved);
+		mockPullFastForward.mockReturnValue(fastForwarded);
+		mockRunWatchBuild.mockResolvedValue({ kind: "built" });
+	});
+
+	it("does not sync when the pulled range touched no synced files", async () => {
+		await run({ build: true });
+
+		expect(mockChangedPaths).toHaveBeenCalledWith("aaa1111");
+		expect(mockRunPostBuildSync).not.toHaveBeenCalled();
+		expect(exitCode).toBe(0);
+	});
+
+	it("syncs after the build when the pulled range touched synced files", async () => {
+		mockChangedPaths.mockReturnValue(["claude/commands/watch.md"]);
+
+		await run({ build: true });
+
+		expect(mockRunPostBuildSync).toHaveBeenCalled();
+		expect(logged.join("\n")).toContain("synced ~/.claude");
+		expect(exitCode).toBe(0);
+	});
+
+	it("exits 4 with the sync output when the sync fails", async () => {
+		mockChangedPaths.mockReturnValue(["claude/settings.json"]);
+		mockRunPostBuildSync.mockResolvedValue({
+			kind: "failed",
+			exitCode: 2,
+			output: "EACCES: permission denied",
+		});
+
+		await run({ build: true });
+
+		expect(exitCode).toBe(4);
+		expect(written.join("")).toContain("EACCES: permission denied");
+		expect(errored.join("\n")).toContain("sync failed with exit code 2");
+	});
+
+	it("does not sync when the build failed", async () => {
+		mockChangedPaths.mockReturnValue(["claude/commands/watch.md"]);
+		mockRunWatchBuild.mockResolvedValue({
+			kind: "failed",
+			exitCode: 1,
+			output: "tsc: error TS2345",
+		});
+
+		await run({ build: true });
+
+		expect(mockRunPostBuildSync).not.toHaveBeenCalled();
+		expect(exitCode).toBe(4);
+	});
+
+	it("does not sync without --build", async () => {
+		mockChangedPaths.mockReturnValue(["claude/commands/watch.md"]);
+
+		await run();
+
+		expect(mockRunPostBuildSync).not.toHaveBeenCalled();
 		expect(exitCode).toBe(0);
 	});
 });
