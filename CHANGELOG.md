@@ -1,3 +1,15 @@
+# [0.574.0](https://github.com/staff0rd/assist/compare/v0.573.2...v0.574.0) (2026-08-21)
+
+
+### Bug Fixes
+
+* retry unstable origin lookups ([30d8156](https://github.com/staff0rd/assist/commit/30d8156529291ddb5d45fd5d959aad84802646fa))
+
+
+### Features
+
+* preview an existing issue edit ([d0ece0d](https://github.com/staff0rd/assist/commit/d0ece0d368d6a83182fe038ab875343487e889a5))
+
 ## [0.573.2](https://github.com/staff0rd/assist/compare/v0.573.1...v0.573.2) (2026-08-19)
 
 
