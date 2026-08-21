@@ -1,3 +1,10 @@
+# [0.584.0](https://github.com/staff0rd/assist/compare/v0.583.0...v0.584.0) (2026-08-21)
+
+
+### Features
+
+* save and replay named Miro extracts ([050d5e5](https://github.com/staff0rd/assist/commit/050d5e5f5f49e78ba80a9584b084ed39dc90b27f))
+
 # [0.583.0](https://github.com/staff0rd/assist/compare/v0.582.0...v0.583.0) (2026-08-21)
 
 
