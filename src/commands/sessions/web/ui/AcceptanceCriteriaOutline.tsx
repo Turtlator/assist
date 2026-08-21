@@ -1,7 +1,11 @@
 import { Box } from "@mui/material";
+import { useRef } from "react";
 import { criterionNumbers } from "./criterionNumbers";
+import { CriterionDropLine } from "./CriterionDropLine";
 import { CriterionRow } from "./CriterionRow";
 import type { AcceptanceCriterion } from "./splitAcceptanceCriteria";
+import { useCriteriaOutline } from "./useCriteriaOutline";
+import { useCriterionDrag } from "./useCriterionDrag";
 
 const outlineSx = {
 	my: 1,
@@ -10,9 +14,12 @@ const outlineSx = {
 	border: 1,
 	borderColor: "divider",
 	borderRadius: 1,
+	position: "relative",
 	userSelect: "text",
 	cursor: "auto",
 } as const;
+
+const EMPTY_ROW: AcceptanceCriterion[] = [{ text: "", depth: 0 }];
 
 export function AcceptanceCriteriaOutline({
 	items,
@@ -21,25 +28,31 @@ export function AcceptanceCriteriaOutline({
 	items: AcceptanceCriterion[];
 	onChange: (items: AcceptanceCriterion[]) => void;
 }) {
-	const numbers = criterionNumbers(items.map((item) => item.depth));
+	const listRef = useRef<HTMLDivElement | null>(null);
+	const rows = items.length > 0 ? items : EMPTY_ROW;
+	const outline = useCriteriaOutline(rows, onChange);
+	const { drag, onGrip } = useCriterionDrag(rows, listRef, outline.onDrop);
+	const numbers = criterionNumbers(rows.map((item) => item.depth));
 
 	return (
-		<Box sx={outlineSx} data-preview-skip aria-label="Acceptance criteria">
-			{items.map((item, index) => (
+		<Box
+			sx={outlineSx}
+			ref={listRef}
+			data-preview-skip
+			aria-label="Acceptance criteria"
+		>
+			{rows.map((item, index) => (
 				<CriterionRow
 					key={`criterion-${index}`}
+					index={index}
 					number={numbers[index]}
-					depth={item.depth}
-					text={item.text}
-					onText={(text) =>
-						onChange(
-							items.map((current, i) =>
-								i === index ? { ...current, text } : current,
-							),
-						)
-					}
+					item={item}
+					outline={outline}
+					dragging={drag?.from === index}
+					onGrip={onGrip(index)}
 				/>
 			))}
+			<CriterionDropLine drag={drag} />
 		</Box>
 	);
 }

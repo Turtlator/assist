@@ -22,6 +22,9 @@ if (!Range.prototype.getClientRects) {
 			[Symbol.iterator]: [][Symbol.iterator],
 		}) as unknown as DOMRectList;
 }
+if (!Element.prototype.setPointerCapture) {
+	Element.prototype.setPointerCapture = () => {};
+}
 if (!URL.createObjectURL) {
 	URL.createObjectURL = () => "blob:test";
 }
@@ -1045,6 +1048,135 @@ describe("PrPreviewPane inline comments", () => {
 
 			expect(screen.queryByLabelText("Criterion 1")).toBeNull();
 			expect(container.querySelector("ul")).toBeTruthy();
+		});
+
+		const sectionBody = (...items: string[]) =>
+			[
+				"## Background",
+				"",
+				"why",
+				"",
+				"## Acceptance criteria",
+				"",
+				...items,
+				"",
+				"## Notes",
+				"",
+				"tail",
+			].join("\n");
+
+		const openWith = (requestId: string, ...items: string[]) => {
+			const onDecision = vi.fn();
+			render(
+				<PrPreviewPane
+					preview={{ ...issueEdit, requestId, body: sectionBody(...items) }}
+					onDecision={onDecision}
+				/>,
+			);
+			return onDecision;
+		};
+
+		const pushedBody = (onDecision: ReturnType<typeof vi.fn>) => {
+			fireEvent.click(screen.getByRole("button", { name: "Approve" }));
+			const [, payload] = onDecision.mock.calls[0] as [
+				string,
+				{ body: string },
+			];
+			return payload.body;
+		};
+
+		const caretEnd = (field: HTMLTextAreaElement) => {
+			field.setSelectionRange(field.value.length, field.value.length);
+		};
+
+		it("Enter splits a criterion into a sibling at the same depth", () => {
+			const onDecision = openWith("k1", "1. first");
+			const field = row("1");
+			caretEnd(field);
+
+			fireEvent.keyDown(field, { key: "Enter" });
+			fireEvent.change(row("2"), { target: { value: "second" } });
+
+			expect(pushedBody(onDecision)).toBe(sectionBody("1. first", "1. second"));
+		});
+
+		it("Tab indents a criterion three spaces under the one above", () => {
+			const onDecision = openWith("k2", "1. first", "1. second");
+
+			fireEvent.keyDown(row("2"), { key: "Tab" });
+
+			expect(screen.getByLabelText("Criterion 1.1")).toBeTruthy();
+			expect(pushedBody(onDecision)).toBe(
+				sectionBody("1. first", "   1. second"),
+			);
+		});
+
+		it("Shift+Tab outdents a criterion and carries its children", () => {
+			const onDecision = openWith(
+				"k3",
+				"1. first",
+				"   1. second",
+				"      1. third",
+			);
+
+			fireEvent.keyDown(row("1.1"), { key: "Tab", shiftKey: true });
+
+			expect(pushedBody(onDecision)).toBe(
+				sectionBody("1. first", "1. second", "   1. third"),
+			);
+		});
+
+		it("Alt+Down moves a criterion below its next sibling with its children", () => {
+			const onDecision = openWith("k4", "1. a", "   1. a1", "1. b");
+
+			fireEvent.keyDown(row("1"), { key: "ArrowDown", altKey: true });
+
+			expect(pushedBody(onDecision)).toBe(
+				sectionBody("1. b", "1. a", "   1. a1"),
+			);
+		});
+
+		it("Alt+Up moves a criterion above its previous sibling with its children", () => {
+			const onDecision = openWith("k5", "1. a", "1. b", "   1. b1");
+
+			fireEvent.keyDown(row("2"), { key: "ArrowUp", altKey: true });
+
+			expect(pushedBody(onDecision)).toBe(
+				sectionBody("1. b", "   1. b1", "1. a"),
+			);
+		});
+
+		it("Backspace on an empty criterion removes the row", () => {
+			const onDecision = openWith("k6", "1. a", "1.", "1. c");
+
+			fireEvent.keyDown(row("2"), { key: "Backspace" });
+
+			expect(pushedBody(onDecision)).toBe(sectionBody("1. a", "1. c"));
+		});
+
+		it("adds and deletes criteria from the row controls", () => {
+			const onDecision = openWith("k7", "1. first");
+
+			fireEvent.click(
+				screen.getByRole("button", { name: "Add criterion after 1" }),
+			);
+			fireEvent.change(row("2"), { target: { value: "second" } });
+			fireEvent.click(
+				screen.getByRole("button", { name: "Delete criterion 1" }),
+			);
+
+			expect(pushedBody(onDecision)).toBe(sectionBody("1. second"));
+		});
+
+		it("drops a criterion dragged by its grip below the last row", () => {
+			const onDecision = openWith("k8", "1. a", "1. b", "1. c");
+			const grip = screen.getByRole("button", { name: "Reorder criterion 1" });
+
+			fireEvent.pointerDown(grip, { clientX: 0, clientY: 0 });
+			fireEvent.pointerMove(grip, { clientX: 0, clientY: 999 });
+			fireEvent.pointerUp(grip, { clientX: 0, clientY: 999 });
+
+			expect(pushedBody(onDecision)).toBe(sectionBody("1. b", "1. c", "1. a"));
 		});
 
 		it("shows no outliner on a preview that is not editable", () => {

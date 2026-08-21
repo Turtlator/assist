@@ -1,60 +1,50 @@
 import { Box, InputBase } from "@mui/material";
-
-const INDENT_PX = 22;
-
-const rowSx = {
-	display: "flex",
-	alignItems: "flex-start",
-	gap: 1,
-} as const;
-
-const numberSx = {
-	fontFamily: "monospace",
-	fontSize: "0.8rem",
-	color: "text.secondary",
-	minWidth: 32,
-	pt: "5px",
-	textAlign: "right",
-	userSelect: "none",
-	whiteSpace: "nowrap",
-} as const;
-
-const textSx = {
-	flex: 1,
-	fontSize: "inherit",
-	lineHeight: 1.5,
-	px: 0.75,
-	py: 0,
-	borderRadius: 1,
-	"&:hover": { bgcolor: "action.hover" },
-	"&.Mui-focused": { bgcolor: "action.selected" },
-} as const;
+import { CriterionGrip } from "./CriterionGrip";
+import { criterionIndent } from "./criterionIndent";
+import type { CriterionRowProps } from "./CriterionRowProps";
+import { CriterionRowActions } from "./CriterionRowActions";
+import {
+	criterionNumberSx,
+	criterionRowSx,
+	criterionTextSx,
+} from "./criterionRowSx";
+import { useCriterionFocus } from "./useCriterionFocus";
 
 export function CriterionRow({
+	index,
 	number,
-	depth,
-	text,
-	onText,
-}: {
-	number: string;
-	depth: number;
-	text: string;
-	onText: (text: string) => void;
-}) {
+	item,
+	outline,
+	dragging,
+	onGrip,
+}: CriterionRowProps) {
+	const fieldRef = useCriterionFocus(
+		outline.focus?.index === index ? outline.focus : null,
+	);
+	const rowStyle = {
+		marginLeft: criterionIndent(item.depth),
+		opacity: dragging ? 0.4 : 1,
+	};
+
 	return (
-		<Box sx={rowSx} style={{ marginLeft: depth * INDENT_PX }}>
-			<Box component="span" sx={numberSx} aria-hidden="true">
+		<Box sx={criterionRowSx} data-criterion-row style={rowStyle}>
+			<CriterionGrip number={number} onGrip={onGrip} />
+			<Box component="span" sx={criterionNumberSx} aria-hidden="true">
 				{`${number}.`}
 			</Box>
 			<InputBase
 				multiline
-				value={text}
-				sx={textSx}
+				value={item.text}
+				sx={criterionTextSx}
+				inputRef={fieldRef}
 				inputProps={{ "aria-label": `Criterion ${number}` }}
-				onChange={(e) => onText(e.target.value.replace(/[\r\n]+/g, " "))}
-				onKeyDown={(e) => {
-					if (e.key === "Enter") e.preventDefault();
-				}}
+				onChange={(e) => outline.onText(index, e.target.value)}
+				onKeyDown={(event) => outline.onKeyDown(index, event)}
+			/>
+			<CriterionRowActions
+				number={number}
+				onAdd={() => outline.onAdd(index)}
+				onDelete={() => outline.onDelete(index)}
 			/>
 		</Box>
 	);
