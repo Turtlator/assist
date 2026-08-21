@@ -55,7 +55,7 @@ Do not check for a web session yourself — the command already knows. In a web 
 
 Display the output so the user can see what happened. If the command exits non-zero, relay what it reported and stop — nothing was pushed. Two cases to relay verbatim:
 
-- **Request changes** — the reason and every inline comment, each with the excerpt it was left on. Address each one, then run the command again.
+- **Request changes** — the reason and every inline comment, each with the excerpt it was left on. The output names the working file holding the pane's markdown, collapses included. Revise **that file in place** to address the comments — never recompose the body from scratch — then re-run the command, which previews the revised file with the earlier collapses intact. Pass `--fresh` only when the working file should be thrown away and the issue re-fetched.
 - **The issue moved on GitHub** — it names the working file holding the markdown. Someone else edited the issue, so nothing was pushed; tell the user rather than re-running blind.
 
 ## Action: associate

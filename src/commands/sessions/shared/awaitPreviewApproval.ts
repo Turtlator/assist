@@ -5,10 +5,15 @@ import {
 	requestPreviewDecision,
 } from "./requestPreviewDecision";
 
+type PreviewApprovalOptions = {
+	saveEditedBody?: (body: string) => void;
+	rejectionAdvice?: string;
+};
+
 export async function awaitPreviewApproval(
 	subject: string,
 	request: PreviewRequest,
-	saveEditedBody?: (body: string) => void,
+	options: PreviewApprovalOptions = {},
 ): Promise<PreviewDecision> {
 	console.log("Awaiting your approval in the assist web UI preview pane…");
 
@@ -22,8 +27,9 @@ export async function awaitPreviewApproval(
 		process.exit(1);
 	}
 
-	if (decision.body !== undefined) saveEditedBody?.(decision.body);
-	if (decision.decision === "reject") reportPreviewRejection(subject, decision);
+	if (decision.body !== undefined) options.saveEditedBody?.(decision.body);
+	if (decision.decision === "reject")
+		reportPreviewRejection(subject, decision, options.rejectionAdvice);
 
 	return decision;
 }

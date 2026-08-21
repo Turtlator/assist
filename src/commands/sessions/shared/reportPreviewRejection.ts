@@ -3,6 +3,7 @@ import type { PreviewDecision } from "./PreviewDecision";
 export function reportPreviewRejection(
 	subject: string,
 	decision: PreviewDecision,
+	advice?: string,
 ): never {
 	console.error(
 		`${subject} rejected${decision.reason ? `: ${decision.reason}` : "."}`,
@@ -20,5 +21,6 @@ export function reportPreviewRejection(
 			console.error(`${i + 1}. On:\n${quoted}\n   Comment: ${c.note}\n`);
 		}
 	}
+	if (advice) console.error(advice);
 	process.exit(1);
 }

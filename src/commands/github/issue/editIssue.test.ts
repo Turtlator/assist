@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -53,6 +53,20 @@ function exitThrows() {
 
 function workingBodyPath(): string {
 	return join(storeDir, "github-issues", "acme", "widgets", "42.md");
+}
+
+function seedWorkingFile(body: string, updatedAt: string): void {
+	const dir = join(storeDir, "github-issues", "acme", "widgets");
+	mkdirSync(dir, { recursive: true });
+	writeFileSync(join(dir, "42.md"), body);
+	writeFileSync(
+		join(dir, "42.json"),
+		JSON.stringify({ target: "acme/widgets#42", updatedAt }),
+	);
+}
+
+function previewedBody(call = 0): string {
+	return mockRequestPreviewDecision.mock.calls[call][0].body;
 }
 
 function ghCalls(verb: string) {
@@ -264,6 +278,23 @@ describe("editIssue edited body", () => {
 		expect(ghCalls("edit")).toEqual([]);
 	});
 
+	it("names the working file to revise when the preview is rejected", async () => {
+		webSession();
+		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+		exitThrows();
+		mockRequestPreviewDecision.mockResolvedValue({
+			decision: "reject",
+			body: COLLAPSED,
+			comments: [{ quote: "lots of noise", note: "collapse this" }],
+		});
+
+		await expect(editIssue("42", {})).rejects.toThrow("process.exit");
+
+		const output = errorSpy.mock.calls.map((c) => c.join(" ")).join("\n");
+		expect(output).toContain(workingBodyPath());
+		expect(output).toContain("Revise that file in place");
+	});
+
 	it("rejects an edited body referencing Claude before pushing", async () => {
 		webSession();
 		vi.spyOn(console, "error").mockImplementation(() => {});
@@ -316,5 +347,62 @@ describe("editIssue validation", () => {
 
 		expect(mockRequestPreviewDecision).not.toHaveBeenCalled();
 		expect(ghCalls("edit")).toEqual([]);
+	});
+});
+
+describe("editIssue resume", () => {
+	const REVISED = "# History\n\n<details>\nrevised\n</details>";
+
+	it("previews the working file's markdown when the issue has not moved", async () => {
+		webSession();
+		seedWorkingFile(REVISED, FETCHED_AT);
+		mockRequestPreviewDecision.mockResolvedValue({ decision: "approve" });
+
+		await editIssue("42", { repo: "acme/widgets" });
+
+		expect(previewedBody()).toBe(REVISED);
+		expect(readFileSync(workingBodyPath(), "utf8")).toBe(REVISED);
+		expect(ghCalls("edit")).toHaveLength(1);
+	});
+
+	it("re-fetches when the issue moved since the working file was written", async () => {
+		webSession();
+		seedWorkingFile(REVISED, "2026-07-01T00:00:00Z");
+		mockRequestPreviewDecision.mockResolvedValue({ decision: "approve" });
+
+		await editIssue("42", {});
+
+		expect(previewedBody()).toBe("# History\n\nlots of noise");
+		expect(readFileSync(workingBodyPath(), "utf8")).toBe(
+			"# History\n\nlots of noise",
+		);
+	});
+
+	it("re-fetches regardless of the working file with --fresh", async () => {
+		webSession();
+		seedWorkingFile(REVISED, FETCHED_AT);
+		mockRequestPreviewDecision.mockResolvedValue({ decision: "approve" });
+
+		await editIssue("42", { fresh: true });
+
+		expect(previewedBody()).toBe("# History\n\nlots of noise");
+	});
+
+	it("keeps the collapses from a Request changes on the next run", async () => {
+		webSession();
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		exitThrows();
+		mockRequestPreviewDecision.mockResolvedValue({
+			decision: "reject",
+			body: REVISED,
+			comments: [{ quote: "lots of noise", note: "collapse this" }],
+		});
+
+		await expect(editIssue("42", {})).rejects.toThrow("process.exit");
+
+		mockRequestPreviewDecision.mockResolvedValue({ decision: "approve" });
+		await editIssue("42", {});
+
+		expect(previewedBody(1)).toBe(REVISED);
 	});
 });

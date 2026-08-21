@@ -1,21 +1,16 @@
-import { validateProposedContent } from "../../../shared/validateProposedContent";
 import { inWebSession } from "../../sessions/shared/inWebSession";
-import { fetchIssue } from "./fetchIssue";
+import { prepareIssueEdit } from "./prepareIssueEdit";
 import { pushUnchangedIssue } from "./pushUnchangedIssue";
 import { reviewProposedIssueEdit } from "./reviewProposedIssueEdit";
+import { validateIssueBody } from "./validateIssueBody";
 import { viewIssue } from "./viewIssue";
-import { writeIssueWorkingFile } from "./writeIssueWorkingFile";
 
 type EditIssueOptions = {
 	repo?: string;
+	fresh?: boolean;
 };
 
 const USAGE = "Usage: assist github issue edit <number> [-R <owner>/<repo>]";
-
-function slugFromUrl(url: string | undefined): string {
-	const match = /github\.com\/([^/]+\/[^/]+)\//.exec(url ?? "");
-	return match ? match[1] : "unknown/unknown";
-}
 
 export async function editIssue(
 	numberArg: string,
@@ -32,29 +27,19 @@ export async function editIssue(
 		return;
 	}
 
-	const issue = fetchIssue(number, options.repo);
-	const slug = options.repo ?? slugFromUrl(issue.url);
-	const target = `${slug}#${number}`;
-	validateProposedContent(
-		{ subject: "Issue", context: "GitHub issues" },
-		issue.title,
-		issue.body,
-	);
-
-	const save = (markdown: string) =>
-		writeIssueWorkingFile(slug, number, target, issue.updatedAt, markdown);
-
-	const bodyPath = save(issue.body);
+	const issue = prepareIssueEdit(number, options.repo, options.fresh);
 	const edited = await reviewProposedIssueEdit(
-		`Edit ${target}: ${issue.title}`,
+		`Edit ${issue.target}: ${issue.title}`,
 		issue.body,
-		save,
+		{ path: issue.bodyPath, save: issue.save },
 	);
-	validateProposedContent(
-		{ subject: "Issue", context: "GitHub issues" },
-		issue.title,
-		edited,
-	);
+	validateIssueBody(issue.title, edited);
 
-	pushUnchangedIssue(number, options.repo, target, issue.updatedAt, bodyPath);
+	pushUnchangedIssue(
+		number,
+		options.repo,
+		issue.target,
+		issue.updatedAt,
+		issue.bodyPath,
+	);
 }

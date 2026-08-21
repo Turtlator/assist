@@ -31,9 +31,13 @@ export function registerGithubIssue(githubCommand: Command): void {
 			"-R, --repo <owner/repo>",
 			"Target repository (defaults to the current repo)",
 		)
+		.option(
+			"--fresh",
+			"Discard any working file for the issue and re-fetch its body from GitHub",
+		)
 		.addHelpText(
 			"after",
-			"\nFetches the issue's current body and opens it in the assist web preview pane, where it can be reworked before it is pushed back. Approving pushes the pane's markdown to the issue; nothing is pushed if the issue moved on GitHub after it was fetched, or outside a web session.\nOnly the body is touched — the title, labels, assignees and state are left alone.",
+			"\nFetches the issue's current body and opens it in the assist web preview pane, where it can be reworked before it is pushed back. Approving pushes the pane's markdown to the issue; nothing is pushed if the issue moved on GitHub after it was fetched, or outside a web session.\nRejecting writes the pane's markdown to a working file and names it: revise that file in place and re-run to preview the revision, which keeps any collapses already applied. A re-run resumes from the working file while the issue has not moved on GitHub; --fresh discards it and re-fetches.\nOnly the body is touched — the title, labels, assignees and state are left alone.",
 		)
 		.action(editIssue);
 
