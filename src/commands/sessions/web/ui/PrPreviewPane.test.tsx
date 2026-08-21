@@ -934,6 +934,24 @@ describe("PrPreviewPane inline comments", () => {
 			);
 		});
 
+		it("links the issue reference in the title to GitHub", () => {
+			render(
+				<PrPreviewPane
+					preview={{
+						...issueEdit,
+						title: "Edit staff0rd/sandbox#8: Tidy the history",
+					}}
+					onDecision={vi.fn()}
+				/>,
+			);
+
+			const link = screen.getByRole("link", { name: "staff0rd/sandbox#8" });
+			expect(link.getAttribute("href")).toBe(
+				"https://github.com/staff0rd/sandbox/issues/8",
+			);
+			expect(screen.getByText(/Tidy the history/)).toBeTruthy();
+		});
+
 		it("shows an Edit chip with no PR chain or screenshot UI", () => {
 			render(<PrPreviewPane preview={issueEdit} onDecision={vi.fn()} />);
 

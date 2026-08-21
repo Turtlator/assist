@@ -1,3 +1,4 @@
+import { githubIssueUrl } from "../../../../../shared/githubIssueUrl";
 import { shortenGithubIssue } from "../../../shortenGithubIssue";
 import { TrackerLink, type TrackerLinkVariant } from "./TrackerLink";
 
@@ -6,15 +7,6 @@ type GithubIssueLinkProps = {
 	origin?: string;
 	variant?: TrackerLinkVariant;
 };
-
-const shorthand = /^([^/\s]+)\/([^/\s]+)#(\d+)$/;
-
-function issueUrl(githubIssue: string): string | undefined {
-	const match = shorthand.exec(githubIssue);
-	if (!match) return undefined;
-	const [, owner, repo, number] = match;
-	return `https://github.com/${owner}/${repo}/issues/${number}`;
-}
 
 export function GithubIssueLink({
 	githubIssue,
@@ -25,7 +17,7 @@ export function GithubIssueLink({
 	return (
 		<TrackerLink
 			label={shortenGithubIssue(githubIssue, origin)}
-			url={issueUrl(githubIssue)}
+			url={githubIssueUrl(githubIssue)}
 			variant={variant}
 		/>
 	);
