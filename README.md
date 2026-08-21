@@ -274,6 +274,7 @@ The Config tab of the sessions web dashboard never receives secret values: `GET 
 - `assist jira ac <issue-key>` - Print acceptance criteria for a Jira issue
 - `assist jira view <issue-key>` - Print the title and description of a Jira issue
   - Note: Claude fetches Jira context via the MCP Atlassian server, so `/jira` and Jira-key mentions go through MCP. These CLI commands remain for direct human use.
+- `assist miro extract --items <file> --top-left <id|link> --bottom-right <id|link>` - Print the text of every box inside a rectangle on a Miro board as a YAML list, leftmost box edge first (topmost edge breaks ties). `--items` is a file of raw `board_list_items` response pages; anchors accept a bare widget id or a `?moveToWidget=<id>` link
 - `assist ravendb auth add` - Add a new RavenDB connection
 - `assist ravendb auth list` - List configured RavenDB connections
 - `assist ravendb auth remove <name>` - Remove a configured connection
