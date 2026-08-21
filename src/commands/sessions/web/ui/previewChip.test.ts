@@ -58,6 +58,13 @@ describe("previewChip", () => {
 		});
 	});
 
+	it("labels an edit to an existing GitHub issue", () => {
+		expect(previewChip(preview({ kind: "github-issue-edit" }), false)).toEqual({
+			label: "Edit",
+			color: "warning",
+		});
+	});
+
 	it("labels an update to an existing PR", () => {
 		expect(previewChip(preview({ prNumber: 42 }), false)).toEqual({
 			label: "Update #42",

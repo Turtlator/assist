@@ -8,6 +8,12 @@ describe("previewTargetLabel", () => {
 		);
 	});
 
+	it("labels a github issue edit", () => {
+		expect(previewTargetLabel("github-issue-edit", "story", null, false)).toBe(
+			"github issue edit",
+		);
+	});
+
 	it("labels a github issue comment", () => {
 		expect(
 			previewTargetLabel("github-issue-comment", "story", null, false),

@@ -15,7 +15,8 @@ export type PreviewKind =
 	| "backlog-comment"
 	| "pr-comment"
 	| "github-issue"
-	| "github-issue-comment";
+	| "github-issue-comment"
+	| "github-issue-edit";
 
 export type PreviewItemType = "story" | "bug";
 

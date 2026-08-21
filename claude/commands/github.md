@@ -1,9 +1,9 @@
 ---
-description: View or act on a GitHub issue (view, associate, update, started, done, help)
+description: View or act on a GitHub issue (view, edit, associate, update, started, done, help)
 allowed_args: "[action] [owner/repo#number | issue-url] [args]"
 ---
 
-You are the `/github` dispatcher. Parse `$ARGUMENTS` into an **action verb** plus optional issue/args, then run that action. Actions: `view`, `associate`, `update`, `started`, `done`, `help`.
+You are the `/github` dispatcher. Parse `$ARGUMENTS` into an **action verb** plus optional issue/args, then run that action. Actions: `view`, `edit`, `associate`, `update`, `started`, `done`, `help`.
 
 All GitHub operations go through the `gh` CLI. A GitHub issue is referenced as the compact shorthand `owner/repo#number` (e.g. `staff0rd/assist#5`) or a full `https://github.com/owner/repo/issues/N` URL.
 
@@ -12,11 +12,11 @@ All GitHub operations go through the `gh` CLI. A GitHub issue is referenced as t
 Tokenise `$ARGUMENTS` on whitespace.
 
 - No tokens → run **help**.
-- First token is a known action verb (`view`, `associate`, `update`, `started`, `done`, `help`) → that is the action; the remaining tokens are its args.
-- First token matches a GitHub issue reference (`owner/repo#number` or a `github.com/.../issues/N` URL) → action is **view**, issue is that token.
+- First token is a known action verb (`view`, `edit`, `associate`, `update`, `started`, `done`, `help`) → that is the action; the remaining tokens are its args.
+- First token matches a GitHub issue reference (`owner/repo#number` or a `github.com/.../issues/N` URL) → action is **edit**, issue is that token.
 - Anything else → run **help** (the input was not understood).
 
-## Step 2: Resolve the issue (for view / started / done / update)
+## Step 2: Resolve the issue (for view / edit / started / done / update)
 
 These actions operate on a single GitHub issue. Resolve it once:
 
@@ -42,6 +42,35 @@ gh issue view <number> -R <owner>/<repo> 2>&1
 ```
 
 Display the result to the user.
+
+## Action: edit
+
+Rework the issue's body in the assist web preview pane. This is what a bare issue reference runs, and it needs a web session — the pane is the editing surface.
+
+Check whether this is a web session:
+
+```
+echo "session=${ASSIST_SESSION:-} id=${ASSIST_SESSION_ID:-}" 2>&1
+```
+
+If `session` is not `1` or `id` is empty, there is no pane. Fall back to **view** — print the issue to the user and stop:
+
+```
+gh issue view <number> -R <owner>/<repo> 2>&1
+```
+
+In a web session, open the issue in the pane instead:
+
+```
+assist github issue edit <number> -R <owner>/<repo> 2>&1
+```
+
+The command fetches the issue's current body, opens it in the preview pane, and pushes the pane's markdown back on approval. Only the body is touched — the title, labels, assignees and state are left alone.
+
+Display the result so the user can see whether it landed. If the command exits non-zero, relay what it reported and stop — nothing was pushed. Two cases to relay verbatim:
+
+- **Request changes** — the reason and every inline comment, each with the excerpt it was left on. Address each one, then run the command again.
+- **The issue moved on GitHub** — it names the working file holding the markdown. Someone else edited the issue, so nothing was pushed; tell the user rather than re-running blind.
 
 ## Action: associate
 
@@ -120,7 +149,9 @@ Report the final state.
 
 List the available actions and their arguments:
 
-- `/github <owner/repo#number>` or `/github view <ref>` — view an issue (ref optional; falls back to the session item's GitHub issue).
+- `/github view <ref>` — print an issue to chat (ref optional; falls back to the session item's GitHub issue).
+- `/github <owner/repo#number>` — rework that issue in the web preview pane (see `edit`).
+- `/github edit [ref]` — rework the issue body in the web preview pane (what a bare `/github <ref>` runs; prints the issue instead when there is no web session).
 - `/github associate <ref> [id]` — associate a GitHub issue with a backlog item (id optional; falls back to the session item).
 - `/github update [ref]` — post a concise session-summary comment to the issue (previewed for approval before posting).
 - `/github started [ref]` — assign the issue to yourself.

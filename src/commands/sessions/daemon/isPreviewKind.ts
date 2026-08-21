@@ -7,6 +7,7 @@ const PREVIEW_KINDS: PreviewKind[] = [
 	"pr-comment",
 	"github-issue",
 	"github-issue-comment",
+	"github-issue-edit",
 ];
 
 export function isPreviewKind(value: unknown): value is PreviewKind {

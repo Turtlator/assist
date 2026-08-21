@@ -13,6 +13,9 @@ export function previewChip(preview: PrPreview, draft: boolean): ChipSpec {
 	)
 		return { label: "Comment", color: "default" };
 
+	if (preview.kind === "github-issue-edit")
+		return { label: "Edit", color: "warning" };
+
 	if (preview.kind === "github-issue")
 		return { label: "Issue", color: "warning" };
 

@@ -1,6 +1,7 @@
 import type { Command } from "commander";
 import { commentIssue } from "./github/issue/commentIssue";
 import { createIssue } from "./github/issue/createIssue";
+import { editIssue } from "./github/issue/editIssue";
 import { readBodyArgument } from "./prs/readBodyArgument";
 
 export function registerGithubIssue(githubCommand: Command): void {
@@ -22,6 +23,19 @@ export function registerGithubIssue(githubCommand: Command): void {
 			"\nThere is no What/Why/How template: an issue reports a problem, and the target repo's own issue template is unknowable from here. Write the body as the repo's maintainers would expect.\nIn an assist web session the title and body are previewed for approve/reject first (with inline comments); nothing is created until it is approved.",
 		)
 		.action(createIssue);
+
+	issueCommand
+		.command("edit <number>")
+		.description("Edit an existing GitHub issue's body in the preview pane")
+		.option(
+			"-R, --repo <owner/repo>",
+			"Target repository (defaults to the current repo)",
+		)
+		.addHelpText(
+			"after",
+			"\nFetches the issue's current body and opens it in the assist web preview pane, where it can be reworked before it is pushed back. Approving pushes the pane's markdown to the issue; nothing is pushed if the issue moved on GitHub after it was fetched, or outside a web session.\nOnly the body is touched — the title, labels, assignees and state are left alone.",
+		)
+		.action(editIssue);
 
 	issueCommand
 		.command("comment <number>")
