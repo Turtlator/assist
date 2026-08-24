@@ -1,3 +1,10 @@
+# [0.587.0](https://github.com/staff0rd/assist/compare/v0.586.0...v0.587.0) (2026-08-24)
+
+
+### Features
+
+* /miro slash command ([874b1ec](https://github.com/staff0rd/assist/commit/874b1ec97647b0cd6fd872f4ff2c992221b9cf13))
+
 # [0.586.0](https://github.com/staff0rd/assist/compare/v0.585.0...v0.586.0) (2026-08-21)
 
 
