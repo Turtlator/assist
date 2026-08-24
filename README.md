@@ -72,6 +72,7 @@ After installation, the `assist` command will be available globally. You can als
 - `/inspect` - Run .NET code inspections on changed files
 - `/screenshot` - Capture a screenshot of a running application window
 - `/raven` - Query and manage RavenDB connections and collections
+- `/miro [board url | extract name]` - Dump a Miro frame's raw `board_list_items` pages and extract its boxes as an ordered YAML list via `assist miro extract`
 - `/seq` - Query Seq logs from a URL or filter expression
 - `/sql` - Query a MSSQL database via assist sql
 - `/verify` - Run all verification commands in parallel

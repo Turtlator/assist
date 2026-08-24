@@ -41,6 +41,7 @@ assist jira auth
 assist jira view
 assist list
 assist ls
+assist miro extract
 assist news
 assist prs list-comments
 assist ravendb auth list
