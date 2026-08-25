@@ -1,3 +1,10 @@
+## [0.588.1](https://github.com/staff0rd/assist/compare/v0.588.0...v0.588.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* match GitHub react issue body textarea ([34981e2](https://github.com/staff0rd/assist/commit/34981e20f8cbfe05a09728c72c61281016108458))
+
 # [0.588.0](https://github.com/staff0rd/assist/compare/v0.587.0...v0.588.0) (2026-08-25)
 
 
