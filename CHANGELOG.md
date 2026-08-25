@@ -1,3 +1,10 @@
+# [0.589.0](https://github.com/staff0rd/assist/compare/v0.588.3...v0.589.0) (2026-08-25)
+
+
+### Features
+
+* convert, insert, new-issue outlining ([b3d7b18](https://github.com/staff0rd/assist/commit/b3d7b18ac0c49f18dbc0c14036ee12282fa700c9))
+
 ## [0.588.3](https://github.com/staff0rd/assist/compare/v0.588.2...v0.588.3) (2026-08-25)
 
 
