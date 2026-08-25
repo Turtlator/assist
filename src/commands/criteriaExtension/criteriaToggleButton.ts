@@ -11,20 +11,28 @@ const BUTTON_STYLE = [
 	"cursor: pointer",
 ].join(";");
 
-export function criteriaToggleButton(
-	onToggle: (open: boolean) => void,
-): HTMLButtonElement {
-	const button = document.createElement("button");
-	button.type = "button";
-	button.textContent = "Outline criteria";
-	button.setAttribute("data-assist-criteria-toggle", "");
-	button.setAttribute("aria-pressed", "false");
-	button.style.cssText = BUTTON_STYLE;
-	button.addEventListener("click", (event) => {
+const LABEL = { open: "Edit markdown", closed: "Outline criteria" } as const;
+
+export function criteriaToggleButton(onToggle: (open: boolean) => void): {
+	element: HTMLButtonElement;
+	setOpen: (open: boolean) => void;
+} {
+	const element = document.createElement("button");
+	element.type = "button";
+	element.setAttribute("data-assist-criteria-toggle", "");
+	element.style.cssText = BUTTON_STYLE;
+
+	const setOpen = (open: boolean) => {
+		element.setAttribute("aria-pressed", String(open));
+		element.textContent = open ? LABEL.open : LABEL.closed;
+	};
+
+	setOpen(false);
+	element.addEventListener("click", (event) => {
 		event.preventDefault();
-		const open = button.getAttribute("aria-pressed") !== "true";
-		button.setAttribute("aria-pressed", String(open));
+		const open = element.getAttribute("aria-pressed") !== "true";
+		setOpen(open);
 		onToggle(open);
 	});
-	return button;
+	return { element, setOpen };
 }
