@@ -23,6 +23,22 @@ export default defineConfig({
 			recursive: true,
 		});
 		await build({
+			entryPoints: ["src/commands/criteriaExtension/criteriaContentScript.tsx"],
+			bundle: true,
+			minify: true,
+			format: "iife",
+			target: "es2020",
+			outfile: "criteria-extension/content.js",
+			jsx: "automatic",
+			jsxImportSource: "react",
+			define: { "process.env.NODE_ENV": '"production"' },
+		});
+		cpSync(
+			"criteria-extension",
+			"dist/commands/criteriaExtension/criteria-extension",
+			{ recursive: true },
+		);
+		await build({
 			entryPoints: ["src/commands/sessions/web/ui/App.tsx"],
 			bundle: true,
 			minify: true,

@@ -1,0 +1,13 @@
+{
+	"manifest_version": 3,
+	"name": "assist criteria outliner",
+	"version": "1.0.0",
+	"description": "Adds an Outline criteria toggle to GitHub's issue editor, backed by assist's acceptance criteria outliner.",
+	"content_scripts": [
+		{
+			"matches": ["https://github.com/*"],
+			"js": ["content.js"],
+			"run_at": "document_idle"
+		}
+	]
+}

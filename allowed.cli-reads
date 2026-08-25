@@ -32,6 +32,7 @@ assist complexity
 assist config get
 assist config keys
 assist config list
+assist criteria-extension
 assist coverage
 assist daemon status
 assist dotnet

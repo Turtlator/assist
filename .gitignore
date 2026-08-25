@@ -10,3 +10,4 @@ screenshots
 .claude/settings.local.json
 assist-test.txt
 .assist/backlog.db
+criteria-extension/content.js

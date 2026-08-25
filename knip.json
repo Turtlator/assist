@@ -3,7 +3,8 @@
 		"src/index.ts",
 		"oxlint-rules/filenameConvention.ts",
 		"src/commands/sessions/web/ui/App.tsx",
-		"src/commands/sessions/web/ui/installMonacoGlobal.ts"
+		"src/commands/sessions/web/ui/installMonacoGlobal.ts",
+		"src/commands/criteriaExtension/criteriaContentScript.tsx"
 	],
 	"ignoreDependencies": [
 		"@vitest/coverage-v8",
@@ -13,5 +14,10 @@
 		"skott",
 		"tsx"
 	],
-	"ignore": ["**/.venv/**", "netcap-extension/**", "pi/**"]
+	"ignore": [
+		"**/.venv/**",
+		"netcap-extension/**",
+		"criteria-extension/**",
+		"pi/**"
+	]
 }

@@ -300,6 +300,7 @@ The Config tab of the sessions web dashboard never receives secret values: `GET 
 
 - `assist netcap [-p, --port <port>] [-o, --out <dir>] [-f, --filter <pattern>]` - Capture browser network traffic to `capture.jsonl` under `--out` (default `~/.assist/netcap`), paired with the [netcap browser extension](#netcap-browser-extension)
 - `assist netcap extract-linkedin-posts [file]` - Parse a netcap capture into structured LinkedIn posts, written to `posts.json` beside the capture
+- `assist criteria-extension` - Print the directory to load the [acceptance criteria outliner extension](#acceptance-criteria-outliner-extension) unpacked from (copies to `C:\tools\criteria-extension` under WSL)
 - `assist screenshot <process>` - Capture a screenshot of a running application window (`screenshot.outputDir`, default `./screenshots`)
 - `assist handover save --summary <s>` - Save a session handover note (content from stdin), scoped by the repo's git origin
 - `assist handover list` - List unrecalled handovers for this repo, most recent first
@@ -420,6 +421,16 @@ Web server changes only need the `assist sessions` process restarted — session
 - `commit.expectedBranch` — when set (e.g. `main`), `assist commit` prints a non-blocking warning if HEAD is on any other branch, so work on a stray branch isn't silently orphaned
 - `branch.prefix` — when set (e.g. `sw`), `assist branch <slug>` prepends `<prefix>/` to the branch name
 - `branch.defaultBranch` — override the base branch, which is otherwise resolved live from the remote (`git ls-remote --symref origin HEAD`), falling back to `main`
+
+## Acceptance criteria outliner extension
+
+`assist criteria-extension` prints the directory to load unpacked; nothing talks to assist at runtime. The extension is a single Manifest V3 content script scoped to `https://github.com/*`, built by `npm run build` from `src/commands/criteriaExtension/criteriaContentScript.tsx` into `criteria-extension/content.js` (gitignored). It adds an **Outline criteria** toggle to the markdown toolbar of an issue's body editor; pressing it hides the textarea and mounts the same `AcceptanceCriteriaOutline` control the web preview panel uses, in a shadow root with its own emotion cache and MUI theme. Each edit is written back through `writeAcceptanceCriteria` into the textarea and dispatched as an `input` event, so GitHub's own Save pushes it.
+
+1. Run `assist criteria-extension` — it prints the extension directory. Under WSL it copies the extension to `C:\tools\criteria-extension` and prints that Windows path instead; re-run and reload the extension after a rebuild.
+2. Load the unpacked extension:
+   - **Chrome**: open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select the extension directory.
+   - **Firefox**: open `about:debugging#/runtime/this-firefox` → **Load Temporary Add-on…** → pick `manifest.json` inside the printed extension directory.
+3. Open an issue, press **Edit** on the body, and press **Outline criteria**.
 
 ## netcap browser extension
 
