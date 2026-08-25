@@ -1,10 +1,10 @@
 import { Box } from "@mui/material";
 import { useState } from "react";
+import { acceptanceCriteriaState } from "../sessions/web/ui/acceptanceCriteriaState";
 import { acceptanceSectionSlice } from "../sessions/web/ui/acceptanceSectionSlice";
-import { AcceptanceCriteriaOutline } from "../sessions/web/ui/AcceptanceCriteriaOutline";
-import { splitAcceptanceCriteria } from "../sessions/web/ui/splitAcceptanceCriteria";
-import { writeAcceptanceCriteria } from "../sessions/web/ui/writeAcceptanceCriteria";
 import { CriteriaContextField } from "./CriteriaContextField";
+import { CriteriaInsertPrompt } from "./CriteriaInsertPrompt";
+import { CriteriaSectionControl } from "./CriteriaSectionControl";
 
 const BEFORE_LABEL = "Body before acceptance criteria";
 const AFTER_LABEL = "Body after acceptance criteria";
@@ -17,7 +17,7 @@ export function CriteriaOutlineHost({
 	onBody: (body: string) => void;
 }) {
 	const [body, setBody] = useState(initialBody);
-	const section = splitAcceptanceCriteria(body);
+	const state = acceptanceCriteriaState(body);
 	const slice = acceptanceSectionSlice(body);
 
 	const update = (next: string) => {
@@ -25,32 +25,28 @@ export function CriteriaOutlineHost({
 		onBody(next);
 	};
 
-	if (!section || !slice) return null;
+	if (state.kind === "insert" || !slice)
+		return <CriteriaInsertPrompt body={body} onBody={update} />;
 
-	// why: the section's own lines are carried through verbatim, so editing the
-	// prose around it never rewrites criterion markers the user did not touch
+	const items = state.kind === "outline" ? state.items : null;
+	const before = items ? slice.before : [...slice.before, ...slice.lines];
+	const untouched = items ? slice.lines : [];
+
 	return (
 		<Box sx={{ width: "100%" }}>
 			<CriteriaContextField
 				label={BEFORE_LABEL}
-				value={section.before.join("\n")}
+				value={before.join("\n")}
 				onChange={(text) =>
-					update(
-						[...text.split("\n"), ...slice.lines, ...section.after].join("\n"),
-					)
+					update([...text.split("\n"), ...untouched, ...slice.after].join("\n"))
 				}
 			/>
-			<AcceptanceCriteriaOutline
-				items={section.items}
-				onChange={(items) => update(writeAcceptanceCriteria(body, items))}
-			/>
+			<CriteriaSectionControl items={items} body={body} onBody={update} />
 			<CriteriaContextField
 				label={AFTER_LABEL}
-				value={section.after.join("\n")}
+				value={slice.after.join("\n")}
 				onChange={(text) =>
-					update(
-						[...section.before, ...slice.lines, ...text.split("\n")].join("\n"),
-					)
+					update([...before, ...untouched, ...text.split("\n")].join("\n"))
 				}
 			/>
 		</Box>

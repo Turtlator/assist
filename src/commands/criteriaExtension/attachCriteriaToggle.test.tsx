@@ -37,6 +37,12 @@ function rows(field: HTMLTextAreaElement) {
 	);
 }
 
+function shadowHosts(): number {
+	return Array.from(document.querySelectorAll("div")).filter(
+		(element) => element.shadowRoot,
+	).length;
+}
+
 describe("attachCriteriaToggle", () => {
 	it("adds the toggle to the editor toolbar", async () => {
 		const { button } = await setup(BODY);
@@ -88,6 +94,23 @@ describe("attachCriteriaToggle", () => {
 		field.value = BODY;
 		await act(async () => field.dispatchEvent(new Event("input")));
 		expect(rows(field)).toHaveLength(2);
+	});
+
+	it("offers the insert button when the toggle is pressed on a bare body", async () => {
+		const { field, button } = await setup("Just prose");
+		await act(async () => button.click());
+		expect(shadow(field)?.querySelector("button")?.textContent).toBe(
+			"Add acceptance criteria",
+		);
+	});
+
+	it("mounts one outline when insert rewrites the body", async () => {
+		const { field, button } = await setup("Just prose");
+		await act(async () => button.click());
+		const insert = shadow(field)?.querySelector("button") as HTMLButtonElement;
+		await act(async () => insert.click());
+		expect(shadowHosts()).toBe(1);
+		expect(rows(field)).toHaveLength(1);
 	});
 
 	it("attaches only once per textarea", async () => {

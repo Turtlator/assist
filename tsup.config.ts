@@ -23,7 +23,7 @@ export default defineConfig({
 			recursive: true,
 		});
 		await build({
-			entryPoints: ["src/commands/criteriaExtension/criteriaContentScript.tsx"],
+			entryPoints: ["src/commands/criteriaExtension/criteriaContentScript.ts"],
 			bundle: true,
 			minify: true,
 			format: "iife",

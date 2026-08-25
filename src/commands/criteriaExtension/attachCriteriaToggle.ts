@@ -1,12 +1,9 @@
-import type { Root } from "react-dom/client";
 import { acceptanceCriteriaState } from "../sessions/web/ui/acceptanceCriteriaState";
+import { criteriaOutlineSurface } from "./criteriaOutlineSurface";
 import { criteriaToggleButton } from "./criteriaToggleButton";
 import { findEditorToolbar } from "./findEditorToolbar";
-import { mountCriteriaOutline } from "./mountCriteriaOutline";
-import { setTextareaValue } from "./setTextareaValue";
 
 const ATTACHED = "data-assist-criteria-attached";
-const HOST_STYLE = "display:block;width:100%;flex:1 1 auto;align-self:stretch";
 
 function placeButton(
 	textarea: HTMLTextAreaElement,
@@ -25,39 +22,33 @@ export function attachCriteriaToggle(textarea: HTMLTextAreaElement): void {
 	if (textarea.hasAttribute(ATTACHED)) return;
 	textarea.setAttribute(ATTACHED, "");
 
-	let host: HTMLElement | null = null;
-	let root: Root | null = null;
+	const surface = criteriaOutlineSurface(textarea);
 
-	const close = () => {
-		root?.unmount();
-		root = null;
-		host?.remove();
-		host = null;
-		textarea.style.display = "";
-	};
+	function stopWaitingForBody(): void {
+		textarea.removeEventListener("input", showOutlineWhenBodyArrives);
+	}
 
-	const open = () => {
-		host = document.createElement("div");
-		host.style.cssText = HOST_STYLE;
-		textarea.parentElement?.insertBefore(host, textarea.nextSibling);
-		textarea.style.display = "none";
-		root = mountCriteriaOutline(host, textarea.value, (body) =>
-			setTextareaValue(textarea, body),
-		);
-	};
+	function showOutline(): void {
+		stopWaitingForBody();
+		surface.show();
+		toggle.setOpen(true);
+	}
 
-	const toggle = criteriaToggleButton((shown) => (shown ? open() : close()));
+	function showTextarea(): void {
+		stopWaitingForBody();
+		surface.hide();
+		toggle.setOpen(false);
+	}
+
+	function showOutlineWhenBodyArrives(): void {
+		if (outlinable(textarea.value)) showOutline();
+	}
+
+	const toggle = criteriaToggleButton((shown) =>
+		shown ? showOutline() : showTextarea(),
+	);
 	placeButton(textarea, toggle.element);
 
-	const autoOpen = () => {
-		if (!outlinable(textarea.value)) return;
-		open();
-		toggle.setOpen(true);
-	};
-
-	// why: GitHub sometimes mounts the textarea before React fills it in, so an
-	// empty field gets one more chance once its value arrives
-	if (textarea.value === "")
-		textarea.addEventListener("input", autoOpen, { once: true });
-	else autoOpen();
+	if (outlinable(textarea.value)) showOutline();
+	else textarea.addEventListener("input", showOutlineWhenBodyArrives);
 }

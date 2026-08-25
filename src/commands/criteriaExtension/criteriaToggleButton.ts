@@ -1,6 +1,9 @@
 const BUTTON_STYLE = [
 	"font: inherit",
 	"font-size: 12px",
+	"display: inline-flex",
+	"align-items: center",
+	"align-self: center",
 	"line-height: 20px",
 	"padding: 1px 8px",
 	"margin: 0 4px",

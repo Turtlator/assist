@@ -424,13 +424,13 @@ Web server changes only need the `assist sessions` process restarted — session
 
 ## Acceptance criteria outliner extension
 
-`assist criteria-extension` prints the directory to load unpacked; nothing talks to assist at runtime. The extension is a single Manifest V3 content script scoped to `https://github.com/*`, built by `npm run build` from `src/commands/criteriaExtension/criteriaContentScript.tsx` into `criteria-extension/content.js` (gitignored). It adds an **Outline criteria** toggle to the markdown toolbar of an issue's body editor; pressing it hides the textarea and mounts the same `AcceptanceCriteriaOutline` control the web preview panel uses, in a shadow root with its own emotion cache and MUI theme. Each edit is written back through `writeAcceptanceCriteria` into the textarea and dispatched as an `input` event, so GitHub's own Save pushes it.
+`assist criteria-extension` prints the directory to load unpacked; nothing talks to assist at runtime. The extension is a single Manifest V3 content script scoped to `https://github.com/*`, built by `npm run build` from `src/commands/criteriaExtension/criteriaContentScript.ts` into `criteria-extension/content.js` (gitignored). It adds an **Outline criteria** toggle to the markdown toolbar of an issue's body editor and the new-issue form, re-attaching after client-side navigation; pressing it hides the textarea and mounts the same `AcceptanceCriteriaOutline` control the web preview panel uses, in a shadow root with its own emotion cache and MUI theme. A body whose acceptance criteria are bullets, checkboxes or prose gets a **Convert to outline** button instead, and a body with no acceptance criteria heading gets **Add acceptance criteria**. Each edit is written back through `writeAcceptanceCriteria` into the textarea and dispatched as an `input` event, so GitHub's own Save pushes it.
 
 1. Run `assist criteria-extension` — it prints the extension directory. Under WSL it copies the extension to `C:\tools\criteria-extension` and prints that Windows path instead; re-run and reload the extension after a rebuild.
 2. Load the unpacked extension:
    - **Chrome**: open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select the extension directory.
    - **Firefox**: open `about:debugging#/runtime/this-firefox` → **Load Temporary Add-on…** → pick `manifest.json` inside the printed extension directory.
-3. Open an issue, press **Edit** on the body, and press **Outline criteria**.
+3. Open an issue, press **Edit** on the body, and press **Outline criteria**. The new-issue form works the same way.
 
 ## netcap browser extension
 
