@@ -1,3 +1,10 @@
+## [0.588.3](https://github.com/staff0rd/assist/compare/v0.588.2...v0.588.3) (2026-08-25)
+
+
+### Bug Fixes
+
+* follow github color mode, contain keys ([c07f54e](https://github.com/staff0rd/assist/commit/c07f54e259845680b86a5b9a1b5eaee1fc0313ab))
+
 ## [0.588.2](https://github.com/staff0rd/assist/compare/v0.588.1...v0.588.2) (2026-08-25)
 
 
