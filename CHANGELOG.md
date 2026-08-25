@@ -1,3 +1,10 @@
+# [0.588.0](https://github.com/staff0rd/assist/compare/v0.587.0...v0.588.0) (2026-08-25)
+
+
+### Features
+
+* outline criteria GitHub extension ([b7043ba](https://github.com/staff0rd/assist/commit/b7043ba791a461ed2e72dc8d455af9fccfe18ccb))
+
 # [0.587.0](https://github.com/staff0rd/assist/compare/v0.586.0...v0.587.0) (2026-08-24)
 
 
