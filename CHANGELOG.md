@@ -1,3 +1,10 @@
+## [0.588.2](https://github.com/staff0rd/assist/compare/v0.588.1...v0.588.2) (2026-08-25)
+
+
+### Bug Fixes
+
+* editable body around criteria outline ([b90d300](https://github.com/staff0rd/assist/commit/b90d300194d7c137868cf2ba84e8caa732782481))
+
 ## [0.588.1](https://github.com/staff0rd/assist/compare/v0.588.0...v0.588.1) (2026-08-25)
 
 
