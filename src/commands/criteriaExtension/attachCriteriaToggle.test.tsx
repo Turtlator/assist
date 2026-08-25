@@ -17,11 +17,13 @@ const BODY = [
 
 function setup(body: string) {
 	document.body.innerHTML =
-		'<form><div role="toolbar"></div><textarea name="issue[body]"></textarea></form>';
+		'<form><div role="toolbar"></div><textarea placeholder="Type your description here…"></textarea></form>';
 	const field = document.querySelector("textarea") as HTMLTextAreaElement;
 	field.value = body;
 	attachCriteriaToggle(field);
-	const button = document.querySelector("[aria-pressed]") as HTMLButtonElement;
+	const button = document.querySelector(
+		"[data-assist-criteria-toggle]",
+	) as HTMLButtonElement;
 	return { field, button };
 }
 
@@ -58,6 +60,8 @@ describe("attachCriteriaToggle", () => {
 	it("attaches only once per textarea", () => {
 		const { field } = setup(BODY);
 		attachCriteriaToggle(field);
-		expect(document.querySelectorAll("[aria-pressed]")).toHaveLength(1);
+		expect(
+			document.querySelectorAll("[data-assist-criteria-toggle]"),
+		).toHaveLength(1);
 	});
 });

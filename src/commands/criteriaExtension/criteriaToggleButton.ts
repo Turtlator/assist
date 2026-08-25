@@ -17,6 +17,7 @@ export function criteriaToggleButton(
 	const button = document.createElement("button");
 	button.type = "button";
 	button.textContent = "Outline criteria";
+	button.setAttribute("data-assist-criteria-toggle", "");
 	button.setAttribute("aria-pressed", "false");
 	button.style.cssText = BUTTON_STYLE;
 	button.addEventListener("click", (event) => {
