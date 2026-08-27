@@ -439,21 +439,17 @@ Web server changes only need the `assist sessions` process restarted — session
 
 ### Permanent Firefox install
 
-Firefox release and beta only install signed add-ons, so a permanent install means having Mozilla sign the package. `assist criteria-extension --sign` uses AMO's **unlisted** (self-distribution) channel: Mozilla signs the `.xpi` and hands it back, with no public store listing and no human review queue.
+Firefox release and beta only install signed add-ons, so a permanent install means having Mozilla sign the package. Signing uses AMO's **unlisted** (self-distribution) channel: Mozilla signs the `.xpi` and hands it back, with no public store listing and no human review queue.
 
-1. Create an AMO API key at [addons.mozilla.org/developers/addon/api/key](https://addons.mozilla.org/en-US/developers/addon/api/key/) and export the two halves:
+Signing runs in CI, so the AMO key lives only as repo secrets and never on a developer machine. One-time setup: create an AMO API key at [addons.mozilla.org/developers/addon/api/key](https://addons.mozilla.org/en-US/developers/addon/api/key/) and add its two halves as the repo secrets `AMO_JWT_ISSUER` (the `user:12345678:123` issuer) and `AMO_JWT_SECRET`. The **Criteria extension** workflow maps them onto the `WEB_EXT_API_KEY` / `WEB_EXT_API_SECRET` that `web-ext` reads.
 
-   ```bash
-   export WEB_EXT_API_KEY=user:12345678:123
-   export WEB_EXT_API_SECRET=...
-   ```
+1. Run the **Criteria extension** workflow from the Actions tab (`gh workflow run criteria-extension.yml`). It checks out `main`, builds, signs the extension at assist's current version, and uploads the signed add-on to that version's GitHub release as `criteria-extension.xpi`. A failed AMO submission fails the job and attaches nothing.
+2. Download `criteria-extension.xpi` from the release — the URL follows from the version, `https://github.com/staff0rd/assist/releases/download/v<version>/criteria-extension.xpi`.
+3. Open the `.xpi` in Firefox (drag it onto a window, or `about:addons` → gear → **Install Add-on From File…**). It survives restarts.
 
-   They are read from the environment rather than `assist.yml` so the secret never lands in a file that could be committed.
+AMO refuses a version it has already signed, which is why the staged manifest carries assist's version instead of the manifest's `1.0.0` placeholder — sign once per release, not twice at the same version. Unlisted add-ons get no updates from AMO, so a new build means installing the new `.xpi`; wiring up self-hosted `update_url` auto-updates is not done.
 
-2. Run `npm run build` (to refresh `content.js`), then `assist criteria-extension --sign`. It stages a copy of the extension with assist's own version stamped into `manifest.json`, shells out to `npx web-ext sign`, and writes the signed add-on to `~/.assist/criteria-extension/`. Under WSL it copies the `.xpi` to `C:\tools\criteria-extension.xpi` and prints that Windows path.
-3. Open the printed `.xpi` in Firefox (drag it onto a window, or `about:addons` → gear → **Install Add-on From File…**). It survives restarts.
-
-AMO refuses a version it has already signed, which is why the staged manifest carries assist's version instead of the manifest's `1.0.0` placeholder — re-sign after a release, not twice at the same version. Unlisted add-ons get no updates from AMO, so a new build means installing the new `.xpi`; wiring up self-hosted `update_url` auto-updates is not done.
+`assist criteria-extension --sign` still signs locally for someone who holds an AMO key: export `WEB_EXT_API_KEY` and `WEB_EXT_API_SECRET`, run `npm run build` (to refresh `content.js`), then the command. It stages a copy of the extension with assist's version stamped into `manifest.json`, shells out to `npx web-ext sign`, and writes the signed add-on to `~/.assist/criteria-extension/criteria-extension.xpi`. Under WSL it copies that to `C:\tools\criteria-extension.xpi` and prints the Windows path.
 
 Two alternatives need no signing: **Firefox Developer Edition** or **Nightly** honour `xpinstall.signatures.required = false` in `about:config` and will then install an unsigned local `.xpi` permanently, and Chrome's **Load unpacked** already survives restarts, so the unpacked directory is one-time setup there.
 

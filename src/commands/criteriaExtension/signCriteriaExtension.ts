@@ -4,6 +4,7 @@ import { join } from "node:path";
 import chalk from "chalk";
 import packageJson from "../../../package.json";
 import { spawnInherit } from "../../shared/spawnInherit";
+import { copySignedXpi } from "./copySignedXpi";
 import { criteriaExtensionDir } from "./criteriaExtensionDir";
 import { findSignedXpi } from "./findSignedXpi";
 import { signedAddonInstallPath } from "./signedAddonInstallPath";
@@ -48,6 +49,8 @@ export async function signCriteriaExtension(): Promise<void> {
 		process.exitCode = 1;
 		return;
 	}
-	const path = await signedAddonInstallPath(xpi);
+	const path = await signedAddonInstallPath(
+		await copySignedXpi(xpi, ARTIFACTS_DIR),
+	);
 	console.log(chalk.dim(`install the signed add-on from ${path}`));
 }
