@@ -1,3 +1,10 @@
+## [0.589.1](https://github.com/staff0rd/assist/compare/v0.589.0...v0.589.1) (2026-08-27)
+
+
+### Bug Fixes
+
+* rebind session transcript after /clear ([009afbf](https://github.com/staff0rd/assist/commit/009afbfa4c3035d01cffec4caea39806fe6da35c))
+
 # [0.589.0](https://github.com/staff0rd/assist/compare/v0.588.3...v0.589.0) (2026-08-25)
 
 
