@@ -27,11 +27,8 @@ function extractSpeaker(fullText: string): {
 	text: string;
 } {
 	const match = fullText.match(/^<v\s+([^>]+)>/);
-	if (!match) return { speaker: null, text: fullText };
-	return {
-		speaker: match[1],
-		text: fullText.replace(/<v\s+[^>]+>/, "").trim(),
-	};
+	const text = fullText.replace(/<v\s+[^>]+>|<\/v>/g, "").trim();
+	return { speaker: match ? match[1] : null, text };
 }
 
 function isTextLine(line: string): boolean {

@@ -55,6 +55,36 @@ Second line`;
 		});
 	});
 
+	describe("when cues close the speaker tag", () => {
+		it("should strip the closing tag from text", () => {
+			const vtt = `WEBVTT
+
+00:00:01.000 --> 00:00:03.000
+<v Alice>Hello there</v>`;
+
+			const result = parseVtt(vtt);
+
+			expect(result[0]).toEqual({
+				startMs: 1000,
+				endMs: 3000,
+				speaker: "Alice",
+				text: "Hello there",
+			});
+		});
+
+		it("should strip closing tags from every line of a multi-line cue", () => {
+			const vtt = `WEBVTT
+
+00:00:01.000 --> 00:00:03.000
+<v Alice>Hello there</v>
+<v Alice>and welcome</v>`;
+
+			const result = parseVtt(vtt);
+
+			expect(result[0].text).toBe("Hello there and welcome");
+		});
+	});
+
 	describe("when using HH:MM:SS.mmm format", () => {
 		it("should parse hours correctly", () => {
 			const vtt = `WEBVTT

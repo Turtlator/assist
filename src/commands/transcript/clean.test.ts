@@ -49,7 +49,43 @@ const TEAMS_VTT = `WEBVTT
 00:00:11.000 --> 00:00:13.000
 <v Alice>Great`;
 
+const TEAMS_VTT_WITH_CLOSING_TAGS = `WEBVTT
+
+7e5f8a1c-0001-0002/1-0
+00:00:01.000 --> 00:00:03.000
+<v Alice>So I think we should</v>
+
+7e5f8a1c-0001-0002/2-0
+00:00:02.500 --> 00:00:05.000
+<v Alice>So I think we should ship it today</v>
+
+7e5f8a1c-0001-0002/3-0
+00:00:06.000 --> 00:00:08.000
+<v Bob>Agreed</v>`;
+
 describe("clean", () => {
+	describe("when given a real Teams .vtt with cue ids and closing </v> tags", () => {
+		it("strips the closing tags so the rolling captions still collapse", () => {
+			mockExistsSync.mockReturnValue(true);
+			mockReadFileSync.mockReturnValue(TEAMS_VTT_WITH_CLOSING_TAGS);
+
+			clean("raw.vtt");
+
+			expect(logOutput.join("")).toBe(
+				"Alice: So I think we should ship it today\n\nBob: Agreed",
+			);
+		});
+
+		it("emits no markup in the vtt output", () => {
+			mockExistsSync.mockReturnValue(true);
+			mockReadFileSync.mockReturnValue(TEAMS_VTT_WITH_CLOSING_TAGS);
+
+			clean("raw.vtt", { format: "vtt" });
+
+			expect(logOutput.join("")).not.toContain("</v>");
+		});
+	});
+
 	describe("when given a Teams-style .vtt with rolling-caption duplicates", () => {
 		it("collapses the duplicated caption into one line per speaker turn", () => {
 			mockExistsSync.mockReturnValue(true);
