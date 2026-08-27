@@ -304,7 +304,7 @@ The Config tab of the sessions web dashboard never receives secret values: `GET 
 
 - `assist netcap [-p, --port <port>] [-o, --out <dir>] [-f, --filter <pattern>]` - Capture browser network traffic to `capture.jsonl` under `--out` (default `~/.assist/netcap`), paired with the [netcap browser extension](#netcap-browser-extension)
 - `assist netcap extract-linkedin-posts [file]` - Parse a netcap capture into structured LinkedIn posts, written to `posts.json` beside the capture
-- `assist criteria-extension` - Print the directory to load the [acceptance criteria outliner extension](#acceptance-criteria-outliner-extension) unpacked from (copies to `C:\tools\criteria-extension` under WSL)
+- `assist criteria-extension [--sign]` - Print the directory to load the [acceptance criteria outliner extension](#acceptance-criteria-outliner-extension) unpacked from (copies to `C:\tools\criteria-extension` under WSL); `--sign` signs it on AMO's unlisted channel and prints the `.xpi` for a permanent Firefox install
 - `assist screenshot <process>` - Capture a screenshot of a running application window (`screenshot.outputDir`, default `./screenshots`)
 - `assist handover save --summary <s>` - Save a session handover note (content from stdin), scoped by the repo's git origin
 - `assist handover list` - List unrecalled handovers for this repo, most recent first
@@ -434,8 +434,28 @@ Web server changes only need the `assist sessions` process restarted — session
 1. Run `assist criteria-extension` — it prints the extension directory. Under WSL it copies the extension to `C:\tools\criteria-extension` and prints that Windows path instead; re-run and reload the extension after a rebuild.
 2. Load the unpacked extension:
    - **Chrome**: open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select the extension directory.
-   - **Firefox**: open `about:debugging#/runtime/this-firefox` → **Load Temporary Add-on…** → pick `manifest.json` inside the printed extension directory.
+   - **Firefox**: open `about:debugging#/runtime/this-firefox` → **Load Temporary Add-on…** → pick `manifest.json` inside the printed extension directory. Firefox drops a temporary add-on on every restart; see [permanent Firefox install](#permanent-firefox-install) to avoid that.
 3. Open an issue, press **Edit** on the body, and press **Outline criteria**. The new-issue form works the same way.
+
+### Permanent Firefox install
+
+Firefox release and beta only install signed add-ons, so a permanent install means having Mozilla sign the package. `assist criteria-extension --sign` uses AMO's **unlisted** (self-distribution) channel: Mozilla signs the `.xpi` and hands it back, with no public store listing and no human review queue.
+
+1. Create an AMO API key at [addons.mozilla.org/developers/addon/api/key](https://addons.mozilla.org/en-US/developers/addon/api/key/) and export the two halves:
+
+   ```bash
+   export WEB_EXT_API_KEY=user:12345678:123
+   export WEB_EXT_API_SECRET=...
+   ```
+
+   They are read from the environment rather than `assist.yml` so the secret never lands in a file that could be committed.
+
+2. Run `npm run build` (to refresh `content.js`), then `assist criteria-extension --sign`. It stages a copy of the extension with assist's own version stamped into `manifest.json`, shells out to `npx web-ext sign`, and writes the signed add-on to `~/.assist/criteria-extension/`. Under WSL it copies the `.xpi` to `C:\tools\criteria-extension.xpi` and prints that Windows path.
+3. Open the printed `.xpi` in Firefox (drag it onto a window, or `about:addons` → gear → **Install Add-on From File…**). It survives restarts.
+
+AMO refuses a version it has already signed, which is why the staged manifest carries assist's version instead of the manifest's `1.0.0` placeholder — re-sign after a release, not twice at the same version. Unlisted add-ons get no updates from AMO, so a new build means installing the new `.xpi`; wiring up self-hosted `update_url` auto-updates is not done.
+
+Two alternatives need no signing: **Firefox Developer Edition** or **Nightly** honour `xpinstall.signatures.required = false` in `about:config` and will then install an unsigned local `.xpi` permanently, and Chrome's **Load unpacked** already survives restarts, so the unpacked directory is one-time setup there.
 
 ## netcap browser extension
 

@@ -3,6 +3,12 @@
 	"name": "assist criteria outliner",
 	"version": "1.0.0",
 	"description": "Adds an Outline criteria toggle to GitHub's issue editor, backed by assist's acceptance criteria outliner.",
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "criteria-outliner@staff0rd.github.io",
+			"strict_min_version": "109.0"
+		}
+	},
 	"content_scripts": [
 		{
 			"matches": ["https://github.com/*"],
