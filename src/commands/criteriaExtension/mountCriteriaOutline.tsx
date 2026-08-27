@@ -1,10 +1,9 @@
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
-import { createTheme, ThemeProvider } from "@mui/material";
 import { createRoot, type Root } from "react-dom/client";
 import { containKeyEvents } from "./containKeyEvents";
 import { CriteriaOutlineHost } from "./CriteriaOutlineHost";
-import { githubColorMode } from "./githubColorMode";
+import { CriteriaTheme } from "./CriteriaTheme";
 
 /**
  * Mount the outliner inside a shadow root so GitHub's stylesheet cannot reach
@@ -26,16 +25,12 @@ export function mountCriteriaOutline(
 	container.style.cssText = "width:100%;font:inherit;color:inherit";
 	shadow.append(styles, container);
 	const cache = createCache({ key: "assist-criteria", container: styles });
-	const theme = createTheme({
-		palette: { mode: githubColorMode(document.documentElement) },
-		typography: { fontFamily: "inherit" },
-	});
 	const root = createRoot(container);
 	root.render(
 		<CacheProvider value={cache}>
-			<ThemeProvider theme={theme}>
+			<CriteriaTheme>
 				<CriteriaOutlineHost initialBody={initialBody} onBody={onBody} />
-			</ThemeProvider>
+			</CriteriaTheme>
 		</CacheProvider>,
 	);
 	return root;
