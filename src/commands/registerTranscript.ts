@@ -1,6 +1,7 @@
 import type { Command } from "commander";
 import { configHelp } from "../shared/configHelp";
 import {
+	clean as transcriptClean,
 	configure as transcriptConfigure,
 	list as transcriptList,
 	move as transcriptMove,
@@ -23,6 +24,11 @@ export function registerTranscript(program: Command): void {
 		.command("list")
 		.description("List raw .vtt filenames waiting in the pick-up directory")
 		.action(transcriptList);
+
+	transcriptCommand
+		.command("clean <path>")
+		.description("Clean any .vtt file and write the chat log to stdout")
+		.action(transcriptClean);
 
 	transcriptCommand
 		.command("move <file>")

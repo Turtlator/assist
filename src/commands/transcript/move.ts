@@ -1,14 +1,7 @@
-import {
-	existsSync,
-	mkdirSync,
-	readFileSync,
-	renameSync,
-	writeFileSync,
-} from "node:fs";
+import { existsSync, mkdirSync, renameSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { getTranscriptConfig } from "../../shared/loadConfig";
-import { cuesToChatMessages, formatChatLog } from "./convert/formatChatLog";
-import { deduplicateCues, parseVtt } from "./convert/parseVtt";
+import { convertVttToMarkdown } from "./convertVttToMarkdown";
 
 type MoveOptions = {
 	date: string;
@@ -16,12 +9,6 @@ type MoveOptions = {
 };
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-
-function convertVttToMarkdown(inputPath: string): string {
-	const cues = parseVtt(readFileSync(inputPath, "utf8"));
-	const messages = cuesToChatMessages(deduplicateCues(cues));
-	return formatChatLog(messages);
-}
 
 function archiveRawVtt(
 	vttDir: string,
