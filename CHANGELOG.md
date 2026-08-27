@@ -1,3 +1,10 @@
+# [0.594.0](https://github.com/staff0rd/assist/compare/v0.593.0...v0.594.0) (2026-08-27)
+
+
+### Features
+
+* add assist rules list ([707d589](https://github.com/staff0rd/assist/commit/707d589eba8295e7f9b6e2806f5b19150b4aab63))
+
 # [0.593.0](https://github.com/staff0rd/assist/compare/v0.592.1...v0.593.0) (2026-08-27)
 
 
