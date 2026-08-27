@@ -1,3 +1,10 @@
+## [0.595.1](https://github.com/staff0rd/assist/compare/v0.595.0...v0.595.1) (2026-08-27)
+
+
+### Bug Fixes
+
+* strip closing v tags in vtt cues ([22cf351](https://github.com/staff0rd/assist/commit/22cf3518384e3baf14c3e8d36e0e9c484f59b158))
+
 # [0.595.0](https://github.com/staff0rd/assist/compare/v0.594.0...v0.595.0) (2026-08-27)
 
 
