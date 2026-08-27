@@ -1,3 +1,10 @@
+# [0.599.0](https://github.com/staff0rd/assist/compare/v0.598.0...v0.599.0) (2026-08-27)
+
+
+### Features
+
+* follow github theme changes live ([5a72d94](https://github.com/staff0rd/assist/commit/5a72d9441e2316a7fc62160d1b2d42d6a6958c16))
+
 # [0.598.0](https://github.com/staff0rd/assist/compare/v0.597.0...v0.598.0) (2026-08-27)
 
 
