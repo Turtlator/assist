@@ -1,3 +1,10 @@
+# [0.597.0](https://github.com/staff0rd/assist/compare/v0.596.0...v0.597.0) (2026-08-27)
+
+
+### Features
+
+* sign the criteria extension ([13f5f54](https://github.com/staff0rd/assist/commit/13f5f54eb14237d44ef4ac807b96f32848455975))
+
 # [0.596.0](https://github.com/staff0rd/assist/compare/v0.595.1...v0.596.0) (2026-08-27)
 
 
