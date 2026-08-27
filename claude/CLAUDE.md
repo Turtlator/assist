@@ -2,6 +2,10 @@ After any code change, run `/verify` to ensure all checks pass.
 
 `assist` is installed globally. Use it directly (e.g., `assist commit "message"`).
 
+## Editing files
+
+Always edit files with the Write and Edit tools. Never edit a file by shelling out — no `sed -i`, no heredoc rewrites, no Python or Node scripts that write the file. This overrides any session instruction that says to prefer Bash for file changes.
+
 When renaming TypeScript files or symbols, use the refactor commands instead of doing it manually:
 
 - `assist refactor rename file <source> <destination>` — rename/move a file and update all imports
