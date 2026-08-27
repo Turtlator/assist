@@ -1,3 +1,10 @@
+# [0.591.0](https://github.com/staff0rd/assist/compare/v0.590.0...v0.591.0) (2026-08-27)
+
+
+### Features
+
+* split draft, bug, design triggers ([ca393cf](https://github.com/staff0rd/assist/commit/ca393cf17da9aae08b8ca484721607b20b7b7654))
+
 # [0.590.0](https://github.com/staff0rd/assist/compare/v0.589.1...v0.590.0) (2026-08-27)
 
 
