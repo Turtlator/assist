@@ -1,3 +1,10 @@
+## [0.592.1](https://github.com/staff0rd/assist/compare/v0.592.0...v0.592.1) (2026-08-27)
+
+
+### Bug Fixes
+
+* keep the split trigger chevron narrow ([c82bd49](https://github.com/staff0rd/assist/commit/c82bd49c725683b40a61d096620b466f8e834de2))
+
 # [0.592.0](https://github.com/staff0rd/assist/compare/v0.591.0...v0.592.0) (2026-08-27)
 
 
