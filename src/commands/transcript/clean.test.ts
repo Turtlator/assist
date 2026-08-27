@@ -72,6 +72,61 @@ describe("clean", () => {
 		});
 	});
 
+	describe("when asked for vtt output", () => {
+		it("writes cleaned cues back as valid WebVTT with timings and voice tags", () => {
+			mockExistsSync.mockReturnValue(true);
+			mockReadFileSync.mockReturnValue(TEAMS_VTT);
+
+			clean("raw.vtt", { format: "vtt" });
+
+			expect(logOutput.join("")).toBe(
+				[
+					"WEBVTT",
+					"",
+					"00:00:02.500 --> 00:00:05.000",
+					"<v Alice>So I think we should ship it today",
+					"",
+					"00:00:08.200 --> 00:00:10.000",
+					"<v Bob>Agreed, let us do that",
+					"",
+					"00:00:11.000 --> 00:00:13.000",
+					"<v Alice>Great",
+				].join("\n"),
+			);
+		});
+
+		it("is stable when the cleaned output is cleaned again", () => {
+			mockExistsSync.mockReturnValue(true);
+			mockReadFileSync.mockReturnValue(TEAMS_VTT);
+
+			clean("raw.vtt", { format: "vtt" });
+			const firstPass = logOutput.join("");
+
+			logOutput = [];
+			mockReadFileSync.mockReturnValue(firstPass);
+			clean("clean.vtt", { format: "vtt" });
+
+			expect(logOutput.join("")).toBe(firstPass);
+		});
+	});
+
+	describe("when given an unknown format", () => {
+		it("exits 1 with a stderr message and no stdout", () => {
+			mockExistsSync.mockReturnValue(true);
+			mockReadFileSync.mockReturnValue(TEAMS_VTT);
+
+			expect(() => clean("raw.vtt", { format: "json" })).toThrow(
+				"process.exit(1)",
+			);
+
+			expect(exitCode).toBe(1);
+			expect(errorOutput).toContain(
+				"Error: --format must be one of: md, vtt (got: json)",
+			);
+			expect(logOutput).toEqual([]);
+		});
+	});
+
 	describe("when the file does not exist", () => {
 		it("exits 1 with a stderr message and no stdout", () => {
 			mockExistsSync.mockReturnValue(false);

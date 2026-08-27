@@ -1,17 +1,46 @@
 import { existsSync } from "node:fs";
-import { convertVttToMarkdown } from "./convertVttToMarkdown";
+import { cuesToChatMessages, formatChatLog } from "./convert/formatChatLog";
+import { formatVtt } from "./convert/formatVtt";
+import { readCleanedCues } from "./convert/readCleanedCues";
+import type { VttCue } from "./types";
 
-export function clean(file: string): void {
+const FORMATS = ["md", "vtt"] as const;
+
+type CleanFormat = (typeof FORMATS)[number];
+
+type CleanOptions = {
+	format?: string;
+};
+
+function isCleanFormat(value: string): value is CleanFormat {
+	return (FORMATS as readonly string[]).includes(value);
+}
+
+function serialise(cues: VttCue[], format: CleanFormat): string {
+	return format === "vtt"
+		? formatVtt(cues)
+		: formatChatLog(cuesToChatMessages(cues));
+}
+
+export function clean(file: string, options: CleanOptions = {}): void {
+	const format = options.format ?? "md";
+	if (!isCleanFormat(format)) {
+		console.error(
+			`Error: --format must be one of: ${FORMATS.join(", ")} (got: ${format})`,
+		);
+		process.exit(1);
+	}
+
 	if (!existsSync(file)) {
 		console.error(`Error: VTT file not found: ${file}`);
 		process.exit(1);
 	}
 
-	const markdown = convertVttToMarkdown(file);
-	if (!markdown) {
+	const cues = readCleanedCues(file);
+	if (cues.length === 0) {
 		console.error(`Error: no cues found in: ${file}`);
 		process.exit(1);
 	}
 
-	console.log(markdown);
+	console.log(serialise(cues, format));
 }

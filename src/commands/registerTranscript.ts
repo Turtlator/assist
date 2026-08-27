@@ -27,7 +27,8 @@ export function registerTranscript(program: Command): void {
 
 	transcriptCommand
 		.command("clean <path>")
-		.description("Clean any .vtt file and write the chat log to stdout")
+		.description("Clean any .vtt file and write the result to stdout")
+		.option("--format <md|vtt>", "output format", "md")
 		.action(transcriptClean);
 
 	transcriptCommand

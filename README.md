@@ -337,7 +337,7 @@ The Config tab of the sessions web dashboard never receives secret values: `GET 
 ### Transcripts and voice
 
 - `assist transcript configure` - Configure transcript directories
-- `assist transcript clean <path>` - Clean any .vtt file and write the chat log to stdout (e.g. `assist transcript clean ./raw.vtt > clean.md`)
+- `assist transcript clean <path>` - Clean any .vtt file and write the result to stdout (`--format <md|vtt>`, default `md`). Markdown chat log: `assist transcript clean ./raw.vtt > clean.md`; cleaned WebVTT with timings preserved: `assist transcript clean ./raw.vtt --format vtt > fixed.vtt`
 - `assist transcript list` - List raw .vtt filenames waiting in the pick-up directory
 - `assist transcript move <file>` - Convert a raw .vtt to a dated markdown transcript and archive the original
 - `assist voice setup` - Download required voice models (VAD, STT)
