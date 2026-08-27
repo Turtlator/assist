@@ -1,3 +1,10 @@
+# [0.598.0](https://github.com/staff0rd/assist/compare/v0.597.0...v0.598.0) (2026-08-27)
+
+
+### Features
+
+* sign the extension from CI ([94fbfea](https://github.com/staff0rd/assist/commit/94fbfea30abe135d626d535a04d708da8b15d167))
+
 # [0.597.0](https://github.com/staff0rd/assist/compare/v0.596.0...v0.597.0) (2026-08-27)
 
 
