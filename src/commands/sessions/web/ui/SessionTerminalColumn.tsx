@@ -30,6 +30,7 @@ export function SessionTerminalColumn({
 			<SessionPreviewSplit
 				session={activeSession}
 				sendPrDecision={sendPrDecision}
+				sendInput={terminal.sendInput}
 			>
 				<TerminalArea {...terminal} />
 			</SessionPreviewSplit>

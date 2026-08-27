@@ -8,7 +8,9 @@ export function PrPreviewFooter({
 	comments,
 	commentColors,
 	pending,
+	cwd,
 	onAdd,
+	onCite,
 	onRemove,
 	onCancel,
 	onCollapse,
@@ -43,7 +45,9 @@ export function PrPreviewFooter({
 			<SelectionCommentPopover
 				pending={pending}
 				editable={editable}
+				cwd={cwd}
 				onAdd={onAdd}
+				onCite={onCite}
 				onCancel={onCancel}
 				onCollapse={onCollapse}
 			/>

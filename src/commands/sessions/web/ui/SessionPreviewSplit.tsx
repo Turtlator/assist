@@ -13,10 +13,12 @@ export type SendPrDecision = (
 export function SessionPreviewSplit({
 	session,
 	sendPrDecision,
+	sendInput,
 	children,
 }: {
 	session: SessionInfo | undefined;
 	sendPrDecision: SendPrDecision;
+	sendInput: (sessionId: string, data: string) => void;
 	children: ReactNode;
 }) {
 	return (
@@ -24,6 +26,7 @@ export function SessionPreviewSplit({
 			preview={session?.pendingPrPreview ?? null}
 			sessionId={session?.id}
 			cwd={session?.cwd}
+			sendInput={sendInput}
 			onDecision={(requestId, decision, details) => {
 				if (session) sendPrDecision(session.id, requestId, decision, details);
 			}}

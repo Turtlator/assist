@@ -1,6 +1,8 @@
-import { Box, Popover, Typography } from "@mui/material";
-import { CommentNoteForm } from "./CommentNoteForm";
-import { QuoteBlock } from "./QuoteBlock";
+import { Box, Popover } from "@mui/material";
+import {
+	SelectionCommentBody,
+	type SelectionCommentBodyProps,
+} from "./SelectionCommentBody";
 
 export type SelectionAnchor = {
 	quote: string;
@@ -18,25 +20,12 @@ const boxSx = {
 
 export function SelectionCommentPopover({
 	pending,
-	moved,
-	editable,
-	onAdd,
-	onCancel,
-	onCollapse,
-}: {
-	pending: SelectionAnchor | null;
-	moved?: boolean;
-	editable?: boolean;
-	onAdd: (note: string) => void;
-	onCancel: () => void;
-	onCollapse?: () => void;
-}) {
-	const draftKey = pending?.quote ?? "";
-
+	...body
+}: SelectionCommentBodyProps & { pending: SelectionAnchor | null }) {
 	return (
 		<Popover
 			open={pending !== null}
-			onClose={onCancel}
+			onClose={body.onCancel}
 			anchorReference="anchorPosition"
 			anchorPosition={
 				pending ? { top: pending.top, left: pending.left } : undefined
@@ -44,18 +33,10 @@ export function SelectionCommentPopover({
 			transformOrigin={{ vertical: "top", horizontal: "left" }}
 		>
 			<Box sx={boxSx}>
-				{moved && (
-					<Typography variant="caption" color="warning.main">
-						These lines changed since you selected them — your comment still
-						quotes the text below.
-					</Typography>
-				)}
-				<QuoteBlock text={draftKey} />
-				<CommentNoteForm
-					key={draftKey}
-					onAdd={onAdd}
-					onCancel={onCancel}
-					onCollapse={editable ? onCollapse : undefined}
+				<SelectionCommentBody
+					{...body}
+					quote={pending?.quote ?? ""}
+					open={pending !== null}
 				/>
 			</Box>
 		</Popover>

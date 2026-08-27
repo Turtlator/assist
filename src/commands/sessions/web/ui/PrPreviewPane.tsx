@@ -1,9 +1,10 @@
 import { Box, Divider } from "@mui/material";
-import type { PrPreview } from "../../shared/SessionInfoBase";
-import type { PrDecisionDetails } from "./PrDecisionDetails";
 import { PrPreviewContent } from "./PrPreviewContent";
 import { PrPreviewFooter } from "./PrPreviewFooter";
 import { PrPreviewHeader } from "./PrPreviewHeader";
+import type { PrPreviewPaneProps } from "./PrPreviewPaneProps";
+import { previewFooterProps } from "./previewFooterProps";
+import { previewRuleCiter } from "./previewRuleCiter";
 import { prPreviewPaneSx } from "./prPreviewPaneSx";
 import { usePrPane } from "./usePrPane";
 
@@ -11,19 +12,11 @@ export function PrPreviewPane({
 	preview,
 	sessionId,
 	cwd,
+	sendInput,
 	onDecision,
-}: {
-	preview: PrPreview;
-	sessionId?: string;
-	cwd?: string;
-	onDecision: (
-		decision: "approve" | "reject",
-		details: PrDecisionDetails,
-	) => void;
-}) {
+}: PrPreviewPaneProps) {
 	const isPr = (preview.kind ?? "pr") === "pr";
 	const editable = preview.kind === "github-issue-edit";
-	const newPr = isPr && preview.prNumber === null;
 	const pane = usePrPane({
 		requestId: preview.requestId,
 		sessionId,
@@ -41,18 +34,19 @@ export function PrPreviewPane({
 			<Divider />
 			<PrPreviewContent pane={pane} screenshots={isPr} />
 			<PrPreviewFooter
-				comments={pane.comments}
-				commentColors={pane.commentColors}
-				pending={pane.pending}
-				onRemove={pane.remove}
-				onDecision={pane.onDecide}
-				onAdd={pane.onAdd}
-				onCancel={pane.onCancel}
-				onCollapse={pane.onCollapse}
-				chain={isPr ? pane.chain : undefined}
-				editable={editable}
-				newPr={newPr}
-				onChainChange={pane.setChain}
+				{...previewFooterProps({
+					preview,
+					pane,
+					cwd,
+					isPr,
+					editable,
+					onCite: previewRuleCiter(
+						sessionId,
+						sendInput,
+						pane.pending?.quote,
+						pane.onCancel,
+					),
+				})}
 			/>
 		</Box>
 	);

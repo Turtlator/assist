@@ -18,6 +18,7 @@ import { harnessCapabilities } from "./harnessCapabilities";
 import { jiraSite } from "./jiraSite";
 import { listFiles } from "./listFiles";
 import { listNewsItems } from "./listNewsItems";
+import { listScopedRules } from "./listScopedRules";
 import { listUsageHistory } from "./listUsageHistory";
 import { openInCode } from "./openInCode";
 import { prList } from "./prList";
@@ -74,6 +75,7 @@ const routes: Record<string, Handler> = {
 	"GET /api/file": fileContent,
 	"POST /api/file": writeFileContent,
 	"GET /api/files": listFiles,
+	"GET /api/rules": listScopedRules,
 	"GET /api/jira-site": jiraSite,
 	"GET /api/harness": harnessCapabilities,
 	"GET /api/session-layout": sessionLayout,

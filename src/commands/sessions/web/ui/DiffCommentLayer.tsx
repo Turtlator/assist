@@ -5,6 +5,7 @@ import { buildChangeIndex } from "./buildChangeIndex";
 import { commentColor } from "./commentColor";
 import { DragOverlay } from "./DragOverlay";
 import type { DiffComment } from "./formatDiffComment";
+import { ruleCitationNote } from "./ruleCitationNote";
 import { SelectionCommentPopover } from "./SelectionCommentPopover";
 import { useDiffSelection } from "./useDiffSelection";
 
@@ -16,11 +17,13 @@ const wrapperSx = {
 
 export function DiffCommentLayer({
 	path,
+	cwd,
 	hunks,
 	onComment,
 	children,
 }: {
 	path: string;
+	cwd?: string | undefined;
 	hunks: HunkData[];
 	onComment?: (comment: DiffComment) => void;
 	children: ReactNode;
@@ -50,7 +53,10 @@ export function DiffCommentLayer({
 			<SelectionCommentPopover
 				pending={pending}
 				moved={pending?.moved}
+				cwd={cwd}
+				path={path}
 				onAdd={add}
+				onCite={(rule) => add(ruleCitationNote(rule))}
 				onCancel={clear}
 			/>
 		</Box>

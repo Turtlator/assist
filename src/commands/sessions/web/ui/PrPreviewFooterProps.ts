@@ -1,3 +1,4 @@
+import type { ScopedRule } from "../../../rules/types";
 import type { PrPreviewComment } from "../../shared/SessionInfoBase";
 import type { PendingComment } from "./PendingComment";
 import type { PrPreviewChain } from "./PrPreviewChain";
@@ -7,7 +8,9 @@ export type PrPreviewFooterProps = {
 	comments: LocalComment[];
 	commentColors: string[];
 	pending: PendingComment | null;
+	cwd?: string | undefined;
 	onAdd: (note: string) => void;
+	onCite?: ((rule: ScopedRule) => void) | undefined;
 	onRemove: (id: number) => void;
 	onCancel: () => void;
 	onCollapse: () => void;

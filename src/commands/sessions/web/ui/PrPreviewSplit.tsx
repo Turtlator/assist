@@ -16,12 +16,14 @@ export function PrPreviewSplit({
 	preview,
 	sessionId,
 	cwd,
+	sendInput,
 	onDecision,
 	children,
 }: {
 	preview: PrPreview | null;
 	sessionId?: string;
 	cwd?: string;
+	sendInput?: ((sessionId: string, data: string) => void) | undefined;
 	onDecision: OnDecision;
 	children: ReactNode;
 }) {
@@ -51,6 +53,7 @@ export function PrPreviewSplit({
 				rendered={rendered}
 				sessionId={sessionId}
 				cwd={cwd}
+				sendInput={sendInput}
 				open={open}
 				onExited={onExited}
 				onDecision={onDecision}

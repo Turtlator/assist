@@ -53,7 +53,12 @@ export function FileDiff({
 				/>
 			)}
 			{!collapsed && (
-				<DiffCommentLayer path={path} hunks={file.hunks} onComment={onComment}>
+				<DiffCommentLayer
+					path={path}
+					cwd={cwd}
+					hunks={file.hunks}
+					onComment={onComment}
+				>
 					<FileDiffBody file={file} path={path} viewType={viewType} />
 				</DiffCommentLayer>
 			)}
