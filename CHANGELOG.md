@@ -1,3 +1,10 @@
+# [0.593.0](https://github.com/staff0rd/assist/compare/v0.592.1...v0.593.0) (2026-08-27)
+
+
+### Features
+
+* add transcript clean command ([45326bb](https://github.com/staff0rd/assist/commit/45326bbfcce52489891781e1dc521f32de57f04c))
+
 ## [0.592.1](https://github.com/staff0rd/assist/compare/v0.592.0...v0.592.1) (2026-08-27)
 
 
