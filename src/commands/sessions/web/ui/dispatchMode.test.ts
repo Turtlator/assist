@@ -38,6 +38,14 @@ describe("dispatchMode", () => {
 		expect(onCreateAssist).toHaveBeenCalledWith(["draft", "--once"], "/repo");
 	});
 
+	it("builds args with no trailing prompt for an empty text", () => {
+		const onCreateAssist = vi.fn();
+
+		dispatchMode("assist-draft", "/repo", onCreateAssist, () => {}, "");
+
+		expect(onCreateAssist).toHaveBeenCalledWith(["draft", "--once"], "/repo");
+	});
+
 	it("omits empty or whitespace-only text from the args", () => {
 		const onCreateAssist = vi.fn();
 

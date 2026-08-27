@@ -5,7 +5,7 @@ import { FreePromptDropdown } from "./FreePromptDropdown";
 
 afterEach(cleanup);
 
-function openDropdown(onSubmit: (prompt: string) => void, allowEmpty = true) {
+function renderDropdown(onSubmit: (prompt: string) => void, allowEmpty = true) {
 	render(
 		<FreePromptDropdown
 			disabled={false}
@@ -13,11 +13,42 @@ function openDropdown(onSubmit: (prompt: string) => void, allowEmpty = true) {
 			allowEmpty={allowEmpty}
 		/>,
 	);
-	fireEvent.click(screen.getByRole("button", { name: "prompt" }));
+}
+
+function openDropdown(onSubmit: (prompt: string) => void, allowEmpty = true) {
+	renderDropdown(onSubmit, allowEmpty);
+	fireEvent.click(
+		screen.getByRole("button", {
+			name: allowEmpty ? "prompt options" : "prompt",
+		}),
+	);
 	return screen.getByRole("textbox");
 }
 
 describe("FreePromptDropdown", () => {
+	it("submits an empty prompt without opening the dropdown when the label is clicked", () => {
+		const onSubmit = vi.fn();
+		renderDropdown(onSubmit);
+
+		fireEvent.click(screen.getByRole("button", { name: "prompt" }));
+
+		expect(onSubmit).toHaveBeenCalledWith("");
+		expect(screen.queryByRole("textbox")).not.toBeTruthy();
+	});
+
+	it("keeps the single trigger when empty is not allowed", () => {
+		const onSubmit = vi.fn();
+		renderDropdown(onSubmit, false);
+
+		expect(
+			screen.queryByRole("button", { name: "prompt options" }),
+		).not.toBeTruthy();
+		fireEvent.click(screen.getByRole("button", { name: "prompt" }));
+
+		expect(onSubmit).not.toHaveBeenCalled();
+		expect(screen.getByRole("textbox")).toBeTruthy();
+	});
+
 	it("submits an empty prompt on Enter when empty is allowed", () => {
 		const onSubmit = vi.fn();
 		const input = openDropdown(onSubmit);

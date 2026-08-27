@@ -16,7 +16,11 @@ export function FreePromptDropdown({
 	const [prompt, setPrompt] = useState("");
 
 	return (
-		<DropdownWrapper label={label} disabled={disabled}>
+		<DropdownWrapper
+			label={label}
+			disabled={disabled}
+			onDefaultAction={allowEmpty ? () => onSubmit("") : undefined}
+		>
 			{(close) => (
 				<FreePromptForm
 					value={prompt}
