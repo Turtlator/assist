@@ -21,8 +21,17 @@ export function PromptLaunchButton({
 	const [prompt, setPrompt] = useState("");
 	const [harness, setHarness] = useState<HarnessKind>("claude");
 
+	const launch = (text: string) => {
+		if (harness === "claude") onCreate(text, cwd);
+		else onCreateHarness(harness, text, cwd);
+	};
+
 	return (
-		<DropdownWrapper label="prompt" disabled={disabled}>
+		<DropdownWrapper
+			label="prompt"
+			disabled={disabled}
+			onDefaultAction={() => launch("")}
+		>
 			{(close) => (
 				<FreePromptForm
 					value={prompt}
@@ -37,10 +46,8 @@ export function PromptLaunchButton({
 						) : undefined
 					}
 					onSubmit={() => {
-						if (harness === "claude") onCreate(prompt, cwd);
-						else onCreateHarness(harness, prompt, cwd);
+						launch(prompt);
 						setPrompt("");
-						setHarness("claude");
 						close();
 					}}
 				/>

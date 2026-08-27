@@ -18,10 +18,12 @@ export function DropdownWrapper({
 	label,
 	children,
 	disabled = false,
+	onDefaultAction,
 }: {
 	label: ReactNode;
 	children: (close: () => void) => ReactNode;
 	disabled?: boolean;
+	onDefaultAction?: () => void;
 }) {
 	const [open, setOpen] = useState(false);
 	const wrapperRef = useRef<HTMLFieldSetElement>(null);
@@ -42,6 +44,7 @@ export function DropdownWrapper({
 				open={open}
 				disabled={disabled}
 				onClick={() => setOpen(!open)}
+				onDefaultAction={onDefaultAction}
 			/>
 			{open && children(() => setOpen(false))}
 		</Paper>

@@ -34,7 +34,11 @@ function renderButton(handlers: {
 }
 
 function openComposer() {
-	fireEvent.click(screen.getByRole("button", { name: /prompt/i }));
+	fireEvent.click(screen.getByRole("button", { name: "prompt options" }));
+}
+
+function clickLabel() {
+	fireEvent.click(screen.getByRole("button", { name: "prompt" }));
 }
 
 function typeAndSubmit(prompt: string) {
@@ -90,5 +94,56 @@ describe("PromptLaunchButton", () => {
 
 		expect(onCreate).toHaveBeenCalledWith("go", "/git/repo");
 		expect(onCreateHarness).not.toHaveBeenCalled();
+	});
+
+	it("launches with an empty prompt when the label half is clicked", () => {
+		mockHarness({ exposeCodexActions: false, exposePiActions: false });
+		const onCreate = vi.fn();
+		const onCreateHarness = vi.fn();
+		renderButton({ onCreate, onCreateHarness });
+
+		clickLabel();
+
+		expect(onCreate).toHaveBeenCalledWith("", "/git/repo");
+		expect(onCreateHarness).not.toHaveBeenCalled();
+		expect(screen.queryByRole("textbox")).toBeNull();
+	});
+
+	it("opens the prompt form when the chevron half is clicked", () => {
+		mockHarness({ exposeCodexActions: false, exposePiActions: false });
+		const onCreate = vi.fn();
+		const onCreateHarness = vi.fn();
+		renderButton({ onCreate, onCreateHarness });
+
+		openComposer();
+
+		expect(screen.getByRole("textbox")).toBeTruthy();
+		expect(onCreate).not.toHaveBeenCalled();
+	});
+
+	it("keeps the harness picked in the dropdown for the label half", async () => {
+		mockHarness({ exposeCodexActions: true, exposePiActions: false });
+		const onCreate = vi.fn();
+		const onCreateHarness = vi.fn();
+		renderButton({ onCreate, onCreateHarness });
+
+		openComposer();
+		fireEvent.click(await screen.findByRole("radio", { name: "Codex" }));
+		typeAndSubmit("go");
+		clickLabel();
+
+		expect(onCreateHarness).toHaveBeenNthCalledWith(
+			1,
+			"codex",
+			"go",
+			"/git/repo",
+		);
+		expect(onCreateHarness).toHaveBeenNthCalledWith(
+			2,
+			"codex",
+			"",
+			"/git/repo",
+		);
+		expect(onCreate).not.toHaveBeenCalled();
 	});
 });
