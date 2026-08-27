@@ -4,6 +4,7 @@ import { PrPreviewFooter } from "./PrPreviewFooter";
 import { PrPreviewHeader } from "./PrPreviewHeader";
 import type { PrPreviewPaneProps } from "./PrPreviewPaneProps";
 import { previewFooterProps } from "./previewFooterProps";
+import { previewRuleAdder } from "./previewRuleAdder";
 import { previewRuleCiter } from "./previewRuleCiter";
 import { prPreviewPaneSx } from "./prPreviewPaneSx";
 import { usePrPane } from "./usePrPane";
@@ -41,6 +42,12 @@ export function PrPreviewPane({
 					isPr,
 					editable,
 					onCite: previewRuleCiter(
+						sessionId,
+						sendInput,
+						pane.pending?.quote,
+						pane.onCancel,
+					),
+					onAddRule: previewRuleAdder(
 						sessionId,
 						sendInput,
 						pane.pending?.quote,

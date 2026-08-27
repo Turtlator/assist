@@ -1,11 +1,11 @@
 import Box from "@mui/material/Box";
 import { useState } from "react";
-import type { FileData, ViewType } from "react-diff-view";
+import type { FileData } from "react-diff-view";
 import { DiffCommentLayer } from "./DiffCommentLayer";
 import { diffFileDomId } from "./diffFileDomId";
 import { FileDiffBody } from "./FileDiffBody";
 import { FileDiffHeader } from "./FileDiffHeader";
-import type { DiffComment } from "./formatDiffComment";
+import type { FileDiffProps } from "./FileDiffProps";
 import { isMarkdownPath } from "./isMarkdownPath";
 import { MarkdownPreviewDialog } from "./MarkdownPreviewDialog";
 
@@ -22,14 +22,8 @@ export function FileDiff({
 	collapsed,
 	onToggle,
 	onComment,
-}: {
-	file: FileData;
-	viewType: ViewType;
-	cwd: string | undefined;
-	collapsed: boolean;
-	onToggle: () => void;
-	onComment?: (comment: DiffComment) => void;
-}) {
+	onAddRule,
+}: FileDiffProps) {
 	const [previewOpen, setPreviewOpen] = useState(false);
 	const path = filePath(file);
 
@@ -58,6 +52,7 @@ export function FileDiff({
 					cwd={cwd}
 					hunks={file.hunks}
 					onComment={onComment}
+					onAddRule={onAddRule}
 				>
 					<FileDiffBody file={file} path={path} viewType={viewType} />
 				</DiffCommentLayer>

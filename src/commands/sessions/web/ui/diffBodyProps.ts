@@ -15,6 +15,7 @@ export function diffBodyProps(
 		isCollapsed: diff.collapsedFiles.isCollapsed,
 		onToggleCollapsed: diff.collapsedFiles.toggle,
 		onComment: diff.comments.onComment,
+		onAddRule: diff.comments.onAddRule,
 		onRevert: diff.revert.onRevert,
 		onRevertPaths: diff.revert.onRevertPaths,
 		emptyMessage: diff.emptyMessage,

@@ -10,6 +10,7 @@ export function previewFooterProps({
 	isPr,
 	editable,
 	onCite,
+	onAddRule,
 }: {
 	preview: PrPreview;
 	pane: ReturnType<typeof usePrPane>;
@@ -17,6 +18,7 @@ export function previewFooterProps({
 	isPr: boolean;
 	editable: boolean;
 	onCite: ((rule: ScopedRule) => void) | undefined;
+	onAddRule: ((note: string) => void) | undefined;
 }): PrPreviewFooterProps {
 	return {
 		comments: pane.comments,
@@ -25,6 +27,7 @@ export function previewFooterProps({
 		cwd,
 		onAdd: pane.onAdd,
 		onCite,
+		onAddRule,
 		onRemove: pane.remove,
 		onCancel: pane.onCancel,
 		onCollapse: pane.onCollapse,

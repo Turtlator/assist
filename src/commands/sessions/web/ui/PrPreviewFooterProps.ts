@@ -11,6 +11,7 @@ export type PrPreviewFooterProps = {
 	cwd?: string | undefined;
 	onAdd: (note: string) => void;
 	onCite?: ((rule: ScopedRule) => void) | undefined;
+	onAddRule?: ((note: string) => void) | undefined;
 	onRemove: (id: number) => void;
 	onCancel: () => void;
 	onCollapse: () => void;

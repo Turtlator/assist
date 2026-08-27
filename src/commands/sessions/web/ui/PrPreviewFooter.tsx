@@ -11,6 +11,7 @@ export function PrPreviewFooter({
 	cwd,
 	onAdd,
 	onCite,
+	onAddRule,
 	onRemove,
 	onCancel,
 	onCollapse,
@@ -48,6 +49,7 @@ export function PrPreviewFooter({
 				cwd={cwd}
 				onAdd={onAdd}
 				onCite={onCite}
+				onAddRule={onAddRule}
 				onCancel={onCancel}
 				onCollapse={onCollapse}
 			/>

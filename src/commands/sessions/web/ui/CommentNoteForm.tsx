@@ -1,18 +1,21 @@
-import { Button, Stack, TextField } from "@mui/material";
+import { TextField } from "@mui/material";
 import { useState } from "react";
+import { CommentNoteActions } from "./CommentNoteActions";
 
 export function CommentNoteForm({
 	onAdd,
+	onAddRule,
 	onCancel,
 	onCollapse,
 }: {
 	onAdd: (note: string) => void;
+	onAddRule?: ((note: string) => void) | undefined;
 	onCancel: () => void;
 	onCollapse?: (() => void) | undefined;
 }) {
 	const [note, setNote] = useState("");
+	const trimmed = note.trim();
 	const submit = () => {
-		const trimmed = note.trim();
 		if (trimmed) onAdd(trimmed);
 	};
 
@@ -33,24 +36,13 @@ export function CommentNoteForm({
 					}
 				}}
 			/>
-			<Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end" }}>
-				<Button size="small" onClick={onCancel}>
-					Cancel
-				</Button>
-				{onCollapse && (
-					<Button size="small" variant="outlined" onClick={onCollapse}>
-						Collapse
-					</Button>
-				)}
-				<Button
-					size="small"
-					variant="contained"
-					disabled={note.trim().length === 0}
-					onClick={submit}
-				>
-					Add comment
-				</Button>
-			</Stack>
+			<CommentNoteActions
+				disabled={trimmed.length === 0}
+				onAdd={submit}
+				onAddRule={onAddRule ? () => onAddRule(trimmed) : undefined}
+				onCancel={onCancel}
+				onCollapse={onCollapse}
+			/>
 		</>
 	);
 }

@@ -1,6 +1,4 @@
-const RULES_HEADING = /^##\s+rules\s*$/i;
-const SECTION_END = /^#{1,2}\s/;
-const RULE_BULLET = /^\s*[-*]\s+\*\*\s*([^*]+?)\s*\*\*\s*(?:[—–:-]\s*)?(.*)$/;
+import { RULE_BULLET, rulesSectionRange } from "./rulesSectionRange";
 
 type ParsedRule = {
 	code: string;
@@ -9,12 +7,11 @@ type ParsedRule = {
 
 export function parseRulesSection(content: string): ParsedRule[] {
 	const lines = content.split(/\r?\n/);
-	const start = lines.findIndex((line) => RULES_HEADING.test(line));
-	if (start === -1) return [];
+	const range = rulesSectionRange(lines);
+	if (!range) return [];
 
 	const rules: ParsedRule[] = [];
-	for (const line of lines.slice(start + 1)) {
-		if (SECTION_END.test(line)) break;
+	for (const line of lines.slice(range.start + 1, range.end)) {
 		const match = RULE_BULLET.exec(line);
 		if (!match) continue;
 		const code = match[1].trim();

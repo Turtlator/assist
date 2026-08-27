@@ -3,7 +3,9 @@ import { type ReactNode, useMemo } from "react";
 import type { HunkData } from "react-diff-view";
 import { buildChangeIndex } from "./buildChangeIndex";
 import { commentColor } from "./commentColor";
+import { diffSelectionActions } from "./diffSelectionActions";
 import { DragOverlay } from "./DragOverlay";
+import type { AddRuleRequest } from "./formatAddRuleCommand";
 import type { DiffComment } from "./formatDiffComment";
 import { ruleCitationNote } from "./ruleCitationNote";
 import { SelectionCommentPopover } from "./SelectionCommentPopover";
@@ -20,12 +22,14 @@ export function DiffCommentLayer({
 	cwd,
 	hunks,
 	onComment,
+	onAddRule,
 	children,
 }: {
 	path: string;
 	cwd?: string | undefined;
 	hunks: HunkData[];
 	onComment?: (comment: DiffComment) => void;
+	onAddRule?: (request: AddRuleRequest) => void;
 	children: ReactNode;
 }) {
 	const index = useMemo(() => buildChangeIndex(hunks), [hunks]);
@@ -34,17 +38,13 @@ export function DiffCommentLayer({
 
 	if (!onComment) return <>{children}</>;
 
-	const add = (note: string) => {
-		if (pending)
-			onComment({
-				path,
-				startLine: pending.startLine,
-				endLine: pending.endLine,
-				quote: pending.quote,
-				note,
-			});
-		clear();
-	};
+	const { add, addRule } = diffSelectionActions({
+		path,
+		pending,
+		clear,
+		onComment,
+		onAddRule,
+	});
 
 	return (
 		<Box ref={wrapperRef} onMouseDown={onMouseDown} sx={wrapperSx}>
@@ -57,6 +57,7 @@ export function DiffCommentLayer({
 				path={path}
 				onAdd={add}
 				onCite={(rule) => add(ruleCitationNote(rule))}
+				onAddRule={addRule}
 				onCancel={clear}
 			/>
 		</Box>

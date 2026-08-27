@@ -3,6 +3,7 @@ import Typography from "@mui/material/Typography";
 import type { FileData, ViewType } from "react-diff-view";
 import { diffSx } from "./diffSx";
 import { FileDiff, filePath } from "./FileDiff";
+import type { AddRuleRequest } from "./formatAddRuleCommand";
 import type { DiffComment } from "./formatDiffComment";
 
 export type DiffFileListProps = {
@@ -12,6 +13,7 @@ export type DiffFileListProps = {
 	isCollapsed: (path: string) => boolean;
 	onToggleCollapsed: (path: string) => void;
 	onComment?: (comment: DiffComment) => void;
+	onAddRule?: (request: AddRuleRequest) => void;
 	emptyMessage: string;
 };
 
@@ -22,6 +24,7 @@ export function DiffFileList({
 	isCollapsed,
 	onToggleCollapsed,
 	onComment,
+	onAddRule,
 	emptyMessage,
 }: DiffFileListProps) {
 	if (files.length === 0)
@@ -42,6 +45,7 @@ export function DiffFileList({
 					collapsed={isCollapsed(filePath(file))}
 					onToggle={() => onToggleCollapsed(filePath(file))}
 					onComment={onComment}
+					onAddRule={onAddRule}
 				/>
 			))}
 		</Box>

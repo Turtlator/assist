@@ -41,6 +41,7 @@ After installation, the `assist` command will be available globally. You can als
 ## Claude Commands
 
 - `/add-command` - Add a new run command to assist.yml
+- `/add-rule` - Capture a new `CLAUDE.md` rule from a review comment: words the rule from the note, infers the scope from the commented file (asking only when genuinely ambiguous, defaulting to the nearest `CLAUDE.md`), and writes it with `assist rules add`. Sent by the comment pane's **Add rule** button
 - `/branch <description> [--jira KEY]` - Create a branch off the fresh remote default, deriving a kebab-case slug from the description
 - `/bug` - File a bug with reproduction steps, expected and actual behavior
 - `/comment` - Add pending review comments to the current PR
@@ -235,6 +236,7 @@ The Config tab of the sessions web dashboard never receives secret values: `GET 
 ### Rules
 
 - `assist rules list [path]` - List the rules in scope for a path (default: cwd), read from the `## Rules` section of every `CLAUDE.md` from that path's directory up to the repo root, nearest scope first, grouped by the file each rule came from. Rules are `- **<code>** — <text>` bullets
+- `assist rules add <text> [--scope <path>]` - Add a rule to the `## Rules` section of the scope's `CLAUDE.md`, creating the section when absent and allocating the next repo-wide code. `--scope` takes a file or directory (resolved to the nearest existing `CLAUDE.md` at or above it, defaulting to cwd) or a `CLAUDE.md` path written to directly and created if absent. After writing, the root `CLAUDE.md` records the directories that carry their own `## Rules` so scoped rules stay discoverable from the root
 
 ### Devlog
 
