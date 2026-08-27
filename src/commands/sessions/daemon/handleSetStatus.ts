@@ -14,10 +14,11 @@ export function handleSetStatus(
 		`set-status received: id=${d.sessionId} status=${d.status}${d.source ? ` source=${d.source}` : ""}`,
 	);
 	if (m.windowsProxy.route(client, d)) return;
-	m.setStatus(
-		d.sessionId as string,
-		d.status as SessionStatus,
-		d.source as string | undefined,
-	);
+	m.setStatus({
+		id: d.sessionId as string,
+		status: d.status as SessionStatus,
+		source: d.source as string | undefined,
+		claudeSessionId: d.claudeSessionId as string | undefined,
+	});
 	if (d.ack) sendTo(client, { type: "ack", sessionId: d.sessionId });
 }

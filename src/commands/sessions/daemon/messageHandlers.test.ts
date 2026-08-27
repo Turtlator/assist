@@ -37,7 +37,12 @@ describe("set-status handler", () => {
 		expect(daemonLogMock).toHaveBeenCalledWith(
 			"set-status received: id=42 status=waiting",
 		);
-		expect(m.setStatus).toHaveBeenCalledWith("42", "waiting", undefined);
+		expect(m.setStatus).toHaveBeenCalledWith({
+			id: "42",
+			status: "waiting",
+			source: undefined,
+			claudeSessionId: undefined,
+		});
 	});
 
 	it("still logs receipt when the request is routed to the windows daemon", () => {
@@ -63,7 +68,30 @@ describe("set-status handler", () => {
 			source: "permission",
 		});
 
-		expect(m.setStatus).toHaveBeenCalledWith("42", "waiting", "permission");
+		expect(m.setStatus).toHaveBeenCalledWith({
+			id: "42",
+			status: "waiting",
+			source: "permission",
+			claudeSessionId: undefined,
+		});
+	});
+
+	it("passes the conversation the hook fired for through to the manager", () => {
+		const m = fakeManager();
+
+		messageHandlers["set-status"](fakeClient() as never, m, {
+			sessionId: "42",
+			status: "running",
+			source: "prompt",
+			claudeSessionId: "after-clear",
+		});
+
+		expect(m.setStatus).toHaveBeenCalledWith({
+			id: "42",
+			status: "running",
+			source: "prompt",
+			claudeSessionId: "after-clear",
+		});
 	});
 
 	it("acknowledges an ack'd delivery back to the client", () => {

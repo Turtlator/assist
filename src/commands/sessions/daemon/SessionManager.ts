@@ -10,7 +10,6 @@ import {
 	type RunSpawnRequest,
 	type Session,
 	type SessionInfo,
-	type SessionStatus,
 } from "./createSession";
 import { dismissSessionGated } from "./dismissSessionGated";
 import { drainSessions } from "./drainSessions";
@@ -18,9 +17,9 @@ import { flushPhaseActiveMs } from "./flushPhaseActiveMs";
 import { greetClient } from "./greetClient";
 import { PrPreviewCoordinator } from "./PrPreviewCoordinator";
 import { makeSessionSpawner } from "./makeSessionSpawner";
-import { applySetStatus } from "./applySetStatus";
 import { applyUsageRecord } from "./applyUsageRecord";
 import { makeStatusChangeHandler } from "./makeStatusChangeHandler";
+import { type HookStatusReport, setStatusFromHook } from "./setStatusFromHook";
 import {
 	restartManagedSession,
 	type RestartResult,
@@ -216,8 +215,8 @@ export class SessionManager {
 		if (sessionIo.setStarred(this.sessions, id, starred)) this.notify();
 	}
 
-	setStatus(id: string, status: SessionStatus, source?: string): void {
-		applySetStatus(this.sessions, id, status, source, this.onStatusChange);
+	setStatus(report: HookStatusReport): void {
+		setStatusFromHook(this.sessions, report, this.notify, this.onStatusChange);
 	}
 
 	/* why: the status line relays token totals keyed by Claude's session id; join

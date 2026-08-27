@@ -148,7 +148,12 @@ describe("dispatchMessage", () => {
 				status: "waiting",
 			});
 
-			expect(setStatus).toHaveBeenCalledWith("s1", "waiting", undefined);
+			expect(setStatus).toHaveBeenCalledWith({
+				id: "s1",
+				status: "waiting",
+				source: undefined,
+				claudeSessionId: undefined,
+			});
 		});
 
 		describe("when the session is windows-routed", () => {

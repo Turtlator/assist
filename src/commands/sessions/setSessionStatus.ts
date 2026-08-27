@@ -1,6 +1,7 @@
 import { appendDaemonLog } from "./daemon/appendDaemonLog";
 import { sendToDaemon } from "./daemon/sendToDaemon";
 import { sendToDaemonAwaitAck } from "./daemon/sendToDaemonAwaitAck";
+import { readHookClaudeSessionId } from "./readHookClaudeSessionId";
 
 const DELIVERY_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 100;
@@ -14,7 +15,12 @@ export async function setSessionStatus(
 	const sessionId = process.env.ASSIST_SESSION_ID;
 	logHookFired(status, sessionId, opts.source);
 	if (!sessionId) return;
-	const payload = buildPayload(sessionId, status, opts);
+	const payload = buildPayload(
+		sessionId,
+		status,
+		opts,
+		await readHookClaudeSessionId(),
+	);
 	if (opts.ack) await deliverReliably(sessionId, status, payload);
 	else await deliverBestEffort(sessionId, status, payload);
 }
@@ -23,12 +29,14 @@ function buildPayload(
 	sessionId: string,
 	status: string,
 	opts: SetStatusOptions,
+	claudeSessionId: string | undefined,
 ): Record<string, unknown> {
 	const payload: Record<string, unknown> = {
 		type: "set-status",
 		sessionId,
 		status,
 	};
+	if (claudeSessionId) payload.claudeSessionId = claudeSessionId;
 	if (opts.source) payload.source = opts.source;
 	if (opts.ack) payload.ack = true;
 	return payload;

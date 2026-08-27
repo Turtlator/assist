@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { appendDaemonLog } from "./daemon/appendDaemonLog";
 import { sendToDaemon } from "./daemon/sendToDaemon";
 import { sendToDaemonAwaitAck } from "./daemon/sendToDaemonAwaitAck";
+import { readHookClaudeSessionId } from "./readHookClaudeSessionId";
 import { setSessionStatus } from "./setSessionStatus";
 
 vi.mock("./daemon/sendToDaemon", () => ({
@@ -16,13 +17,21 @@ vi.mock("./daemon/appendDaemonLog", () => ({
 	appendDaemonLog: vi.fn(),
 }));
 
+vi.mock("./readHookClaudeSessionId", () => ({
+	readHookClaudeSessionId: vi.fn(async () => undefined),
+}));
+
 const sendMock = sendToDaemon as unknown as ReturnType<typeof vi.fn>;
 const ackMock = sendToDaemonAwaitAck as unknown as ReturnType<typeof vi.fn>;
 const logMock = appendDaemonLog as unknown as ReturnType<typeof vi.fn>;
+const hookIdMock = readHookClaudeSessionId as unknown as ReturnType<
+	typeof vi.fn
+>;
 
 describe("setSessionStatus", () => {
 	beforeEach(() => {
 		vi.useFakeTimers();
+		hookIdMock.mockResolvedValue(undefined);
 		process.env.ASSIST_SESSION_ID = "s1";
 	});
 
@@ -44,6 +53,21 @@ describe("setSessionStatus", () => {
 			status: "running",
 		});
 		expect(ackMock).not.toHaveBeenCalled();
+	});
+
+	it("reports the conversation id the hook fired for so a /clear rebinds", async () => {
+		sendMock.mockResolvedValue(undefined);
+		hookIdMock.mockResolvedValue("post-clear-id");
+
+		await setSessionStatus("running", { source: "prompt" });
+
+		expect(sendMock).toHaveBeenCalledWith({
+			type: "set-status",
+			sessionId: "s1",
+			status: "running",
+			claudeSessionId: "post-clear-id",
+			source: "prompt",
+		});
 	});
 
 	it("includes the source but no ack flag for a best-effort hint", async () => {

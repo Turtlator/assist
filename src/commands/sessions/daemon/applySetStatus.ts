@@ -8,6 +8,7 @@ export function applySetStatus(
 	status: SessionStatus,
 	source: string | undefined,
 	onStatusChange: OnStatusChange,
+	rebind?: (session: Session) => void,
 ): void {
 	const session = sessions.get(id);
 	if (!session) {
@@ -22,6 +23,7 @@ export function applySetStatus(
 		);
 		return;
 	}
+	rebind?.(session);
 	if (source === "permission") session.permissionActive = true;
 	if (status === "running") session.permissionActive = false;
 	onStatusChange(session, status);

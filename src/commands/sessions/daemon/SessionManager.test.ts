@@ -500,7 +500,7 @@ describe("SessionManager", () => {
 			const manager = new SessionManager();
 			manager.spawn();
 
-			manager.setStatus("1", "waiting");
+			manager.setStatus({ id: "1", status: "waiting" });
 
 			expect(manager.listSessions()[0]?.status).toBe("waiting");
 		});
@@ -511,7 +511,7 @@ describe("SessionManager", () => {
 			const manager = new SessionManager();
 			manager.spawn();
 
-			manager.setStatus("1", "waiting", "permission");
+			manager.setStatus({ id: "1", status: "waiting", source: "permission" });
 
 			expect(session.permissionActive).toBe(true);
 		});
@@ -526,7 +526,7 @@ describe("SessionManager", () => {
 			const manager = new SessionManager();
 			manager.spawn();
 
-			manager.setStatus("1", "running", "pretool");
+			manager.setStatus({ id: "1", status: "running", source: "pretool" });
 
 			expect(session.permissionActive).toBe(false);
 		});
@@ -535,14 +535,16 @@ describe("SessionManager", () => {
 			it("does nothing", () => {
 				const manager = new SessionManager();
 
-				expect(() => manager.setStatus("missing", "running")).not.toThrow();
+				expect(() =>
+					manager.setStatus({ id: "missing", status: "running" }),
+				).not.toThrow();
 			});
 
 			it("warns instead of silently no-opping", () => {
 				const manager = new SessionManager();
 				daemonLogMock.mockClear();
 
-				manager.setStatus("missing", "waiting");
+				manager.setStatus({ id: "missing", status: "waiting" });
 
 				expect(daemonLogMock).toHaveBeenCalledWith(
 					expect.stringContaining("unknown session id=missing status=waiting"),
@@ -557,7 +559,7 @@ describe("SessionManager", () => {
 				manager.spawn();
 				persistLiveMock.mockClear();
 
-				manager.setStatus("1", "running");
+				manager.setStatus({ id: "1", status: "running" });
 
 				expect(persistLiveMock).not.toHaveBeenCalled();
 			});
