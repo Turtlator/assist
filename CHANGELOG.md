@@ -1,3 +1,10 @@
+# [0.595.0](https://github.com/staff0rd/assist/compare/v0.594.0...v0.595.0) (2026-08-27)
+
+
+### Features
+
+* add transcript clean --format vtt ([3624e6a](https://github.com/staff0rd/assist/commit/3624e6a907520dc9808602ff9eaf53dc34acdd8a))
+
 # [0.594.0](https://github.com/staff0rd/assist/compare/v0.593.0...v0.594.0) (2026-08-27)
 
 
