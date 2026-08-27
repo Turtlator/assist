@@ -5,10 +5,14 @@ import { FreePromptDropdown } from "./FreePromptDropdown";
 
 afterEach(cleanup);
 
-function renderDropdown(onSubmit: (prompt: string) => void, allowEmpty = true) {
+function renderDropdown(
+	onSubmit: (prompt: string) => void,
+	allowEmpty = true,
+	disabled = false,
+) {
 	render(
 		<FreePromptDropdown
-			disabled={false}
+			disabled={disabled}
 			onSubmit={onSubmit}
 			allowEmpty={allowEmpty}
 		/>,
@@ -33,6 +37,52 @@ describe("FreePromptDropdown", () => {
 		fireEvent.click(screen.getByRole("button", { name: "prompt" }));
 
 		expect(onSubmit).toHaveBeenCalledWith("");
+		expect(screen.queryByRole("textbox")).not.toBeTruthy();
+	});
+
+	it("titles the chevron half distinctly from the label half", () => {
+		renderDropdown(vi.fn());
+
+		const chevron = screen.getByRole("button", { name: "prompt options" });
+
+		expect(chevron.getAttribute("title")).toBe("prompt options");
+		expect(chevron.getAttribute("aria-expanded")).toBe("false");
+	});
+
+	it("disables both halves when the trigger is disabled", () => {
+		renderDropdown(vi.fn(), true, true);
+
+		expect(
+			screen.getByRole("button", { name: "prompt" }).hasAttribute("disabled"),
+		).toBe(true);
+		expect(
+			screen
+				.getByRole("button", { name: "prompt options" })
+				.hasAttribute("disabled"),
+		).toBe(true);
+	});
+
+	it("keeps the dropdown open while focus moves between the halves", () => {
+		const onSubmit = vi.fn();
+		renderDropdown(onSubmit);
+		const chevron = screen.getByRole("button", { name: "prompt options" });
+		fireEvent.click(chevron);
+
+		fireEvent.blur(chevron, {
+			relatedTarget: screen.getByRole("button", { name: "prompt" }),
+		});
+
+		expect(screen.getByRole("textbox")).toBeTruthy();
+	});
+
+	it("closes the dropdown when focus leaves the trigger entirely", () => {
+		const onSubmit = vi.fn();
+		renderDropdown(onSubmit);
+		const chevron = screen.getByRole("button", { name: "prompt options" });
+		fireEvent.click(chevron);
+
+		fireEvent.blur(chevron, { relatedTarget: document.body });
+
 		expect(screen.queryByRole("textbox")).not.toBeTruthy();
 	});
 
