@@ -1,3 +1,10 @@
+# [0.596.0](https://github.com/staff0rd/assist/compare/v0.595.1...v0.596.0) (2026-08-27)
+
+
+### Features
+
+* cite scoped rules from comments ([80c1142](https://github.com/staff0rd/assist/commit/80c114239f25d5d447c65c31d926e67ee742efbf))
+
 ## [0.595.1](https://github.com/staff0rd/assist/compare/v0.595.0...v0.595.1) (2026-08-27)
 
 
