@@ -1,3 +1,10 @@
+# [0.592.0](https://github.com/staff0rd/assist/compare/v0.591.0...v0.592.0) (2026-08-27)
+
+
+### Features
+
+* label and title the split trigger chevron ([b879a8d](https://github.com/staff0rd/assist/commit/b879a8dd5a37f376dd743628909700c8f97e0f68))
+
 # [0.591.0](https://github.com/staff0rd/assist/compare/v0.590.0...v0.591.0) (2026-08-27)
 
 
