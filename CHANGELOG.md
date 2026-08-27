@@ -1,3 +1,10 @@
+# [0.600.0](https://github.com/staff0rd/assist/compare/v0.599.0...v0.600.0) (2026-08-27)
+
+
+### Features
+
+* capture rules from comments ([8705a12](https://github.com/staff0rd/assist/commit/8705a126c407cd35363082f047d4165a6a0aca49))
+
 # [0.599.0](https://github.com/staff0rd/assist/compare/v0.598.0...v0.599.0) (2026-08-27)
 
 
