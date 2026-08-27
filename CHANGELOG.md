@@ -1,3 +1,10 @@
+# [0.590.0](https://github.com/staff0rd/assist/compare/v0.589.1...v0.590.0) (2026-08-27)
+
+
+### Features
+
+* split prompt trigger into button + chevron ([4f86130](https://github.com/staff0rd/assist/commit/4f8613060785b6809b9a27501231597671e6fe63))
+
 ## [0.589.1](https://github.com/staff0rd/assist/compare/v0.589.0...v0.589.1) (2026-08-27)
 
 
