@@ -232,6 +232,10 @@ The Config tab of the sessions web dashboard never receives secret values: `GET 
 - `assist refactor extract <file> <functionName> <destination>` - Extract a function and its private dependencies to a new file (`--apply` to execute)
 - `assist refactor restructure [pattern]` - Analyze the import graph and restructure tightly-coupled files into nested directories
 
+### Rules
+
+- `assist rules list [path]` - List the rules in scope for a path (default: cwd), read from the `## Rules` section of every `CLAUDE.md` from that path's directory up to the repo root, nearest scope first, grouped by the file each rule came from. Rules are `- **<code>** — <text>` bullets
+
 ### Devlog
 
 - `assist devlog list` - Group git commits by date
