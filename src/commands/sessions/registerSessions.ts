@@ -1,5 +1,6 @@
 import type { Command } from "commander";
 import { configHelp } from "../../shared/configHelp";
+import { closeSession } from "./closeSession";
 import { registerSetStatusCommand } from "./registerSetStatusCommand";
 import { sessionsConfigHelp } from "./sessionsConfigHelp";
 import { summarise } from "./summarise";
@@ -29,6 +30,13 @@ export function registerSessions(program: Command): void {
 		.option("-f, --force", "Re-generate all summaries, even existing ones")
 		.option("-n, --limit <count>", "Maximum number of sessions to summarise")
 		.action(summarise);
+
+	cmd
+		.command("close")
+		.description(
+			"Dismiss the current daemon-managed session, ending it and reaping its worktree",
+		)
+		.action(closeSession);
 
 	registerSetStatusCommand(cmd);
 
