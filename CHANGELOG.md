@@ -1,3 +1,10 @@
+# [0.603.0](https://github.com/staff0rd/assist/compare/v0.602.0...v0.603.0) (2026-08-28)
+
+
+### Features
+
+* add assist sessions close ([a34e6cc](https://github.com/staff0rd/assist/commit/a34e6ccf7098cd059d89eb4df589b2df66cdf10e))
+
 # [0.602.0](https://github.com/staff0rd/assist/compare/v0.601.2...v0.602.0) (2026-08-28)
 
 
