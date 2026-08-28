@@ -1,3 +1,10 @@
+# [0.601.0](https://github.com/staff0rd/assist/compare/v0.600.0...v0.601.0) (2026-08-28)
+
+
+### Features
+
+* add rules index and adopt-rules ([958d922](https://github.com/staff0rd/assist/commit/958d922d4ffe22a2c674ef7d726031d7bfe5bc1a))
+
 # [0.600.0](https://github.com/staff0rd/assist/compare/v0.599.0...v0.600.0) (2026-08-27)
 
 
