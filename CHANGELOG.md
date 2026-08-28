@@ -1,3 +1,10 @@
+# [0.605.0](https://github.com/staff0rd/assist/compare/v0.604.0...v0.605.0) (2026-08-28)
+
+
+### Features
+
+* add /close command ([0125644](https://github.com/staff0rd/assist/commit/012564420cb86a2ea8ad25a9934b1c880360cf51))
+
 # [0.604.0](https://github.com/staff0rd/assist/compare/v0.603.0...v0.604.0) (2026-08-28)
 
 
