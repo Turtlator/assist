@@ -60,23 +60,13 @@ assist rules add '<rule text>' --scope <path to that CLAUDE.md> 2>&1
 - Keep the author's wording wherever it already reads as a rule. You are reformatting rules, not rewriting them.
 - Do not hard-wrap: one line per bullet.
 
-## Step 4: Suggest the changes
+## Step 4: Apply it
 
-Before touching anything, show the user the whole list of suggested changes — every candidate you found, in every `CLAUDE.md`, as its own numbered row. Group the rows by file. Each row gives:
+Make the changes straight away, one file at a time. Do not ask first and do not print a plan to approve.
 
-- how it reads today: the heading it sits under, or the opening words of the prose
-- the exact bullet it would become, `- **<code>** — <text>`, with the code it would be given
-- the file whose `## Rules` section it lands in, when that is not the file it is already in
+Because nothing gates the write, let doubt decide the other way: when you cannot tell whether a line is a standing rule or just description, leave it alone and name it in the report. A rule missed is one command away from being added; a paragraph of documentation mangled into a bullet is not.
 
-A rename is a single row for the whole section, naming the heading it replaces and the codes it preserves. Close with the files you would leave alone and a few words on why.
-
-Then stop and wait. These are suggestions: the user may strike rows, reword them, move one to a different scope, or add something you missed. Do not start applying because the list looks obvious.
-
-## Step 5: Apply what was agreed
-
-Work through the agreed rows **one file at a time**, showing what changed after each, so a wrong call is caught before it repeats across the repo. Apply only what was agreed — do not add a row, reword one, or quietly drop one along the way.
-
-## Step 6: Record and verify
+## Step 5: Record and verify
 
 Once the files are fixed, record the scoped directories in the root `CLAUDE.md`:
 

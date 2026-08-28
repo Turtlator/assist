@@ -41,7 +41,7 @@ After installation, the `assist` command will be available globally. You can als
 ## Claude Commands
 
 - `/add-command` - Add a new run command to assist.yml
-- `/add-rule` - Capture a new `CLAUDE.md` rule from a review comment: words the rule from the note, infers the scope from the commented file (asking only when genuinely ambiguous, defaulting to the nearest `CLAUDE.md`), and writes it with `assist rules add`. Sent by the comment pane's **Add rule** button
+- `/add-rule` - Capture a new `CLAUDE.md` rule from a review comment
 - `/branch <description> [--jira KEY]` - Create a branch off the fresh remote default, deriving a kebab-case slug from the description
 - `/bug` - File a bug with reproduction steps, expected and actual behavior
 - `/comment` - Add pending review comments to the current PR
@@ -49,7 +49,7 @@ After installation, the `assist` command will be available globally. You can als
 - `/devlog` - Generate devlog entry for the next unversioned day
 - `/draft` - Draft a new backlog item with LLM-assisted questioning
 - `/fix-conflict [--rebase]` - Resolve the current PR branch's conflicts against the remote default, verify, then push; merges by default, `--rebase` replays the branch and pushes with `--force-with-lease`
-- `/fix-rules [dir]` - Put existing rules into the `## Rules` format `assist rules` reads. `[dir]` bounds the work (default: cwd) — only `CLAUDE.md` files at or below it are inventoried and changed, and a target below the repo root reports which files that excluded. Reads each one, then suggests the full list of changes — one row per candidate, showing how it reads today and the exact bullet it would become — and waits. Once agreed, applies them one file at a time (a wrongly-named heading is renamed, preserving its codes; prose and numbered rules are reworded and added via `assist rules add`, with the original prose removed), then records the scoped directories with `assist rules index`. Rules stay in the `CLAUDE.md` they were already in; the root index line is the only thing written outside the target
+- `/fix-rules [dir]` - Put existing rules into the `## Rules` format `assist rules` reads
 - `/forward-comments` - Split a coarse PR comment into per-line review comments, attributed to the original reviewer
 - `/handover` - Write a session handover note for the next conversation
 - `/pr` - Raise a PR with a concise description, then watch CI in the background

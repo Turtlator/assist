@@ -42,4 +42,10 @@ assist rules add '<rule text>' --scope <path> 2>&1
 
 Use single quotes around the rule text to avoid shell escaping issues.
 
-Show the command output — it names the allocated code and the file — then tell the user in one line which rule was added and where. Do not make any other edit: the rule is the whole task, and fixing the quoted text is not part of it unless the user asks.
+Show the command output — it names the allocated code and the file — then tell the user in one line which rule was added and where.
+
+## Step 5: Fix what broke it
+
+The rule exists because something broke it, so the quoted text is now a live violation. Rectify it in the same pass, without being asked: edit the quoted text in the file the `File:` line named, so it follows the rule you just wrote. Where there was no `File:` line, fix the draft or the text the quote came from.
+
+Fix the instance you were given. Do not sweep the rest of the repo for other violations of the new rule unless the user asks for that.
