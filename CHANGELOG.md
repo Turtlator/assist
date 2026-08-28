@@ -1,3 +1,10 @@
+# [0.604.0](https://github.com/staff0rd/assist/compare/v0.603.0...v0.604.0) (2026-08-28)
+
+
+### Features
+
+* issue create --type ([64758e4](https://github.com/staff0rd/assist/commit/64758e44d525b70cb00ee8cb5692f6023bd48099))
+
 # [0.603.0](https://github.com/staff0rd/assist/compare/v0.602.0...v0.603.0) (2026-08-28)
 
 
