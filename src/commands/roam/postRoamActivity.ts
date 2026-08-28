@@ -26,6 +26,12 @@ function findPortFile(roamDir: string): string | undefined {
 	return candidates[0]?.path;
 }
 
+const PID_BY_APP: Record<string, number> = {
+	"claude-code": 99999,
+	codex: 99998,
+	pi: 99997,
+};
+
 export function postRoamActivity(app: string, event: string): void {
 	const appData = process.env.APPDATA;
 	if (!appData) return;
@@ -40,7 +46,8 @@ export function postRoamActivity(app: string, event: string): void {
 		return;
 	}
 
-	const url = `http://127.0.0.1:${port}/api/v1/activity/${app}/${event}?pid=${app === "codex" ? 99998 : 99999}`;
+	const pid = PID_BY_APP[app] ?? 99999;
+	const url = `http://127.0.0.1:${port}/api/v1/activity/${app}/${event}?pid=${pid}`;
 
 	try {
 		execFileSync("curl", ["-sf", "--max-time", "0.2", "-X", "POST", url], {

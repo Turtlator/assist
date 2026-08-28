@@ -10,4 +10,5 @@ import { postRoamActivity } from "./postRoamActivity";
 
 export async function stopClaudeCodeIcon(): Promise<void> {
 	await postRoamActivity("claude-code", "stop");
+	await postRoamActivity("pi", "agent-end");
 }

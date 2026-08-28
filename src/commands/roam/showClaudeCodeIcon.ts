@@ -10,4 +10,5 @@ import { postRoamActivity } from "./postRoamActivity";
 
 export function showClaudeCodeIcon(): void {
 	postRoamActivity("claude-code", "post-tool-use");
+	postRoamActivity("pi", "agent-start");
 }
