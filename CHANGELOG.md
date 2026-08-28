@@ -1,3 +1,10 @@
+## [0.601.2](https://github.com/staff0rd/assist/compare/v0.601.1...v0.601.2) (2026-08-28)
+
+
+### Bug Fixes
+
+* add-rule fixes what broke the rule ([a802a66](https://github.com/staff0rd/assist/commit/a802a6694d7f0bee0f26c5e7e4a2edf43f5bc435))
+
 ## [0.601.1](https://github.com/staff0rd/assist/compare/v0.601.0...v0.601.1) (2026-08-28)
 
 
