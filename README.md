@@ -44,6 +44,7 @@ After installation, the `assist` command will be available globally. You can als
 - `/add-rule` - Capture a new `CLAUDE.md` rule from a review comment
 - `/branch <description> [--jira KEY]` - Create a branch off the fresh remote default, deriving a kebab-case slug from the description
 - `/bug` - File a bug with reproduction steps, expected and actual behavior
+- `/close` - Judge from the conversation alone whether the work is finished and nothing awaits the user, then run `assist sessions close`; otherwise report what is outstanding and leave the session running
 - `/comment` - Add pending review comments to the current PR
 - `/commit` - Commit only relevant files from the session
 - `/devlog` - Generate devlog entry for the next unversioned day
