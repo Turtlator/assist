@@ -41,6 +41,7 @@ After installation, the `assist` command will be available globally. You can als
 ## Claude Commands
 
 - `/add-command` - Add a new run command to assist.yml
+- `/adopt-rules [path]` - Move a repo's existing rules into the canonical `## Rules` sections `assist rules` reads: inventories every `CLAUDE.md`, classifies each as rename (bullets already coded, just the heading is wrong), reword (prose or numbered lists, migrated one at a time via `assist rules add`) or leave, proposes the plan before touching anything, then records the scoped directories with `assist rules index`
 - `/add-rule` - Capture a new `CLAUDE.md` rule from a review comment: words the rule from the note, infers the scope from the commented file (asking only when genuinely ambiguous, defaulting to the nearest `CLAUDE.md`), and writes it with `assist rules add`. Sent by the comment pane's **Add rule** button
 - `/branch <description> [--jira KEY]` - Create a branch off the fresh remote default, deriving a kebab-case slug from the description
 - `/bug` - File a bug with reproduction steps, expected and actual behavior
@@ -237,6 +238,7 @@ The Config tab of the sessions web dashboard never receives secret values: `GET 
 
 - `assist rules list [path]` - List the rules in scope for a path (default: cwd), read from the `## Rules` section of every `CLAUDE.md` from that path's directory up to the repo root, nearest scope first, grouped by the file each rule came from. Rules are `- **<code>** — <text>` bullets
 - `assist rules add <text> [--scope <path>]` - Add a rule to the `## Rules` section of the scope's `CLAUDE.md`, creating the section when absent and allocating the next repo-wide code. `--scope` takes a file or directory (resolved to the nearest existing `CLAUDE.md` at or above it, defaulting to cwd) or a `CLAUDE.md` path written to directly and created if absent. After writing, the root `CLAUDE.md` records the directories that carry their own `## Rules` so scoped rules stay discoverable from the root
+- `assist rules index [path]` - Record the directories that carry their own `## Rules` in the repo root's `CLAUDE.md`, rewriting the line in place rather than duplicating it. `rules add` does this on every add; run it directly after hand-editing a `## Rules` section (e.g. renaming an existing heading)
 
 ### Devlog
 

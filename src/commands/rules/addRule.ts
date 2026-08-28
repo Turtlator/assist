@@ -5,8 +5,7 @@ import { findRepoRoot } from "../../shared/findRepoRoot";
 import { insertRuleBullet } from "./insertRuleBullet";
 import { nextRuleCode } from "./nextRuleCode";
 import { resolveRuleScope } from "./resolveRuleScope";
-import { scopedRuleDirectories } from "./scopedRuleDirectories";
-import { upsertScopedRulesPointer } from "./upsertScopedRulesPointer";
+import { updateScopedRulesIndex } from "./updateScopedRulesIndex";
 
 function read(file: string): string {
 	return existsSync(file) ? readFileSync(file, "utf8") : "";
@@ -26,11 +25,7 @@ export function addRule(text: string, options: { scope?: string }): void {
 	const code = nextRuleCode(root);
 
 	writeFileSync(target, insertRuleBullet(read(target), code, rule));
-
-	const rootFile = path.join(root, "CLAUDE.md");
-	const before = read(rootFile);
-	const after = upsertScopedRulesPointer(before, scopedRuleDirectories(root));
-	if (after !== before) writeFileSync(rootFile, after);
+	updateScopedRulesIndex(root);
 
 	console.log(
 		`Added ${chalk.cyan(code)} to ${path.relative(process.cwd(), target) || target}`,

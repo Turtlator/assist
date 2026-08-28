@@ -1,5 +1,6 @@
 import type { Command } from "commander";
 import { addRule } from "./rules/addRule";
+import { indexRules } from "./rules/indexRules";
 import { listRules } from "./rules/listRules";
 
 export function registerRules(program: Command): void {
@@ -26,4 +27,11 @@ export function registerRules(program: Command): void {
 		.action((text: string, options: { scope?: string }) =>
 			addRule(text, options),
 		);
+
+	rulesCommand
+		.command("index [path]")
+		.description(
+			"Record the directories that carry their own `## Rules` in the repo root's CLAUDE.md, so scoped rules are discoverable from the root",
+		)
+		.action((target?: string) => indexRules(target));
 }
