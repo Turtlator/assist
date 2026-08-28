@@ -1,3 +1,10 @@
+## [0.601.1](https://github.com/staff0rd/assist/compare/v0.601.0...v0.601.1) (2026-08-28)
+
+
+### Bug Fixes
+
+* rename to fix-rules, scope its path ([4fb5df6](https://github.com/staff0rd/assist/commit/4fb5df6aeb813e5cd0c4b1f0011e2d8c29307205))
+
 # [0.601.0](https://github.com/staff0rd/assist/compare/v0.600.0...v0.601.0) (2026-08-28)
 
 
