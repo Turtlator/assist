@@ -58,16 +58,16 @@ describe("previewChip", () => {
 		).toEqual({ label: "Comment", color: "default" });
 	});
 
-	it("labels a GitHub issue", () => {
+	it("labels a GitHub issue as one being created", () => {
 		expect(previewChip(preview({ kind: "github-issue" }), false)).toEqual({
-			label: "Issue",
-			color: "warning",
+			label: "New issue",
+			color: "success",
 		});
 	});
 
 	it("labels an edit to an existing GitHub issue", () => {
 		expect(previewChip(preview({ kind: "github-issue-edit" }), false)).toEqual({
-			label: "Edit",
+			label: "Edit issue",
 			color: "warning",
 		});
 	});

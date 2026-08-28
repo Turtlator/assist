@@ -21,6 +21,11 @@ export type PreviewKind =
 
 export type PreviewItemType = "story" | "bug";
 
+export type PreviewMetadata = {
+	label: string;
+	value: string;
+};
+
 export type PrPreview = {
 	requestId: string;
 	title: string;
@@ -29,6 +34,7 @@ export type PrPreview = {
 	kind?: PreviewKind;
 	itemType?: PreviewItemType;
 	draft?: boolean;
+	metadata?: PreviewMetadata[];
 };
 
 export type SessionInfoBase = {

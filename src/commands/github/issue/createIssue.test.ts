@@ -37,10 +37,23 @@ type GraphqlWorld = {
 	orgTypes?: { id: string; name: string }[];
 	project?: { id: string; title: string; field?: unknown } | null;
 	projectRoot?: "organization" | "user";
+	labels?: string[];
 };
 
 function graphqlReplies(world: GraphqlWorld = {}) {
 	return (query: string) => {
+		if (query.includes("labels(first:")) {
+			return JSON.stringify({
+				data: {
+					repository: {
+						labels: {
+							nodes: (world.labels ?? []).map((name) => ({ name })),
+							pageInfo: { hasNextPage: false, endCursor: null },
+						},
+					},
+				},
+			});
+		}
 		if (query.includes("issueTypes")) {
 			return JSON.stringify({
 				data: { organization: { issueTypes: { nodes: world.orgTypes ?? [] } } },
@@ -248,10 +261,12 @@ describe("createIssue --type", () => {
 			type: "epic",
 		});
 
-		const previewBody = mockRequestPreviewDecision.mock.calls[0]?.[0]?.body;
-		expect(previewBody).toContain("**Repository:** acme/widgets");
-		expect(previewBody).toContain("**Type:** Epic");
-		expect(previewBody).toContain("Details");
+		const request = mockRequestPreviewDecision.mock.calls[0]?.[0];
+		expect(request?.body).toBe("Details");
+		expect(request?.metadata).toEqual([
+			{ label: "Repository", value: "acme/widgets" },
+			{ label: "Type", value: "Epic" },
+		]);
 
 		expect(execFileSync).toHaveBeenCalledWith(
 			"gh",
@@ -427,9 +442,13 @@ describe("createIssue --project", () => {
 			status: "backlog",
 		});
 
-		const previewBody = mockRequestPreviewDecision.mock.calls[0]?.[0]?.body;
-		expect(previewBody).toContain("**Project:** 1 (Roadmap)");
-		expect(previewBody).toContain("**Status:** Backlog");
+		const request = mockRequestPreviewDecision.mock.calls[0]?.[0];
+		expect(request?.body).toBe("Details");
+		expect(request?.metadata).toEqual([
+			{ label: "Repository", value: "acme/widgets" },
+			{ label: "Project", value: "1 (Roadmap)" },
+			{ label: "Status", value: "Backlog" },
+		]);
 
 		expect(execFileSync).toHaveBeenCalledWith(
 			"gh",
@@ -498,5 +517,69 @@ describe("createIssue --project", () => {
 		expect(output).toContain(ISSUE_URL);
 		expect(output).toContain("status to Backlog");
 		expect(output).toContain("HTTP 403");
+	});
+});
+
+describe("createIssue --label", () => {
+	it("aborts before creating when the repo has no such label", async () => {
+		const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+		exitThrows();
+		runGhGraphqlJson.mockImplementation(
+			graphqlReplies({ labels: ["bug", "documentation"] }),
+		);
+
+		await expect(
+			createIssue({
+				title: "Crash on load",
+				body: "Details",
+				repo: "acme/widgets",
+				label: ["regression"],
+			}),
+		).rejects.toThrow("process.exit");
+
+		const output = errorSpy.mock.calls.map((c) => c.join(" ")).join("\n");
+		expect(output).toContain("bug, documentation");
+		expect(execFileSync).not.toHaveBeenCalled();
+	});
+
+	it("passes the repo's own spelling of each label to gh issue create", async () => {
+		process.env.ASSIST_SESSION = "1";
+		process.env.ASSIST_SESSION_ID = "s1";
+		mockRequestPreviewDecision.mockResolvedValue({ decision: "approve" });
+		runGhGraphqlJson.mockImplementation(
+			graphqlReplies({ labels: ["bug", "needs triage"] }),
+		);
+
+		await createIssue({
+			title: "Crash on load",
+			body: "Details",
+			repo: "acme/widgets",
+			label: ["Bug", "needs-triage"],
+		});
+
+		const request = mockRequestPreviewDecision.mock.calls[0]?.[0];
+		expect(request?.body).toBe("Details");
+		expect(request?.metadata).toEqual([
+			{ label: "Repository", value: "acme/widgets" },
+			{ label: "Labels", value: "bug, needs triage" },
+		]);
+		expect(execFileSync).toHaveBeenCalledWith(
+			"gh",
+			[
+				"issue",
+				"create",
+				"--title",
+				"Crash on load",
+				"--body",
+				"Details",
+				"--repo",
+				"acme/widgets",
+				"--label",
+				"bug",
+				"--label",
+				"needs triage",
+			],
+			expect.anything(),
+		);
 	});
 });

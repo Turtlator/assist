@@ -2,7 +2,11 @@ import { connectToDaemon } from "../daemon/connectToDaemon";
 import { readSocketLines } from "../daemon/readSocketLines";
 import { parsePreviewDecision } from "./parsePreviewDecision";
 import type { PreviewDecision } from "./PreviewDecision";
-import type { PreviewItemType, PreviewKind } from "./SessionInfoBase";
+import type {
+	PreviewItemType,
+	PreviewKind,
+	PreviewMetadata,
+} from "./SessionInfoBase";
 
 export type PreviewRequest = {
 	sessionId: string;
@@ -13,6 +17,7 @@ export type PreviewRequest = {
 	kind?: PreviewKind;
 	itemType?: PreviewItemType;
 	draft?: boolean;
+	metadata?: PreviewMetadata[];
 };
 
 export function requestPreviewDecision(

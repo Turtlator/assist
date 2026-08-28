@@ -2,6 +2,7 @@ import { type SessionClient, sendTo } from "./broadcast";
 import type { Session } from "./createSession";
 import { daemonLog } from "./daemonLog";
 import { isPreviewKind } from "./isPreviewKind";
+import { parsePreviewMetadata } from "./parsePreviewMetadata";
 import { previewTargetLabel } from "./previewTargetLabel";
 
 type Msg = Record<string, unknown>;
@@ -35,6 +36,7 @@ export function setPrPreview(
 		kind,
 		itemType: kind === "backlog-item" ? itemType : undefined,
 		draft: kind === "pr" && prNumber === null ? draft : undefined,
+		metadata: parsePreviewMetadata(d.metadata),
 	};
 	waiters.set(id, client);
 	const target = previewTargetLabel(kind, itemType, prNumber, draft);

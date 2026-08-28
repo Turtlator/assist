@@ -856,6 +856,34 @@ describe("PrPreviewPane inline comments", () => {
 		});
 	});
 
+	describe("github issue create previews", () => {
+		const newIssue: PrPreview = {
+			requestId: "n1",
+			title: "Crash on load",
+			body: "Details about the crash",
+			prNumber: null,
+			kind: "github-issue",
+			metadata: [
+				{ label: "Repository", value: "acme/widgets" },
+				{ label: "Type", value: "Epic" },
+				{ label: "Labels", value: "bug, needs triage" },
+			],
+		};
+
+		it("names the pane as a new issue and lists its metadata above the body", () => {
+			const { container } = render(
+				<PrPreviewPane preview={newIssue} onDecision={vi.fn()} />,
+			);
+
+			expect(screen.getByText("New issue")).toBeTruthy();
+			expect(screen.getByText("acme/widgets")).toBeTruthy();
+			expect(screen.getByText("bug, needs triage")).toBeTruthy();
+			expect(container.querySelector(".markdown")?.textContent?.trim()).toBe(
+				"Details about the crash",
+			);
+		});
+	});
+
 	describe("github issue edit previews", () => {
 		const issueEdit: PrPreview = {
 			requestId: "e1",
@@ -958,7 +986,7 @@ describe("PrPreviewPane inline comments", () => {
 		it("shows an Edit chip with no PR chain or screenshot UI", () => {
 			render(<PrPreviewPane preview={issueEdit} onDecision={vi.fn()} />);
 
-			expect(screen.getByText("Edit")).toBeTruthy();
+			expect(screen.getByText("Edit issue")).toBeTruthy();
 			expect(screen.queryByText("New PR")).toBeNull();
 			expect(screen.queryByLabelText("Review")).toBeNull();
 			expect(screen.queryByLabelText("Post")).toBeNull();

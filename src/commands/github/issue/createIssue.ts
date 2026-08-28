@@ -1,6 +1,6 @@
 import { validateProposedContent } from "../../../shared/validateProposedContent";
 import { applyCreatedIssueMetadata } from "./applyCreatedIssueMetadata";
-import { buildIssuePreviewBody } from "./buildIssuePreviewBody";
+import { issuePreviewMetadata } from "./issuePreviewMetadata";
 import {
 	type CreateIssueMetadata,
 	resolveCreateIssueMetadata,
@@ -15,10 +15,11 @@ type CreateIssueOptions = {
 	type?: string;
 	project?: string;
 	status?: string;
+	label?: string[];
 };
 
 const USAGE =
-	"Usage: assist github issue create --title <title> --body <body> [-R <owner>/<repo>] [--type <name>] [--project <number>] [--status <name>]";
+	"Usage: assist github issue create --title <title> --body <body> [-R <owner>/<repo>] [--type <name>] [--project <number>] [--status <name>] [--label <name>]";
 
 function preflight(
 	options: CreateIssueOptions,
@@ -29,18 +30,6 @@ function preflight(
 		console.error(error instanceof Error ? error.message : String(error));
 		process.exit(1);
 	}
-}
-
-function previewMetadata(resolved: CreateIssueMetadata | undefined) {
-	if (!resolved) return undefined;
-	return {
-		repo: `${resolved.target.owner}/${resolved.target.repo}`,
-		type: resolved.issueType?.name,
-		project:
-			resolved.project &&
-			`${resolved.project.number} (${resolved.project.title})`,
-		status: resolved.project?.status?.optionName,
-	};
 }
 
 export async function createIssue(options: CreateIssueOptions): Promise<void> {
@@ -58,12 +47,9 @@ export async function createIssue(options: CreateIssueOptions): Promise<void> {
 
 	const resolved = preflight(options);
 
-	await reviewProposedIssue(
-		title,
-		buildIssuePreviewBody(previewMetadata(resolved), body),
-	);
+	await reviewProposedIssue(title, body, issuePreviewMetadata(resolved));
 
-	const output = runGhIssueCreate(title, body, options.repo);
+	const output = runGhIssueCreate(title, body, options.repo, resolved?.labels);
 	console.log(output.trim());
 
 	if (resolved) applyCreatedIssueMetadata(output, resolved);

@@ -14,13 +14,13 @@ export function previewChip(preview: PrPreview, draft: boolean): ChipSpec {
 		return { label: "Comment", color: "default" };
 
 	if (preview.kind === "github-issue-edit")
-		return { label: "Edit", color: "warning" };
+		return { label: "Edit issue", color: "warning" };
 
 	if (preview.kind === "miro-board")
 		return { label: "Miro boxes", color: "info" };
 
 	if (preview.kind === "github-issue")
-		return { label: "Issue", color: "warning" };
+		return { label: "New issue", color: "success" };
 
 	if (preview.kind === "backlog-item")
 		return preview.itemType === "bug"
