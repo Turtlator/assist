@@ -1,4 +1,5 @@
 import { normalizeGithubIssue } from "../../../backlog/associate-github/normalizeGithubIssue";
+import { parseRepoSlug } from "../parseRepoSlug";
 
 export type FixStructureTarget = {
 	owner: string;
@@ -7,7 +8,6 @@ export type FixStructureTarget = {
 };
 
 const BARE_NUMBER = /^#?(\d+)$/;
-const REPO_SLUG = /^([^/\s]+)\/([^/\s]+)$/;
 
 export function resolveFixStructureTarget(
 	target: string,
@@ -31,13 +31,5 @@ export function resolveFixStructureTarget(
 			`A bare issue number needs a repository. Re-run with --repo owner/repo, or pass the issue as owner/repo#${bare[1]}`,
 		);
 	}
-	const slug = REPO_SLUG.exec(repo.trim());
-	if (!slug) {
-		throw new Error(`--repo must be owner/repo, not "${repo}"`);
-	}
-	return {
-		owner: slug[1] ?? "",
-		repo: slug[2] ?? "",
-		number: Number(bare[1]),
-	};
+	return { ...parseRepoSlug(repo), number: Number(bare[1]) };
 }

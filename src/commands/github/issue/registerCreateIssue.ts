@@ -11,9 +11,13 @@ export function registerCreateIssue(issueCommand: Command): void {
 			"-R, --repo <owner/repo>",
 			"Target repository (defaults to the current repo)",
 		)
+		.option(
+			"--type <name>",
+			"Native issue type to set on the new issue (e.g. Epic)",
+		)
 		.addHelpText(
 			"after",
-			"\nThere is no What/Why/How template: an issue reports a problem, and the target repo's own issue template is unknowable from here. Write the body as the repo's maintainers would expect.\nIn an assist web session the title and body are previewed for approve/reject first (with inline comments); nothing is created until it is approved.",
+			"\nThere is no What/Why/How template: an issue reports a problem, and the target repo's own issue template is unknowable from here. Write the body as the repo's maintainers would expect.\nIn an assist web session the title and body are previewed for approve/reject first (with inline comments); nothing is created until it is approved.\n--type is resolved against the owning organisation's issue types before the preview, so an unknown name creates nothing.",
 		)
 		.action(createIssue);
 }
