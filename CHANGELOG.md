@@ -1,3 +1,10 @@
+## [0.606.1](https://github.com/staff0rd/assist/compare/v0.606.0...v0.606.1) (2026-08-28)
+
+
+### Bug Fixes
+
+* issue preview metadata and labels ([5311421](https://github.com/staff0rd/assist/commit/53114211063e1e0d7109688bf9b4e2e83b7038a5))
+
 # [0.606.0](https://github.com/staff0rd/assist/compare/v0.605.0...v0.606.0) (2026-08-28)
 
 
