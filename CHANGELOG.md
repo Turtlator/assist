@@ -1,3 +1,10 @@
+# [0.602.0](https://github.com/staff0rd/assist/compare/v0.601.2...v0.602.0) (2026-08-28)
+
+
+### Features
+
+* also light pi icon on agent activity ([8aea78f](https://github.com/staff0rd/assist/commit/8aea78ff17ee46d7d8da30bb30b171c77eae9949))
+
 ## [0.601.2](https://github.com/staff0rd/assist/compare/v0.601.1...v0.601.2) (2026-08-28)
 
 
