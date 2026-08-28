@@ -1,3 +1,10 @@
+# [0.606.0](https://github.com/staff0rd/assist/compare/v0.605.0...v0.606.0) (2026-08-28)
+
+
+### Features
+
+* issue create --project and --status ([8c1aa2e](https://github.com/staff0rd/assist/commit/8c1aa2e67cec7e96447e86591507398f4ec2ce97))
+
 # [0.605.0](https://github.com/staff0rd/assist/compare/v0.604.0...v0.605.0) (2026-08-28)
 
 
