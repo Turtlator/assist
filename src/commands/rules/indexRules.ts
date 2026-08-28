@@ -4,8 +4,8 @@ import { findRepoRoot } from "../../shared/findRepoRoot";
 import { scopeDirectory } from "./scopeDirectory";
 import { updateScopedRulesIndex } from "./updateScopedRulesIndex";
 
-export function indexRules(target?: string): void {
-	const startDir = scopeDirectory(path.resolve(target ?? process.cwd()));
+export function indexRules(): void {
+	const startDir = scopeDirectory(process.cwd());
 	const root = findRepoRoot(startDir) ?? startDir;
 	const directories = updateScopedRulesIndex(root);
 	const rootFile = path.relative(process.cwd(), path.join(root, "CLAUDE.md"));

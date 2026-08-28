@@ -29,9 +29,9 @@ export function registerRules(program: Command): void {
 		);
 
 	rulesCommand
-		.command("index [path]")
+		.command("index")
 		.description(
-			"Record the directories that carry their own `## Rules` in the repo root's CLAUDE.md, so scoped rules are discoverable from the root",
+			"Record the directories that carry their own `## Rules` in the repo root's CLAUDE.md, so scoped rules are discoverable from the root. Always repo-wide, resolved from the cwd",
 		)
-		.action((target?: string) => indexRules(target));
+		.action(() => indexRules());
 }

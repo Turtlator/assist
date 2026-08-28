@@ -41,7 +41,6 @@ After installation, the `assist` command will be available globally. You can als
 ## Claude Commands
 
 - `/add-command` - Add a new run command to assist.yml
-- `/adopt-rules [path]` - Move a repo's existing rules into the canonical `## Rules` sections `assist rules` reads: inventories every `CLAUDE.md`, classifies each as rename (bullets already coded, just the heading is wrong), reword (prose or numbered lists, migrated one at a time via `assist rules add`) or leave, proposes the plan before touching anything, then records the scoped directories with `assist rules index`
 - `/add-rule` - Capture a new `CLAUDE.md` rule from a review comment: words the rule from the note, infers the scope from the commented file (asking only when genuinely ambiguous, defaulting to the nearest `CLAUDE.md`), and writes it with `assist rules add`. Sent by the comment pane's **Add rule** button
 - `/branch <description> [--jira KEY]` - Create a branch off the fresh remote default, deriving a kebab-case slug from the description
 - `/bug` - File a bug with reproduction steps, expected and actual behavior
@@ -50,6 +49,7 @@ After installation, the `assist` command will be available globally. You can als
 - `/devlog` - Generate devlog entry for the next unversioned day
 - `/draft` - Draft a new backlog item with LLM-assisted questioning
 - `/fix-conflict [--rebase]` - Resolve the current PR branch's conflicts against the remote default, verify, then push; merges by default, `--rebase` replays the branch and pushes with `--force-with-lease`
+- `/fix-rules [dir]` - Put existing rules into the `## Rules` format `assist rules` reads. `[dir]` bounds the work (default: cwd) — only `CLAUDE.md` files at or below it are inventoried and changed, and a target below the repo root reports which files that excluded. Reads each one, then suggests the full list of changes — one row per candidate, showing how it reads today and the exact bullet it would become — and waits. Once agreed, applies them one file at a time (a wrongly-named heading is renamed, preserving its codes; prose and numbered rules are reworded and added via `assist rules add`, with the original prose removed), then records the scoped directories with `assist rules index`. Rules stay in the `CLAUDE.md` they were already in; the root index line is the only thing written outside the target
 - `/forward-comments` - Split a coarse PR comment into per-line review comments, attributed to the original reviewer
 - `/handover` - Write a session handover note for the next conversation
 - `/pr` - Raise a PR with a concise description, then watch CI in the background
@@ -238,7 +238,7 @@ The Config tab of the sessions web dashboard never receives secret values: `GET 
 
 - `assist rules list [path]` - List the rules in scope for a path (default: cwd), read from the `## Rules` section of every `CLAUDE.md` from that path's directory up to the repo root, nearest scope first, grouped by the file each rule came from. Rules are `- **<code>** — <text>` bullets
 - `assist rules add <text> [--scope <path>]` - Add a rule to the `## Rules` section of the scope's `CLAUDE.md`, creating the section when absent and allocating the next repo-wide code. `--scope` takes a file or directory (resolved to the nearest existing `CLAUDE.md` at or above it, defaulting to cwd) or a `CLAUDE.md` path written to directly and created if absent. After writing, the root `CLAUDE.md` records the directories that carry their own `## Rules` so scoped rules stay discoverable from the root
-- `assist rules index [path]` - Record the directories that carry their own `## Rules` in the repo root's `CLAUDE.md`, rewriting the line in place rather than duplicating it. `rules add` does this on every add; run it directly after hand-editing a `## Rules` section (e.g. renaming an existing heading)
+- `assist rules index` - Record the directories that carry their own `## Rules` in the repo root's `CLAUDE.md`, rewriting the line in place rather than duplicating it. Always repo-wide, resolved from the cwd — it takes no path, since the index lives at the root by definition and cannot be narrowed. `rules add` does this on every add; run it directly after hand-editing a `## Rules` section (e.g. renaming an existing heading)
 
 ### Devlog
 
