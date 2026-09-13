@@ -1,3 +1,10 @@
+# [0.643.0](https://github.com/staff0rd/assist/compare/v0.642.0...v0.643.0) (2026-09-13)
+
+
+### Features
+
+* show which shell values churn in HUD ([44544b5](https://github.com/staff0rd/assist/commit/44544b52388179d26c535f21f924406bf24e2e32))
+
 # [0.642.0](https://github.com/staff0rd/assist/compare/v0.641.0...v0.642.0) (2026-09-13)
 
 
