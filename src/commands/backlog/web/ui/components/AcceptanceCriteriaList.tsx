@@ -1,5 +1,6 @@
 import { Box, List, ListItem, Typography } from "@mui/material";
 import { itemSectionAnchor } from "./itemSectionAnchor";
+import { MarkdownHtml } from "./MarkdownHtml";
 import { renderMarkdownInline } from "./renderMarkdown";
 
 type AcceptanceCriteriaListProps = {
@@ -37,12 +38,10 @@ export function AcceptanceCriteriaList({
 						>
 							{i + 1}.
 						</Typography>
-						<Box
+						<MarkdownHtml
 							component="span"
 							className="markdown"
-							dangerouslySetInnerHTML={{
-								__html: renderMarkdownInline(ac),
-							}}
+							html={renderMarkdownInline(ac)}
 						/>
 					</ListItem>
 				))}

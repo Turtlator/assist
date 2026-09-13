@@ -1,5 +1,6 @@
-import { Box, List, ListItem, Typography } from "@mui/material";
+import { List, ListItem, Typography } from "@mui/material";
 import type { PlanPhase } from "../types";
+import { MarkdownHtml } from "./MarkdownHtml";
 import { renderMarkdownInline } from "./renderMarkdown";
 
 export function TaskList({
@@ -21,12 +22,10 @@ export function TaskList({
 					<Typography component="span" sx={{ color: "text.secondary", mr: 1 }}>
 						{marker}
 					</Typography>
-					<Box
+					<MarkdownHtml
 						component="span"
 						className="markdown"
-						dangerouslySetInnerHTML={{
-							__html: renderMarkdownInline(t.task),
-						}}
+						html={renderMarkdownInline(t.task)}
 					/>
 				</ListItem>
 			))}

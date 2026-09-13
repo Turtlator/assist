@@ -1,10 +1,10 @@
 import { Box, useTheme } from "@mui/material";
 import { useMemo } from "react";
+import { MarkdownHtml } from "./MarkdownHtml";
 import { markdownSx, wideMarkdownSx } from "./markdownSx";
 import { MermaidDiagram } from "./MermaidDiagram";
 import { renderMarkdown } from "./renderMarkdown";
 import { splitMarkdownSegments } from "./splitMarkdownSegments";
-import { useMarkdownBlockDebug } from "./useMarkdownBlockDebug";
 
 export function MarkdownBlock({
 	content,
@@ -21,17 +21,15 @@ export function MarkdownBlock({
 		[content, renderMermaid],
 	);
 	const sx = wide ? wideMarkdownSx : markdownSx;
-	useMarkdownBlockDebug(content, segments);
 
-	if (!segments) {
+	if (!segments)
 		return (
-			<Box
+			<MarkdownHtml
 				className="markdown"
 				sx={sx}
-				dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
+				html={renderMarkdown(content)}
 			/>
 		);
-	}
 
 	return (
 		<Box className="markdown" sx={sx}>
@@ -44,10 +42,7 @@ export function MarkdownBlock({
 						naturalWidth={wide}
 					/>
 				) : (
-					<Box
-						key={segment.key}
-						dangerouslySetInnerHTML={{ __html: segment.html }}
-					/>
+					<MarkdownHtml key={segment.key} html={segment.html} />
 				),
 			)}
 		</Box>

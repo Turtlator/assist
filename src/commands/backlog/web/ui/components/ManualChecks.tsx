@@ -1,4 +1,5 @@
 import { Box, Divider, List, ListItem, Typography } from "@mui/material";
+import { MarkdownHtml } from "./MarkdownHtml";
 import { renderMarkdownInline } from "./renderMarkdown";
 
 export function ManualChecks({ checks }: { checks: string[] }) {
@@ -25,13 +26,11 @@ export function ManualChecks({ checks }: { checks: string[] }) {
 						>
 							{"\u2610"}
 						</Typography>
-						<Box
+						<MarkdownHtml
 							component="span"
 							className="markdown"
 							sx={{ fontSize: "0.875rem", color: "text.secondary" }}
-							dangerouslySetInnerHTML={{
-								__html: renderMarkdownInline(check),
-							}}
+							html={renderMarkdownInline(check)}
 						/>
 					</ListItem>
 				))}

@@ -4,10 +4,7 @@ import "react-diff-view/style/index.css";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import { AppShell } from "./AppShell";
-import { installLinkClickDebug } from "./installLinkClickDebug";
 import { useColorMode } from "./useColorMode";
-
-installLinkClickDebug();
 
 const components = {
 	MuiButtonBase: {
