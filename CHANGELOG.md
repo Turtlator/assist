@@ -1,3 +1,10 @@
+## [0.640.1](https://github.com/staff0rd/assist/compare/v0.640.0...v0.640.1) (2026-09-13)
+
+
+### Bug Fixes
+
+* stop markdown re-render wiping links ([3dd9b07](https://github.com/staff0rd/assist/commit/3dd9b0728df9a9d6485074551a9953fb8e480574))
+
 # [0.640.0](https://github.com/staff0rd/assist/compare/v0.639.1...v0.640.0) (2026-09-13)
 
 
