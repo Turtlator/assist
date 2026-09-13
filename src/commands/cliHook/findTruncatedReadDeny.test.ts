@@ -117,6 +117,56 @@ describe("findTruncatedReadDeny", () => {
 		expect(findTruncatedReadDeny(["assist prs list-comments"])).toBeUndefined();
 	});
 
+	it("denies verify piped to tail", () => {
+		const decision = findTruncatedReadDeny(["assist verify", "tail -20"]);
+
+		expect(decision?.permissionDecision).toBe("deny");
+		expect(decision?.permissionDecisionReason).toBe(
+			"Do not pipe 'assist verify' through head or tail. Verify already prints only what failed — under CLAUDECODE it suppresses every passing check — so there is nothing to trim and a truncated read drops the failing check's output, the only part worth reading, leaving you guessing at the failure. Run 'assist verify' bare and read all of it.",
+		);
+	});
+
+	it("denies verify piped to head", () => {
+		expect(
+			findTruncatedReadDeny(["assist verify", "head -n 5"])?.permissionDecision,
+		).toBe("deny");
+	});
+
+	it("denies verify truncated by an absolute-path head", () => {
+		expect(
+			findTruncatedReadDeny(["assist verify", "/usr/bin/head -5"])
+				?.permissionDecision,
+		).toBe("deny");
+	});
+
+	it("denies verify when the truncator follows an intermediate filter", () => {
+		expect(
+			findTruncatedReadDeny(["assist verify", "grep -i error", "head -5"])
+				?.permissionDecision,
+		).toBe("deny");
+	});
+
+	it.each([
+		"assist verify all",
+		"assist verify list",
+		"assist verify config-keys",
+	])("denies the %s subcommand piped to head", (command) => {
+		expect(
+			findTruncatedReadDeny([command, "head -20"])?.permissionDecision,
+		).toBe("deny");
+	});
+
+	it("denies a raw verify command that could not be split into parts", () => {
+		expect(
+			findTruncatedReadDenyRaw("assist verify 2>&1 | tail -40")
+				?.permissionDecision,
+		).toBe("deny");
+	});
+
+	it("allows a bare verify", () => {
+		expect(findTruncatedReadDeny(["assist verify"])).toBeUndefined();
+	});
+
 	it("does not match a command that merely mentions the read as an argument", () => {
 		expect(
 			findTruncatedReadDeny(["echo assist backlog show a930", "head -5"]),

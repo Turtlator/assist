@@ -16,6 +16,11 @@ const UNTRUNCATABLE_READS: UntruncatableRead[] = [
 	backlogRead("assist backlog show"),
 	backlogRead("assist backlog view"),
 	{
+		prefix: "assist verify",
+		reason:
+			"Verify already prints only what failed — under CLAUDECODE it suppresses every passing check — so there is nothing to trim and a truncated read drops the failing check's output, the only part worth reading, leaving you guessing at the failure. Run 'assist verify' bare and read all of it.",
+	},
+	{
 		prefix: "assist prs list-comments",
 		reason:
 			"Every unresolved thread prints in full above the resolved index, with its author, path:line, id, url and body, so a truncated read leaves you the one-line resolved index instead of the threads. Run 'assist prs list-comments' bare and read all of it — do not read or parse the YAML cache; fixed, wontfix and reply locate it themselves.",
