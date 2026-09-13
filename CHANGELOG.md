@@ -1,3 +1,10 @@
+## [0.643.3](https://github.com/staff0rd/assist/compare/v0.643.2...v0.643.3) (2026-09-13)
+
+
+### Bug Fixes
+
+* reject an authored Review phase ([a634728](https://github.com/staff0rd/assist/commit/a6347286c3b285672d6ef67b8988dbaddd89cecc))
+
 ## [0.643.2](https://github.com/staff0rd/assist/compare/v0.643.1...v0.643.2) (2026-09-13)
 
 
