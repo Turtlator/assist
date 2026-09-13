@@ -6,6 +6,7 @@ import ListItemText from "@mui/material/ListItemText";
 import MenuItem from "@mui/material/MenuItem";
 import { ColorModeIcon } from "./ColorModeIcon";
 import { RESTART_ITEM } from "./postRestart";
+import { RenderHudMenuItem } from "./RenderHudMenuItem";
 
 type HamburgerMenuHandlers = {
 	mode: "light" | "dark";
@@ -27,6 +28,7 @@ export function hamburgerMenuItems({
 			</ListItemIcon>
 			<ListItemText>Toggle dark mode</ListItemText>
 		</MenuItem>,
+		<RenderHudMenuItem key="render-hud" />,
 		<Divider key="restart-divider" />,
 		<MenuItem key="restart" onClick={onRestart}>
 			<ListItemIcon>

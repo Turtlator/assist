@@ -22,7 +22,7 @@ export function sampleRenderRates(
 }
 
 export function formatRenderRates(rates: RenderRate[]): string {
-	if (rates.length === 0) return "renders: waiting…";
+	if (rates.length === 0) return "no renders since reset";
 	const width = Math.max(...rates.map((rate) => rate.label.length));
 	const lines = rates.map(
 		(rate) =>

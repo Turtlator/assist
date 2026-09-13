@@ -1,6 +1,7 @@
 import { type CSSProperties, useEffect, useRef } from "react";
-import { renderCounters, renderHudEnabled } from "./renderCounters";
+import { renderCounters } from "./renderCounters";
 import { formatRenderRates, sampleRenderRates } from "./sampleRenderRates";
+import { useRenderHudEnabled } from "./useRenderHudEnabled";
 
 const SAMPLE_MS = 500;
 
@@ -20,9 +21,10 @@ const hudStyle: CSSProperties = {
 
 export function RenderRateHud() {
 	const ref = useRef<HTMLDivElement | null>(null);
+	const enabled = useRenderHudEnabled();
 
 	useEffect(() => {
-		if (!renderHudEnabled) return;
+		if (!enabled) return;
 		let previous = new Map(renderCounters);
 		let sampledAt = performance.now();
 		let frame = requestAnimationFrame(function tick() {
@@ -39,9 +41,9 @@ export function RenderRateHud() {
 			if (ref.current) ref.current.textContent = formatRenderRates(rates);
 		});
 		return () => cancelAnimationFrame(frame);
-	}, []);
+	}, [enabled]);
 
-	if (!renderHudEnabled) return null;
+	if (!enabled) return null;
 
 	return (
 		<div
