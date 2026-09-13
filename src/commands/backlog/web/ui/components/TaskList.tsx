@@ -1,6 +1,6 @@
 import { Box, List, ListItem, Typography } from "@mui/material";
-import { marked } from "marked";
 import type { PlanPhase } from "../types";
+import { renderMarkdownInline } from "./renderMarkdown";
 
 export function TaskList({
 	tasks,
@@ -25,7 +25,7 @@ export function TaskList({
 						component="span"
 						className="markdown"
 						dangerouslySetInnerHTML={{
-							__html: marked.parseInline(t.task) as string,
+							__html: renderMarkdownInline(t.task),
 						}}
 					/>
 				</ListItem>

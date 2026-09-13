@@ -1,6 +1,6 @@
 import { Box, List, ListItem, Typography } from "@mui/material";
-import { marked } from "marked";
 import { itemSectionAnchor } from "./itemSectionAnchor";
+import { renderMarkdownInline } from "./renderMarkdown";
 
 type AcceptanceCriteriaListProps = {
 	criteria: string[];
@@ -41,7 +41,7 @@ export function AcceptanceCriteriaList({
 							component="span"
 							className="markdown"
 							dangerouslySetInnerHTML={{
-								__html: marked.parseInline(ac) as string,
+								__html: renderMarkdownInline(ac),
 							}}
 						/>
 					</ListItem>

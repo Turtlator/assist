@@ -1,8 +1,8 @@
 import { Box, useTheme } from "@mui/material";
-import { marked } from "marked";
 import { useMemo } from "react";
 import { markdownSx, wideMarkdownSx } from "./markdownSx";
 import { MermaidDiagram } from "./MermaidDiagram";
+import { renderMarkdown } from "./renderMarkdown";
 import { splitMarkdownSegments } from "./splitMarkdownSegments";
 
 export function MarkdownBlock({
@@ -26,7 +26,7 @@ export function MarkdownBlock({
 			<Box
 				className="markdown"
 				sx={sx}
-				dangerouslySetInnerHTML={{ __html: marked.parse(content) as string }}
+				dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
 			/>
 		);
 	}

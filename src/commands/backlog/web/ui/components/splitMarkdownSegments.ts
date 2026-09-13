@@ -1,11 +1,12 @@
-import { type Token, type TokensList, marked } from "marked";
+import type { Token, TokensList } from "marked";
+import { lexMarkdown, renderMarkdownTokens } from "./renderMarkdown";
 
 type MarkdownSegment =
 	| { type: "html"; key: string; html: string }
 	| { type: "mermaid"; key: string; source: string };
 
 export function splitMarkdownSegments(content: string): MarkdownSegment[] {
-	const tokens = marked.lexer(content);
+	const tokens = lexMarkdown(content);
 	const segments: MarkdownSegment[] = [];
 	let buffer: Token[] = [];
 	let index = 0;
@@ -18,7 +19,7 @@ export function splitMarkdownSegments(content: string): MarkdownSegment[] {
 		segments.push({
 			type: "html",
 			key: `md-${index}`,
-			html: marked.parser(slice) as string,
+			html: renderMarkdownTokens(slice),
 		});
 		index += 1;
 		buffer = [];

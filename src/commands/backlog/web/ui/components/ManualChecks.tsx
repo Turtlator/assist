@@ -1,5 +1,5 @@
 import { Box, Divider, List, ListItem, Typography } from "@mui/material";
-import { marked } from "marked";
+import { renderMarkdownInline } from "./renderMarkdown";
 
 export function ManualChecks({ checks }: { checks: string[] }) {
 	return (
@@ -30,7 +30,7 @@ export function ManualChecks({ checks }: { checks: string[] }) {
 							className="markdown"
 							sx={{ fontSize: "0.875rem", color: "text.secondary" }}
 							dangerouslySetInnerHTML={{
-								__html: marked.parseInline(check) as string,
+								__html: renderMarkdownInline(check),
 							}}
 						/>
 					</ListItem>
