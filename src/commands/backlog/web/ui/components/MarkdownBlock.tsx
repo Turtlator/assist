@@ -4,6 +4,7 @@ import { markdownSx, wideMarkdownSx } from "./markdownSx";
 import { MermaidDiagram } from "./MermaidDiagram";
 import { renderMarkdown } from "./renderMarkdown";
 import { splitMarkdownSegments } from "./splitMarkdownSegments";
+import { useMarkdownBlockDebug } from "./useMarkdownBlockDebug";
 
 export function MarkdownBlock({
 	content,
@@ -20,6 +21,7 @@ export function MarkdownBlock({
 		[content, renderMermaid],
 	);
 	const sx = wide ? wideMarkdownSx : markdownSx;
+	useMarkdownBlockDebug(content, segments);
 
 	if (!segments) {
 		return (
