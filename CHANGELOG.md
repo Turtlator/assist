@@ -1,3 +1,10 @@
+## [0.639.1](https://github.com/staff0rd/assist/compare/v0.639.0...v0.639.1) (2026-09-13)
+
+
+### Bug Fixes
+
+* open markdown links in a new tab ([d26b1ff](https://github.com/staff0rd/assist/commit/d26b1ff3eb8e17c42b015ecf58d41907d50fa383))
+
 # [0.639.0](https://github.com/staff0rd/assist/compare/v0.638.0...v0.639.0) (2026-09-13)
 
 
