@@ -1,3 +1,10 @@
+# [0.642.0](https://github.com/staff0rd/assist/compare/v0.641.0...v0.642.0) (2026-09-13)
+
+
+### Features
+
+* toggle render HUD from hamburger menu ([79be885](https://github.com/staff0rd/assist/commit/79be8850eab5a57b51d32ae84dd1c1f4c5bb02f2))
+
 # [0.641.0](https://github.com/staff0rd/assist/compare/v0.640.1...v0.641.0) (2026-09-13)
 
 
