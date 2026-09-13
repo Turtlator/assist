@@ -1,3 +1,10 @@
+## [0.643.2](https://github.com/staff0rd/assist/compare/v0.643.1...v0.643.2) (2026-09-13)
+
+
+### Bug Fixes
+
+* keep sessions markdown links stable ([0c5f9fb](https://github.com/staff0rd/assist/commit/0c5f9fb9c946af1cb751ae7f0962b4e4bd743a58))
+
 ## [0.643.1](https://github.com/staff0rd/assist/compare/v0.643.0...v0.643.1) (2026-09-13)
 
 
