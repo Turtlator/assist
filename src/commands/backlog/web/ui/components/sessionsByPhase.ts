@@ -7,6 +7,12 @@ import type {
 
 export const REVIEW_PHASE: PlanPhase = { name: "Review", tasks: [] };
 
+export function reviewPhaseIndex(phases: PlanPhase[]): number {
+	return phases.at(-1)?.name === REVIEW_PHASE.name
+		? phases.length - 1
+		: phases.length;
+}
+
 export function phaseStatus(
 	index: number,
 	currentPhase: number | undefined,

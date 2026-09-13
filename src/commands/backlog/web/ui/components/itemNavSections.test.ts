@@ -99,6 +99,31 @@ describe("itemNavSections", () => {
 		]);
 	});
 
+	it("does not append a Review row when the plan already ends with one", () => {
+		const sections = itemNavSections(
+			item({
+				plan: [
+					{ name: "First", tasks: [] },
+					{ name: "Review", tasks: [] },
+				],
+				phaseSessions: [
+					{
+						phaseIdx: 2,
+						claudeSessionId: "s",
+						hostname: "h",
+						osUser: "u",
+					},
+				],
+			}),
+		);
+
+		expect(sections.map((s) => s.title ?? s.label)).toEqual([
+			"Phases",
+			"First",
+			"Review",
+		]);
+	});
+
 	it("places phase rows between Sub-tasks and Activity", () => {
 		const sections = itemNavSections(
 			item({

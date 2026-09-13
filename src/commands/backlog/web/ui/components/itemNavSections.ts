@@ -1,6 +1,6 @@
 import type { BacklogItem, PhaseStatus } from "../types";
 import { ITEM_SECTION_IDS, phaseAnchor } from "./itemSectionAnchor";
-import { phaseStatus, REVIEW_PHASE } from "./sessionsByPhase";
+import { phaseStatus, REVIEW_PHASE, reviewPhaseIndex } from "./sessionsByPhase";
 
 export type ItemNavSection = {
 	id: string;
@@ -13,9 +13,10 @@ export type ItemNavSection = {
 function planSections(item: BacklogItem): ItemNavSection[] {
 	const phases = item.plan ?? [];
 	if (phases.length === 0) return [];
-	const hasReview = (item.phaseSessions ?? []).some(
-		(s) => s.phaseIdx >= phases.length,
-	);
+	const reviewIdx = reviewPhaseIndex(phases);
+	const hasReview =
+		reviewIdx === phases.length &&
+		(item.phaseSessions ?? []).some((s) => s.phaseIdx >= reviewIdx);
 	const allPhases = hasReview ? [...phases, REVIEW_PHASE] : phases;
 	return [
 		{ id: ITEM_SECTION_IDS.plan, label: "Phases" },

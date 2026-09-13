@@ -4,6 +4,7 @@ import { PhaseCard } from "./PhaseCard";
 import {
 	phaseStatus,
 	REVIEW_PHASE,
+	reviewPhaseIndex,
 	sessionsByPhase,
 	usageByPhase,
 } from "./sessionsByPhase";
@@ -27,11 +28,14 @@ export function PhaseCardList({
 }: PhaseCardListProps) {
 	const byPhase = usageByPhase(usage);
 	const sessionsFor = sessionsByPhase(sessions);
+	const reviewIdx = reviewPhaseIndex(phases);
 	const reviewSessions = (sessions ?? []).filter(
-		(s) => s.phaseIdx >= phases.length,
+		(s) => s.phaseIdx >= reviewIdx,
 	);
 	const allPhases =
-		reviewSessions.length > 0 ? [...phases, REVIEW_PHASE] : phases;
+		reviewIdx === phases.length && reviewSessions.length > 0
+			? [...phases, REVIEW_PHASE]
+			: phases;
 	return (
 		<Stack spacing={1.5}>
 			{allPhases.map((phase, i) => (
@@ -42,7 +46,7 @@ export function PhaseCardList({
 					status={phaseStatus(i, currentPhase)}
 					itemId={itemId}
 					usage={byPhase.get(i)}
-					sessions={i < phases.length ? sessionsFor.get(i) : reviewSessions}
+					sessions={i === reviewIdx ? reviewSessions : sessionsFor.get(i)}
 					onRewind={i < phases.length ? onRewind : undefined}
 				/>
 			))}

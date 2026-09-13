@@ -33,6 +33,12 @@ function printPhase(
 	printPhaseSessions(sessions);
 }
 
+function reviewPhaseIndex(plan: PlanPhase[]): number {
+	return plan.at(-1)?.name === REVIEW_PHASE_NAME
+		? plan.length - 1
+		: plan.length;
+}
+
 function printReviewSessions(item: BacklogItem, planLength: number): void {
 	const sessions = (item.phaseSessions ?? []).filter(
 		(s) => s.phaseIdx >= planLength,
@@ -46,12 +52,16 @@ function printReviewSessions(item: BacklogItem, planLength: number): void {
 export function printPlan(item: BacklogItem): void {
 	if (!item.plan || item.plan.length === 0) return;
 
+	const plan = item.plan;
+	const reviewIdx = reviewPhaseIndex(plan);
 	console.log(chalk.bold("Plan"));
-	for (const [i, phase] of item.plan.entries()) {
+	for (const [i, phase] of plan.entries()) {
 		const isCurrent = item.currentPhase === i + 1;
-		const sessions = (item.phaseSessions ?? []).filter((s) => s.phaseIdx === i);
+		const sessions = (item.phaseSessions ?? []).filter((s) =>
+			i === reviewIdx ? s.phaseIdx >= i : s.phaseIdx === i,
+		);
 		printPhase(phase, i, isCurrent, sessions);
 	}
-	printReviewSessions(item, item.plan.length);
+	if (reviewIdx === plan.length) printReviewSessions(item, plan.length);
 	console.log();
 }

@@ -7,7 +7,10 @@ const phases: PlanPhase[] = [
 	{ name: "Second", tasks: [{ task: "do b" }] },
 ];
 
-function item(phaseSessions?: PhaseSession[]): BacklogItem {
+function item(
+	phaseSessions?: PhaseSession[],
+	plan: PlanPhase[] = phases,
+): BacklogItem {
 	return {
 		id: 1,
 		type: "story",
@@ -15,7 +18,7 @@ function item(phaseSessions?: PhaseSession[]): BacklogItem {
 		acceptanceCriteria: [],
 		status: "in-progress",
 		starred: false,
-		plan: phases,
+		plan,
 		...(phaseSessions ? { phaseSessions } : {}),
 	};
 }
@@ -79,6 +82,32 @@ describe("printPlan", () => {
 
 		const out = output();
 		expect(out).toContain("Phase 3: Review");
+		expect(out).toContain("host-r / carol / sess-review");
+	});
+
+	it("prints one Review phase when the stored plan already ends with one", () => {
+		const authoredReview: PlanPhase[] = [
+			{ name: "Fix", tasks: [{ task: "patch it" }] },
+			{ name: "Review", tasks: [{ task: "check it" }] },
+		];
+
+		printPlan(
+			item(
+				[
+					{
+						phaseIdx: 2,
+						claudeSessionId: "sess-review",
+						hostname: "host-r",
+						osUser: "carol",
+					},
+				],
+				authoredReview,
+			),
+		);
+
+		const out = output();
+		expect(out).toContain("Phase 2: Review");
+		expect(out).not.toContain("Phase 3: Review");
 		expect(out).toContain("host-r / carol / sess-review");
 	});
 

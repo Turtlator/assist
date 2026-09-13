@@ -50,4 +50,31 @@ describe("PlanSection", () => {
 		expect(screen.getByText("Phase 3: Review")).toBeTruthy();
 		expect(screen.getByText("host-r / carol / sess-review")).toBeTruthy();
 	});
+
+	it("renders one Review card when the plan already ends with a Review phase", () => {
+		const authoredReview: PlanPhase[] = [
+			{ name: "First", tasks: [{ task: "do a" }] },
+			{ name: "Review", tasks: [{ task: "check it" }] },
+		];
+		const sessions: PhaseSession[] = [
+			{
+				phaseIdx: 2,
+				claudeSessionId: "sess-review",
+				hostname: "host-r",
+				osUser: "carol",
+			},
+		];
+
+		render(
+			<PlanSection
+				phases={authoredReview}
+				currentPhase={2}
+				sessions={sessions}
+			/>,
+		);
+
+		expect(screen.getAllByText(/Review$/)).toHaveLength(1);
+		expect(screen.getByText("Phase 2: Review")).toBeTruthy();
+		expect(screen.getByText("host-r / carol / sess-review")).toBeTruthy();
+	});
 });
