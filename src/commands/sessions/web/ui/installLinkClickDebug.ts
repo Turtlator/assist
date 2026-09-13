@@ -1,6 +1,15 @@
 import { describeLinkTarget } from "./describeLinkTarget";
+import { watchMarkdownMutations } from "./watchMarkdownMutations";
 
 type DebugWindow = typeof globalThis & { __linkDebugInstalled?: boolean };
+
+const TRACKED = [
+	"mousedown",
+	"mouseup",
+	"click",
+	"auxclick",
+	"dragstart",
+] as const;
 
 export function installLinkClickDebug() {
 	const target = globalThis as DebugWindow;
@@ -26,26 +35,25 @@ export function installLinkClickDebug() {
 		return inheritedOpen.apply(globalThis, args);
 	};
 
-	globalThis.addEventListener(
-		"click",
-		(event) => {
-			console.info(
-				"[linkdebug] CAPTURE",
-				describeLinkTarget(event.target),
-				"button:",
-				event.button,
-				"defaultPrevented:",
-				event.defaultPrevented,
-			);
-			setTimeout(() => {
+	for (const type of TRACKED)
+		globalThis.addEventListener(
+			type,
+			(event) => {
+				const mouse = event as MouseEvent;
 				console.info(
-					"[linkdebug] SETTLED defaultPrevented:",
+					`[linkdebug] ${type} @${performance.now().toFixed(0)}`,
+					describeLinkTarget(event.target),
+					"button:",
+					mouse.button,
+					"at",
+					`${mouse.clientX},${mouse.clientY}`,
+					"defaultPrevented:",
 					event.defaultPrevented,
 				);
-			}, 0);
-		},
-		true,
-	);
+			},
+			true,
+		);
 
-	console.info("[linkdebug] installed");
+	watchMarkdownMutations();
+	console.info("[linkdebug] installed v2");
 }
