@@ -1,4 +1,4 @@
-After any code change, run `/verify` to ensure all checks pass.
+After any code change, run `/verify` to ensure all checks pass. Run it bare — never pipe it through `head`, `tail`, `grep`, `rg` or `wc`, as it already prints only what failed.
 
 `assist` is installed globally. Use it directly (e.g., `assist commit "message"`).
 
