@@ -1,3 +1,10 @@
+## [0.643.4](https://github.com/staff0rd/assist/compare/v0.643.3...v0.643.4) (2026-09-13)
+
+
+### Bug Fixes
+
+* render one Review for stored plans ([766114b](https://github.com/staff0rd/assist/commit/766114b1aea90af978ffb66f4e58a4b0d60afc6d))
+
 ## [0.643.3](https://github.com/staff0rd/assist/compare/v0.643.2...v0.643.3) (2026-09-13)
 
 
