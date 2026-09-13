@@ -1,8 +1,15 @@
 // @vitest-environment jsdom
 import { renderHook } from "@testing-library/react";
+import type { ReactNode } from "react";
+import { MemoryRouter } from "react-router";
 import { describe, expect, it, vi } from "vitest";
 import type { HistoricalSession, SessionInfo } from "./types";
 import { useAdoptRepoCard } from "./useAdoptRepoCard";
+
+const routerAt = (path: string) =>
+	function Wrapper({ children }: { children: ReactNode }) {
+		return <MemoryRouter initialEntries={[path]}>{children}</MemoryRouter>;
+	};
 
 const clone = "/repos/live";
 const group = { origin: "host/org/live", clone };
@@ -44,17 +51,20 @@ function renderAdopt(
 	selectedCardId: string | null,
 	selectedCwd = clone,
 	active: Record<string, string> = activeByRepo,
+	path = "/sessions",
 ) {
 	const onSelect = vi.fn();
-	renderHook(() =>
-		useAdoptRepoCard({
-			selectedCwd,
-			selectedCardId,
-			sessions,
-			history,
-			activeByRepo: active,
-			onSelect,
-		}),
+	renderHook(
+		() =>
+			useAdoptRepoCard({
+				selectedCwd,
+				selectedCardId,
+				sessions,
+				history,
+				activeByRepo: active,
+				onSelect,
+			}),
+		{ wrapper: routerAt(path) },
 	);
 	return onSelect;
 }
@@ -75,7 +85,10 @@ function renderCardClick(
 				activeByRepo,
 				onSelect,
 			}),
-		{ initialProps: { selectedCardId: from } },
+		{
+			initialProps: { selectedCardId: from },
+			wrapper: routerAt("/sessions"),
+		},
 	);
 	onSelect.mockClear();
 	rerender({ selectedCardId: to });
@@ -115,5 +128,13 @@ describe("useAdoptRepoCard", () => {
 		expect(renderCardClick("other-repo", null)).toHaveBeenCalledWith(
 			"worktree",
 		);
+	});
+
+	describe("on a route that deselects the session", () => {
+		it("does not adopt, so it cannot fight the reconciler", () => {
+			expect(
+				renderAdopt(null, clone, activeByRepo, "/backlog/items/a1"),
+			).not.toHaveBeenCalled();
+		});
 	});
 });

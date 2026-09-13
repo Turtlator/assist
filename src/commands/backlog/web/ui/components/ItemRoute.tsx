@@ -1,5 +1,5 @@
 import { Box, CircularProgress } from "@mui/material";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useParams, useSearchParams } from "react-router";
 import { countRender } from "../../../../sessions/web/ui/renderCounters";
 import {
@@ -20,7 +20,10 @@ export function ItemRoute({ onReload }: { onReload: () => Promise<void> }) {
 	const [searchParams] = useSearchParams();
 	const cwdParam = searchParams.get("cwd") || undefined;
 	const selection = useRepoSelectionContext();
-	const value = cwdParam ? { ...selection, selectedCwd: cwdParam } : selection;
+	const value = useMemo(
+		() => (cwdParam ? { ...selection, selectedCwd: cwdParam } : selection),
+		[selection, cwdParam],
+	);
 	countRender("ItemRoute");
 
 	return (

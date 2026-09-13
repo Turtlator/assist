@@ -38,6 +38,32 @@ describe("ActiveSelection", () => {
 			expect(Object.keys(selection.toJSON())).toEqual(["/b", "/a"]);
 		});
 
+		describe("when the selection is unchanged", () => {
+			it("does not notify", () => {
+				const onChange = vi.fn();
+				const selection = new ActiveSelection(onChange);
+				selection.set("/repo", "2");
+				onChange.mockClear();
+
+				selection.set("/repo", "2");
+
+				expect(onChange).not.toHaveBeenCalled();
+			});
+
+			it("still notifies when another repo was selected since", () => {
+				const onChange = vi.fn();
+				const selection = new ActiveSelection(onChange);
+				selection.set("/a", "1");
+				selection.set("/b", "2");
+				onChange.mockClear();
+
+				selection.set("/a", "1");
+
+				expect(onChange).toHaveBeenCalledOnce();
+				expect(Object.keys(selection.toJSON())).toEqual(["/b", "/a"]);
+			});
+		});
+
 		describe("when the cwd is empty", () => {
 			it("does not persist", () => {
 				new ActiveSelection(() => {}).set("", "2");

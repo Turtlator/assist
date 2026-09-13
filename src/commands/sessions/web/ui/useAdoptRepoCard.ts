@@ -3,6 +3,7 @@ import { cardForRepo } from "./cardForRepo";
 import { findActiveSession } from "./findActiveSession";
 import { repoGroupCwd } from "./repoGroupKey";
 import type { HistoricalSession, SessionInfo } from "./types";
+import { useRouteDeselectsSession } from "./useRouteDeselectsSession";
 
 export function useAdoptRepoCard({
 	selectedCwd,
@@ -24,11 +25,20 @@ export function useAdoptRepoCard({
 	const inSelectedRepo = Boolean(selectedRepo && selectedRepo === selectedCwd);
 	const candidate = cardForRepo(activeByRepo, selectedCwd, sessions);
 	const lastCardId = useRef(selectedCardId);
+	const deselects = useRouteDeselectsSession();
 	useEffect(() => {
 		const newCardWillMoveRepo =
 			lastCardId.current !== selectedCardId && Boolean(selectedRepo);
 		lastCardId.current = selectedCardId;
-		if (newCardWillMoveRepo || inSelectedRepo || !candidate) return;
+		if (deselects || newCardWillMoveRepo || inSelectedRepo || !candidate)
+			return;
 		onSelect(candidate);
-	}, [selectedCardId, selectedRepo, inSelectedRepo, candidate, onSelect]);
+	}, [
+		selectedCardId,
+		selectedRepo,
+		inSelectedRepo,
+		candidate,
+		onSelect,
+		deselects,
+	]);
 }

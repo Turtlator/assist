@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { loadPersisted, savePersisted } from "./loadPersisted";
 import type { SidebarCollapse } from "./useSidebarCollapsedContext";
 
@@ -9,12 +9,16 @@ export function useSidebarCollapsed(): SidebarCollapse {
 		() => loadPersisted<true>(KEY).length > 0,
 	);
 
-	return {
-		collapsed,
-		onToggleCollapsed: () => {
-			const next = !collapsed;
+	const onToggleCollapsed = useCallback(() => {
+		setCollapsed((current) => {
+			const next = !current;
 			savePersisted(KEY, next ? [true] : []);
-			setCollapsed(next);
-		},
-	};
+			return next;
+		});
+	}, []);
+
+	return useMemo(
+		() => ({ collapsed, onToggleCollapsed }),
+		[collapsed, onToggleCollapsed],
+	);
 }
