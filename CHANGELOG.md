@@ -1,3 +1,10 @@
+## [0.643.1](https://github.com/staff0rd/assist/compare/v0.643.0...v0.643.1) (2026-09-13)
+
+
+### Bug Fixes
+
+* stop set-active render loop on backlog ([7b5870a](https://github.com/staff0rd/assist/commit/7b5870af11b462f6c8cab1487a63c777f1d682bd))
+
 # [0.643.0](https://github.com/staff0rd/assist/compare/v0.642.0...v0.643.0) (2026-09-13)
 
 
