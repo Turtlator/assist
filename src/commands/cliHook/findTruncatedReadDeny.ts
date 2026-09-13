@@ -1,106 +1,68 @@
+import {
+	matchApprovalGatedCommand,
+	matchUntruncatableRead,
+	TRUNCATOR_BINARIES,
+	type UntruncatableRead,
+} from "./matchUntruncatableRead";
+
 type HookDecision = {
 	permissionDecision: "allow" | "deny";
 	permissionDecisionReason: string;
 };
 
-type UntruncatableRead = { prefix: string; reason: string };
+function startsWithFilter(part: string, filters: string[]): boolean {
+	const binary = part.split(/\s+/)[0]?.split("/").pop() ?? "";
+	return filters.includes(binary);
+}
 
-function backlogRead(prefix: string): UntruncatableRead {
+function pipesToFilter(rawCommand: string, filters: string[]): boolean {
+	return new RegExp(`\\|\\s*(?:\\S*/)?(?:${filters.join("|")})\\b`).test(
+		rawCommand,
+	);
+}
+
+function namedFilters(filters: string[]): string {
+	return `${filters.slice(0, -1).join(", ")} or ${filters.at(-1)}`;
+}
+
+function readDecision(read: UntruncatableRead): HookDecision {
 	return {
-		prefix,
-		reason: `Plan, Activity and Comments print at the end of the output, so a truncated read drops them and leaves you assuming the item has none. Run '${prefix} <id>' bare and read all of it, or use a focused view: 'assist backlog comments <id>' for comments only.`,
+		permissionDecision: "deny",
+		permissionDecisionReason: `Do not pipe '${read.prefix}' through ${namedFilters(read.filters)}. ${read.reason}`,
 	};
 }
 
-const UNTRUNCATABLE_READS: UntruncatableRead[] = [
-	backlogRead("assist backlog show"),
-	backlogRead("assist backlog view"),
-	{
-		prefix: "assist verify",
-		reason:
-			"Verify already prints only what failed — under CLAUDECODE it suppresses every passing check — so there is nothing to trim and a truncated read drops the failing check's output, the only part worth reading, leaving you guessing at the failure. Run 'assist verify' bare and read all of it.",
-	},
-	{
-		prefix: "assist prs list-comments",
-		reason:
-			"Every unresolved thread prints in full above the resolved index, with its author, path:line, id, url and body, so a truncated read leaves you the one-line resolved index instead of the threads. Run 'assist prs list-comments' bare and read all of it — do not read or parse the YAML cache; fixed, wontfix and reply locate it themselves.",
-	},
-];
-
-const APPROVAL_GATED_COMMANDS = [
-	"assist backlog propose",
-	"assist backlog comment",
-	"assist backlog update-plan",
-	"assist backlog add-phase",
-	"assist github issue create",
-	"assist github issue edit",
-	"assist github issue comment",
-	"assist github issue edit-comment",
-	"assist slack post",
-	"assist prs raise",
-	"assist prs edit",
-	"assist prs comment",
-	"assist prs reply",
-	"assist prs wontfix",
-	"assist miro extract",
-];
-
-const TRUNCATOR_BINARIES = ["head", "tail"];
-
-const PIPED_TRUNCATOR_RE = /\|\s*(?:\S*\/)?(?:head|tail)\b/;
-
-function hasPrefix(prefix: string, part: string): boolean {
-	return part === prefix || part.startsWith(`${prefix} `);
-}
-
-function matchRead(part: string): UntruncatableRead | undefined {
-	return UNTRUNCATABLE_READS.find((entry) => hasPrefix(entry.prefix, part));
-}
-
-function matchGated(part: string): string | undefined {
-	return APPROVAL_GATED_COMMANDS.find((prefix) => hasPrefix(prefix, part));
-}
-
-function startsWithTruncator(part: string): boolean {
-	const binary = part.split(/\s+/)[0]?.split("/").pop() ?? "";
-	return TRUNCATOR_BINARIES.includes(binary);
-}
-
-function toDecision(
-	read: UntruncatableRead | undefined,
-	gated: string | undefined,
-): HookDecision | undefined {
-	if (read)
-		return {
-			permissionDecision: "deny",
-			permissionDecisionReason: `Do not pipe '${read.prefix}' through head or tail. ${read.reason}`,
-		};
-
-	if (gated)
-		return {
-			permissionDecision: "deny",
-			permissionDecisionReason: `Do not pipe '${gated}' through head or tail. It gates on a preview the reviewer can reject with inline comments, and those comments print at the end of the output. Nothing persists them, so a truncated read discards the reviewer's feedback for good and they have to retype it. Run '${gated}' bare and read all of it.`,
-		};
-
-	return undefined;
+function gatedDecision(gated: string): HookDecision {
+	return {
+		permissionDecision: "deny",
+		permissionDecisionReason: `Do not pipe '${gated}' through head or tail. It gates on a preview the reviewer can reject with inline comments, and those comments print at the end of the output. Nothing persists them, so a truncated read discards the reviewer's feedback for good and they have to retype it. Run '${gated}' bare and read all of it.`,
+	};
 }
 
 export function findTruncatedReadDeny(
 	parts: string[],
 ): HookDecision | undefined {
-	if (!parts.some(startsWithTruncator)) return undefined;
+	const read = parts.map(matchUntruncatableRead).find(Boolean);
+	if (read && parts.some((part) => startsWithFilter(part, read.filters)))
+		return readDecision(read);
 
-	return toDecision(
-		parts.map(matchRead).find(Boolean),
-		parts.map(matchGated).find(Boolean),
-	);
+	const gated = parts.map(matchApprovalGatedCommand).find(Boolean);
+	if (gated && parts.some((part) => startsWithFilter(part, TRUNCATOR_BINARIES)))
+		return gatedDecision(gated);
+
+	return undefined;
 }
 
 export function findTruncatedReadDenyRaw(
 	rawCommand: string,
 ): HookDecision | undefined {
-	if (!startsWithTruncator(rawCommand) && !PIPED_TRUNCATOR_RE.test(rawCommand))
-		return undefined;
+	const read = matchUntruncatableRead(rawCommand);
+	if (read && pipesToFilter(rawCommand, read.filters))
+		return readDecision(read);
 
-	return toDecision(matchRead(rawCommand), matchGated(rawCommand));
+	const gated = matchApprovalGatedCommand(rawCommand);
+	if (gated && pipesToFilter(rawCommand, TRUNCATOR_BINARIES))
+		return gatedDecision(gated);
+
+	return undefined;
 }

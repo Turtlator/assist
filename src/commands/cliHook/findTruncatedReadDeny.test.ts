@@ -122,7 +122,7 @@ describe("findTruncatedReadDeny", () => {
 
 		expect(decision?.permissionDecision).toBe("deny");
 		expect(decision?.permissionDecisionReason).toBe(
-			"Do not pipe 'assist verify' through head or tail. Verify already prints only what failed — under CLAUDECODE it suppresses every passing check — so there is nothing to trim and a truncated read drops the failing check's output, the only part worth reading, leaving you guessing at the failure. Run 'assist verify' bare and read all of it.",
+			"Do not pipe 'assist verify' through head, tail, grep, rg or wc. Verify already prints only what failed — under CLAUDECODE it suppresses every passing check — so there is nothing to trim or search for and a narrowed read drops the failing check's output, the only part worth reading, leaving you guessing at the failure. Run 'assist verify' bare and read all of it.",
 		);
 	});
 
@@ -163,8 +163,39 @@ describe("findTruncatedReadDeny", () => {
 		).toBe("deny");
 	});
 
+	it.each([
+		["assist verify all", "grep -i error"],
+		["assist verify", "rg error"],
+		["assist verify", "wc -l"],
+	])("denies %s narrowed by %s", (command, filter) => {
+		expect(findTruncatedReadDeny([command, filter])?.permissionDecision).toBe(
+			"deny",
+		);
+	});
+
+	it("denies a raw verify command narrowed by grep", () => {
+		expect(
+			findTruncatedReadDenyRaw("assist verify 2>&1 | grep -i error")
+				?.permissionDecision,
+		).toBe("deny");
+	});
+
 	it("allows a bare verify", () => {
 		expect(findTruncatedReadDeny(["assist verify"])).toBeUndefined();
+	});
+
+	it.each([
+		["assist backlog show a930", "grep knip"],
+		["assist prs list-comments", "grep src/"],
+		["assist backlog view a930", "wc -l"],
+	])("allows %s narrowed by %s", (command, filter) => {
+		expect(findTruncatedReadDeny([command, filter])).toBeUndefined();
+	});
+
+	it("allows a raw backlog show narrowed by grep", () => {
+		expect(
+			findTruncatedReadDenyRaw("assist backlog show a930 2>&1 | grep knip"),
+		).toBeUndefined();
 	});
 
 	it("does not match a command that merely mentions the read as an argument", () => {
