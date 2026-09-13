@@ -1,4 +1,5 @@
 import { type CSSProperties, useEffect, useRef } from "react";
+import { copyRenderRates } from "./copyRenderRates";
 import { renderCounters } from "./renderCounters";
 import { formatRenderRates, sampleRenderRates } from "./sampleRenderRates";
 import { useRenderHudEnabled } from "./useRenderHudEnabled";
@@ -17,10 +18,12 @@ const hudStyle: CSSProperties = {
 	borderRadius: 4,
 	whiteSpace: "pre",
 	cursor: "pointer",
+	userSelect: "none",
 };
 
 export function RenderRateHud() {
 	const ref = useRef<HTMLDivElement | null>(null);
+	const text = useRef("");
 	const enabled = useRenderHudEnabled();
 
 	useEffect(() => {
@@ -38,7 +41,8 @@ export function RenderRateHud() {
 			);
 			previous = new Map(renderCounters);
 			sampledAt = now;
-			if (ref.current) ref.current.textContent = formatRenderRates(rates);
+			text.current = formatRenderRates(rates);
+			if (ref.current) ref.current.textContent = text.current;
 		});
 		return () => cancelAnimationFrame(frame);
 	}, [enabled]);
@@ -49,8 +53,9 @@ export function RenderRateHud() {
 		<div
 			ref={ref}
 			style={hudStyle}
-			onClick={() => renderCounters.clear()}
-			onKeyDown={() => renderCounters.clear()}
+			title="Click to copy"
+			onClick={() => copyRenderRates(ref.current, text.current)}
+			onKeyDown={() => copyRenderRates(ref.current, text.current)}
 		/>
 	);
 }

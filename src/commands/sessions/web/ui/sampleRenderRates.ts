@@ -28,5 +28,5 @@ export function formatRenderRates(rates: RenderRate[]): string {
 		(rate) =>
 			`${rate.label.padEnd(width)} ${rate.perSecond.toFixed(0).padStart(4)}/s ${String(rate.total).padStart(6)}`,
 	);
-	return ["renders/s  total (click to reset)", ...lines].join("\n");
+	return ["renders/s  total (click to copy)", ...lines].join("\n");
 }
