@@ -30,6 +30,20 @@ describe("withReviewPhase", () => {
 		]);
 	});
 
+	it("renders one Review phase when the stored plan already ends with one", () => {
+		const item = makeItem({
+			plan: [
+				{ name: "Fix", tasks: [{ task: "patch it" }] },
+				{ name: REVIEW_PHASE_NAME, tasks: [{ task: "check it" }] },
+			],
+		});
+
+		expect(withReviewPhase(item).plan?.map((p) => p.name)).toEqual([
+			"Fix",
+			REVIEW_PHASE_NAME,
+		]);
+	});
+
 	it("leaves a plan-less item unchanged", () => {
 		const item = makeItem();
 

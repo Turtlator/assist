@@ -100,6 +100,26 @@ describe("readProposedItem", () => {
 		expect(errorSpy.mock.calls.join("\n")).toContain("at least one task");
 	});
 
+	it("exits non-zero when a phase is named Review", async () => {
+		const errorSpy = expectFailure();
+
+		await expect(
+			readProposedItem(
+				writePayload({
+					name: "n",
+					type: "story",
+					phases: [
+						{ name: "Fix", tasks: ["t"] },
+						{ name: "review", tasks: ["verify it"] },
+					],
+				}),
+			),
+		).rejects.toThrow("process.exit");
+		expect(errorSpy.mock.calls.join("\n")).toContain(
+			"appended to every plan automatically",
+		);
+	});
+
 	it("exits non-zero on an unknown field inside a phase", async () => {
 		const errorSpy = expectFailure();
 

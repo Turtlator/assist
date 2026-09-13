@@ -1,4 +1,4 @@
-import { buildReviewPhase } from "./buildReviewPhase";
+import { appendReviewPhase } from "./appendReviewPhase";
 import { resolvePlan } from "./resolvePlan";
 import type { BacklogItem, PlanPhase } from "./types";
 
@@ -9,5 +9,5 @@ import type { BacklogItem, PlanPhase } from "./types";
  * phases at runtime, so rewind validation matches the phases the runner produced.
  */
 export function resolveRewindPlan(item: BacklogItem): PlanPhase[] {
-	return [...resolvePlan(item), buildReviewPhase()];
+	return appendReviewPhase(resolvePlan(item));
 }

@@ -79,7 +79,7 @@ Two tests for each phase before proposing the plan:
 
 Keep phases small (2-4 tasks each). A typical item should have 2-3 phases.
 
-Most phases should NOT have manual checks. Only add `manualChecks` to a phase when the checks are genuinely difficult to automate (e.g. visual appearance, UX flow, hardware interaction). Do not add a final phase just for end-to-end verification — a review phase is auto-appended at runtime.
+Most phases should NOT have manual checks. Only add `manualChecks` to a phase when the checks are genuinely difficult to automate (e.g. visual appearance, UX flow, hardware interaction). Do not add a final phase just for end-to-end verification — a `Review` phase is appended to every plan automatically, and authoring one is rejected.
 
 ## Step 4: Propose the item
 
@@ -100,7 +100,7 @@ cat <<'JSON' | assist backlog propose --json - 2>&1
 JSON
 ```
 
-The payload is strict JSON — an unknown key is an error. `\n` inside the `description` string is a JSON escape and becomes a real newline, which is what the markdown rendering needs. Each phase needs at least one task; omit `manualChecks` for the phases that don't need any (most of them).
+The payload is strict JSON — an unknown key is an error. `\n` inside the `description` string is a JSON escape and becomes a real newline, which is what the markdown rendering needs. Each phase needs at least one task; omit `manualChecks` for the phases that don't need any (most of them). A phase named `Review` is rejected: the runner appends that phase itself.
 
 Always run `propose` **as a background task**, and do no other work until it returns. In a web session it blocks on the preview pane until the user decides, which can take far longer than the default command timeout, and the pending preview dies with the process — a killed `propose` abandons the item.
 

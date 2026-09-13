@@ -60,7 +60,7 @@ cat <<'JSON' | assist backlog update-plan <id> --json - 2>&1
 JSON
 ```
 
-The payload is the whole plan, not a patch: every phase you want the item to end up with, in order, each with all of its tasks. Take the current plan from `assist backlog view <id>`, apply the user's changes to it, and send the result — a phase you leave out is removed, and reordering is just sending the phases in a different order. The payload is strict JSON, so an unknown key is an error, and each phase needs at least one task. Omit `manualChecks` for phases that don't need any (most of them).
+The payload is the whole plan, not a patch: every phase you want the item to end up with, in order, each with all of its tasks. Take the current plan from `assist backlog view <id>`, apply the user's changes to it, and send the result — a phase you leave out is removed, and reordering is just sending the phases in a different order. The payload is strict JSON, so an unknown key is an error, and each phase needs at least one task. Omit `manualChecks` for phases that don't need any (most of them). A phase named `Review` is rejected: the runner appends that phase itself, so it is never part of the stored plan.
 
 Do not chain `add-phase`, `update-phase`, `remove-phase` and `move-phase` calls to build up a change — that is one preview per command and leaves the item half-edited if the user rejects part way. Those commands remain for a human typing a quick one-liner at a terminal.
 

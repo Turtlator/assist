@@ -55,6 +55,8 @@ The backlog preview is text plus inline comments only. It has no screenshot atta
 
 Each phase is `{ name, tasks, manualChecks }`. `name` and every task are non-empty after trimming, `tasks` needs at least one entry, and `manualChecks` defaults to `[]` — most phases have none.
 
+A phase named `Review` (in any casing) is rejected. The runner appends its own `Review` phase to every plan, so an authored one is stored on top of it and the item runs and renders two. The same rule applies to `update-plan`, which validates phases with the same schema.
+
 `phases` and a bug's default `Fix` phase are mutually exclusive: when the payload carries phases they are the plan, and the default is only applied to a `bug` proposed with no phases, matching what `assist backlog add` does.
 
 ## Wire protocol

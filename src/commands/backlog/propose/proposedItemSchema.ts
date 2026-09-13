@@ -1,7 +1,15 @@
 import { z } from "zod";
+import { REVIEW_PHASE_NAME } from "../buildPhasePrompt";
 
 export const proposedPhaseSchema = z.strictObject({
-	name: z.string().trim().min(1, "phase name is required"),
+	name: z
+		.string()
+		.trim()
+		.min(1, "phase name is required")
+		.refine(
+			(name) => name.toLowerCase() !== REVIEW_PHASE_NAME.toLowerCase(),
+			`"${REVIEW_PHASE_NAME}" is owned by the runner and appended to every plan automatically — remove this phase`,
+		),
 	tasks: z
 		.array(z.string().trim().min(1))
 		.min(1, "a phase needs at least one task"),

@@ -3,6 +3,7 @@ import { add as backlogAdd } from "./add";
 import { addPhase as backlogAddPhase } from "./addPhase";
 import { list as backlogList } from "./list";
 import { propose as backlogPropose } from "./propose";
+import { proposeHelpText } from "./propose/proposeHelpText";
 
 export function registerItemCommands(cmd: Command): void {
 	cmd
@@ -43,6 +44,7 @@ export function registerItemCommands(cmd: Command): void {
 			"--confirmed",
 			"Create the item after its draft has been reviewed in chat (agent use outside a web session)",
 		)
+		.addHelpText("after", `\n${proposeHelpText}`)
 		.action(backlogPropose);
 
 	cmd
