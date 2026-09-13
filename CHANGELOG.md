@@ -1,3 +1,10 @@
+# [0.640.0](https://github.com/staff0rd/assist/compare/v0.639.1...v0.640.0) (2026-09-13)
+
+
+### Features
+
+* deny narrowing verify output ([2ba7cb7](https://github.com/staff0rd/assist/commit/2ba7cb75c188d4da250bb1f815df9160510da1e1))
+
 ## [0.639.1](https://github.com/staff0rd/assist/compare/v0.639.0...v0.639.1) (2026-09-13)
 
 
