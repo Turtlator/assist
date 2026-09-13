@@ -1,3 +1,10 @@
+# [0.639.0](https://github.com/staff0rd/assist/compare/v0.638.0...v0.639.0) (2026-09-13)
+
+
+### Features
+
+* deny piping verify to head or tail ([c768bf1](https://github.com/staff0rd/assist/commit/c768bf1fa2366d266bce5c6208d5e39cdc21e0f8))
+
 # [0.638.0](https://github.com/staff0rd/assist/compare/v0.637.0...v0.638.0) (2026-09-11)
 
 
