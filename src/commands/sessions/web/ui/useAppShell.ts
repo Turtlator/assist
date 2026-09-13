@@ -1,3 +1,4 @@
+import { trackChangedValues } from "./trackChangedValues";
 import { useAdoptRepoCard } from "./useAdoptRepoCard";
 import { useRepoSelection } from "./useRepoSelection";
 import { useSessionLaunch } from "./useSessionLaunch";
@@ -25,6 +26,13 @@ export function useAppShell() {
 	const { launch, viewLaunchedSession } = useSessionLaunch(socket);
 	const topBar = useTopBarLayout();
 	const sidebarCollapse = useSidebarCollapsed();
+	trackChangedValues("shell", {
+		...socket,
+		selection,
+		launch,
+		topBar,
+		sidebarCollapse,
+	});
 
 	return {
 		socket,
