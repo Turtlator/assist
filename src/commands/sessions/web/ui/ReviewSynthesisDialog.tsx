@@ -1,12 +1,12 @@
 import {
-	Box,
 	Button,
 	Dialog,
 	DialogActions,
 	DialogContent,
 	DialogTitle,
 } from "@mui/material";
-import { marked } from "marked";
+import { MarkdownHtml } from "../../../backlog/web/ui/components/MarkdownHtml";
+import { renderMarkdown } from "../../../backlog/web/ui/components/renderMarkdown";
 
 export function ReviewSynthesisDialog({
 	content,
@@ -19,7 +19,7 @@ export function ReviewSynthesisDialog({
 		<Dialog open onClose={onClose} maxWidth="md" fullWidth>
 			<DialogTitle>Review synthesis</DialogTitle>
 			<DialogContent dividers>
-				<Box
+				<MarkdownHtml
 					className="markdown"
 					sx={{
 						lineHeight: 1.7,
@@ -27,9 +27,7 @@ export function ReviewSynthesisDialog({
 						"& a": { color: "primary.main" },
 						wordBreak: "break-word",
 					}}
-					dangerouslySetInnerHTML={{
-						__html: marked.parse(content) as string,
-					}}
+					html={renderMarkdown(content)}
 				/>
 			</DialogContent>
 			<DialogActions>

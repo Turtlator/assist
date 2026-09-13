@@ -34,6 +34,14 @@ function wrapRange(root: Node, range: Range, color: string): void {
 	for (const t of targets) wrapWithinNode(t.node, t.start, t.end, color);
 }
 
+export function clearHighlights(root: HTMLElement): void {
+	for (const mark of root.querySelectorAll("mark.pr-comment")) {
+		if (!mark.parentNode) continue;
+		while (mark.firstChild) mark.before(mark.firstChild);
+		mark.remove();
+	}
+}
+
 export function applyHighlights(
 	root: HTMLElement,
 	ranges: ColoredOffsets[],
