@@ -1,3 +1,10 @@
+# [0.641.0](https://github.com/staff0rd/assist/compare/v0.640.1...v0.641.0) (2026-09-13)
+
+
+### Features
+
+* add render-rate HUD for web UI ([d3b9c1a](https://github.com/staff0rd/assist/commit/d3b9c1afe6851daa15cda62f18b96f450c80cbd1))
+
 ## [0.640.1](https://github.com/staff0rd/assist/compare/v0.640.0...v0.640.1) (2026-09-13)
 
 
