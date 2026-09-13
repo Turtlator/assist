@@ -1,6 +1,7 @@
 import { Box, CircularProgress } from "@mui/material";
 import { useCallback } from "react";
 import { useParams, useSearchParams } from "react-router";
+import { countRender } from "../../../../sessions/web/ui/renderCounters";
 import {
 	RepoSelectionContext,
 	useRepoSelectionContext,
@@ -20,6 +21,7 @@ export function ItemRoute({ onReload }: { onReload: () => Promise<void> }) {
 	const cwdParam = searchParams.get("cwd") || undefined;
 	const selection = useRepoSelectionContext();
 	const value = cwdParam ? { ...selection, selectedCwd: cwdParam } : selection;
+	countRender("ItemRoute");
 
 	return (
 		<RepoSelectionContext.Provider value={value}>

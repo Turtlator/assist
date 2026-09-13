@@ -1,5 +1,6 @@
 import { Box } from "@mui/material";
 import { useNavigate } from "react-router";
+import { countRender } from "../../../../sessions/web/ui/renderCounters";
 import { updateItemStatus, updateSubtaskStatus } from "../api";
 import type { BacklogItem, SubtaskStatus } from "../types";
 import { useRepoCwd } from "../useRepoCwd";
@@ -15,6 +16,7 @@ type ItemDetailProps = {
 export function ItemDetail({ item, onReload }: ItemDetailProps) {
 	const navigate = useNavigate();
 	const cwd = useRepoCwd();
+	countRender("ItemDetail");
 	const handleDeleted = async () => {
 		await onReload();
 		navigate("/backlog");
