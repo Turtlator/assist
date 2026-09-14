@@ -9,6 +9,7 @@ import {
 } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { ScopedRule } from "../../../rules/types";
 import { FileView } from "./FileView";
 import type { SessionInfo } from "./types";
 import { RepoSelectionContext } from "./useRepoSelectionContext";
@@ -33,7 +34,7 @@ type CaretDoc = {
 
 vi.mock("../../../backlog/web/ui/components/MarkdownBlock", () => ({
 	MarkdownBlock: ({ content }: { content: string }) => (
-		<div data-testid="markdown">{content}</div>
+		<div data-testid="markdown">{content.replaceAll("**", "")}</div>
 	),
 }));
 
@@ -74,10 +75,16 @@ type SaveResponse = {
 
 const LOADED_MTIME = 1000;
 
-function stubContent(content: string, save?: SaveResponse) {
-	const fetchMock = vi.fn(async (_url: string, init?: RequestInit) => {
+function stubContent(
+	content: string,
+	save?: SaveResponse,
+	rules: ScopedRule[] = [],
+) {
+	const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
 		if (init?.method === "POST" && save)
 			return { ok: save.ok, status: save.status, json: async () => save.body };
+		if (url.startsWith("/api/rules"))
+			return { ok: true, status: 200, json: async () => ({ rules }) };
 		return {
 			ok: true,
 			status: 200,
@@ -495,7 +502,8 @@ describe("FileView", () => {
 	});
 });
 
-const DOC = "# Notes\n\nThe first paragraph\nwraps over two lines.\n";
+const DOC =
+	"# Notes\n\nThe first paragraph\nwraps over two lines.\n\nA **bold** claim here.\n";
 
 const liveSession = {
 	id: "daemon-1",
@@ -535,8 +543,9 @@ function selectQuote(text: string) {
 
 async function openRendered(
 	comments: Parameters<typeof renderView>[2],
+	rules: ScopedRule[] = [],
 ): Promise<void> {
-	stubContent(DOC);
+	stubContent(DOC, undefined, rules);
 	renderView("/file?path=docs/notes.md", "/repo", comments);
 	await screen.findByTestId("editor");
 	fireEvent.click(screen.getByRole("button", { name: "Rendered" }));
@@ -584,6 +593,40 @@ describe("FileView comments in rendered mode", () => {
 		await waitFor(() =>
 			expect(sendInput).toHaveBeenLastCalledWith("daemon-1", "\r"),
 		);
+	});
+
+	it("carries the path alone when the quote is not in the raw file", async () => {
+		const sendInput = vi.fn();
+		await openRendered({
+			sessions: [liveSession],
+			cardId: "daemon-1",
+			sendInput,
+		});
+
+		selectQuote("bold claim");
+		note("say which claim");
+		fireEvent.click(screen.getByRole("button", { name: "Add comment" }));
+
+		const data = sendInput.mock.calls[0]?.[1] as string;
+		expect(data).toContain("docs/notes.md\r");
+		expect(data).not.toContain("docs/notes.md:");
+		expect(data).toContain("bold claim");
+		expect(data).toContain("say which claim");
+	});
+
+	it("cites a scoped rule against the located lines", async () => {
+		const sendInput = vi.fn();
+		await openRendered(
+			{ sessions: [liveSession], cardId: "daemon-1", sendInput },
+			[{ code: "R1", text: "Keep it tight", source: "CLAUDE.md" }],
+		);
+
+		selectQuote("first paragraph");
+		fireEvent.click(await screen.findByText("R1"));
+
+		const data = sendInput.mock.calls[0]?.[1] as string;
+		expect(data).toContain("docs/notes.md:3");
+		expect(data).toContain("breaks rule R1 (CLAUDE.md) — Keep it tight");
 	});
 
 	it("offers add rule alongside the note", async () => {
