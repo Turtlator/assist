@@ -1,3 +1,10 @@
+## [0.645.1](https://github.com/staff0rd/assist/compare/v0.645.0...v0.645.1) (2026-09-14)
+
+
+### Bug Fixes
+
+* review findings post without preview ([3d4d66c](https://github.com/staff0rd/assist/commit/3d4d66c1e721ad8e4fc23b9724482abb1961eea4))
+
 # [0.645.0](https://github.com/staff0rd/assist/compare/v0.644.1...v0.645.0) (2026-09-14)
 
 
