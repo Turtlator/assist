@@ -1,3 +1,10 @@
+# [0.645.0](https://github.com/staff0rd/assist/compare/v0.644.1...v0.645.0) (2026-09-14)
+
+
+### Features
+
+* config search matches descriptions ([e6d3257](https://github.com/staff0rd/assist/commit/e6d32578b60eec8461aa8f5d92f1ad9b6f27a145))
+
 ## [0.644.1](https://github.com/staff0rd/assist/compare/v0.644.0...v0.644.1) (2026-09-14)
 
 
