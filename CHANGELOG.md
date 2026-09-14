@@ -1,3 +1,10 @@
+## [0.643.5](https://github.com/staff0rd/assist/compare/v0.643.4...v0.643.5) (2026-09-14)
+
+
+### Bug Fixes
+
+* codex 0.154 provider overrides ([7a5a8a6](https://github.com/staff0rd/assist/commit/7a5a8a6a8eee394223402d4660c9248dbfec5c6e))
+
 ## [0.643.4](https://github.com/staff0rd/assist/compare/v0.643.3...v0.643.4) (2026-09-13)
 
 
