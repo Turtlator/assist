@@ -1,3 +1,10 @@
+# [0.646.0](https://github.com/staff0rd/assist/compare/v0.645.1...v0.646.0) (2026-09-14)
+
+
+### Features
+
+* comment on rendered files ([85b0a0b](https://github.com/staff0rd/assist/commit/85b0a0b569a1d1c392ad2613adaac4d6f79cef67))
+
 ## [0.645.1](https://github.com/staff0rd/assist/compare/v0.645.0...v0.645.1) (2026-09-14)
 
 
