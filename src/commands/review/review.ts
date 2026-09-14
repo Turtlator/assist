@@ -3,6 +3,7 @@ import { findRepoRoot } from "../../shared/findRepoRoot";
 import { checkoutOnlySession } from "./checkoutOnlySession";
 import { checkoutPr } from "./checkoutPr";
 import { reviewPr } from "./reviewPr";
+import { startReviewLog } from "./startReviewLog";
 
 export type ReviewOptions = {
 	prompt?: boolean;
@@ -55,6 +56,7 @@ function validateCheckoutOnly(options: ReviewOptions): void {
 
 export async function review(options: ReviewOptions = {}): Promise<void> {
 	validateOptions(options);
+	startReviewLog();
 	const invokedIn = resolveRepoRoot();
 	if (options.checkoutOnly && options.number)
 		return checkoutOnlySession(options.number);

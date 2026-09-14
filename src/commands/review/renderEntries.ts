@@ -35,7 +35,7 @@ export function renderEntries(entries: SpinnerEntry[], frame: number): string {
 	return sorted.map((e) => renderEntry(e, frame)).join("\n");
 }
 
-function renderEntry(entry: SpinnerEntry, frame: number): string {
+export function renderEntry(entry: SpinnerEntry, frame: number): string {
 	if (entry.state === "succeeded") return `✔ ${entry.text}`;
 	if (entry.state === "failed") return `✖ ${entry.text}`;
 	return `${SPINNER_FRAMES[frame]} ${entry.text}`;

@@ -1,10 +1,12 @@
 import { createLogUpdate } from "log-update";
 import {
 	renderEntries,
+	renderEntry,
 	SPINNER_FRAMES,
 	type SpinnerEntry,
 	type SpinnerState,
 } from "./renderEntries";
+import { appendReviewLog } from "./startReviewLog";
 
 export type SpinnerHandle = {
 	text: string;
@@ -65,6 +67,7 @@ export class MultiSpinner {
 		entry.state = state;
 		if (text !== undefined) entry.text = text;
 		entry.elapsedStart = undefined;
+		appendReviewLog(renderEntry(entry, 0));
 		this.render();
 		this.maybeFinish();
 	}

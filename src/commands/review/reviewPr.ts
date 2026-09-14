@@ -6,6 +6,7 @@ import { handlePostSynthesis } from "./handlePostSynthesis";
 import type { PrDiffRef } from "./postReviewToPr";
 import { prepareReviewDir } from "./prepareReviewDir";
 import { runReviewPipeline } from "./runReviewPipeline";
+import { attachReviewLog } from "./startReviewLog";
 
 type ReviewPrOptions = {
 	prompt?: boolean;
@@ -71,6 +72,7 @@ export async function reviewPr(
 ): Promise<void> {
 	const context = gatherChangedContext();
 	const paths = setupReviewDir(repoRoot, context, options.force ?? false);
+	attachReviewLog(paths.reviewDir);
 	const synthesisOk = await runReviewPipeline(paths, {
 		verbose: options.verbose ?? false,
 	});
