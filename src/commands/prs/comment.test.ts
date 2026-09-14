@@ -94,11 +94,23 @@ describe("comment preview", () => {
 		vi.spyOn(console, "log").mockImplementation(() => {});
 		mockRequestPreviewDecision.mockResolvedValue({ decision: "approve" });
 
-		await comment("src/foo.ts", 42, "body", 40);
+		await comment("src/foo.ts", 42, "body", { startLine: 40 });
 
 		expect(mockRequestPreviewDecision).toHaveBeenCalledWith(
 			expect.objectContaining({ title: "Comment on src/foo.ts:40-42" }),
 		);
+	});
+
+	it("skips the preview in a web session when the caller opts out", async () => {
+		process.env.ASSIST_SESSION = "1";
+		process.env.ASSIST_SESSION_ID = "s1";
+		runGhGraphql.mockReturnValue(threadCreated());
+		vi.spyOn(console, "log").mockImplementation(() => {});
+
+		await comment("src/foo.ts", 42, "body", { skipPreview: true });
+
+		expect(mockRequestPreviewDecision).not.toHaveBeenCalled();
+		expect(runGhGraphql).toHaveBeenCalled();
 	});
 
 	it("exits non-zero without posting when the preview is rejected", async () => {

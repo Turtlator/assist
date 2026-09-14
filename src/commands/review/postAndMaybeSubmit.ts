@@ -48,7 +48,7 @@ export async function postAndMaybeSubmit(
 	markdown: string,
 	options: PostAndMaybeSubmitOptions,
 ): Promise<PostOutcome> {
-	const result = postFindings(lineBound);
+	const result = await postFindings(lineBound);
 	const failedSuffix = result.failed > 0 ? `, ${result.failed} failed` : "";
 	console.log(`Posted ${result.posted} comment(s)${failedSuffix}.`);
 	const carried = carriedUnanchoredFindings(unanchored);

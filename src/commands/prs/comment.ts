@@ -17,18 +17,25 @@ function validateLine(line: number): void {
 	}
 }
 
+type CommentOptions = {
+	startLine?: number;
+	skipPreview?: boolean;
+};
+
 export async function comment(
 	path: string,
 	line: number,
 	body: string,
-	startLine?: number,
+	options: CommentOptions = {},
 ): Promise<void> {
+	const { startLine, skipPreview } = options;
 	validateBody(body);
 	validateLine(line);
 	if (startLine !== undefined) validateLine(startLine);
 
 	const range = startLine !== undefined ? `${startLine}-${line}` : `${line}`;
-	await reviewProposedPrComment(`Comment on ${path}:${range}`, body, null);
+	if (!skipPreview)
+		await reviewProposedPrComment(`Comment on ${path}:${range}`, body, null);
 
 	try {
 		const prId = getCurrentPrNodeId();

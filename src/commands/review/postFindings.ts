@@ -17,13 +17,18 @@ type PostFindingsResult = {
 	failed: number;
 };
 
-export function postFindings(findings: LineBoundFinding[]): PostFindingsResult {
+export async function postFindings(
+	findings: LineBoundFinding[],
+): Promise<PostFindingsResult> {
 	let posted = 0;
 	let failed = 0;
 	for (const finding of findings) {
 		const body = buildCommentBody(finding);
 		try {
-			comment(finding.file, finding.line, body, finding.startLine);
+			await comment(finding.file, finding.line, body, {
+				startLine: finding.startLine,
+				skipPreview: true,
+			});
 			posted++;
 		} catch (error) {
 			failed++;
