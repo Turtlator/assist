@@ -1,3 +1,11 @@
+# [0.644.0](https://github.com/staff0rd/assist/compare/v0.643.5...v0.644.0) (2026-09-14)
+
+
+### Features
+
+* cap video uploads at 10MB ([47b6044](https://github.com/staff0rd/assist/commit/47b6044b18af44410b9ca43be4692d6e7c36bb89))
+* log review output to review.log ([a68b4d1](https://github.com/staff0rd/assist/commit/a68b4d13be82309ada532aac54946d6a5241833e))
+
 ## [0.643.5](https://github.com/staff0rd/assist/compare/v0.643.4...v0.643.5) (2026-09-14)
 
 
