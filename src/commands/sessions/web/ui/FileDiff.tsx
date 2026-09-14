@@ -22,6 +22,8 @@ export function FileDiff({
 	collapsed,
 	onToggle,
 	onComment,
+	onFileComment,
+	commentUnavailable,
 	onAddRule,
 }: FileDiffProps) {
 	const [previewOpen, setPreviewOpen] = useState(false);
@@ -43,6 +45,9 @@ export function FileDiff({
 				<MarkdownPreviewDialog
 					cwd={cwd}
 					path={path}
+					onComment={onFileComment}
+					onAddRule={onAddRule}
+					unavailable={commentUnavailable}
 					onClose={() => setPreviewOpen(false)}
 				/>
 			)}

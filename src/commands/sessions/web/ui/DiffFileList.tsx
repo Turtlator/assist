@@ -5,6 +5,7 @@ import { diffSx } from "./diffSx";
 import { FileDiff, filePath } from "./FileDiff";
 import type { AddRuleRequest } from "./formatAddRuleCommand";
 import type { DiffComment } from "./formatDiffComment";
+import type { FileComment } from "./formatFileComment";
 
 export type DiffFileListProps = {
 	files: FileData[];
@@ -13,6 +14,8 @@ export type DiffFileListProps = {
 	isCollapsed: (path: string) => boolean;
 	onToggleCollapsed: (path: string) => void;
 	onComment?: (comment: DiffComment) => void;
+	onFileComment?: (comment: FileComment) => void;
+	commentUnavailable?: string | undefined;
 	onAddRule?: (request: AddRuleRequest) => void;
 	emptyMessage: string;
 };
@@ -24,6 +27,8 @@ export function DiffFileList({
 	isCollapsed,
 	onToggleCollapsed,
 	onComment,
+	onFileComment,
+	commentUnavailable,
 	onAddRule,
 	emptyMessage,
 }: DiffFileListProps) {
@@ -45,6 +50,8 @@ export function DiffFileList({
 					collapsed={isCollapsed(filePath(file))}
 					onToggle={() => onToggleCollapsed(filePath(file))}
 					onComment={onComment}
+					onFileComment={onFileComment}
+					commentUnavailable={commentUnavailable}
 					onAddRule={onAddRule}
 				/>
 			))}

@@ -13,7 +13,7 @@ export function FileCommentPopover({
 	onCancel,
 }: {
 	pending: PendingComment | null;
-	cwd: string;
+	cwd: string | undefined;
 	path: string;
 	unavailable: string | undefined;
 	onAdd: (note: string) => void;

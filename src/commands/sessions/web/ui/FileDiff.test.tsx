@@ -9,7 +9,21 @@ vi.mock("./FileDiffBody", () => ({
 }));
 
 vi.mock("./MarkdownPreviewDialog", () => ({
-	MarkdownPreviewDialog: () => <div>preview dialog</div>,
+	MarkdownPreviewDialog: ({
+		onComment,
+		unavailable,
+	}: {
+		onComment?: (comment: unknown) => void;
+		unavailable?: string;
+	}) => (
+		<div
+			data-testid="preview"
+			data-commentable={onComment ? "true" : "false"}
+			data-unavailable={unavailable ?? ""}
+		>
+			preview dialog
+		</div>
+	),
 }));
 
 afterEach(cleanup);
@@ -94,5 +108,41 @@ describe("FileDiff", () => {
 		fireEvent.click(screen.getByText("docs/notes.md"));
 
 		expect(onToggle).toHaveBeenCalledOnce();
+	});
+
+	it("hands the preview the file comment sender", () => {
+		render(
+			<FileDiff
+				file={markdownFile("modify")}
+				viewType="unified"
+				cwd="/repo"
+				collapsed={false}
+				onToggle={() => {}}
+				onFileComment={vi.fn()}
+			/>,
+		);
+
+		fireEvent.click(screen.getByRole("button", previewName));
+
+		expect(screen.getByTestId("preview").dataset.commentable).toBe("true");
+	});
+
+	it("hands the preview the reason commenting is unavailable", () => {
+		render(
+			<FileDiff
+				file={markdownFile("modify")}
+				viewType="unified"
+				cwd="/repo"
+				collapsed={false}
+				onToggle={() => {}}
+				commentUnavailable="no live session"
+			/>,
+		);
+
+		fireEvent.click(screen.getByRole("button", previewName));
+
+		const preview = screen.getByTestId("preview");
+		expect(preview.dataset.unavailable).toBe("no live session");
+		expect(preview.dataset.commentable).toBe("false");
 	});
 });

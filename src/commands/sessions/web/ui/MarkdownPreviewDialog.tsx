@@ -1,23 +1,28 @@
 import {
-	Alert,
-	Box,
 	Button,
-	CircularProgress,
 	Dialog,
 	DialogActions,
 	DialogContent,
 	DialogTitle,
 } from "@mui/material";
-import { MarkdownBlock } from "../../../backlog/web/ui/components/MarkdownBlock";
+import type { AddRuleRequest } from "./formatAddRuleCommand";
+import type { FileComment } from "./formatFileComment";
+import { MarkdownPreviewBody } from "./MarkdownPreviewBody";
 import { useFileContent } from "./useFileContent";
 
 export function MarkdownPreviewDialog({
 	cwd,
 	path,
+	onComment,
+	onAddRule,
+	unavailable,
 	onClose,
 }: {
 	cwd: string | undefined;
 	path: string;
+	onComment?: ((comment: FileComment) => void) | undefined;
+	onAddRule?: ((request: AddRuleRequest) => void) | undefined;
+	unavailable?: string | undefined;
 	onClose: () => void;
 }) {
 	const state = useFileContent(cwd, path);
@@ -28,27 +33,14 @@ export function MarkdownPreviewDialog({
 				{path}
 			</DialogTitle>
 			<DialogContent dividers>
-				{state.status === "loading" && (
-					<Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-						<CircularProgress size={24} />
-					</Box>
-				)}
-				{state.status === "absent" && (
-					<Alert severity="info">
-						This file is no longer in the working tree.
-					</Alert>
-				)}
-				{state.status === "too-large" && (
-					<Alert severity="info">
-						This file is too large to display (over 2 MB).
-					</Alert>
-				)}
-				{state.status === "error" && (
-					<Alert severity="error">Couldn't load this file.</Alert>
-				)}
-				{state.status === "ready" && (
-					<MarkdownBlock content={state.content} renderMermaid wide />
-				)}
+				<MarkdownPreviewBody
+					state={state}
+					cwd={cwd}
+					path={path}
+					onComment={onComment}
+					onAddRule={onAddRule}
+					unavailable={unavailable}
+				/>
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={onClose}>Close</Button>

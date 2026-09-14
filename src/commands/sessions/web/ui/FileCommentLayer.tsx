@@ -20,7 +20,7 @@ export function FileCommentLayer({
 	children,
 }: {
 	path: string;
-	cwd: string;
+	cwd: string | undefined;
 	source: string;
 	onComment?: ((comment: FileComment) => void) | undefined;
 	onAddRule?: ((request: AddRuleRequest) => void) | undefined;
