@@ -1,3 +1,10 @@
+# [0.647.0](https://github.com/staff0rd/assist/compare/v0.646.0...v0.647.0) (2026-09-14)
+
+
+### Features
+
+* comment on markdown preview ([26e89d3](https://github.com/staff0rd/assist/commit/26e89d3f07e9068bfa9aa8ce1a3a1bcc9c8269b0))
+
 # [0.646.0](https://github.com/staff0rd/assist/compare/v0.645.1...v0.646.0) (2026-09-14)
 
 
