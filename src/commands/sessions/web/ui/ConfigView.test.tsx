@@ -125,8 +125,27 @@ const filterableEntries: ConfigEntry[] = [
 	},
 ];
 
+const describedEntries: ConfigEntry[] = [
+	{
+		key: "commit.pull",
+		type: "boolean",
+		value: true,
+		source: "project",
+		node: node("commit.pull"),
+		note: "Rebase onto the remote first",
+	},
+	{
+		key: "backup.dir",
+		type: "string",
+		value: "~/.assist/backups",
+		source: "global",
+		node: node("backup.dir"),
+		note: "Where archives are written",
+	},
+];
+
 function keyFilter() {
-	return screen.getByLabelText("Filter config keys");
+	return screen.getByLabelText("Filter config keys and descriptions");
 }
 
 function renderView(selectedCwd = "/repo") {
@@ -1469,7 +1488,9 @@ describe("ConfigView", () => {
 		fireEvent.change(keyFilter(), { target: { value: "commit" } });
 		expect(screen.queryByText("backup.dir")).toBeNull();
 
-		fireEvent.click(screen.getByRole("button", { name: "Clear key filter" }));
+		fireEvent.click(
+			screen.getByRole("button", { name: "Clear config filter" }),
+		);
 
 		expect(screen.getByText("backup.dir")).toBeTruthy();
 		expect(screen.getByText("commit.pull")).toBeTruthy();
@@ -1483,9 +1504,22 @@ describe("ConfigView", () => {
 		await waitFor(() => expect(screen.getByText("backup.dir")).toBeTruthy());
 		fireEvent.change(keyFilter(), { target: { value: "nosuchkey" } });
 
-		expect(screen.getByText("No keys match “nosuchkey”.")).toBeTruthy();
+		expect(
+			screen.getByText("No keys or descriptions match “nosuchkey”."),
+		).toBeTruthy();
 		expect(keyFilter()).toBeTruthy();
 		expect(screen.queryByText("commit")).toBeNull();
+	});
+
+	it("narrows the rows to a word that appears only in a description", async () => {
+		stubEntries(describedEntries);
+		renderView();
+
+		await waitFor(() => expect(screen.getByText("backup.dir")).toBeTruthy());
+		fireEvent.change(keyFilter(), { target: { value: "rebase" } });
+
+		expect(screen.getByText("commit.pull")).toBeTruthy();
+		expect(screen.queryByText("backup.dir")).toBeNull();
 	});
 
 	it("keeps a leaf the schema does not describe read-only", async () => {

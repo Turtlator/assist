@@ -6,5 +6,9 @@ export function filterConfigEntries(
 ): ConfigEntry[] {
 	const term = search.trim().toLowerCase();
 	if (!term) return entries;
-	return entries.filter((entry) => entry.key.toLowerCase().includes(term));
+	return entries.filter(
+		(entry) =>
+			entry.key.toLowerCase().includes(term) ||
+			(entry.note?.toLowerCase().includes(term) ?? false),
+	);
 }

@@ -32,7 +32,7 @@ export function ConfigView() {
 			</Stack>
 			{groups.length === 0 ? (
 				<Typography color="text.secondary" align="center" sx={{ py: 6 }}>
-					No keys match “{search.trim()}”.
+					No keys or descriptions match “{search.trim()}”.
 				</Typography>
 			) : (
 				<Stack spacing={2} sx={{ mt: 2 }}>

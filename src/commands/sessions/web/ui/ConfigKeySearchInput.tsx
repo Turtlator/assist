@@ -17,13 +17,13 @@ export function ConfigKeySearchInput({
 			placeholder="Search"
 			sx={{ width: 240 }}
 			slotProps={{
-				htmlInput: { "aria-label": "Filter config keys" },
+				htmlInput: { "aria-label": "Filter config keys and descriptions" },
 				input: {
 					sx: { fontSize: 12 },
 					endAdornment: search ? (
 						<IconButton
 							size="small"
-							aria-label="Clear key filter"
+							aria-label="Clear config filter"
 							onClick={() => onChange("")}
 						>
 							<CloseIcon fontSize="inherit" />
