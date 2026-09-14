@@ -27,11 +27,13 @@ describe("buildCodexModelArgs", () => {
 		expect(buildCodexModelArgs()).toEqual({
 			args: [
 				"-c",
+				"model_providers.litellm.name=LiteLLM",
+				"-c",
 				"model_providers.litellm.base_url=https://proxy.example/v1",
 				"-c",
 				"model_providers.litellm.env_key=ASSIST_LITELLM_API_KEY",
 				"-c",
-				"model_providers.litellm.wire_api=chat",
+				"model_providers.litellm.wire_api=responses",
 				"-c",
 				"model_provider=litellm",
 				"-m",

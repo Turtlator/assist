@@ -17,11 +17,13 @@ export function buildCodexModelArgs(): CodexModelOverride {
 	return {
 		args: [
 			"-c",
+			"model_providers.litellm.name=LiteLLM",
+			"-c",
 			`model_providers.litellm.base_url=${config.baseUrl}/v1`,
 			"-c",
 			`model_providers.litellm.env_key=${API_KEY_ENV}`,
 			"-c",
-			"model_providers.litellm.wire_api=chat",
+			"model_providers.litellm.wire_api=responses",
 			"-c",
 			"model_provider=litellm",
 			"-m",
