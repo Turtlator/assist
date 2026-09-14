@@ -1,3 +1,10 @@
+## [0.644.1](https://github.com/staff0rd/assist/compare/v0.644.0...v0.644.1) (2026-09-14)
+
+
+### Bug Fixes
+
+* deliver upload size rejection ([064db5c](https://github.com/staff0rd/assist/commit/064db5c675b64fe80cae8ba0b1236f99344b423f))
+
 # [0.644.0](https://github.com/staff0rd/assist/compare/v0.643.5...v0.644.0) (2026-09-14)
 
 
