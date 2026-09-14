@@ -653,7 +653,7 @@ describe("PrPreviewPane inline comments", () => {
 	}
 
 	const uploadingIndicators = () =>
-		screen.queryAllByText("Uploading screenshot…");
+		screen.queryAllByText("Uploading screenshot or video…");
 
 	it("shows an indicator per in-flight upload and keeps them independent", async () => {
 		const { first, second } = stubDeferredUploads();

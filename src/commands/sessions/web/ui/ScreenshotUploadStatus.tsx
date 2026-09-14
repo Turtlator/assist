@@ -7,7 +7,7 @@ function UploadingRow() {
 		<Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
 			<CircularProgress size={16} />
 			<Typography variant="caption" color="text.secondary">
-				Uploading screenshot…
+				Uploading screenshot or video…
 			</Typography>
 		</Stack>
 	);
@@ -53,7 +53,7 @@ export function ScreenshotUploadStatus({
 	if (empty)
 		return (
 			<Typography variant="caption" color="text.secondary">
-				Drop or paste an image to attach a screenshot
+				Drop or paste an image or video to attach
 			</Typography>
 		);
 

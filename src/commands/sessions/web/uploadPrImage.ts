@@ -8,9 +8,8 @@ import {
 	runGhImage,
 } from "./runGhImage";
 import { readRequestBuffer } from "./readRequestBuffer";
+import { uploadSizeLimit } from "./uploadSizeLimit";
 import { writeTempImage } from "./writeTempImage";
-
-const MAX_BYTES = 25 * 1024 * 1024;
 
 export async function uploadPrImage(
 	req: IncomingMessage,
@@ -23,9 +22,10 @@ export async function uploadPrImage(
 	const name = url.searchParams.get("name") ?? "";
 	const contentType = req.headers["content-type"] ?? "";
 
-	const body = await readRequestBuffer(req, MAX_BYTES);
+	const { maxBytes, tooLargeMessage } = uploadSizeLimit(contentType);
+	const body = await readRequestBuffer(req, maxBytes);
 	if (!body) {
-		respondJson(res, 413, { error: "Image too large (max 25MB)." });
+		respondJson(res, 413, { error: tooLargeMessage });
 		return;
 	}
 	if (body.length === 0) {

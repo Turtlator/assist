@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const runGhImageMock = vi.fn();
 vi.mock("./runGhImage", () => ({
@@ -44,6 +44,10 @@ function makeRes() {
 }
 
 describe("uploadPrImage", () => {
+	beforeEach(() => {
+		runGhImageMock.mockReset();
+	});
+
 	it("hosts the image and returns its markdown", async () => {
 		runGhImageMock.mockResolvedValue("![shot](https://x/y.png)");
 		const res = makeRes();
@@ -81,6 +85,67 @@ describe("uploadPrImage", () => {
 		);
 		expect(res.status).toBe(400);
 		expect((res.body as { error: string }).error).toContain("Empty");
+	});
+
+	it("rejects a video over 10MB before running gh image", async () => {
+		runGhImageMock.mockResolvedValue("https://x/y.mp4");
+		const res = makeRes();
+		await uploadPrImage(
+			makeReq(
+				"/api/pr-preview/upload-image?cwd=/repo&name=clip.mp4",
+				"video/mp4",
+				Buffer.alloc(10 * 1024 * 1024 + 1),
+			),
+			res,
+		);
+		expect(res.status).toBe(413);
+		expect((res.body as { error: string }).error).toBe(
+			"Video too large (max 10MB).",
+		);
+		expect(runGhImageMock).not.toHaveBeenCalled();
+	});
+
+	it("accepts a video under 10MB", async () => {
+		runGhImageMock.mockResolvedValue("https://x/y.mp4");
+		const res = makeRes();
+		await uploadPrImage(
+			makeReq(
+				"/api/pr-preview/upload-image?cwd=/repo&name=clip.mov",
+				"video/quicktime",
+				Buffer.alloc(9 * 1024 * 1024),
+			),
+			res,
+		);
+		expect(res.status).toBe(200);
+		expect(res.body).toEqual({ markdown: "https://x/y.mp4" });
+	});
+
+	it("keeps the 25MB cap for images", async () => {
+		runGhImageMock.mockResolvedValue("![shot](https://x/y.png)");
+		const res = makeRes();
+		await uploadPrImage(
+			makeReq(
+				"/api/pr-preview/upload-image?cwd=/repo&name=shot.png",
+				"image/png",
+				Buffer.alloc(11 * 1024 * 1024),
+			),
+			res,
+		);
+		expect(res.status).toBe(200);
+
+		const tooBig = makeRes();
+		await uploadPrImage(
+			makeReq(
+				"/api/pr-preview/upload-image?cwd=/repo&name=shot.png",
+				"image/png",
+				Buffer.alloc(25 * 1024 * 1024 + 1),
+			),
+			tooBig,
+		);
+		expect(tooBig.status).toBe(413);
+		expect((tooBig.body as { error: string }).error).toBe(
+			"Image too large (max 25MB).",
+		);
 	});
 
 	it("returns 501 when gh-image is unavailable", async () => {
