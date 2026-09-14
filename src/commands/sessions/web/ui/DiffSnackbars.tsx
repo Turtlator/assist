@@ -1,4 +1,4 @@
-import { DiffCommentSnackbar } from "./DiffCommentSnackbar";
+import { CommentSentSnackbar } from "./CommentSentSnackbar";
 import { DiffRevertSnackbar } from "./DiffRevertSnackbar";
 
 export function DiffSnackbars({
@@ -14,7 +14,7 @@ export function DiffSnackbars({
 }) {
 	return (
 		<>
-			<DiffCommentSnackbar sessionName={sentTo} onClose={clearSent} />
+			<CommentSentSnackbar sessionName={sentTo} onClose={clearSent} />
 			<DiffRevertSnackbar error={revertError} onClose={clearRevertError} />
 		</>
 	);

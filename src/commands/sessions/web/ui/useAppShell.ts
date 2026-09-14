@@ -1,3 +1,4 @@
+import { selectedCardId } from "./selectedCardId";
 import { trackChangedValues } from "./trackChangedValues";
 import { useAdoptRepoCard } from "./useAdoptRepoCard";
 import { useRepoSelection } from "./useRepoSelection";
@@ -8,16 +9,16 @@ import { useTopBarLayout } from "./useTopBarLayout";
 
 export function useAppShell() {
 	const socket = useSessionSocket();
-	const selectedCardId = socket.viewingTranscriptSessionId ?? socket.activeId;
+	const cardId = selectedCardId(socket);
 	const selection = useRepoSelection(
 		socket.currentCwd,
 		socket.history,
-		selectedCardId,
+		cardId,
 		socket.sessions,
 	);
 	useAdoptRepoCard({
 		selectedCwd: selection.selectedCwd,
-		selectedCardId,
+		selectedCardId: cardId,
 		sessions: socket.sessions,
 		history: socket.history,
 		activeByRepo: socket.activeByRepo,

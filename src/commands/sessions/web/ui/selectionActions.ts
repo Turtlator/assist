@@ -1,32 +1,25 @@
-import type { DiffSelection } from "./finishDiffSelection";
 import type { AddRuleRequest } from "./formatAddRuleCommand";
-import type { DiffComment } from "./formatDiffComment";
 
-export function diffSelectionActions({
+export function selectionActions<Pending extends { quote: string }, Comment>({
 	path,
 	pending,
 	clear,
 	onComment,
 	onAddRule,
+	build,
 }: {
 	path: string;
-	pending: DiffSelection | null;
+	pending: Pending | null;
 	clear: () => void;
-	onComment: (comment: DiffComment) => void;
+	onComment?: ((comment: Comment) => void) | undefined;
 	onAddRule?: ((request: AddRuleRequest) => void) | undefined;
+	build: (pending: Pending, note: string) => Comment;
 }): {
 	add: (note: string) => void;
 	addRule: ((note: string) => void) | undefined;
 } {
 	const add = (note: string) => {
-		if (pending)
-			onComment({
-				path,
-				startLine: pending.startLine,
-				endLine: pending.endLine,
-				quote: pending.quote,
-				note,
-			});
+		if (pending && onComment) onComment(build(pending, note));
 		clear();
 	};
 

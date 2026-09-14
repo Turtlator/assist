@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import {
+	act,
 	cleanup,
 	fireEvent,
 	render,
@@ -9,7 +10,26 @@ import {
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { FileView } from "./FileView";
+import type { SessionInfo } from "./types";
 import { RepoSelectionContext } from "./useRepoSelectionContext";
+
+if (!Range.prototype.getBoundingClientRect) {
+	Range.prototype.getBoundingClientRect = () =>
+		({ top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0 }) as DOMRect;
+}
+if (!Range.prototype.getClientRects) {
+	Range.prototype.getClientRects = () =>
+		({
+			length: 0,
+			item: () => null,
+			[Symbol.iterator]: [][Symbol.iterator],
+		}) as unknown as DOMRectList;
+}
+
+type CaretDoc = {
+	caretRangeFromPoint?: ((x: number, y: number) => Range | null) | undefined;
+	elementFromPoint?: ((x: number, y: number) => Element | null) | undefined;
+};
 
 vi.mock("../../../backlog/web/ui/components/MarkdownBlock", () => ({
 	MarkdownBlock: ({ content }: { content: string }) => (
@@ -42,6 +62,8 @@ vi.mock("./MonacoEditor", () => ({
 afterEach(() => {
 	cleanup();
 	vi.unstubAllGlobals();
+	(document as CaretDoc).caretRangeFromPoint = undefined;
+	(document as CaretDoc).elementFromPoint = undefined;
 });
 
 type SaveResponse = {
@@ -66,7 +88,15 @@ function stubContent(content: string, save?: SaveResponse) {
 	return fetchMock;
 }
 
-function renderView(entry: string, worktreeCwd = "/repo") {
+function renderView(
+	entry: string,
+	worktreeCwd = "/repo",
+	comments: {
+		sessions?: SessionInfo[];
+		cardId?: string | null;
+		sendInput?: (sessionId: string, data: string) => void;
+	} = {},
+) {
 	const router = createMemoryRouter(
 		[
 			{
@@ -80,7 +110,11 @@ function renderView(entry: string, worktreeCwd = "/repo") {
 							setSelectedCwd: vi.fn(),
 						}}
 					>
-						<FileView />
+						<FileView
+							sessions={comments.sessions ?? []}
+							sendInput={comments.sendInput ?? vi.fn()}
+							cardId={comments.cardId ?? null}
+						/>
 					</RepoSelectionContext.Provider>
 				),
 			},
@@ -458,5 +492,125 @@ describe("FileView", () => {
 		expect(
 			await screen.findByText("This file is too large to display (over 2 MB)."),
 		).toBeTruthy();
+	});
+});
+
+const DOC = "# Notes\n\nThe first paragraph\nwraps over two lines.\n";
+
+const liveSession = {
+	id: "daemon-1",
+	claudeSessionId: "claude-1",
+	name: "one",
+	commandType: "claude",
+	startedAt: 0,
+	status: "running",
+} as SessionInfo;
+
+function caretAt(node: Node, offset: number): Range {
+	const range = document.createRange();
+	range.setStart(node, offset);
+	range.collapse(true);
+	return range;
+}
+
+function selectQuote(text: string) {
+	const root = screen.getByTestId("markdown");
+	const node = root.firstChild as Node;
+	const idx = (node.textContent ?? "").indexOf(text);
+	if (idx === -1) throw new Error(`text not found: ${text}`);
+
+	(document as CaretDoc).elementFromPoint = vi.fn().mockReturnValue(root);
+	(document as CaretDoc).caretRangeFromPoint = vi
+		.fn()
+		.mockReturnValueOnce(caretAt(node, idx))
+		.mockReturnValue(caretAt(node, idx + text.length));
+
+	fireEvent.mouseDown(root, { clientX: 1, clientY: 1 });
+	act(() => {
+		globalThis.dispatchEvent(
+			new MouseEvent("mouseup", { clientX: 2, clientY: 1, bubbles: true }),
+		);
+	});
+}
+
+async function openRendered(
+	comments: Parameters<typeof renderView>[2],
+): Promise<void> {
+	stubContent(DOC);
+	renderView("/file?path=docs/notes.md", "/repo", comments);
+	await screen.findByTestId("editor");
+	fireEvent.click(screen.getByRole("button", { name: "Rendered" }));
+}
+
+function note(text: string) {
+	fireEvent.change(screen.getByPlaceholderText("Add a note…"), {
+		target: { value: text },
+	});
+}
+
+describe("FileView comments in rendered mode", () => {
+	it("sends the path, line range, quote and note to the active session", async () => {
+		const sendInput = vi.fn();
+		await openRendered({
+			sessions: [liveSession],
+			cardId: "daemon-1",
+			sendInput,
+		});
+
+		selectQuote("first paragraph\nwraps");
+		note("tighten this");
+		fireEvent.click(screen.getByRole("button", { name: "Add comment" }));
+
+		const [sessionId, data] = sendInput.mock.calls[0] as [string, string];
+		expect(sessionId).toBe("daemon-1");
+		expect(data).toContain("docs/notes.md:3-4");
+		expect(data).toContain("first paragraph");
+		expect(data).toContain("tighten this");
+		expect(await screen.findByText("Comment sent to one")).toBeTruthy();
+	});
+
+	it("submits the comment in the terminal", async () => {
+		const sendInput = vi.fn();
+		await openRendered({
+			sessions: [liveSession],
+			cardId: "daemon-1",
+			sendInput,
+		});
+
+		selectQuote("first paragraph");
+		note("why");
+		fireEvent.click(screen.getByRole("button", { name: "Add comment" }));
+
+		await waitFor(() =>
+			expect(sendInput).toHaveBeenLastCalledWith("daemon-1", "\r"),
+		);
+	});
+
+	it("offers add rule alongside the note", async () => {
+		const sendInput = vi.fn();
+		await openRendered({
+			sessions: [liveSession],
+			cardId: "daemon-1",
+			sendInput,
+		});
+
+		selectQuote("first paragraph");
+		note("keep paragraphs short");
+		fireEvent.click(screen.getByRole("button", { name: "Add rule" }));
+
+		expect(sendInput.mock.calls[0]?.[1]).toContain("/add-rule");
+	});
+
+	it("explains that commenting is unavailable without a live session", async () => {
+		const sendInput = vi.fn();
+		await openRendered({ sessions: [], cardId: null, sendInput });
+
+		selectQuote("first paragraph");
+
+		expect(
+			await screen.findByText("Select a session card to comment on this file."),
+		).toBeTruthy();
+		expect(screen.queryByPlaceholderText("Add a note…")).toBeNull();
+		expect(sendInput).not.toHaveBeenCalled();
 	});
 });

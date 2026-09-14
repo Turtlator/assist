@@ -3,19 +3,15 @@ import { type ReactNode, useMemo } from "react";
 import type { HunkData } from "react-diff-view";
 import { buildChangeIndex } from "./buildChangeIndex";
 import { commentColor } from "./commentColor";
-import { diffSelectionActions } from "./diffSelectionActions";
+import { diffCommentFrom } from "./diffCommentFrom";
 import { DragOverlay } from "./DragOverlay";
 import type { AddRuleRequest } from "./formatAddRuleCommand";
 import type { DiffComment } from "./formatDiffComment";
 import { ruleCitationNote } from "./ruleCitationNote";
+import { selectionActions } from "./selectionActions";
 import { SelectionCommentPopover } from "./SelectionCommentPopover";
+import { selectionLayerSx } from "./selectionLayerSx";
 import { useDiffSelection } from "./useDiffSelection";
-
-const wrapperSx = {
-	position: "relative",
-	userSelect: "none",
-	cursor: "text",
-} as const;
 
 export function DiffCommentLayer({
 	path,
@@ -38,16 +34,17 @@ export function DiffCommentLayer({
 
 	if (!onComment) return <>{children}</>;
 
-	const { add, addRule } = diffSelectionActions({
+	const { add, addRule } = selectionActions({
 		path,
 		pending,
 		clear,
 		onComment,
 		onAddRule,
+		build: (selection, note) => diffCommentFrom(path, selection, note),
 	});
 
 	return (
-		<Box ref={wrapperRef} onMouseDown={onMouseDown} sx={wrapperSx}>
+		<Box ref={wrapperRef} onMouseDown={onMouseDown} sx={selectionLayerSx}>
 			<Box ref={contentRef}>{children}</Box>
 			<DragOverlay rects={rects} color={commentColor(0).fill} />
 			<SelectionCommentPopover

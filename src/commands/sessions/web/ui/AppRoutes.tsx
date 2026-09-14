@@ -9,6 +9,7 @@ import { FileView } from "./FileView";
 import { NewsView } from "./NewsView";
 import { countRender } from "./renderCounters";
 import { RenderRateHud } from "./RenderRateHud";
+import { selectedCardId } from "./selectedCardId";
 import { SessionContent } from "./SessionContent";
 import { UsageHistoryView } from "./UsageHistoryView";
 import type { SessionSocket } from "./useSessionSocket";
@@ -47,7 +48,16 @@ export function AppRoutes({ socket }: { socket: SessionSocket }) {
 							/>
 						}
 					/>
-					<Route path="file" element={<FileView />} />
+					<Route
+						path="file"
+						element={
+							<FileView
+								sessions={socket.sessions}
+								sendInput={socket.sendInput}
+								cardId={selectedCardId(socket)}
+							/>
+						}
+					/>
 					<Route path="*" element={<Navigate to="/sessions" replace />} />
 				</Route>
 			</Routes>

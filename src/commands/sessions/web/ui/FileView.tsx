@@ -1,28 +1,24 @@
-import { useState } from "react";
-import { useSearchParams } from "react-router";
+import { CommentSentSnackbar } from "./CommentSentSnackbar";
 import { ErrorSnackbar } from "./ErrorSnackbar";
 import { FileViewBody } from "./FileViewBody";
 import { FileViewHeader } from "./FileViewHeader";
-import type { FileViewMode } from "./FileViewMode";
 import { fileViewMessage } from "./fileViewMessage";
 import { PageShell } from "./PageShell";
-import { languageForPath } from "./refractorHighlighter";
+import type { SessionInfo } from "./types";
 import { UnsavedChangesPrompt } from "./UnsavedChangesPrompt";
-import { useFileBuffer } from "./useFileBuffer";
-import { useFileContent } from "./useFileContent";
-import { useRepoSelectionContext } from "./useRepoSelectionContext";
-import { useSaveHotkey } from "./useSaveHotkey";
+import { useFileViewState } from "./useFileViewState";
 
-export function FileView() {
-	const [searchParams] = useSearchParams();
-	const path = searchParams.get("path") ?? "";
-	const { worktreeCwd } = useRepoSelectionContext();
-	const cwd = searchParams.get("cwd") || worktreeCwd;
-	const state = useFileContent(cwd, path);
-	const buffer = useFileBuffer(cwd, path, state);
-	const isMarkdown = languageForPath(path) === "markdown";
-	const [mode, setMode] = useState<FileViewMode>("raw");
-	useSaveHotkey(buffer.save);
+export function FileView({
+	sessions,
+	sendInput,
+	cardId,
+}: {
+	sessions: SessionInfo[];
+	sendInput: (sessionId: string, data: string) => void;
+	cardId: string | null;
+}) {
+	const { path, cwd, state, buffer, comments, isMarkdown, mode, setMode } =
+		useFileViewState(sessions, cardId, sendInput);
 
 	return (
 		<PageShell
@@ -42,13 +38,19 @@ export function FileView() {
 			{state.status === "ready" && (
 				<FileViewBody
 					path={path}
+					cwd={cwd}
 					rendered={isMarkdown && mode === "rendered"}
 					value={buffer.value}
 					onChange={buffer.setValue}
+					comments={comments}
 				/>
 			)}
 			<UnsavedChangesPrompt dirty={buffer.dirty} />
 			<ErrorSnackbar error={buffer.error} onClose={buffer.clearError} />
+			<CommentSentSnackbar
+				sessionName={comments.sentTo}
+				onClose={comments.clearSent}
+			/>
 		</PageShell>
 	);
 }

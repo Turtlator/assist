@@ -1,7 +1,7 @@
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 
-export function DiffCommentSnackbar({
+export function CommentSentSnackbar({
 	sessionName,
 	onClose,
 }: {
